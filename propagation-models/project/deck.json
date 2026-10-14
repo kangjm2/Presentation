@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-14T00:00:00Z"},
+  "lists": "css",
+  "title": "전파 모델의 역사",
+  "order": ["cover", "why", "timeline", "friis", "hata", "cost231", "fading", "gscm", "raytracing", "compare", "fusion", "summary"],
+  "sections": {
+    "intro": {"description": "도입: 전파 모델이 왜 필요하고, 70년 동안 어떻게 바뀌었나", "start": "cover"},
+    "statistical": {"description": "통계 계열: 자유공간 공식의 한계에서 경험식, 확률적 채널, GSCM까지", "start": "friis"},
+    "deterministic": {"description": "결정론 계열: 레이 트레이싱과 세 계열의 비교", "start": "raytracing"},
+    "now": {"description": "현재와 정리: 융합·데이터 기반 모델, 그리고 질문이 모델을 바꾼다는 결론", "start": "fusion"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}

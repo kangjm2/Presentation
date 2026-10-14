@@ -1,0 +1,39 @@
+<section id="raytracing" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">ERA 6 · 1990s → 지금 · 결정론적 모델</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">레이 트레이싱: 이 장소의 채널을 계산</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="position:relative;width:840px;height:560px;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;overflow:hidden">
+<svg aria-label="도시 거리 평면도: 송신기에서 같은 거리의 수신기 1로 직접파와 양쪽 벽 반사파가 도달하고, 모퉁이를 돌아간 수신기 2에는 직접파가 건물에 막히고 모서리 회절파만 도달" style="position:absolute;left:0px;top:0px;width:840px;height:560px" width="840" height="560" viewBox="0 0 840 560"><g fill="#DCD8CE"><rect x="0" y="0" width="840" height="200"/><rect x="0" y="360" width="420" height="200"/><rect x="540" y="360" width="300" height="200"/></g><line x1="100" y1="300" x2="480" y2="500" stroke="#5E6675" stroke-width="3" stroke-dasharray="4 8"/><g stroke="#5E6675" stroke-width="4"><line x1="288" y1="393" x2="312" y2="417"/><line x1="312" y1="393" x2="288" y2="417"/></g><polyline points="100,300 525,200 780,260" fill="none" stroke="#A84A16" stroke-width="4"/><polyline points="100,300 355,360 780,260" fill="none" stroke="#A84A16" stroke-width="4"/><line x1="100" y1="300" x2="780" y2="260" stroke="#14213D" stroke-width="4"/><polyline points="100,300 420,360 480,500" fill="none" stroke="#255E9E" stroke-width="4" stroke-dasharray="14 8"/><g fill="#A84A16"><circle cx="525" cy="200" r="7"/><circle cx="355" cy="360" r="7"/></g><circle cx="420" cy="360" r="8" fill="#255E9E"/><g fill="#14213D"><circle cx="100" cy="300" r="12"/><circle cx="780" cy="260" r="12"/><circle cx="480" cy="500" r="12"/></g><line x1="560" y1="397" x2="610" y2="397" stroke="#14213D" stroke-width="4"/><line x1="560" y1="441" x2="610" y2="441" stroke="#A84A16" stroke-width="4"/><line x1="560" y1="485" x2="610" y2="485" stroke="#255E9E" stroke-width="4" stroke-dasharray="14 8"/><line x1="560" y1="529" x2="610" y2="529" stroke="#5E6675" stroke-width="3" stroke-dasharray="4 8"/></svg>
+<p style="position:absolute;left:60px;top:316px;width:60px;font-size:24px;font-weight:600">Tx</p>
+<p style="position:absolute;left:750px;top:296px;width:70px;font-size:24px;font-weight:600">Rx1</p>
+<p style="position:absolute;left:496px;top:486px;width:44px;font-size:24px;font-weight:600">Rx2</p>
+<p style="position:absolute;left:620px;top:380px;width:210px;font-size:24px;color:#14213D">직접 (LOS)</p>
+<p style="position:absolute;left:620px;top:424px;width:210px;font-size:24px;color:#14213D">반사 (GO)</p>
+<p style="position:absolute;left:620px;top:468px;width:210px;font-size:24px;color:#14213D">회절 (UTD)</p>
+<p style="position:absolute;left:620px;top:512px;width:210px;font-size:24px;color:#14213D">차단된 직접파</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#255E9E">원리</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">3D 지도 + 재질 상수 → 경로 탐색(이미지법·SBR) → 기하광학(직접·반사·투과) + UTD(회절) + 확산 산란</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#255E9E">출력</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">경로마다 지연·각도·전력·위상 → <b>위치 특정(site-specific)</b> 채널</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#255E9E">왜 다시 주목받나</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">mmWave·THz는 빛처럼 직진 → RT 정확도 ↑ · GPU로 계산 비용 ↓ · 3D 도시 지도의 보편화</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#A84A16">한계</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">지도·재질 오차에 민감 · 식생·사람·차량 같은 동적 객체 · 넓은 지역은 여전히 계산량이 크다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Keller (GTD) 1962 · Kouyoumjian–Pathak (UTD) 1974 · Schaubach–Davis–Rappaport, VTC 1992 · Valenzuela, VTC 1993</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 60초) 이제 결정론 계열입니다. 레이 트레이싱은 전파를 빛처럼 광선으로 보고, 3D 지도와 건물 재질 정보를 넣어 송수신기 사이의 모든 경로를 직접 찾습니다. 직접파, 반사, 투과는 기하광학으로, 모서리 회절은 UTD로 계산합니다. 그림에서 수신기 1은 직접파와 양쪽 벽 반사파를 받고, 모퉁이를 돈 수신기 2는 직접파가 막혀 회절파만 받습니다. 결과는 경로별 지연, 각도, 전력, 위상, 즉 바로 이 장소의 채널입니다. 이론적 기반인 GTD와 UTD는 60~70년대에 있었지만, 계산 비용 때문에 실제 셀룰러 연구에는 1990년대 초 마이크로셀과 실내 환경에서 쓰이기 시작했습니다. 최근 다시 주목받는 이유는 세 가지입니다. mmWave와 THz에서는 전파가 빛처럼 직진해 광선 근사가 더 정확해졌고, GPU 덕분에 계산이 빨라졌으며, 3D 도시 지도를 쉽게 구할 수 있게 됐습니다. 다만 지도와 재질 값이 틀리면 결과도 틀리고, 나무, 사람, 차량 같은 동적 요소와 넓은 지역의 계산량은 여전히 숙제입니다.</aside>
+</section>

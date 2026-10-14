@@ -1,0 +1,38 @@
+<section id="fading" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">ERA 4 · 1968 – 1997 · 확률적 채널 모델</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">평균이 아니라 ‘분포’를 모델링하다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:640px;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:26px;line-height:1.5;color:#4A5262">GSM·CDMA·OFDM으로 대역폭이 넓어지자, 평균 손실보다 <b>지연 확산</b>과 <b>시간 변동</b>이 성능을 좌우했다.</p>
+<div style="display:flex;flex-direction:column;gap:6px;border-left:6px solid #A84A16;padding:4px 0px 4px 20px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">Clarke (1968) · Jakes (1974)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">레일리 페이딩 + 도플러 스펙트럼: 협대역 채널의 시간 변동</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;border-left:6px solid #A84A16;padding:4px 0px 4px 20px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">COST 207 (1989) · ITU-R M.1225 (1997)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">탭 지연선(TDL): Typical Urban, Ped·Veh A/B 같은 표준 프로파일</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;border-left:6px solid #A84A16;padding:4px 0px 4px 20px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">Saleh–Valenzuela (1987)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">다중경로가 ‘클러스터’로 묶여 도착: 실내 광대역 측정에서 출발</p>
+</div>
+</div>
+<div style="width:960px;display:flex;flex-direction:column;gap:20px">
+<div style="position:relative;width:960px;height:460px;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px">
+<svg aria-label="전력 지연 프로파일: 세 개의 클러스터가 시간차를 두고 도착하며, 클러스터 전력과 클러스터 내부 경로 전력이 모두 지수적으로 감쇠" style="position:absolute;left:0px;top:0px;width:960px;height:460px" width="960" height="460" viewBox="0 0 960 460"><g stroke="#5E6675" stroke-width="2"><line x1="40" y1="20" x2="40" y2="400"/><line x1="40" y1="400" x2="940" y2="400"/></g><g stroke="#255E9E" stroke-width="6" stroke-linecap="round"><line x1="60" y1="400" x2="60" y2="60"/><line x1="88" y1="400" x2="88" y2="84"/><line x1="120" y1="400" x2="120" y2="111"/><line x1="155" y1="400" x2="155" y2="141"/><line x1="195" y1="400" x2="195" y2="175"/><line x1="240" y1="400" x2="240" y2="213"/><line x1="320" y1="400" x2="320" y2="128"/><line x1="348" y1="400" x2="348" y2="152"/><line x1="380" y1="400" x2="380" y2="179"/><line x1="415" y1="400" x2="415" y2="209"/><line x1="455" y1="400" x2="455" y2="243"/><line x1="500" y1="400" x2="500" y2="281"/><line x1="620" y1="400" x2="620" y2="196"/><line x1="648" y1="400" x2="648" y2="220"/><line x1="680" y1="400" x2="680" y2="247"/><line x1="715" y1="400" x2="715" y2="277"/><line x1="755" y1="400" x2="755" y2="311"/><line x1="800" y1="400" x2="800" y2="349"/></g><g stroke="#5E6675" stroke-width="2" stroke-dasharray="6 6"><line x1="60" y1="60" x2="240" y2="213"/><line x1="320" y1="128" x2="500" y2="281"/><line x1="620" y1="196" x2="800" y2="349"/></g><polyline points="60,60 320,128 620,196 900,266" fill="none" stroke="#A84A16" stroke-width="3" stroke-dasharray="14 8"/></svg>
+<p style="position:absolute;left:90px;top:22px;width:160px;font-size:24px;font-weight:600">클러스터 1</p>
+<p style="position:absolute;left:330px;top:84px;width:160px;font-size:24px;font-weight:600">클러스터 2</p>
+<p style="position:absolute;left:630px;top:150px;width:160px;font-size:24px;font-weight:600">클러스터 3</p>
+<p style="position:absolute;left:700px;top:96px;width:240px;font-size:24px;font-weight:600;color:#A84A16">클러스터 감쇠 Γ</p>
+<p style="position:absolute;left:600px;top:22px;width:340px;font-size:24px;color:#5E6675;text-align:right">전력 [dB]</p>
+<p style="position:absolute;left:760px;top:408px;width:180px;font-size:24px;color:#5E6675;text-align:right">지연 τ →</p>
+</div>
+<p style="font-size:24px;line-height:1.5;color:#4A5262">Saleh–Valenzuela 개념도: 클러스터 간(Γ)·클러스터 내(γ, 회색 점선) 지수 감쇠. 위치를 맞추는 대신 <b style="color:#A84A16">통계적으로 그럴듯한 채널 표본</b>을 무수히 만들어 링크·시스템 시뮬레이션에 쓴다.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">R. H. Clarke, BSTJ, 1968 · W. C. Jakes, 1974 · A. Saleh &amp; R. Valenzuela, IEEE JSAC, 1987 · COST 207, 1989</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 55초) 경로손실이 커버리지의 문제라면, 디지털 광대역 시스템에서는 다중경로가 성능의 문제가 됩니다. 대역폭이 넓어지면 여러 경로로 온 신호의 시간차, 즉 지연 확산이 심볼 간 간섭을 만들고 등화기나 OFDM의 CP 길이를 결정합니다. 그래서 채널을 평균값이 아니라 확률분포로 묘사하는 모델들이 발전합니다. Clarke와 Jakes는 레일리 페이딩과 도플러 스펙트럼으로 시간 변동을, COST 207과 ITU의 Pedestrian/Vehicular 모델은 몇 개의 탭으로 지연 프로파일을 표준화했습니다. Saleh–Valenzuela는 실내 측정에서 경로들이 클러스터로 묶여 도착한다는 것을 보였는데, 이 클러스터 개념이 이후 표준 채널 모델의 뼈대가 됩니다. 이 계열의 철학은 특정 장소를 맞추는 것이 아니라, 통계적으로 그럴듯한 채널을 무수히 만들어 시뮬레이션하는 것입니다. 다만 여기에는 아직 각도 정보가 없습니다.</aside>
+</section>
