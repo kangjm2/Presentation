@@ -5,6 +5,7 @@
 - **발표용 뷰어 (내비게이션 포함):** https://claude.ai/artifact/TosTPbda3dgsiJiYYG26LV, 또는 로컬에서 `presentation.html`을 브라우저로 열기
 - 편집용 Slides 덱: https://claude.ai/artifact/5NYpFjEa1nbEc3ShmzzKid
 - 두 링크 모두 비공개 — 다른 사람에게 보여주려면 페이지의 Share 메뉴에서 공유
+- 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 소스: `project/deck.json` (슬라이드 순서·섹션·폰트), `project/slides/<id>.html` (슬라이드 1장당 파일 1개, `<aside>` = 발표자 노트)
 
 ## 뷰어 조작
