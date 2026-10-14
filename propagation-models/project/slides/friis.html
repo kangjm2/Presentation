@@ -1,0 +1,32 @@
+<section id="friis" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">ERA 1 · 1946 – 1960s · 해석적 모델</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">출발점: 자유공간, 그리고 그 한계</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="flex:1;display:flex;flex-direction:column;gap:32px">
+<div style="background:#14213D;border-radius:16px;padding:36px 40px;display:flex;flex-direction:column;gap:14px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;color:#F5F3EE">Pr = Pt·Gt·Gr·(λ / 4πd)²</p>
+<p style="font-size:26px;line-height:1.45;color:#C9D3E3">Friis (1946) — 장애물이 없는 가시선(LOS) 경로의 해석해</p>
+<p style="font-size:26px;line-height:1.45;color:#F0A36B">거리 2배 → 6 dB 감소 (경로손실 지수 n = 2)</p>
+</div>
+<p style="font-size:30px;line-height:1.5;color:#4A5262">지면 반사 하나만 더해도(2-ray 모델) 원거리 손실은 d⁴로 빨라진다. 건물·지형이 더해진 도시에서는 해석식으로 예측할 수 없다.</p>
+<p style="font-size:30px;line-height:1.5;font-weight:600;color:#A84A16">→ “직접 재서 공식으로 맞추자”: 경험적 모델의 등장</p>
+</div>
+<div style="width:700px;display:flex;flex-direction:column;gap:20px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">실측 경로손실 지수 n</h3>
+<table style="font-size:26px;color:#14213D">
+<tr><th style="width:62%;text-align:left">환경</th><th style="width:38%;text-align:right">n</th></tr>
+<tr style="background:#D5E3F3"><td>자유공간</td><td style="text-align:right">2</td></tr>
+<tr><td>도심 셀룰러</td><td style="text-align:right">2.7 – 3.5</td></tr>
+<tr><td>그림자 진 도심</td><td style="text-align:right">3 – 5</td></tr>
+<tr><td>건물 내 LOS</td><td style="text-align:right">1.6 – 1.8</td></tr>
+<tr><td>건물 내 NLOS</td><td style="text-align:right">4 – 6</td></tr>
+<tr><td>공장 NLOS</td><td style="text-align:right">2 – 3</td></tr>
+</table>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">H. T. Friis, Proc. IRE, 1946 · 지수 표: T. S. Rappaport, Wireless Communications, 2nd ed., 2002</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 45초) 출발점은 1946년 Friis의 자유공간 전송 공식입니다. 장애물이 없는 가시선 경로라면 수신 전력은 거리의 제곱에 반비례하고, 거리가 두 배가 되면 6 dB 줄어듭니다. 문제는 지상 이동통신 환경이 자유공간이 아니라는 점입니다. 지면 반사 하나만 고려한 2-ray 모델만 해도 먼 거리에서는 거리의 4제곱으로 감쇠합니다. 오른쪽 표처럼 실제 측정된 경로손실 지수는 환경에 따라 1.6에서 6까지 넓게 퍼집니다. 건물과 지형이 복잡하게 얽힌 도시를 해석식으로 푸는 것은 당시 계산 능력으로 불가능했고, 그래서 연구자들은 직접 측정해서 공식으로 맞추는 방향, 즉 경험적 모델로 가게 됩니다.</aside>
+</section>

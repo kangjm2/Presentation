@@ -1,0 +1,54 @@
+<section id="hata" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">ERA 2 · 1968 – 1980 · 경험적 모델</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">Okumura–Hata: 측정을 공식으로</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="flex:1;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:28px;line-height:1.5;color:#4A5262">1G 상용화(NTT 1979, AMPS 1983) 직전, 매크로셀의 커버리지를 미리 계산할 도구가 필요했다.</p>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:center">
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#A84A16">Okumura (1968)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">도쿄 일대 대규모 실측 → 주파수·거리·안테나 높이별 중앙값 감쇠 ‘곡선’</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:28px;background:#A84A16"></x-shape>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#A84A16">Hata (1980)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">곡선을 닫힌 형태의 수식으로 근사 → 계산기 한 번으로 셀 설계</p>
+</div>
+</div>
+<div style="background:#14213D;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:24px;color:#C9D3E3">도심 중앙값 경로손실 [dB] · f [MHz], d [km], h [m]</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.5;color:#F5F3EE">L = 69.55 + 26.16·log f − 13.82·log hb<br>&#160;&#160;&#160;− a(hm) + (44.9 − 6.55·log hb)·log d</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:12px;flex-wrap:wrap">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;padding:6px 14px;border-radius:8px;background:#F7DDCB">f 150–1500 MHz</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;padding:6px 14px;border-radius:8px;background:#F7DDCB">d 1–20 km</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;padding:6px 14px;border-radius:8px;background:#F7DDCB">hb 30–200 m</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;padding:6px 14px;border-radius:8px;background:#F7DDCB">hm 1–10 m</p>
+</div>
+</div>
+<div style="width:520px;display:flex;flex-direction:column;gap:24px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#255E9E">장점</h3>
+<ul style="font-size:24px;line-height:1.5;color:#4A5262">
+<li>실측 기반이라 현실과 맞는다</li>
+<li>입력 4개, 계산이 즉시 끝난다</li>
+<li>수십 년간 셀 설계의 산업 표준</li>
+</ul>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#A84A16">한계</h3>
+<ul style="font-size:24px;line-height:1.5;color:#4A5262">
+<li>측정 도시(도쿄)의 환경에 종속</li>
+<li>유효 범위 밖은 외삽 불가: 2 GHz, 1 km 이하</li>
+<li>기지국이 지붕보다 높아야 한다</li>
+<li>평균값만 준다: ‘이 지점’은 모른다</li>
+</ul>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Y. Okumura et al., Rev. Elec. Comm. Lab., 1968 · M. Hata, IEEE Trans. Veh. Technol., 1980</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 60초) 경험적 모델의 대표가 Okumura–Hata입니다. 1960년대 말 일본에서는 자동차 전화, 즉 1세대 셀룰러를 준비하면서 셀 반경을 미리 계산할 도구가 필요했습니다. Okumura는 1968년 도쿄 일대에서 대규모 측정을 해서 주파수, 거리, 안테나 높이별 감쇠 곡선을 만들었고, Hata는 1980년 이 곡선을 닫힌 형태의 수식으로 근사했습니다. 입력 네 개만 넣으면 바로 경로손실이 나오니 수십 년간 셀 설계의 표준이 됐습니다. 하지만 한계도 분명합니다. 측정한 도시의 환경에 종속되고, 150에서 1500 MHz, 1에서 20 km라는 유효 범위 밖으로는 쓸 수 없습니다. 기지국이 지붕보다 높다는 가정도 있고, 무엇보다 평균값만 줄 뿐 특정 지점의 값은 맞추지 못합니다. 이 한계들이 2세대에서 그대로 문제가 됩니다.</aside>
+</section>
