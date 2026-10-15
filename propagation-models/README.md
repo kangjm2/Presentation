@@ -31,12 +31,12 @@ python3 viewer/build.py
 
 `viewer/template.html`(뷰어 UI)과 `project/`의 슬라이드를 합쳐 `presentation.html`을 다시 만듭니다.
 
-## 구성 (≈ 9분 45초)
+## 구성 (≈ 9분 55초)
 
 | # | id | 내용 | 시간 |
 |---|----|------|------|
 | 1 | cover | 표지 | 0:20 |
-| 2 | why | 왜 전파 모델이 필요한가: 경로손실 · 쉐도잉 · 페이딩 | 0:50 |
+| 2 | why | 링크 예산(P_tx · G · PL(d))과 경로손실 · 쉐도잉 · 페이딩 | 1:00 |
 | 3 | timeline | 1946–2025 계보: 경험적 / 확률적 / 결정론적 / 융합 | 1:00 |
 | 4 | friis | ERA 1 자유공간(Friis)과 그 한계: 경로손실 지수 | 0:45 |
 | 5 | hata | ERA 2 Okumura–Hata: 측정을 공식으로 | 1:00 |
