@@ -1,0 +1,42 @@
+<section id="empirical" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">대표 모델 ① · 통계 계열</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">경험식: 직접 재서 만든 공식</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;align-items:center">
+<div style="width:700px;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:14px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2"><span style="color:#A84A16">Okumura (1968)</span> 도쿄에서 실측 → 그래프</h3>
+<div style="position:relative;width:636px;height:270px">
+<svg aria-label="거리에 따라 손실이 커지는 곡선 세 개, 주파수가 높을수록 위쪽 곡선" style="position:absolute;left:0px;top:0px;width:636px;height:270px" width="636" height="270" viewBox="0 0 636 270"><g stroke="#5E6675" stroke-width="2"><line x1="40" y1="20" x2="40" y2="236"/><line x1="40" y1="236" x2="620" y2="236"/></g><g fill="none" stroke-width="4"><path d="M50 196 Q300 140 610 100" stroke="#255E9E"/><path d="M50 170 Q300 110 610 66" stroke="#255E9E" stroke-opacity="0.7"/><path d="M50 144 Q300 82 610 34" stroke="#255E9E" stroke-opacity="0.45"/></g></svg>
+<p style="position:absolute;left:48px;top:0px;width:200px;font-size:24px;color:#5E6675">손실 ↑</p>
+<p style="position:absolute;left:400px;top:0px;width:220px;font-size:24px;color:#255E9E;text-align:right">높은 주파수</p>
+<p style="position:absolute;left:400px;top:132px;width:220px;font-size:24px;color:#255E9E;text-align:right">낮은 주파수</p>
+<p style="position:absolute;left:460px;top:236px;width:160px;font-size:24px;color:#5E6675;text-align:right">거리 →</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">값을 알려면 사람이 그래프를 눈으로 읽어야 했다</p>
+</div>
+<x-shape kind="arrow-right" style="width:64px;height:36px;background:#A84A16"></x-shape>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:20px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2"><span style="color:#A84A16">Hata (1980)</span> 그래프 → 계산식</h3>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;background:#F7DDCB;border-radius:8px;padding:6px 14px">주파수</p>
+<p style="font-size:24px;background:#F7DDCB;border-radius:8px;padding:6px 14px">거리</p>
+<p style="font-size:24px;background:#F7DDCB;border-radius:8px;padding:6px 14px">기지국 높이</p>
+<p style="font-size:24px;background:#F7DDCB;border-radius:8px;padding:6px 14px">단말 높이</p>
+</div>
+<x-shape kind="arrow-right" style="width:40px;height:24px;background:#5E6675"></x-shape>
+<p style="font-size:28px;font-weight:600;color:#F5F3EE;background:#14213D;border-radius:12px;padding:28px 24px;text-align:center">Hata 식</p>
+<x-shape kind="arrow-right" style="width:40px;height:24px;background:#5E6675"></x-shape>
+<p style="font-size:26px;font-weight:600;background:#D5E3F3;border-radius:12px;padding:18px 20px;text-align:center">경로손실<br>[dB]</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">숫자만 넣으면 바로 답이 나온다 → 컴퓨터로 수천 지점을 자동 계산</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<p style="flex:1;font-size:26px;line-height:1.4;background:#D5E3F3;border-radius:12px;padding:16px 24px"><b>장점</b> 빠르고 간단해서 지금도 초기 설계에 쓴다</p>
+<p style="flex:1;font-size:26px;line-height:1.4;background:#F7DDCB;border-radius:12px;padding:16px 24px"><b>한계</b> 측정한 범위(주파수·거리) 밖에서는 안 맞는다</p>
+</div>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 50초) 통계 계열의 대표가 경험식입니다. 1960년대 일본의 Okumura는 도쿄 일대에서 대규모로 신호 세기를 측정하고, 결과를 주파수별 그래프로 정리했습니다. 문제는 값을 알려면 사람이 그래프를 읽어야 했다는 점입니다. 1980년 Hata는 그 그래프 모양을 따라 하는 계산식을 만들었습니다. 주파수, 거리, 기지국 높이, 단말 높이 네 가지만 넣으면 경로손실이 바로 나오기 때문에, 컴퓨터로 수천 개 지점을 자동 계산할 수 있게 됐습니다. 지금도 초기 설계에서 빠르게 커버리지를 볼 때 씁니다. 다만 측정한 범위를 벗어난 주파수나 거리에서는 잘 맞지 않습니다.</aside>
+</section>

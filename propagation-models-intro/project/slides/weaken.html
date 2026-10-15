@@ -1,0 +1,36 @@
+<section id="weaken" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">기본 개념 · 세 가지 손실</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">신호는 세 가지 방식으로 약해진다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:12px">
+<div style="position:relative;width:472px;height:220px">
+<svg aria-label="기지국에서 멀어질수록 단말의 신호 막대가 4칸, 2칸, 1칸으로 줄어드는 그림" style="position:absolute;left:0px;top:0px;width:472px;height:220px" width="472" height="220" viewBox="0 0 472 220"><line x1="0" y1="205" x2="472" y2="205" stroke="#DCD8CE" stroke-width="3"/><line x1="40" y1="205" x2="40" y2="95" stroke="#14213D" stroke-width="6"/><circle cx="40" cy="85" r="10" fill="#A84A16"/><g fill="none" stroke="#A84A16" stroke-width="3"><path d="M61.4 67 A28 28 0 0 1 61.4 103"/><path d="M78.3 52.9 A50 50 0 0 1 78.3 117.1" stroke-opacity="0.5"/></g><g fill="#14213D"><rect x="160" y="165" width="20" height="36" rx="4"/><rect x="290" y="165" width="20" height="36" rx="4"/><rect x="420" y="165" width="20" height="36" rx="4"/></g><g fill="#14213D"><rect x="155" y="140" width="7" height="10"/><rect x="165" y="132" width="7" height="18"/><rect x="175" y="124" width="7" height="26"/><rect x="185" y="116" width="7" height="34"/><rect x="285" y="140" width="7" height="10"/><rect x="295" y="132" width="7" height="18"/><rect x="415" y="140" width="7" height="10"/></g><g fill="#DCD8CE"><rect x="305" y="124" width="7" height="26"/><rect x="315" y="116" width="7" height="34"/><rect x="425" y="132" width="7" height="18"/><rect x="435" y="124" width="7" height="26"/><rect x="445" y="116" width="7" height="34"/></g></svg>
+</div>
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">① 멀어진다 — 경로손실</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">규모: km</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">멀어질수록 목소리가 작게 들리듯, 거리에 따라 평균적으로 약해진다</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:12px">
+<div style="position:relative;width:472px;height:220px">
+<svg aria-label="건물 앞 단말은 신호 4칸, 건물 뒤 그늘 속 단말은 1칸인 그림" style="position:absolute;left:0px;top:0px;width:472px;height:220px" width="472" height="220" viewBox="0 0 472 220"><polygon points="270,85 472,92 472,205 270,205" fill="#14213D" fill-opacity="0.1"/><line x1="0" y1="205" x2="472" y2="205" stroke="#DCD8CE" stroke-width="3"/><line x1="40" y1="85" x2="472" y2="92" stroke="#5E6675" stroke-width="2" stroke-dasharray="6 6"/><rect x="190" y="85" width="80" height="120" fill="#DCD8CE"/><line x1="40" y1="205" x2="40" y2="95" stroke="#14213D" stroke-width="6"/><circle cx="40" cy="85" r="10" fill="#A84A16"/><g fill="#14213D"><rect x="110" y="165" width="20" height="36" rx="4"/><rect x="380" y="165" width="20" height="36" rx="4"/><rect x="105" y="140" width="7" height="10"/><rect x="115" y="132" width="7" height="18"/><rect x="125" y="124" width="7" height="26"/><rect x="135" y="116" width="7" height="34"/><rect x="375" y="140" width="7" height="10"/></g><g fill="#DCD8CE"><rect x="385" y="132" width="7" height="18"/><rect x="395" y="124" width="7" height="26"/><rect x="405" y="116" width="7" height="34"/></g></svg>
+<p style="position:absolute;left:296px;top:166px;width:80px;font-size:24px;color:#5E6675">그늘</p>
+</div>
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">② 가려진다 — 쉐도잉</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">규모: 수십 – 수백 m</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">건물이나 언덕 뒤 ‘전파 그늘’에 들어가면 더 약해진다</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:12px">
+<div style="position:relative;width:472px;height:220px">
+<svg aria-label="직접 온 신호와 벽에 반사된 신호가 단말에서 만나고, 위쪽의 들쭉날쭉한 선이 세기가 빠르게 오르내리는 모습을 나타내는 그림" style="position:absolute;left:0px;top:0px;width:472px;height:220px" width="472" height="220" viewBox="0 0 472 220"><line x1="0" y1="205" x2="472" y2="205" stroke="#DCD8CE" stroke-width="3"/><rect x="420" y="30" width="52" height="175" fill="#DCD8CE"/><polyline points="90,40 104,28 116,54 128,26 140,46 152,24 164,58 176,30 188,44 200,26 212,52 224,30 236,42 250,34" fill="none" stroke="#C9773F" stroke-width="3" stroke-linejoin="round"/><line x1="40" y1="85" x2="300" y2="168" stroke="#14213D" stroke-width="3"/><polyline points="40,85 420,110 306,166" fill="none" stroke="#A84A16" stroke-width="3"/><line x1="40" y1="205" x2="40" y2="95" stroke="#14213D" stroke-width="6"/><circle cx="40" cy="85" r="10" fill="#A84A16"/><rect x="290" y="165" width="20" height="36" rx="4" fill="#14213D"/></svg>
+</div>
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">③ 겹친다 — 페이딩</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">규모: 수 cm</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">여러 길로 온 신호가 만나 세졌다 약해졌다를 빠르게 반복한다</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.45;font-weight:600;color:#14213D">전파 모델의 차이 = 이 세 가지를 <span style="color:#A84A16">어디까지, 얼마나 정밀하게</span> 설명하느냐</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) 신호가 약해지는 방식은 세 가지입니다. 첫째, 멀어지면 약해집니다. 목소리가 멀리서 작게 들리는 것과 같고, 수 km 규모의 변화입니다. 둘째, 가려지면 약해집니다. 건물이나 언덕 뒤 ‘전파 그늘’에 들어가면 같은 거리라도 더 약해지고, 수십에서 수백 미터 단위로 오르내립니다. 셋째, 겹치면서 흔들립니다. 직접 온 신호와 벽에 반사된 신호가 만나서 서로 보강하거나 상쇄하기 때문에, 단말을 몇 cm만 움직여도 세기가 크게 바뀝니다. 앞으로 볼 여러 전파 모델은 이 세 가지를 어디까지, 얼마나 정밀하게 설명하느냐의 차이라고 보면 됩니다.</aside>
+</section>
