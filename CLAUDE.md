@@ -12,4 +12,4 @@
 - `project/deck.json`, `project/slides/<id>.html`: Slides 아티팩트의 원본. 슬라이드 1장 = 파일 1개, `<aside>` = 발표자 노트
 - `viewer/`: 내비게이션이 있는 단독 뷰어 템플릿과 빌드 스크립트. 슬라이드를 고친 뒤 `python3 viewer/build.py`로 `presentation.html`을 다시 만든다
 - `README.md`: 아티팩트 링크, 슬라이드 구성과 시간 배분
-- `qna.md`: 슬라이드별 예상 질문과 답변
+- `qna.md`: 슬라이드별 예상 질문과 답변 (`qna-easy.md`: 신입 사원용 쉬운 요약본)
