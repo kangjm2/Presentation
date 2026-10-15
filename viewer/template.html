@@ -141,7 +141,9 @@ body.fs.idle .stage { cursor: none }
   var info = slides.map(function (s, i) {
     s.classList.add('slide');
     var h = s.querySelector('h1, h2');
-    var title = h ? h.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
     var a = s.querySelector('aside');
     return { title: title, note: a ? a.textContent.trim() : '' };
   });

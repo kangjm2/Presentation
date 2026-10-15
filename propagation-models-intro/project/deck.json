@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-15T09:00:00Z"},
+  "lists": "css",
+  "title": "전파 모델 입문",
+  "order": ["cover", "what", "weaken", "families", "questions", "empirical", "echoes", "ears", "standard", "raytracing", "choose", "takeaway"],
+  "sections": {
+    "basics": {"description": "기본 개념: 전파 모델이 답하는 질문과 신호가 약해지는 세 가지 방식", "start": "cover"},
+    "history": {"description": "큰 그림: 모델의 두 갈래와, 질문이 바뀔 때마다 등장한 모델들", "start": "families"},
+    "models": {"description": "대표 모델 쉽게 보기: 경험식, 메아리 모델, 표준 모델, 레이 트레이싱", "start": "empirical"},
+    "wrap": {"description": "정리: 언제 무엇을 쓰고, 무엇을 기억할까", "start": "choose"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}

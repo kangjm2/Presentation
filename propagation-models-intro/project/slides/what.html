@@ -1,0 +1,44 @@
+<section id="what" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">기본 개념 · 링크 예산</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">전파 모델은 ‘얼마나 약해질까’에 답한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:640px;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:32px;font-weight:600;line-height:1.3">링크 예산 = 신호의 가계부</p>
+<p style="font-size:26px;line-height:1.5;color:#4A5262">얻은 것은 더하고 잃은 것은 뺀다. 마지막에 남은 수신 전력이 ‘연결 가능한 최소값(수신 감도)’보다 크면 통신이 된다.</p>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-direction:row;gap:20px;align-items:baseline">
+<p style="width:110px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">P_tx</p>
+<p style="flex:1;font-size:24px;line-height:1.45;color:#4A5262">송신 전력 · 우리가 정한다</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:baseline">
+<p style="width:110px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">G</p>
+<p style="flex:1;font-size:24px;line-height:1.45;color:#4A5262">안테나 이득 · 우리가 정한다</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:baseline">
+<p style="width:110px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">PL</p>
+<p style="flex:1;font-size:24px;line-height:1.45;color:#4A5262">경로손실 · <b style="color:#A84A16">환경이 정한다</b></p>
+</div>
+</div>
+<p style="font-size:26px;line-height:1.45;font-weight:600;color:#A84A16">→ 환경이 정하는 PL을 미리 예측하는 것이 전파 모델</p>
+</div>
+<div style="position:relative;width:960px;height:560px;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px">
+<svg aria-label="링크 예산 폭포 그림: 송신 전력 +46, 안테나 이득 +15를 더하고 경로손실 −130을 빼면 수신 전력 −69 dBm이 되며, 수신 감도 −100 dBm보다 31 dB 여유가 있다" style="position:absolute;left:0px;top:0px;width:960px;height:560px" width="960" height="560" viewBox="0 0 960 560"><line x1="60" y1="211" x2="900" y2="211" stroke="#5E6675" stroke-width="2"/><line x1="60" y1="455" x2="900" y2="455" stroke="#A84A16" stroke-width="3" stroke-dasharray="14 8"/><g stroke="#5E6675" stroke-width="2" stroke-dasharray="6 6"><line x1="230" y1="99" x2="300" y2="99"/><line x1="440" y1="62" x2="510" y2="62"/><line x1="650" y1="381" x2="720" y2="381"/></g><rect x="90" y="99" width="140" height="112" rx="6" fill="#255E9E"/><rect x="300" y="62" width="140" height="37" rx="6" fill="#255E9E"/><rect x="510" y="62" width="140" height="319" rx="6" fill="#A84A16"/><rect x="720" y="211" width="140" height="170" rx="6" fill="#14213D"/></svg>
+<p style="position:absolute;left:870px;top:172px;width:90px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">0 dBm</p>
+<p style="position:absolute;left:90px;top:136px;width:140px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F5F3EE;text-align:center">+46</p>
+<p style="position:absolute;left:300px;top:20px;width:140px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E;text-align:center">+15</p>
+<p style="position:absolute;left:510px;top:200px;width:140px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F5F3EE;text-align:center">−130</p>
+<p style="position:absolute;left:720px;top:276px;width:140px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F5F3EE;text-align:center">−69 dBm</p>
+<p style="position:absolute;left:720px;top:400px;width:140px;font-size:24px;font-weight:600;color:#14213D;text-align:center">여유 31 dB</p>
+<p style="position:absolute;left:70px;top:462px;width:600px;font-size:24px;color:#A84A16">수신 감도 −100 dBm (이보다 커야 연결)</p>
+<p style="position:absolute;left:90px;top:510px;width:140px;font-size:24px;color:#4A5262;text-align:center">송신 전력</p>
+<p style="position:absolute;left:300px;top:510px;width:140px;font-size:24px;color:#4A5262;text-align:center">안테나 이득</p>
+<p style="position:absolute;left:510px;top:510px;width:140px;font-size:24px;color:#4A5262;text-align:center">경로손실</p>
+<p style="position:absolute;left:720px;top:510px;width:140px;font-size:24px;color:#4A5262;text-align:center">수신 전력</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시 값: 도심 매크로 기지국을 가정한 대략적인 숫자</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<aside>(약 50초) 먼저 전파 모델이 무엇을 예측하는지부터 보겠습니다. 통신이 되는지는 ‘링크 예산’으로 판단하는데, 신호의 가계부라고 생각하면 됩니다. 기지국이 46 dBm으로 쏘고 안테나로 15 dB를 얻은 뒤, 가는 길에 130 dB를 잃으면 단말에는 −69 dBm이 도착합니다. 단말이 −100 dBm까지 받을 수 있다면 31 dB 여유가 있으니 연결됩니다. 여기서 송신 전력과 안테나는 우리가 고를 수 있지만, 길에서 잃는 양, 즉 경로손실은 건물과 거리 같은 환경이 정합니다. 이 값을 미리 예측하는 도구가 전파 모델입니다.</aside>
+</section>

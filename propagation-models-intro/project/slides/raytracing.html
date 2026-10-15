@@ -1,0 +1,34 @@
+<section id="raytracing" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">대표 모델 ④ · 결정론 계열</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">레이 트레이싱: 지도 위에서 전파를 추적</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="position:relative;width:840px;height:560px;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;overflow:hidden">
+<svg aria-label="도시 거리 평면도: 송신기에서 같은 거리의 수신기 1로 직접 신호와 양쪽 벽 반사 신호가 도달하고, 모퉁이를 돌아간 수신기 2에는 직접 신호가 건물에 막히고 모서리에서 꺾인 신호만 도달" style="position:absolute;left:0px;top:0px;width:840px;height:560px" width="840" height="560" viewBox="0 0 840 560"><g fill="#DCD8CE"><rect x="0" y="0" width="840" height="200"/><rect x="0" y="360" width="420" height="200"/><rect x="540" y="360" width="300" height="200"/></g><line x1="100" y1="300" x2="480" y2="500" stroke="#5E6675" stroke-width="3" stroke-dasharray="4 8"/><g stroke="#5E6675" stroke-width="4"><line x1="288" y1="393" x2="312" y2="417"/><line x1="312" y1="393" x2="288" y2="417"/></g><polyline points="100,300 525,200 780,260" fill="none" stroke="#A84A16" stroke-width="4"/><polyline points="100,300 355,360 780,260" fill="none" stroke="#A84A16" stroke-width="4"/><line x1="100" y1="300" x2="780" y2="260" stroke="#14213D" stroke-width="4"/><polyline points="100,300 420,360 480,500" fill="none" stroke="#255E9E" stroke-width="4" stroke-dasharray="14 8"/><g fill="#A84A16"><circle cx="525" cy="200" r="7"/><circle cx="355" cy="360" r="7"/></g><circle cx="420" cy="360" r="8" fill="#255E9E"/><g fill="#14213D"><circle cx="100" cy="300" r="12"/><circle cx="780" cy="260" r="12"/><circle cx="480" cy="500" r="12"/></g><line x1="560" y1="397" x2="610" y2="397" stroke="#14213D" stroke-width="4"/><line x1="560" y1="441" x2="610" y2="441" stroke="#A84A16" stroke-width="4"/><line x1="560" y1="485" x2="610" y2="485" stroke="#255E9E" stroke-width="4" stroke-dasharray="14 8"/><line x1="560" y1="529" x2="610" y2="529" stroke="#5E6675" stroke-width="3" stroke-dasharray="4 8"/></svg>
+<p style="position:absolute;left:60px;top:316px;width:60px;font-size:24px;font-weight:600">Tx</p>
+<p style="position:absolute;left:750px;top:296px;width:70px;font-size:24px;font-weight:600">Rx1</p>
+<p style="position:absolute;left:496px;top:486px;width:44px;font-size:24px;font-weight:600">Rx2</p>
+<p style="position:absolute;left:620px;top:380px;width:210px;font-size:24px;color:#14213D">직접</p>
+<p style="position:absolute;left:620px;top:424px;width:210px;font-size:24px;color:#14213D">벽에 반사</p>
+<p style="position:absolute;left:620px;top:468px;width:210px;font-size:24px;color:#14213D">모서리에서 꺾임</p>
+<p style="position:absolute;left:620px;top:512px;width:210px;font-size:24px;color:#14213D">건물에 막힘</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#255E9E">어떻게?</h3>
+<p style="font-size:24px;line-height:1.5;color:#4A5262">게임 그래픽이 빛을 추적하듯, 3D 지도 위에서 전파를 쏘고 벽에서 반사시키고 모서리에서 꺾어 수신기까지 가는 길을 모두 찾는다.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#255E9E">장점</h3>
+<p style="font-size:24px;line-height:1.5;color:#4A5262">‘바로 이 장소’의 결과를 준다. 특히 5G mmWave처럼 빛에 가까운 높은 주파수에서 잘 맞는다.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#A84A16">단점</h3>
+<p style="font-size:24px;line-height:1.5;color:#4A5262">지도나 건물 재질 정보가 틀리면 결과도 틀린다. 나무·사람·차량은 다루기 어렵고, 넓은 지역은 계산이 오래 걸린다.</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 50초) 결정론 계열의 대표는 레이 트레이싱입니다. 게임 그래픽에서 빛을 추적하는 것처럼, 3D 지도 위에서 전파를 쏘고 벽에 닿으면 반사시키고 모서리에서는 꺾어서 수신기까지 가는 길을 모두 찾습니다. 그림에서 수신기 1은 직접 온 신호와 양쪽 벽에 반사된 신호를 받고, 모퉁이를 돈 수신기 2는 직접 신호가 건물에 막혀 모서리에서 꺾인 신호만 받습니다. 장점은 바로 이 장소의 결과를 준다는 것이고, 빛에 가까운 높은 주파수일수록 잘 맞습니다. 단점은 지도와 재질 정보에 크게 의존하고, 넓은 지역은 계산이 무겁다는 점입니다.</aside>
+</section>
