@@ -31,7 +31,7 @@ python3 viewer/build.py
 
 `viewer/template.html`(뷰어 UI)과 `project/`의 슬라이드를 합쳐 `presentation.html`을 다시 만듭니다.
 
-## 구성 (≈ 9분 55초)
+## 구성 (≈ 10분)
 
 | # | id | 내용 | 시간 |
 |---|----|------|------|
@@ -41,7 +41,7 @@ python3 viewer/build.py
 | 4 | friis | ERA 1 자유공간(Friis)과 그 한계: 경로손실 지수 | 0:45 |
 | 5 | hata | ERA 2 Okumura–Hata: 측정을 공식으로 | 1:00 |
 | 6 | cost231 | ERA 3 COST 231: 2 GHz, 마이크로셀, Walfisch–Ikegami | 0:50 |
-| 7 | fading | ERA 4 확률적 다중경로: Clarke/Jakes, TDL, Saleh–Valenzuela | 0:55 |
+| 7 | fading | ERA 4 확률적 다중경로: Clarke/Jakes, TDL·클러스터 그림, Saleh–Valenzuela | 1:00 |
 | 8 | gscm | ERA 5 MIMO와 GSCM: SCM → WINNER → 38.901 | 1:00 |
 | 9 | raytracing | ERA 6 레이 트레이싱: GO + UTD, 위치 특정 채널 | 1:00 |
 | 10 | compare | 세 계열 비교표 | 0:45 |
