@@ -1,0 +1,44 @@
+<section id="convert" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">PART 1 · 변환 관계</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">CIR에서는 내려가고, 거꾸로는 못 올라간다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="position:relative;width:1000px;height:600px">
+<svg aria-label="위쪽 CIR에서 왼쪽 아래 CFR과 오른쪽 아래 FIR로 화살표가 내려가고, CFR과 FIR 사이에는 양방향 화살표, 가운데에는 위로 향하는 점선 화살표가 있는 변환 관계도" style="position:absolute;left:0px;top:0px;width:1000px;height:600px" width="1000" height="600" viewBox="0 0 1000 600"><g stroke="#14213D" stroke-width="4"><line x1="430" y1="140" x2="195" y2="418"/><line x1="570" y1="140" x2="805" y2="418"/><line x1="296" y1="500" x2="704" y2="500"/></g><g fill="#14213D"><polygon points="185,430 189,413 201,423"/><polygon points="815,430 799,423 811,413"/><polygon points="280,500 296,492 296,508"/><polygon points="720,500 704,492 704,508"/></g><line x1="500" y1="484" x2="500" y2="162" stroke="#5E6675" stroke-width="3" stroke-dasharray="10 8"/><polygon points="500,146 492,162 508,162" fill="#5E6675"/></svg>
+<div style="position:absolute;left:380px;top:20px;width:240px;background:#14213D;border-radius:16px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F5F3EE">CIR</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#C9D3E3">a_i, τ_i (연속)</p>
+</div>
+<div style="position:absolute;left:30px;top:440px;width:240px;background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #A84A16;border-radius:16px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">CFR</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#4A5262">H[k], K개</p>
+</div>
+<div style="position:absolute;left:730px;top:440px;width:240px;background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #255E9E;border-radius:16px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">FIR 탭</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#4A5262">h[ℓ], 1/W 간격</p>
+</div>
+<p style="position:absolute;left:30px;top:190px;width:290px;font-size:24px;line-height:1.4;text-align:right">f_k에서 합<br><b>정확</b></p>
+<p style="position:absolute;left:690px;top:180px;width:300px;font-size:24px;line-height:1.4">sinc 대역 제한<br>+ 1/W 샘플링 <b>정확</b></p>
+<p style="position:absolute;left:290px;top:516px;width:420px;font-size:24px;line-height:1.4;text-align:center">DFT ↔ IDFT <b>근사</b></p>
+<p style="position:absolute;left:512px;top:290px;width:150px;font-size:24px;line-height:1.4;color:#5E6675">역변환은<br>근사뿐</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">정확한 변환</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">CIR → CFR, CIR → FIR: 고른 주파수·대역에서 식 그대로 계산</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">근사 관계</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">FIR ↔ CFR: W = K·Δf이고 탭이 지연을 충분히 덮으면 DFT로 거의 일치</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">되돌릴 수 없음</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">1/W 안의 경로는 합쳐진다. 20 MHz면 50 ns ≈ 경로차 15 m</p>
+</div>
+<p style="font-size:26px;line-height:1.45;font-weight:600;color:#A84A16">→ 데이터셋은 CIR(a, τ)로 저장하고, 필요한 대역으로 그때그때 변환</p>
+</div>
+</div>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 50초) 세 표현의 관계를 정리하면 이렇습니다. CIR에서 CFR로, CIR에서 FIR로 가는 것은 정확한 계산입니다. 고른 주파수나 대역에서 식 그대로 나옵니다. CFR과 FIR 사이는 DFT로 연결되는데, 대역폭 W가 부반송파 수 곱하기 간격과 같고 탭 범위가 지연을 충분히 덮을 때만 거의 일치하는 근사 관계입니다. 거꾸로 CFR이나 FIR에서 CIR로 올라가는 것은 근사만 가능합니다. 1/W보다 가까운 경로는 하나로 합쳐지기 때문인데, 20 MHz면 50 ns, 경로 길이 차이로 15 m 안의 경로는 구분되지 않습니다. 그래서 데이터셋을 만든다면 원본인 CIR로 저장하고, 필요한 대역으로 그때그때 변환하는 것을 권합니다.</aside>
+</section>

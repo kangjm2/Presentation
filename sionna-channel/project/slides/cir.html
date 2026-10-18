@@ -1,0 +1,50 @@
+<section id="cir" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">PART 1 · 표현 ① CIR</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">CIR: 경로마다 이득 하나, 지연 하나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:700px;display:flex;flex-direction:column;gap:24px">
+<div style="background:#14213D;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;color:#F5F3EE">h(t,τ) = Σ a_i(t)·δ(τ − τ_i)</p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">레이 트레이싱이 찾은 경로 i의 목록 그대로</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:row;gap:20px;align-items:baseline">
+<p style="width:90px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">a_i</p>
+<p style="flex:1;font-size:24px;line-height:1.45;color:#4A5262">복소 이득 — 경로손실·안테나 패턴·편파·반송파 위상이 모두 들어 있다</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:baseline">
+<p style="width:90px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">τ_i</p>
+<p style="flex:1;font-size:24px;line-height:1.45;color:#4A5262">연속값 지연 [s] — 샘플 격자에 묶이지 않는다</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:baseline">
+<p style="width:90px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">t</p>
+<p style="flex:1;font-size:24px;line-height:1.45;color:#4A5262">이동이 있으면 도플러로 시간에 따라 변한다</p>
+</div>
+</div>
+<div style="background:#EAE7DF;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#14213D">a   [rx, rx_ant, tx, tx_ant, path, time]<br>tau [rx, tx, path]</p>
+<p style="font-size:24px;line-height:1.45;color:#5E6675">배열 모양: Sionna RT 1.x 기준, 버전·설정에 따라 확인</p>
+</div>
+</div>
+<div style="position:relative;width:900px;height:420px;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px">
+<svg aria-label="지연 50, 95, 140, 260, 410 ns에 놓인 다섯 경로의 크기를 막대로 나타낸 CIR 예시" style="position:absolute;left:0px;top:0px;width:900px;height:420px" width="900" height="420" viewBox="0 0 900 420"><g stroke="#5E6675" stroke-width="2"><line x1="60" y1="30" x2="60" y2="360"/><line x1="60" y1="360" x2="880" y2="360"/><line x1="222" y1="360" x2="222" y2="368"/><line x1="384" y1="360" x2="384" y2="368"/><line x1="546" y1="360" x2="546" y2="368"/><line x1="708" y1="360" x2="708" y2="368"/><line x1="870" y1="360" x2="870" y2="368"/></g><g stroke="#A84A16" stroke-width="6" stroke-linecap="round"><line x1="141" y1="360" x2="141" y2="60"/><line x1="214" y1="360" x2="214" y2="171"/><line x1="287" y1="360" x2="287" y2="226"/><line x1="481" y1="360" x2="481" y2="275"/><line x1="724" y1="360" x2="724" y2="312"/></g><g fill="#A84A16"><circle cx="141" cy="60" r="8"/><circle cx="214" cy="171" r="8"/><circle cx="287" cy="226" r="8"/><circle cx="481" cy="275" r="8"/><circle cx="724" cy="312" r="8"/></g></svg>
+<p style="position:absolute;left:70px;top:0px;width:200px;font-size:24px;color:#5E6675">|a_i|</p>
+<p style="position:absolute;left:156px;top:44px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">a1, τ1</p>
+<p style="position:absolute;left:229px;top:150px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">a2, τ2</p>
+<p style="position:absolute;left:302px;top:205px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">a3, τ3</p>
+<p style="position:absolute;left:496px;top:254px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">a4, τ4</p>
+<p style="position:absolute;left:739px;top:291px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">a5, τ5</p>
+<p style="position:absolute;left:40px;top:372px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">0</p>
+<p style="position:absolute;left:192px;top:372px;width:60px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">100</p>
+<p style="position:absolute;left:354px;top:372px;width:60px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">200</p>
+<p style="position:absolute;left:516px;top:372px;width:60px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">300</p>
+<p style="position:absolute;left:678px;top:372px;width:60px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">400</p>
+<p style="position:absolute;left:770px;top:372px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:right">500 ns</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림: 예시 경로 5개 (모의 값) · 지연 50, 95, 140, 260, 410 ns</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) CIR은 레이 트레이싱이 찾은 경로 목록 그 자체입니다. 경로 i마다 복소 이득 a_i 하나와 지연 τ_i 하나가 있습니다. a_i에는 경로손실, 안테나 패턴, 편파, 그리고 반송파 위상까지 이미 다 들어 있습니다. τ_i는 연속값이라 샘플링 격자와 상관없이 50 ns, 95 ns처럼 아무 값이나 가질 수 있습니다. 단말이 움직이면 도플러 때문에 a_i가 시간에 따라 변하고, 그래서 time 차원이 있습니다. 배열 모양은 수신기, 수신 안테나, 송신기, 송신 안테나, 경로, 시간 순서인데, Sionna 버전과 설정에 따라 다르니 사용하는 버전의 문서를 확인하는 게 좋습니다. 중요한 점은 CIR이 대역폭과 무관한 원본이라는 것입니다.</aside>
+</section>

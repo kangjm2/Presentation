@@ -1,0 +1,54 @@
+<section id="pipeline" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">큰 그림 · PIPELINE</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">채널 데이터는 CIR에서 시작한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:center">
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">① 입력</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">Scene</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">3D 지도, 재질, 송수신기와 안테나 배열</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:26px;background:#5E6675"></x-shape>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">② 계산</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">Ray tracing</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">PathSolver가 반사·회절·산란 경로를 탐색</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:26px;background:#5E6675"></x-shape>
+<div style="flex:1;background:#14213D;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">③ 원본</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F5F3EE">CIR</h3>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">경로별 복소 이득 a와 지연 τ (+ 각도, 도플러)</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:26px;background:#5E6675"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #A84A16;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">CFR</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">부반송파별 H[k] · OFDM용</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #255E9E;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">FIR 탭</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">샘플 간격 h[ℓ] · 시간 영역용</p>
+</div>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:26px;background:#5E6675"></x-shape>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">⑤ 활용</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">시뮬레이션</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">링크·시스템 시뮬레이션, 학습 데이터셋</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;background:#EAE7DF;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">PART 1 · 변환 (3–8)</p>
+<p style="font-size:28px;line-height:1.4;font-weight:600">CIR이 원본, CFR과 FIR은 그것을 대역 제한해서 본 관점</p>
+</div>
+<div style="flex:1;background:#EAE7DF;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E">PART 2 · 검증 (9–11)</p>
+<p style="font-size:28px;line-height:1.4;font-weight:600">기본 점검 → 38.901 통계 비교 → 차이의 해석</p>
+</div>
+</div>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<aside>(약 45초) 전체 흐름부터 보겠습니다. 3D 지도와 재질, 송수신기와 안테나 배열로 Scene을 만들고, 레이 트레이싱으로 경로를 찾으면 경로마다 복소 이득과 지연을 가진 CIR이 나옵니다. 이것이 원본입니다. 여기서 OFDM 시뮬레이션에 쓰는 주파수 영역의 CFR, 시간 영역 시뮬레이션에 쓰는 FIR 탭을 만들고, 링크·시스템 시뮬레이션이나 학습 데이터셋으로 씁니다. 앞부분에서는 이 세 가지 표현과 변환을, 뒷부분에서는 이렇게 만든 데이터를 어떻게 검증할지를 다룹니다.</aside>
+</section>
