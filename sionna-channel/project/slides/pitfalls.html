@@ -1,0 +1,18 @@
+<section id="pitfalls" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">실무 · 체크리스트</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">자주 하는 실수 여섯 가지</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:28%;text-align:left;color:#F5F3EE">증상</th><th style="width:36%;text-align:left;color:#F7DDCB">흔한 원인</th><th style="width:36%;text-align:left;color:#D5E3F3">확인 방법</th></tr>
+<tr style="background:#F5F3EE"><td>경로손실이 0 dB 근처</td><td>normalize=True로 에너지 정규화</td><td>normalize=False, Σ|a_i|² 확인</td></tr>
+<tr><td>LOS 지연이 0</td><td>normalize_delays=True (기본값)</td><td>절대 지연이 필요하면 False</td></tr>
+<tr style="background:#F5F3EE"><td>CFR 모양이 다른 툴과 다름</td><td>절대 주파수(f_c + f)를 넣음 — a에 반송파 위상이 이미 포함</td><td>기저대역 주파수 사용</td></tr>
+<tr><td>FIR 에너지가 CFR보다 작음</td><td>탭 범위(l_min, l_max)가 짧아 잘림</td><td>범위 확장, Σ|h[ℓ]|² 비교</td></tr>
+<tr style="background:#F5F3EE"><td>OFDM 성능이 지나치게 좋음</td><td>최대 지연 &gt; CP인데 주파수 영역 모델 사용</td><td>지연 확산 vs CP, 시간 영역으로 재확인</td></tr>
+<tr><td>이동하는데 채널이 고정</td><td>num_time_steps = 1, 속도 미설정</td><td>속도 지정, sampling_frequency·num_time_steps 설정</td></tr>
+</table>
+<p style="font-size:28px;line-height:1.4;font-weight:600;color:#A84A16">대부분 “정규화”와 “기준(지연·주파수)”을 어떻게 잡았는지의 문제다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 50초) 실제로 자주 보는 실수를 여섯 가지로 정리했습니다. 경로손실이 0 dB 근처로 나오면 대부분 normalize가 켜져 있는 경우입니다. LOS 지연이 0으로 나오면 normalize_delays 기본값 때문입니다. CFR 모양이 다른 툴과 다르면 절대 주파수를 넣었는지 확인하세요. Sionna의 a에는 반송파 위상이 이미 들어 있어서 기저대역 주파수를 넣어야 합니다. FIR 에너지가 CFR보다 작으면 탭 범위가 짧아 잘린 것이고, OFDM 성능이 지나치게 좋으면 지연이 CP보다 긴데 주파수 영역 모델을 쓴 경우가 많습니다. 마지막으로 이동 시나리오인데 채널이 고정이면 시간 스텝이나 속도 설정을 확인합니다. 대부분 정규화와 기준을 어떻게 잡았는지의 문제입니다.</aside>
+</section>

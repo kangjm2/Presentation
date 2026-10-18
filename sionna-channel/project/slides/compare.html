@@ -1,0 +1,33 @@
+<section id="compare" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">PART 2 · 검증 ③ 비교 조건과 해석</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">같은 조건에서 비교하고, 차이를 나눠 읽는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:680px;display:flex;flex-direction:column;gap:20px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">공정한 비교 조건</h3>
+<ul style="font-size:24px;line-height:1.5;color:#4A5262">
+<li>같은 반송파 주파수와 대역폭</li>
+<li>같은 높이: UMi면 BS 10 m, UE 1.5 m</li>
+<li>등방성 안테나로 안테나 효과 제거</li>
+<li>LOS와 NLOS를 나눠서 비교</li>
+<li>UE 위치는 충분히 많이 (수백 곳 이상)</li>
+<li>Sionna의 38.901 UMi 모델로 같은 배치를 만들어 같은 코드로 지표 계산</li>
+</ul>
+<p style="font-size:26px;line-height:1.45;font-weight:600;color:#F5F3EE;background:#14213D;border-radius:12px;padding:16px 24px">차이 ≠ 오류. 측정 데이터가 있으면 RT · 38.901 · 측정의 3자 비교로 RT 설정을 보정한다</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">차이를 어떻게 읽나</h3>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:30%;text-align:left;color:#F5F3EE">관찰</th><th style="width:40%;text-align:left;color:#F7DDCB">먼저 의심할 것</th><th style="width:30%;text-align:left;color:#D5E3F3">판단</th></tr>
+<tr style="background:#F5F3EE"><td>PL이 수십 dB 어긋남</td><td>단위, 정규화, 안테나 이득</td><td>오류일 가능성이 높다</td></tr>
+<tr><td>DS · AS가 작게 나옴</td><td>반사 차수(max_depth), 확산 산란 꺼짐, 식생·차량 없음</td><td>RT 설정과 한계 — 설정부터 확인</td></tr>
+<tr style="background:#F5F3EE"><td>LOS 확률이 다름</td><td>그 장면의 건물 배치</td><td>정상일 수 있다</td></tr>
+<tr><td>분포 폭(σ)이 좁음</td><td>장면 하나만 사용</td><td>38.901은 여러 도시의 평균</td></tr>
+</table>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">“DS · AS가 작게 나옴”은 RT에서 자주 보이는 경향이며, 장면과 설정에 따라 다르다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 55초) 비교가 의미 있으려면 조건을 맞춰야 합니다. 같은 주파수와 대역폭, 같은 기지국과 단말 높이를 쓰고, 안테나 효과를 빼기 위해 등방성 안테나를 씁니다. LOS와 NLOS는 반드시 나눠서 비교하고, 단말 위치는 수백 곳 이상으로 충분히 많아야 분포를 말할 수 있습니다. 가장 깔끔한 방법은 Sionna에 들어 있는 38.901 UMi 모델로 같은 배치를 만들어서, RT 결과와 똑같은 코드로 지표를 계산하는 것입니다. 차이가 나왔을 때는 나눠서 읽어야 합니다. 경로손실이 수십 dB 어긋나면 거의 확실히 단위나 정규화 오류입니다. 지연 확산이나 각도 확산이 작게 나오는 것은 RT에서 자주 보이는 경향인데, 반사 차수나 확산 산란 설정, 그리고 장면에 나무나 차량이 없는 것을 먼저 확인합니다. LOS 확률이 다른 것은 그 장면의 건물 배치 때문일 수 있어 정상일 수 있고, 분포 폭이 좁은 것은 장면 하나만 썼기 때문입니다. 차이가 곧 오류는 아니고, 측정 데이터가 있다면 3자 비교로 RT 설정을 보정하는 것이 다음 단계입니다.</aside>
+</section>

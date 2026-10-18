@@ -1,0 +1,20 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-18T09:00:00Z"},
+  "lists": "css",
+  "title": "Sionna 채널 데이터: CIR·CFR·FIR과 검증",
+  "order": ["cover", "pipeline", "cir", "cfr", "fir", "convert", "code", "pitfalls", "sanity", "stats", "compare", "summary"],
+  "sections": {
+    "intro": {"description": "도입: Sionna RT에서 채널 데이터가 만들어지는 흐름", "start": "cover"},
+    "forms": {"description": "세 가지 표현: CIR, CFR, FIR 탭의 정의와 서로의 변환", "start": "cir"},
+    "practice": {"description": "실무: Sionna 코드와 자주 하는 실수", "start": "code"},
+    "validation": {"description": "검증: 기본 점검, 38.901 통계와의 비교, 차이의 해석", "start": "sanity"},
+    "wrap": {"description": "정리", "start": "summary"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}

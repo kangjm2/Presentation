@@ -1,0 +1,35 @@
+<section id="sanity" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">PART 2 · 검증 ① 기본 점검</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">통계를 보기 전에, 물리부터 맞는지 본다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">① LOS 경로손실</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#255E9E">|a_LOS|² ≈ G_t·G_r·(λ / 4πd)²</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">등방성 안테나면 자유공간 손실(FSPL)과 거의 같아야 한다</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">예: 3.5 GHz, 100 m → FSPL ≈ 83.3 dB</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">② LOS 지연</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#255E9E">τ_LOS = d / c</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">normalize_delays=False로 뽑았을 때 거리와 맞아야 한다</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">예: 100 m → 333.6 ns</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">③ 에너지 일관성</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#255E9E">Σ|a_i|² ≈ mean_k|H[k]|² ≈ Σ|h[ℓ]|²</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">대역이 넓고 탭 범위가 충분하면 세 값이 거의 같다</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">예 (3–5쪽 그림): 1.70 / 1.74 / 1.74</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">④ CFR 위상 기울기</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#255E9E">Δ∠H[k] = −2π·τ·Δf</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">LOS만 있는 경우 위상 기울기로 지연을 되찾을 수 있다</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">예: τ = 333.6 ns, Δf = 30 kHz → −0.063 rad</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.4;font-weight:600;color:#255E9E">→ 단위·정규화·기준 오류를 먼저 걸러야, 통계 차이를 의미 있게 읽을 수 있다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 50초) 이제 검증입니다. 통계 비교에 들어가기 전에 물리적으로 맞는지부터 확인합니다. 첫째, 가시선 경로의 이득이 자유공간 손실과 맞는지 봅니다. 3.5 GHz에서 100 m면 약 83.3 dB입니다. 둘째, normalize_delays를 끈 상태에서 가시선 지연이 거리 나누기 빛의 속도, 100 m면 333.6 ns인지 봅니다. 셋째, CIR, CFR, FIR 탭의 에너지가 서로 비슷한지 봅니다. 앞의 예시에서는 1.70, 1.74, 1.74로 거의 같았습니다. 넷째, 가시선만 있을 때 CFR 위상이 지연에 맞는 기울기로 회전하는지 봅니다. 이 단계에서 단위, 정규화, 기준 오류를 걸러내야 다음 단계의 통계 차이를 의미 있게 해석할 수 있습니다.</aside>
+</section>

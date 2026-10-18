@@ -1,0 +1,32 @@
+<section id="code" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">실무 · 코드</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">Sionna에서는 세 줄이면 된다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:1100px;background:#14213D;border-radius:16px;padding:28px 32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8"># from sionna.rt import PathSolver, subcarrier_frequencies</span><br><span style="color:#8DB8E8"># from sionna.phy.channel import time_lag_discrete_time_channel</span><br>paths = PathSolver()(scene, max_depth=5)<br><span style="color:#F0A36B"># ① CIR: 경로별 복소 이득 a, 지연 tau</span><br>a, tau = paths.cir(normalize_delays=False, out_type="numpy")<br><span style="color:#F0A36B"># ② CFR: 기저대역 부반송파 주파수에서 H[k]</span><br>freqs = subcarrier_frequencies(1024, 30e3)<br>h_f = paths.cfr(frequencies=freqs, normalize=False,<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;normalize_delays=False, out_type="numpy")<br><span style="color:#F0A36B"># ③ FIR 탭: W = 1024 × 30 kHz = 30.72 MHz</span><br>l_min, l_max = time_lag_discrete_time_channel(30.72e6)<br>h_t = paths.taps(bandwidth=30.72e6, l_min=l_min, l_max=l_max,<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;normalize=False, out_type="numpy")</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#A84A16">normalize_delays=False</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">절대 지연 유지. 기본값(True)은 첫 경로를 0으로 당긴다</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#A84A16">normalize=False</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">경로손실 유지. True면 에너지가 정규화돼 PL 분석에 못 쓴다</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#A84A16">W = K·Δf</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">CFR과 FIR이 같은 대역을 보도록 맞춘다</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#5E6675">Sionna 0.x (TF)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">paths.cir() 후 cir_to_ofdm_channel(), cir_to_time_channel()</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT 1.x 기준 예시 · 함수·인자 이름과 기본값은 사용 중인 버전의 문서로 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 50초) 코드는 간단합니다. PathSolver로 경로를 구한 뒤, paths.cir로 CIR을, paths.cfr에 기저대역 부반송파 주파수를 넣어 CFR을, paths.taps에 대역폭과 탭 범위를 넣어 FIR 탭을 얻습니다. 여기서 세 가지 인자를 꼭 의식해야 합니다. 첫째, normalize_delays의 기본값은 True라서 첫 경로의 지연이 0으로 당겨집니다. 절대 지연이 필요하면 False로 둡니다. 둘째, normalize를 True로 두면 에너지가 정규화되어 경로손실 정보가 사라집니다. 셋째, FIR의 대역폭을 부반송파 수 곱하기 간격과 맞춰야 CFR과 FIR이 같은 대역을 봅니다. 예시는 Sionna RT 1.x 기준이고, TF 기반의 0.x에서는 cir_to_ofdm_channel과 cir_to_time_channel 함수를 씁니다. 함수 이름과 기본값은 버전에 따라 다르니 꼭 문서를 확인하세요.</aside>
+</section>
