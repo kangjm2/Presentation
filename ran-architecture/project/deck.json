@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-18T12:00:00Z"},
+  "lists": "css",
+  "title": "기지국 분리 구조와 인터페이스",
+  "order": ["cover", "overview", "why", "stack", "roles", "fronthaul", "f1e1", "ngxn", "mgmt", "flow", "table", "summary"],
+  "sections": {
+    "intro": {"description": "도입: USM·CU·DU·RU·UE 전체 구조와 기지국을 나누게 된 이유", "start": "cover"},
+    "split": {"description": "분할 기준: 프로토콜 스택을 어디서 자르고, 각 노드가 무엇을 맡는가", "start": "stack"},
+    "interfaces": {"description": "인터페이스: 프런트홀, F1·E1, NG·Xn, 관리(O1·M-plane)", "start": "fronthaul"},
+    "wrap": {"description": "정리: 접속 한 번의 메시지 흐름, 인터페이스 요약표, 핵심 메시지", "start": "flow"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}

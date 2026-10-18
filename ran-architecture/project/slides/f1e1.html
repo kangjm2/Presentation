@@ -1,0 +1,45 @@
+<section id="f1e1" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">인터페이스 ② · DU ↔ CU, CU-CP ↔ CU-UP</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">F1과 E1: 제어와 데이터를 갈라 보낸다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="position:relative;width:700px;height:540px">
+<svg aria-label="DU에서 CU-CP로 가는 F1-C 선과 CU-UP로 가는 F1-U 선, 그리고 CU 안에서 CU-CP와 CU-UP를 잇는 E1 선" style="position:absolute;left:0px;top:0px;width:700px;height:540px" width="700" height="540" viewBox="0 0 700 540"><rect x="380" y="20" width="310" height="500" rx="18" fill="none" stroke="#A84A16" stroke-width="2" stroke-dasharray="10 8"/><line x1="200" y1="240" x2="420" y2="130" stroke="#A84A16" stroke-width="5"/><line x1="200" y1="300" x2="420" y2="410" stroke="#255E9E" stroke-width="5"/><line x1="540" y1="190" x2="540" y2="350" stroke="#A84A16" stroke-width="5"/></svg>
+<div style="position:absolute;left:0px;top:210px;width:200px;height:120px;background:#D5E3F3;border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:center">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2;text-align:center">DU</h3>
+</div>
+<div style="position:absolute;left:420px;top:70px;width:240px;height:120px;background:#F7DDCB;border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;text-align:center">CU-CP</h3>
+<p style="font-size:24px;color:#4A5262;text-align:center">RRC · PDCP-C</p>
+</div>
+<div style="position:absolute;left:420px;top:350px;width:240px;height:120px;background:#F7DDCB;border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;text-align:center">CU-UP</h3>
+<p style="font-size:24px;color:#4A5262;text-align:center">SDAP · PDCP-U</p>
+</div>
+<p style="position:absolute;left:220px;top:134px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">F1-C</p>
+<p style="position:absolute;left:220px;top:372px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">F1-U</p>
+<p style="position:absolute;left:556px;top:250px;width:80px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">E1</p>
+<p style="position:absolute;left:400px;top:486px;width:280px;font-size:24px;color:#A84A16;text-align:right">CU</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:20%;text-align:left;color:#F5F3EE">구간</th><th style="width:34%;text-align:left;color:#F5F3EE">프로토콜</th><th style="width:46%;text-align:left;color:#F5F3EE">하는 일</th></tr>
+<tr style="background:#FBFAF7"><td style="color:#A84A16">F1-C</td><td>F1AP / SCTP / IP</td><td>UE 컨텍스트 설정·해제, RRC 메시지 전달, 셀 설정</td></tr>
+<tr><td style="color:#255E9E">F1-U</td><td>NR-U / GTP-U / UDP / IP</td><td>사용자 데이터, 전달 상태 보고(흐름 제어)</td></tr>
+<tr style="background:#FBFAF7"><td style="color:#A84A16">E1</td><td>E1AP / SCTP / IP</td><td>베어러 컨텍스트 설정, CU-UP 자원 관리</td></tr>
+</table>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">지연 요구: ms 수준</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">프런트홀보다 훨씬 여유 있어, CU를 멀리 떨어진 중앙국에 둘 수 있다 (미드홀)</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">CP / UP 분리의 이점</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">CU-CP 하나가 여러 DU·CU-UP를 제어 → 제어와 데이터를 따로 늘리고, CU-UP는 사용자 가까이 둘 수 있다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">3GPP TS 38.470 시리즈 (F1) · TS 38.460 시리즈 (E1) · TS 38.425 (NR 사용자 평면 프로토콜)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 55초) DU와 CU 사이는 F1입니다. 제어용 F1-C는 SCTP 위의 F1AP로, 단말 컨텍스트를 만들고 지우거나 RRC 메시지를 실어 나르고 셀을 설정합니다. 데이터용 F1-U는 GTP-U 터널 위로 사용자 데이터를 보내고, 얼마나 전달됐는지 상태를 보고해 흐름을 조절합니다. CU 안에서 CU-CP와 CU-UP 사이는 E1으로, 베어러를 만들고 CU-UP 자원을 관리합니다. F1의 지연 요구는 ms 수준이라 프런트홀보다 훨씬 여유가 있고, 그래서 CU를 멀리 떨어진 중앙국에 둘 수 있습니다. 제어와 데이터를 나누면 CU-CP 하나가 여러 DU와 CU-UP를 제어하면서, 데이터 처리량만 따로 늘리거나 CU-UP를 사용자 가까운 엣지에 둘 수 있다는 이점이 있습니다.</aside>
+</section>

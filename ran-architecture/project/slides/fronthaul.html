@@ -1,0 +1,46 @@
+<section id="fronthaul" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">인터페이스 ① · DU ↔ RU</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">프런트홀: 가장 빠르고 가장 무거운 구간</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:800px;display:flex;flex-direction:column;gap:24px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #A84A16;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">C-plane</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">어느 자원·빔에 무엇을 보낼지 지시</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #255E9E;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">U-plane</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">주파수 영역 IQ 샘플 (압축 가능)</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #14213D;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">S-plane</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">시간·주파수 동기: PTP(IEEE 1588), SyncE</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #5E6675;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">M-plane</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">RU 설정·감시: NETCONF / YANG</p>
+</div>
+</div>
+<div style="background:#14213D;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">요구 조건</p>
+<p style="font-size:26px;line-height:1.45;color:#F5F3EE">편도 지연 예산이 수백 µs 이하 → 광 거리 수 km~20 km 안팎. 정밀한 시간 동기가 필수</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:24%;text-align:left;color:#F5F3EE"></th><th style="width:38%;text-align:left;color:#DCD8CE">CPRI (Option 8)</th><th style="width:38%;text-align:left;color:#D5E3F3">O-RAN 7.2x</th></tr>
+<tr style="background:#FBFAF7"><td>보내는 것</td><td>시간 영역 IQ, 안테나별</td><td>주파수 영역 IQ, 레이어·빔별</td></tr>
+<tr><td>전송</td><td>전용 광 링크</td><td>이더넷 패킷 (eCPRI 등)</td></tr>
+<tr style="background:#FBFAF7"><td>대역폭</td><td>안테나 수에 비례 — massive MIMO에 부담</td><td>상대적으로 작다</td></tr>
+<tr><td>RU</td><td>단순</td><td>FFT · 일부 빔포밍 포함</td></tr>
+<tr style="background:#FBFAF7"><td>벤더</td><td>사실상 같은 벤더끼리</td><td>멀티벤더 지향 (연동 시험 필요)</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.45;color:#5E6675">빔포밍 가중치를 어디서 곱하느냐에 따라 Category A(DU) / B(RU)로 나뉜다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">O-RAN WG4 Open Fronthaul (CUS-plane, M-plane) · 지연·거리 값은 구성과 사업자 요구에 따라 다름</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 60초) 첫 번째 인터페이스는 DU와 RU 사이의 프런트홀입니다. O-RAN 프런트홀은 네 개의 평면으로 이루어집니다. C-plane은 어느 자원과 빔에 무엇을 보낼지 지시하고, U-plane은 실제 IQ 샘플을 나릅니다. S-plane은 PTP와 SyncE로 시간과 주파수를 맞추고, M-plane은 NETCONF와 YANG으로 RU를 설정하고 감시합니다. 4G의 CPRI는 안테나마다 시간 영역 IQ를 전용 광 링크로 보냈기 때문에, 안테나가 수십 개인 massive MIMO에서는 대역폭이 감당하기 어려워집니다. 7.2x는 FFT를 RU로 옮겨 주파수 영역에서, 레이어나 빔 단위로 보내기 때문에 전송량이 줄고 이더넷으로 보낼 수 있습니다. 대신 지연 예산이 수백 마이크로초 이하로 매우 엄격하고 정밀한 동기가 필수라서, 가장 빠르고 가장 무거운 구간이라고 할 수 있습니다. 구체적인 지연과 거리 값은 구성에 따라 다릅니다.</aside>
+</section>

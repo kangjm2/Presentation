@@ -1,0 +1,64 @@
+<section id="stack" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">분할 기준 · PROTOCOL SPLIT</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">프로토콜 스택을 어디서 자르는가</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:1000px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center">
+<div style="width:640px;display:flex;flex-direction:row;gap:8px">
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#F7DDCB;border-radius:8px;padding:8px 12px">RRC</p>
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#F7DDCB;border-radius:8px;padding:8px 12px">SDAP</p>
+</div>
+<p style="width:320px;font-size:26px;font-weight:700;color:#A84A16">CU-CP · CU-UP</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center">
+<div style="width:640px;display:flex;flex-direction:row;gap:8px">
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#F7DDCB;border-radius:8px;padding:8px 12px">PDCP-C</p>
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#F7DDCB;border-radius:8px;padding:8px 12px">PDCP-U</p>
+</div>
+<p style="width:320px;font-size:24px;color:#5E6675">제어 | 사용자 데이터</p>
+</div>
+<p style="width:1000px;font-size:24px;font-weight:600;color:#A84A16;border-top:3px dashed #A84A16;padding:4px 0px 0px 0px">Option 2 — F1 (CU ↔ DU)</p>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center">
+<p style="width:640px;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:8px;padding:8px 12px">RLC</p>
+<p style="width:320px;font-size:26px;font-weight:700;color:#255E9E">DU</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center">
+<p style="width:640px;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:8px;padding:8px 12px">MAC (스케줄링)</p>
+<p style="width:320px;font-size:24px;color:#5E6675">슬롯마다 자원 배분</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center">
+<p style="width:640px;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:8px;padding:8px 12px">High-PHY (부호화 · 변조)</p>
+<p style="width:320px;font-size:24px;color:#5E6675"></p>
+</div>
+<p style="width:1000px;font-size:24px;font-weight:600;color:#255E9E;border-top:3px dashed #255E9E;padding:4px 0px 0px 0px">Option 7.2x — O-RAN 프런트홀 (DU ↔ RU)</p>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center">
+<p style="width:640px;font-size:26px;font-weight:600;text-align:center;background:#DCD8CE;border-radius:8px;padding:8px 12px">Low-PHY (FFT · CP · 빔포밍 일부)</p>
+<p style="width:320px;font-size:26px;font-weight:700;color:#5E6675">RU</p>
+</div>
+<p style="width:1000px;font-size:24px;color:#5E6675;border-top:3px dashed #5E6675;padding:4px 0px 0px 0px">Option 8 — CPRI (4G의 BBU ↔ RRH)</p>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center">
+<p style="width:640px;font-size:26px;font-weight:600;text-align:center;background:#DCD8CE;border-radius:8px;padding:8px 12px">RF</p>
+<p style="width:320px;font-size:24px;color:#5E6675"></p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">UE는 전체 스택</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">단말은 RRC부터 RF까지 모두 갖고, 각 계층이 기지국 쪽 같은 계층과 대화한다 (Uu)</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">분할 옵션</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">3GPP가 8가지 분할을 검토해 Option 2를 F1로 표준화. 하위 분할은 O-RAN이 7.2x로 정의</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#A84A16">트레이드오프</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">아래에서 자를수록 RU는 단순해지지만, 전송량과 지연 요구는 커진다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">3GPP TR 38.801 (분할 옵션 검토) · TS 38.401 (NG-RAN 구조) · O-RAN WG4 (프런트홀)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 60초) 장비를 나누는 기준은 프로토콜 스택입니다. 위에서부터 RRC와 SDAP, PDCP는 CU가 맡는데, 제어 쪽이 CU-CP, 사용자 데이터 쪽이 CU-UP입니다. PDCP와 RLC 사이가 첫 번째 경계, 3GPP의 Option 2이고 이것이 F1 인터페이스입니다. RLC, MAC 스케줄링, 부호화와 변조 같은 상위 PHY는 DU가 맡습니다. 상위 PHY와 하위 PHY 사이가 두 번째 경계로, O-RAN이 정의한 Option 7.2x 프런트홀입니다. RU는 FFT, CP 처리, 일부 빔포밍과 RF를 맡습니다. 참고로 4G의 CPRI는 하위 PHY와 RF 사이, Option 8에서 잘랐습니다. 아래에서 자를수록 RU는 단순해지지만 전송해야 할 데이터와 지연 요구가 커지는 트레이드오프가 있고, 7.2x는 그 사이의 절충점입니다. 단말은 이 스택 전체를 가지고 각 계층이 기지국 쪽 같은 계층과 대화합니다.</aside>
+</section>

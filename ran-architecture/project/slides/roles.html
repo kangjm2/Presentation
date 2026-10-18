@@ -1,0 +1,55 @@
+<section id="roles" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">분할 기준 · 역할</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">다섯 장비가 맡는 일</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:stretch">
+<div style="flex:1;background:#FBFAF7;border:2px solid #14213D;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2">UE</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">User Equipment</p>
+<p style="font-size:24px;font-weight:600;color:#5E6675">역할</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">전체 프로토콜 스택을 가진 무선 단말</p>
+<div style="flex:1"></div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262"><b>위치</b> 사용자의 손</p>
+</div>
+<div style="flex:1;background:#DCD8CE;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2">RU</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#4A5262">Radio Unit</p>
+<p style="font-size:24px;font-weight:600;color:#4A5262">역할</p>
+<p style="font-size:24px;line-height:1.45;color:#14213D">RF 송수신, 하위 PHY (FFT · CP · 빔포밍 일부)</p>
+<div style="flex:1"></div>
+<p style="font-size:24px;line-height:1.45;color:#14213D"><b>위치</b> 안테나 옆 · 타워</p>
+<p style="font-size:24px;line-height:1.45;color:#14213D"><b>시간</b> µs 단위</p>
+</div>
+<div style="flex:1;background:#D5E3F3;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2">DU</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#4A5262">Distributed Unit</p>
+<p style="font-size:24px;font-weight:600;color:#4A5262">역할</p>
+<p style="font-size:24px;line-height:1.45;color:#14213D">상위 PHY, MAC 스케줄링, RLC — 실시간 처리</p>
+<div style="flex:1"></div>
+<p style="font-size:24px;line-height:1.45;color:#14213D"><b>위치</b> 셀 사이트 · 엣지</p>
+<p style="font-size:24px;line-height:1.45;color:#14213D"><b>시간</b> 슬롯 (1 ms 이하)</p>
+</div>
+<div style="flex:1;background:#F7DDCB;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2">CU</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#4A5262">Central Unit</p>
+<p style="font-size:24px;font-weight:600;color:#4A5262">역할</p>
+<p style="font-size:24px;line-height:1.45;color:#14213D">CP: RRC 연결·이동성 제어<br>UP: PDCP · SDAP 데이터 처리</p>
+<div style="flex:1"></div>
+<p style="font-size:24px;line-height:1.45;color:#14213D"><b>위치</b> 중앙국 · 데이터센터</p>
+<p style="font-size:24px;line-height:1.45;color:#14213D"><b>시간</b> ms ~ 수십 ms</p>
+</div>
+<div style="flex:1;background:#EAE7DF;border:2px solid #5E6675;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2">USM</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#4A5262">관리 시스템 (EMS)</p>
+<p style="font-size:24px;font-weight:600;color:#4A5262">역할</p>
+<p style="font-size:24px;line-height:1.45;color:#14213D">설정 · 장애 · 성능 · 소프트웨어 관리</p>
+<div style="flex:1"></div>
+<p style="font-size:24px;line-height:1.45;color:#14213D"><b>위치</b> 운영 센터</p>
+<p style="font-size:24px;line-height:1.45;color:#14213D"><b>시간</b> 초 ~ 분 (비실시간)</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.4;font-weight:600;color:#A84A16">안테나에 가까울수록 빠르게, 멀어질수록 넓게 본다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 50초) 다섯 장비의 역할을 나란히 놓았습니다. UE는 전체 스택을 가진 단말입니다. RU는 안테나 옆에서 전파를 주고받고 FFT 같은 하위 PHY를 처리하며, 마이크로초 단위로 동작합니다. DU는 셀 사이트나 엣지에서 상위 PHY와 MAC 스케줄링, RLC를 맡는데, 슬롯마다, 즉 1 ms 이하 주기로 어떤 단말에 어떤 자원을 줄지 정해야 하는 실시간 장비입니다. CU는 중앙국에서 RRC 연결과 이동성 같은 제어를 맡는 CU-CP와, PDCP와 SDAP로 사용자 데이터를 처리하는 CU-UP로 나뉩니다. USM은 운영 센터에서 이 장비들의 설정, 장애, 성능, 소프트웨어를 관리하는 비실시간 시스템입니다. 정리하면, 안테나에 가까울수록 빠르게 반응하고, 멀어질수록 넓은 범위를 봅니다.</aside>
+</section>
