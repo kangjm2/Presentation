@@ -1,0 +1,50 @@
+<section id="mgmt" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;letter-spacing:2px">인터페이스 ④ · USM ↔ CU · DU · RU</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">관리: USM은 위에서 전체를 본다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">계층형 (Hierarchical)</h3>
+<div style="position:relative;width:760px;height:240px">
+<svg aria-label="USM이 DU를 관리하고, DU가 다시 RU를 관리하는 계층형 구조" style="position:absolute;left:0px;top:0px;width:760px;height:240px" width="760" height="240" viewBox="0 0 760 240"><g stroke="#5E6675" stroke-width="4" stroke-dasharray="10 8"><line x1="380" y1="56" x2="380" y2="92"/><line x1="380" y1="148" x2="380" y2="184"/></g></svg>
+<p style="position:absolute;left:260px;top:0px;width:240px;font-size:26px;font-weight:600;background:#EAE7DF;border:2px solid #5E6675;border-radius:10px;padding:8px 12px;text-align:center">USM</p>
+<p style="position:absolute;left:260px;top:92px;width:240px;font-size:26px;font-weight:600;background:#D5E3F3;border-radius:10px;padding:8px 12px;text-align:center">DU</p>
+<p style="position:absolute;left:260px;top:184px;width:240px;font-size:26px;font-weight:600;background:#DCD8CE;border-radius:10px;padding:8px 12px;text-align:center">RU</p>
+<p style="position:absolute;left:392px;top:57px;width:100px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">O1</p>
+<p style="position:absolute;left:392px;top:149px;width:140px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">M-plane</p>
+<p style="position:absolute;left:0px;top:70px;width:240px;font-size:24px;line-height:1.45;color:#4A5262">USM은 DU만 보고, DU가 RU를 대신 관리</p>
+</div>
+</div>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2">혼합형 (Hybrid)</h3>
+<div style="position:relative;width:760px;height:240px">
+<svg aria-label="USM이 DU를 관리하면서 RU도 직접 관리하는 혼합형 구조" style="position:absolute;left:0px;top:0px;width:760px;height:240px" width="760" height="240" viewBox="0 0 760 240"><g stroke="#5E6675" stroke-width="4" stroke-dasharray="10 8"><line x1="380" y1="56" x2="380" y2="92"/><line x1="380" y1="148" x2="380" y2="184"/></g><polyline points="500,28 600,28 600,212 500,212" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 8"/></svg>
+<p style="position:absolute;left:260px;top:0px;width:240px;font-size:26px;font-weight:600;background:#EAE7DF;border:2px solid #5E6675;border-radius:10px;padding:8px 12px;text-align:center">USM</p>
+<p style="position:absolute;left:260px;top:92px;width:240px;font-size:26px;font-weight:600;background:#D5E3F3;border-radius:10px;padding:8px 12px;text-align:center">DU</p>
+<p style="position:absolute;left:260px;top:184px;width:240px;font-size:26px;font-weight:600;background:#DCD8CE;border-radius:10px;padding:8px 12px;text-align:center">RU</p>
+<p style="position:absolute;left:392px;top:57px;width:100px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">O1</p>
+<p style="position:absolute;left:392px;top:149px;width:100px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">일부</p>
+<p style="position:absolute;left:612px;top:86px;width:148px;font-size:24px;line-height:1.4;color:#A84A16">M-plane<br>직접</p>
+<p style="position:absolute;left:0px;top:70px;width:240px;font-size:24px;line-height:1.45;color:#4A5262">USM이 RU도 직접 관리 (DU는 필요한 부분만)</p>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:stretch">
+<div style="flex:1;background:#EAE7DF;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">하는 일 (FCAPS)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">설정(CM) · 장애(FM) · 성능(PM) · 소프트웨어 업그레이드</p>
+</div>
+<div style="flex:1;background:#EAE7DF;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">주로 쓰는 방식</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">NETCONF/YANG으로 설정, 이벤트·파일 전송으로 장애·성능 보고</p>
+</div>
+<div style="flex:1;background:#14213D;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#F5F3EE">더 빠른 최적화는 RIC</h3>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">O-RAN의 Near-RT RIC(E2) · Non-RT RIC(A1) — 다음 세미나 주제</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">O-RAN O1 (WG10) · Open Fronthaul M-plane (WG4) · 실제 USM의 프로토콜과 관리 모델은 벤더 구현에 따라 다름</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 50초) 마지막 경계는 관리입니다. USM은 CU와 DU를 O1 계열의 관리 인터페이스로 관리하고, RU는 프런트홀의 M-plane으로 관리합니다. RU 관리에는 두 가지 모델이 있습니다. 계층형은 USM이 DU만 보고 DU가 RU를 대신 관리하는 방식이고, 혼합형은 USM이 RU에도 직접 연결해 관리하는 방식입니다. 하는 일은 흔히 FCAPS라고 부르는 설정, 장애, 성능, 소프트웨어 관리이고, 보통 NETCONF와 YANG으로 설정하고 이벤트와 파일 전송으로 장애와 성능을 보고합니다. 다만 실제 USM이 쓰는 프로토콜과 관리 모델은 벤더 구현에 따라 다를 수 있습니다. 이보다 빠른, 초 단위 이하의 최적화는 O-RAN의 RIC가 E2와 A1 인터페이스로 맡는데, 이건 다음 세미나 주제로 남겨 두겠습니다.</aside>
+</section>

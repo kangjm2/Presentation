@@ -1,0 +1,51 @@
+<section id="ngxn" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">인터페이스 ③ · CU ↔ 코어, CU ↔ 이웃 기지국</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">NG와 Xn: 코어와, 이웃과 연결한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="position:relative;width:700px;height:540px">
+<svg aria-label="CU에서 5G 코어의 AMF로 가는 NG-C, UPF로 가는 NG-U, 그리고 이웃 gNB로 가는 Xn 연결선" style="position:absolute;left:0px;top:0px;width:700px;height:540px" width="700" height="540" viewBox="0 0 700 540"><rect x="430" y="10" width="260" height="330" rx="18" fill="none" stroke="#14213D" stroke-width="2" stroke-dasharray="10 8"/><line x1="220" y1="230" x2="450" y2="90" stroke="#A84A16" stroke-width="5"/><line x1="220" y1="290" x2="450" y2="240" stroke="#255E9E" stroke-width="5"/><line x1="220" y1="330" x2="450" y2="455" stroke="#14213D" stroke-width="5"/></svg>
+<div style="position:absolute;left:0px;top:190px;width:220px;height:160px;background:#F7DDCB;border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2;text-align:center">CU</h3>
+<p style="font-size:24px;color:#4A5262;text-align:center">CP · UP</p>
+</div>
+<div style="position:absolute;left:450px;top:40px;width:220px;height:100px;background:#14213D;border-radius:16px;padding:12px;display:flex;flex-direction:column;justify-content:center;gap:2px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;text-align:center;color:#F5F3EE">AMF</h3>
+<p style="font-size:24px;color:#C9D3E3;text-align:center">접속 · 이동성</p>
+</div>
+<div style="position:absolute;left:450px;top:190px;width:220px;height:100px;background:#14213D;border-radius:16px;padding:12px;display:flex;flex-direction:column;justify-content:center;gap:2px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;text-align:center;color:#F5F3EE">UPF</h3>
+<p style="font-size:24px;color:#C9D3E3;text-align:center">데이터 전달</p>
+</div>
+<p style="position:absolute;left:450px;top:296px;width:220px;font-size:24px;color:#14213D;text-align:center">5G 코어</p>
+<div style="position:absolute;left:450px;top:400px;width:220px;height:110px;background:#FBFAF7;border:2px solid #A84A16;border-radius:16px;padding:12px;display:flex;flex-direction:column;justify-content:center;gap:2px">
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;text-align:center">이웃 gNB</h3>
+<p style="font-size:24px;color:#4A5262;text-align:center">(CU)</p>
+</div>
+<p style="position:absolute;left:236px;top:116px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">NG-C</p>
+<p style="position:absolute;left:300px;top:206px;width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">NG-U</p>
+<p style="position:absolute;left:330px;top:326px;width:100px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#14213D">Xn</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:16%;text-align:left;color:#F5F3EE">구간</th><th style="width:26%;text-align:left;color:#F5F3EE">연결</th><th style="width:22%;text-align:left;color:#F5F3EE">프로토콜</th><th style="width:36%;text-align:left;color:#F5F3EE">하는 일</th></tr>
+<tr style="background:#FBFAF7"><td style="color:#A84A16">NG-C</td><td>CU-CP ↔ AMF (N2)</td><td>NGAP / SCTP</td><td>단말 등록·세션 설정, 페이징</td></tr>
+<tr><td style="color:#255E9E">NG-U</td><td>CU-UP ↔ UPF (N3)</td><td>GTP-U / UDP</td><td>사용자 데이터 터널</td></tr>
+<tr style="background:#FBFAF7"><td>Xn-C</td><td>gNB ↔ gNB</td><td>XnAP / SCTP</td><td>핸드오버 준비, 이중 연결</td></tr>
+<tr><td>Xn-U</td><td>gNB ↔ gNB</td><td>GTP-U / UDP</td><td>핸드오버 중 데이터 전달</td></tr>
+</table>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">NAS는 그냥 지나간다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">등록·인증 같은 NAS 메시지는 UE와 AMF 사이의 대화. 기지국은 내용을 보지 않고 실어 나른다</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">4G와 함께 쓸 때 (NSA)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">EN-DC에서는 4G 기지국(eNB)과 gNB가 X2로 연결되고, 코어는 4G의 EPC를 쓴다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">3GPP TS 38.410 시리즈 (NG) · TS 38.420 시리즈 (Xn) · TS 23.501 (5G 시스템 구조)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 50초) CU 위쪽으로는 NG 인터페이스로 5G 코어와 연결됩니다. 제어용 NG-C는 CU-CP와 AMF 사이로, 단말 등록과 세션 설정, 페이징을 다룹니다. 코어 쪽 이름으로는 N2입니다. 데이터용 NG-U는 CU-UP와 UPF 사이의 GTP-U 터널로, N3라고도 부릅니다. 이웃 기지국끼리는 Xn으로 연결되어 핸드오버를 준비하고, 핸드오버 중에는 데이터를 넘겨줍니다. 하나 기억할 점은 등록이나 인증 같은 NAS 메시지는 단말과 AMF 사이의 대화라서, 기지국은 내용을 보지 않고 실어 나르기만 한다는 것입니다. 4G와 함께 쓰는 NSA 구성에서는 4G 기지국과 gNB가 X2로 연결되고, 코어는 4G의 EPC를 씁니다.</aside>
+</section>
