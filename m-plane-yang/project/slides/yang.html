@@ -1,0 +1,32 @@
+<section id="yang" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">YANG ① · 읽는 법</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">YANG은 데이터의 설계도다 — 값이 아니라 모양을 정한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="width:880px;background:#14213D;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:2px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#8DB8E8;white-space:nowrap">module o-ran-uplane-conf {</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:32px">container user-plane-configuration {</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:64px">list tx-array-carriers {</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F0A36B;white-space:nowrap;padding-left:96px">key "name";</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:96px">leaf name { type string; }</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:96px">leaf center-of-channel-bandwidth {</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#C9D3E3;white-space:nowrap;padding-left:128px">type uint64; units "Hz"; }</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:96px">leaf active { type enumeration {</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#C9D3E3;white-space:nowrap;padding-left:128px">enum INACTIVE; enum SLEEP; enum ACTIVE; } }</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F0A36B;white-space:nowrap;padding-left:96px">leaf state { config false; ... }</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:64px">} } }</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">module</b> 하나의 기능 묶음 (o-ran-sync, o-ran-fm …)</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">container · list</b> 폴더와 표 — list는 key로 행을 구분</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">leaf · type</b> 값 하나와 그 타입 · 단위 · 허용 범위</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">config false</b> 장비가 알려 주는 상태 — 쓸 수 없다</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">rpc · notification</b> 동작 요청과 이벤트도 모델로 정의</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">feature · deviation</b> 선택 기능, 표준과 다른 점을 장비가 선언</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">o-ran-uplane-conf에서 발췌 · 단순화 (실제 모델은 더 많은 leaf 포함) · YANG 1.1 RFC 7950</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 50초) YANG은 데이터의 설계도입니다. 값을 담는 것이 아니라, 값이 어떤 모양이어야 하는지를 정합니다. 왼쪽은 O-RU의 U-Plane 설정 모델에서 송신 캐리어 부분을 단순화한 것입니다. module은 하나의 기능 묶음이고, O-RAN은 동기, 경보, 소프트웨어처럼 기능별로 모듈을 나눕니다. container는 폴더, list는 표라고 생각하면 되고, key로 각 행을 구분합니다. leaf는 값 하나인데, 타입과 단위, 허용 범위가 함께 정의됩니다. 예를 들어 active는 INACTIVE, SLEEP, ACTIVE 세 값만 가질 수 있습니다. config false가 붙은 state는 장비가 알려 주는 상태라서 클라이언트가 쓸 수 없습니다. 이 밖에 rpc로 재시작 같은 동작 요청을, notification으로 이벤트를 정의하고, feature와 deviation으로 장비가 지원하는 선택 기능과 표준과 다른 점을 스스로 선언합니다.</aside>
+</section>

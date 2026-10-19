@@ -1,0 +1,35 @@
+<section id="arch" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">구조 · 누가 누구를 관리하나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">O-RU는 서버, O-DU · SMO는 클라이언트</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="position:relative;width:1000px;height:480px">
+<svg aria-label="왼쪽 계층형: SMO가 O-DU를 관리하고 O-DU만 O-RU를 M-Plane으로 관리한다. 오른쪽 하이브리드: SMO와 O-DU가 둘 다 O-RU에 M-Plane으로 직접 연결된다" style="position:absolute;left:0px;top:0px;width:1000px;height:480px" width="1000" height="480" viewBox="0 0 1000 480"><line x1="500" y1="10" x2="500" y2="470" stroke="#C9C4B8" stroke-width="3" stroke-dasharray="10 8"/><g stroke="#5E6675" stroke-width="4"><line x1="230" y1="94" x2="230" y2="190"/><line x1="730" y1="94" x2="730" y2="190"/></g><g stroke="#A84A16" stroke-width="6"><line x1="230" y1="254" x2="230" y2="360"/><line x1="730" y1="254" x2="730" y2="360"/></g><path d="M 820 62 Q 940 230 828 384" fill="none" stroke="#A84A16" stroke-width="6" stroke-dasharray="14 8"/><polygon points="822,392 843,381 828,369" fill="#A84A16"/></svg>
+<p style="position:absolute;left:140px;top:30px;width:180px;font-size:26px;font-weight:600;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:14px 0px">SMO</p>
+<p style="position:absolute;left:140px;top:190px;width:180px;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:10px;padding:14px 0px">O-DU</p>
+<p style="position:absolute;left:140px;top:360px;width:180px;font-size:26px;font-weight:600;text-align:center;background:#F7DDCB;border:3px solid #A84A16;border-radius:10px;padding:11px 0px">O-RU</p>
+<p style="position:absolute;left:640px;top:30px;width:180px;font-size:26px;font-weight:600;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:14px 0px">SMO</p>
+<p style="position:absolute;left:640px;top:190px;width:180px;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:10px;padding:14px 0px">O-DU</p>
+<p style="position:absolute;left:640px;top:360px;width:180px;font-size:26px;font-weight:600;text-align:center;background:#F7DDCB;border:3px solid #A84A16;border-radius:10px;padding:11px 0px">O-RU</p>
+<p style="position:absolute;left:250px;top:130px;width:200px;font-size:24px;color:#5E6675">O1</p>
+<p style="position:absolute;left:250px;top:295px;width:220px;font-size:24px;font-weight:600;color:#A84A16">M-Plane</p>
+<p style="position:absolute;left:750px;top:295px;width:150px;font-size:24px;font-weight:600;color:#A84A16">M-Plane</p>
+<p style="position:absolute;left:885px;top:200px;width:115px;font-size:24px;font-weight:600;color:#A84A16">SMO 직접</p>
+<p style="position:absolute;left:0px;top:430px;width:480px;font-size:26px;font-weight:700;text-align:center">계층형</p>
+<p style="position:absolute;left:520px;top:430px;width:480px;font-size:26px;font-weight:700;text-align:center">하이브리드</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">NETCONF 서버</b> O-RU — 데이터(YANG 모델)를 가진 쪽</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">NETCONF 클라이언트</b> O-DU · SMO — 표준 문서에서는 “O-RU 컨트롤러”</p>
+<p style="font-size:24px;line-height:1.45"><b>전송</b> SSH 또는 TLS 위의 NETCONF</p>
+<p style="font-size:24px;line-height:1.45"><b>Call Home</b> O-RU가 먼저 접속: SSH 4334 · TLS 4335 포트</p>
+<div style="background:#14213D;border-radius:14px;padding:16px 22px">
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">클라이언트가 여럿일 수 있다 → 누가 무엇을 바꿀지 <b style="color:#F0A36B">권한</b>이 필요해진다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NETCONF Call Home: RFC 8071 · 포트는 IANA 할당값 · 그림은 개념도</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) 구조는 두 가지입니다. 계층형에서는 SMO가 O1으로 O-DU를 관리하고, O-RU는 O-DU만 M-Plane으로 관리합니다. 하이브리드에서는 SMO도 O-RU에 직접 M-Plane으로 연결해, 예를 들어 소프트웨어 관리나 성능 수집을 SMO가 직접 합니다. 어느 쪽이든 역할은 같습니다. 데이터를 가진 O-RU가 NETCONF 서버이고, O-DU와 SMO가 클라이언트입니다. 표준 문서에서는 클라이언트를 O-RU 컨트롤러라고 부릅니다. 메시지는 SSH나 TLS로 암호화된 연결 위에서 오갑니다. 특이한 점은 Call Home입니다. 보통은 클라이언트가 서버에 접속하지만, M-Plane에서는 막 켜진 O-RU가 먼저 컨트롤러에 접속합니다. SSH면 4334, TLS면 4335 포트를 씁니다. 그래서 설치자가 RU 주소를 몰라도 RU가 스스로 관리자를 찾아갑니다. 그리고 클라이언트가 여럿일 수 있기 때문에, 누가 무엇을 바꿀 수 있는지 정하는 권한 제어가 필요해집니다.</aside>
+</section>
