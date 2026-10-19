@@ -1,0 +1,30 @@
+<section id="radio" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">의미 ① · 수신 세기와 품질</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RSRP는 크기, SINR은 깨끗함</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:17%;text-align:left;color:#F5F3EE">KPI</th><th style="width:38%;text-align:left;color:#F5F3EE">정의 (TS 38.215)</th><th style="width:17%;text-align:left;color:#F5F3EE">보고 범위</th><th style="width:28%;text-align:left;color:#F5F3EE">해석 예시 (경험치)</th></tr>
+<tr style="background:#FBFAF7"><td><b>SS-RSRP</b></td><td>SSS가 실린 자원 요소(RE) 하나당 평균 수신 전력</td><td>−156 ~ −31 dBm</td><td>−90 이상 양호, −110 이하 커버리지 부족</td></tr>
+<tr><td><b>SS-RSRQ</b></td><td>N × RSRP ÷ RSSI — 전체 수신 전력 중 내 셀 신호의 비중</td><td>−43 ~ 20 dB</td><td>−10 이상 양호, −15 이하 간섭 · 부하 의심</td></tr>
+<tr style="background:#FBFAF7"><td><b>SS-SINR</b></td><td>SSS 전력 ÷ (간섭 + 잡음), 같은 RE에서</td><td>−23 ~ 40 dB</td><td>20 이상 우수, 0 이하 간섭 심함</td></tr>
+<tr><td><b>CSI-RSRP · SINR</b></td><td>CSI-RS 기준. 연결 상태에서 단말별로 설정된 신호</td><td>SS와 같은 방식</td><td>실제 데이터 빔의 품질에 더 가깝다</td></tr>
+</table>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">SS vs CSI-RS</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">SSB는 셀 공통 빔(접속 · 셀 선택용), CSI-RS는 단말 맞춤(데이터용)</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">RSRQ가 낮다면</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">RSSI에 이웃 셀 신호와 내 셀의 데이터 부하가 함께 들어간다</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">같이 봐야 한다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">RSRP만 좋아도, SINR만 좋아도 안 된다 → 10쪽의 네 칸 진단</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">정의 TS 38.215 · 보고 범위 TS 38.133 · 해석 기준은 사업자 · 대역 · 서비스에 따라 다른 예시값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 55초) 가장 기본인 세 가지부터 보겠습니다. SS-RSRP는 동기 신호 중 SSS가 실린 자원 요소 하나당 평균 수신 전력입니다. 대역폭과 상관없이 신호가 얼마나 크게 들어오는지를 봅니다. SS-RSRQ는 RSRP에 자원 블록 수를 곱해 전체 수신 전력인 RSSI로 나눈 값으로, 받은 전력 중 내 셀 신호의 비중입니다. RSSI에는 이웃 셀 신호와 내 셀의 데이터 부하가 같이 들어가서, 부하가 많을 때도 낮아질 수 있습니다. SS-SINR은 같은 자원에서 신호 전력을 간섭과 잡음의 합으로 나눈 값으로, 신호가 얼마나 깨끗한지를 봅니다. 연결 상태에서는 단말별로 설정한 CSI-RS 기준 값도 나오는데, 실제 데이터 빔 품질에 더 가깝습니다. 오른쪽 해석 기준은 흔히 쓰는 경험치일 뿐이고, 사업자와 대역마다 다릅니다. 핵심은 RSRP는 크기, SINR은 깨끗함이라서, 둘을 같이 봐야 원인이 갈린다는 점입니다.</aside>
+</section>

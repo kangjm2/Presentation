@@ -1,0 +1,39 @@
+<section id="mobility" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">의미 ⑤ · 이동성과 신뢰성</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">핸드오버는 타이밍 싸움이다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:900px;display:flex;flex-direction:column;gap:12px">
+<div style="position:relative;width:900px;height:490px">
+<svg aria-label="시간에 따라 서빙 셀 RSRP는 내려가고 이웃 셀 RSRP는 올라가 교차하는 그래프. 교차 뒤 이웃이 오프셋만큼 더 강해지는 시점, TTT 구간 뒤 측정 보고 시점, 핸드오버 완료 시점이 세로 점선으로 표시되어 있다" style="position:absolute;left:0px;top:0px;width:900px;height:490px" width="900" height="490" viewBox="0 0 900 490"><rect x="550" y="20" width="110" height="420" fill="#F7DDCB" fill-opacity="0.7"/><g stroke="#5E6675" stroke-width="3"><line x1="60" y1="20" x2="60" y2="440"/><line x1="60" y1="440" x2="890" y2="440"/></g><g stroke="#5E6675" stroke-width="2" stroke-dasharray="8 8"><line x1="550" y1="20" x2="550" y2="440"/><line x1="660" y1="20" x2="660" y2="440"/><line x1="740" y1="20" x2="740" y2="440"/></g><polyline points="60,90 80,92 100,105 120,109 140,120 160,128 180,125 200,131 220,153 240,149 260,156 280,177 300,174 320,188 340,189 360,199 380,197 400,213 420,224 440,225 460,236 480,242 500,238 520,257 540,261 560,263 580,265 600,288 620,288 640,299 660,309 680,313 700,324 720,322 740,336 760,337 780,352 800,359 820,352 840,359 860,368 880,380" fill="none" stroke="#14213D" stroke-width="5" stroke-linejoin="round"/><polyline points="60,400 80,401 100,384 120,380 140,367 160,364 180,354 200,346 220,343 240,336 260,334 280,323 300,320 320,311 340,306 360,293 380,277 400,282 420,277 440,268 460,255 480,250 500,234 520,238 540,226 560,213 580,202 600,209 620,204 640,180 660,186 680,172 700,160 720,155 740,156 760,151 780,128 800,131 820,114 840,119 860,104 880,100" fill="none" stroke="#A84A16" stroke-width="5" stroke-linejoin="round"/><g fill="#255E9E"><circle cx="550" cy="440" r="9"/><circle cx="660" cy="440" r="9"/><circle cx="740" cy="440" r="9"/></g></svg>
+<p style="position:absolute;left:70px;top:0px;width:140px;font-size:24px;color:#5E6675">RSRP</p>
+<p style="position:absolute;left:780px;top:450px;width:110px;font-size:24px;color:#5E6675;text-align:right">시간 →</p>
+<p style="position:absolute;left:560px;top:24px;width:90px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#A84A16;text-align:center">TTT</p>
+<p style="position:absolute;left:110px;top:44px;width:160px;font-size:24px;font-weight:600;color:#14213D">서빙 셀</p>
+<p style="position:absolute;left:110px;top:410px;width:160px;font-size:24px;font-weight:600;color:#A84A16">이웃 셀</p>
+<p style="position:absolute;left:530px;top:450px;width:40px;font-size:24px;font-weight:700;color:#255E9E;text-align:center">①</p>
+<p style="position:absolute;left:640px;top:450px;width:40px;font-size:24px;font-weight:700;color:#255E9E;text-align:center">②</p>
+<p style="position:absolute;left:720px;top:450px;width:40px;font-size:24px;font-weight:700;color:#255E9E;text-align:center">③</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">① A3 진입 (이웃 ① 이웃이 서빙보다 오프셋만큼 강해짐 (A3 진입) ② TTT 동안 유지 → 측정 보고 ③ HO 명령 · 완료gt; 서빙 + 오프셋) ② TTT 동안 유지 → 측정 보고 ③ HO 완료</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:18px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">측정 보고 이벤트</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">A2 서빙 약화 · A3 이웃이 더 강함 · A5 서빙 &lt; 임계1, 이웃 &gt; 임계2 · B1 (NSA) NR 셀 추가</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">신뢰성 KPI</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">HO 시도 · 성공률, RLF, RACH 실패, 접속 성공률, 호 단절률</p>
+</div>
+<div style="background:#14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#F0A36B">실패 세 가지</h3>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">늦은 HO: 보고 전에 RLF<br>이른 HO: 넘어가자마자 실패<br>핑퐁: 두 셀 사이 왕복</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">이벤트 정의 TS 38.331 · 그래프는 개념도 · XCAL5에서는 L3 메시지(Measurement Report, RRC Reconfiguration)로 시점 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 55초) 이동성 KPI는 핸드오버를 중심으로 봅니다. 그래프처럼 단말이 이동하면 서빙 셀 신호는 내려가고 이웃 셀 신호는 올라갑니다. 이웃이 서빙보다 정해진 오프셋만큼 강해지면 A3 조건에 들어가고, 그 상태가 TTT, 즉 Time to Trigger 동안 유지되면 단말이 측정 보고를 보냅니다. 그러면 기지국이 핸드오버 명령을 내리고 단말이 새 셀로 넘어갑니다. XCAL5에서는 측정 보고와 RRC 재설정 같은 L3 메시지로 이 시점을 정확히 볼 수 있습니다. 이벤트는 A3 외에도 서빙 약화를 알리는 A2, 두 임계값을 쓰는 A5, NSA에서 NR 셀을 붙이는 B1이 자주 나옵니다. 실패는 세 가지로 나눕니다. 보고하기 전에 신호가 끊기는 늦은 HO, 넘어가자마자 실패하는 이른 HO, 두 셀 사이를 오가는 핑퐁입니다. 어느 유형인지에 따라 다음 장에서 볼 파라미터를 반대 방향으로 조정하게 됩니다.</aside>
+</section>

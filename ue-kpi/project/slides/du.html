@@ -1,0 +1,22 @@
+<section id="du" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">활용 ① · DU 최적화</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">무선은 좋은데 성능이 낮다면, DU를 본다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:36%;text-align:left;color:#F5F3EE">KPI 패턴 (증상)</th><th style="width:24%;text-align:left;color:#F5F3EE">의심 원인</th><th style="width:40%;text-align:left;color:#D5E3F3">DU에서 볼 파라미터</th></tr>
+<tr style="background:#FBFAF7"><td>SINR · CQI 양호, MCS가 낮게 머묾</td><td>링크 적응이 보수적</td><td>BLER 목표, OLLA 스텝, MCS · CQI 표 (256QAM)</td></tr>
+<tr><td>MCS 높음, Initial BLER가 목표보다 훨씬 높음</td><td>링크 적응이 공격적 · CSI가 늦음</td><td>OLLA 스텝, CSI 보고 주기, 이동 속도 대응</td></tr>
+<tr style="background:#FBFAF7"><td>SINR 양호, RI가 1~2에 머묾</td><td>랭크 적응 · CSI-RS 설정</td><td>CSI-RS 포트 수, 최대 레이어 · 랭크 제한, 코드북 종류</td></tr>
+<tr><td>무선 양호, RB · 슬롯 할당이 적음</td><td>부하 · 스케줄러 정책</td><td>스케줄러 가중치(PF), 사용자 수 제한, TDD 패턴, BWP</td></tr>
+<tr style="background:#FBFAF7"><td>RLF 뒤 재접속 · HO 실패 / 짧은 시간 HO 왕복</td><td>늦은 HO / 핑퐁</td><td>A3 오프셋 · 히스테리시스 · TTT, 셀별 오프셋(CIO) — 방향은 반대로</td></tr>
+<tr><td>셀 경계에서 UL BLER 높음, PHR 음수</td><td>UL 전력 한계</td><td>p0-nominal · alpha (전력 제어), UL MCS · RB, 안 되면 RU 쪽 문제</td></tr>
+</table>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#D5E3F3;border-radius:12px;padding:14px 20px"><b>한 번에 하나만</b> 바꾸고, 같은 경로 · 같은 시간대로 다시 잰다</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#D5E3F3;border-radius:12px;padding:14px 20px"><b>OSS 카운터로 확인</b> — 측정 경로 밖 단말에 부작용은 없는지</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">파라미터 이름과 조정 범위는 벤더마다 다름 · 표는 대표적인 대응 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 60초) 이제 활용입니다. 먼저 DU 최적화는 무선 환경은 좋은데 성능이 낮은 경우에 해당합니다. SINR과 CQI는 좋은데 MCS가 낮게 머물면 링크 적응이 보수적인 것이니 BLER 목표와 OLLA 스텝, MCS 표를 봅니다. 반대로 MCS는 높은데 첫 전송 BLER가 목표보다 훨씬 높으면 공격적이거나 CSI가 늦게 반영되는 것이니 OLLA와 CSI 보고 주기를 봅니다. SINR이 좋은데 랭크가 1이나 2에 머물면 CSI-RS 포트 수나 랭크 제한 설정을 확인합니다. 무선은 좋은데 RB나 슬롯을 적게 받으면 부하나 스케줄러 정책 문제입니다. 핸드오버는 늦은 HO면 오프셋이나 TTT를 줄이고, 핑퐁이면 히스테리시스나 TTT를 늘립니다. 방향이 반대라는 점이 중요합니다. 셀 경계에서 상향 BLER가 높고 PHR이 음수면 전력 제어 파라미터를 보되, 단말 전력이 이미 최대라면 DU로는 한계가 있어서 RU 쪽 문제로 넘어갑니다. 그리고 항상 한 번에 하나만 바꾸고, 같은 조건으로 다시 재고, OSS 카운터로 다른 단말에 부작용이 없는지 확인합니다.</aside>
+</section>

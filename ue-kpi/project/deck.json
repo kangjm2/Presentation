@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-19T12:00:00Z"},
+  "lists": "css",
+  "title": "UE KPI로 읽는 RAN",
+  "order": ["cover", "dm", "map", "radio", "beam", "linkadapt", "throughput", "mobility", "du", "ru", "workflow", "summary"],
+  "sections": {
+    "intro": {"description": "도입: UE DM 툴(XCAL5)이 무엇을 수집하는가", "start": "cover"},
+    "meaning": {"description": "KPI의 의미: 수신 세기·품질, 셀·빔, 링크 적응, 처리량, 이동성", "start": "map"},
+    "use": {"description": "활용: DU 파라미터 최적화와 RU 배치", "start": "du"},
+    "wrap": {"description": "측정·분석 절차와 정리", "start": "workflow"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}

@@ -1,0 +1,40 @@
+<section id="dm" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">도입 · UE DM 툴</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">단말 칩셋의 로그를 위치와 함께 모은다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:620px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-left:6px solid #14213D;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">시험 단말 (칩셋)</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">모뎀이 L1~L3 진단(DM) 로그를 낸다</p>
+</div>
+<p style="font-size:28px;color:#A84A16;text-align:center">↓ USB 진단 포트</p>
+<div style="background:#F7DDCB;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">XCAL5 (수집)</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">실시간 표시 · GPS 위치 결합 · 시험 자동화</p>
+</div>
+<p style="font-size:28px;color:#A84A16;text-align:center">↓ 로그 파일</p>
+<div style="background:#D5E3F3;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">후처리 (XCAP 등)</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">KPI 지도 · 통계 · 이벤트 추적</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:22%;text-align:left;color:#F5F3EE"></th><th style="width:39%;text-align:left;color:#F7DDCB">UE DM 로그</th><th style="width:39%;text-align:left;color:#D5E3F3">기지국 OSS 카운터</th></tr>
+<tr style="background:#FBFAF7"><td>관점</td><td>단말 한 대가 겪은 그대로</td><td>셀 전체 단말의 평균</td></tr>
+<tr><td>위치</td><td>GPS로 지점마다</td><td>셀 · 섹터 단위</td></tr>
+<tr style="background:#FBFAF7"><td>시간 해상도</td><td>슬롯 · 메시지 단위</td><td>15분 ~ 1시간 집계</td></tr>
+<tr><td>범위</td><td>측정한 경로만</td><td>모든 단말 · 모든 시간</td></tr>
+<tr style="background:#FBFAF7"><td>강점</td><td>원인 추적 (L1~L3 메시지)</td><td>추세 · 부하 파악</td></tr>
+</table>
+<div style="background:#14213D;border-radius:16px;padding:22px 28px">
+<p style="font-size:28px;line-height:1.45;color:#F5F3EE">OSS는 <b style="color:#F0A36B">어느 셀이</b> 아픈지, DM 로그는 <b style="color:#F0A36B">어디서 왜</b> 아픈지 알려 준다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Accuver XCAL5 제품 소개 기준 · 지원 칩셋 · 화면 구성은 버전에 따라 다름</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<aside>(약 50초) 먼저 DM 툴이 무엇인지부터 보겠습니다. 시험 단말의 모뎀 칩셋은 물리 계층부터 RRC까지 진단 로그, 즉 DM 로그를 내보냅니다. XCAL5는 이 로그를 USB 진단 포트로 받아 실시간으로 보여 주고, GPS 위치와 묶어서 저장합니다. 저장한 로그는 XCAP 같은 후처리 도구로 지도와 통계로 만듭니다. 이 데이터는 기지국의 OSS 카운터와 성격이 다릅니다. OSS는 셀 전체 단말을 15분이나 1시간 단위로 평균한 값이고, DM 로그는 단말 한 대가 특정 지점, 특정 순간에 겪은 일을 메시지 단위로 보여 줍니다. 그래서 OSS는 어느 셀이 아픈지 알려 주고, DM 로그는 어디서 왜 아픈지 알려 준다고 정리할 수 있습니다. 두 가지를 함께 써야 합니다.</aside>
+</section>
