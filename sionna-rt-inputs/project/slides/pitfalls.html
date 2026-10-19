@@ -1,0 +1,20 @@
+<section id="pitfalls" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">점검표 · 흔한 실수</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“경로가 안 나와요”의 대부분은 입력 문제다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:30%;text-align:left;color:#F5F3EE">증상</th><th style="width:38%;text-align:left;color:#F5F3EE">흔한 원인</th><th style="width:32%;text-align:left;color:#F5F3EE">확인할 입력</th></tr>
+<tr style="background:#FBFAF7"><td>경로가 0개 · 너무 적다</td><td>Rx가 건물 안 · 지면 아래, 단위 착오(mm)</td><td>④ 위치, ① 좌표 · 단위</td></tr>
+<tr><td>지면 반사가 없다</td><td>지면 메시가 없음</td><td>① 장면</td></tr>
+<tr style="background:#FBFAF7"><td>먼 곳 · NLoS 경로 누락</td><td>광선 수 · 반사 차수 부족</td><td>⑥ samples · max_depth</td></tr>
+<tr><td>확산 산란이 안 보인다</td><td>솔버 스위치 꺼짐 또는 산란 계수 0</td><td>⑥ diffuse_reflection, ② S</td></tr>
+<tr style="background:#FBFAF7"><td>건물 뒤가 너무 어둡다</td><td>회절 꺼짐</td><td>⑥ diffraction</td></tr>
+<tr><td>도플러가 0이다</td><td>velocity 없음, 시간 단계 1</td><td>④ velocity, cir num_time_steps</td></tr>
+<tr style="background:#FBFAF7"><td>실행마다 결과가 다르다</td><td>확률적 샘플링</td><td>⑥ deterministic · seed</td></tr>
+<tr><td>GPU 메모리 부족</td><td>장면 · 광선 · 경로 버퍼 과다</td><td>① 범위, ⑥ samples · max_num_paths</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">장면 미리보기(scene.preview)로 송수신기 위치와 경로를 눈으로 먼저 확인하는 습관이 가장 효과적</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 50초) 실습하면서 가장 많이 듣는 말이 “경로가 안 나와요”인데, 대부분 입력 문제입니다. 경로가 하나도 없거나 너무 적으면 수신기가 건물 안이나 지면 아래에 있거나, 메시 단위가 밀리미터라 좌표가 어긋난 경우가 많습니다. 지면 반사가 없으면 지면 메시가 빠진 것이고, 먼 곳이나 비가시 경로가 누락되면 광선 수나 반사 차수를 늘립니다. 확산 산란이 안 보이면 솔버 스위치나 재질의 산란 계수를, 건물 뒤가 지나치게 어두우면 회절 설정을 확인합니다. 도플러가 0이면 속도를 주지 않았거나 시간 단계가 1인 경우입니다. 실행마다 결과가 다르면 확률적 샘플링 때문이니 결정적 모드를 쓰고, GPU 메모리가 부족하면 장면 범위나 광선 수, 경로 버퍼를 줄입니다. 가장 효과적인 습관은 계산 전에 장면 미리보기로 송수신기 위치와 경로를 눈으로 확인하는 것입니다.</aside>
+</section>

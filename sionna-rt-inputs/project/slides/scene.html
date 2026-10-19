@@ -1,0 +1,33 @@
+<section id="scene" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">입력 ① · 장면 (Scene)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">장면 = XML 목차 + 메시 파일들</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="width:880px;background:#14213D;border-radius:16px;padding:22px 26px;display:flex;flex-direction:column;gap:0px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#8DB8E8;white-space:nowrap">&lt;scene version="2.1.0"&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F0A36B;white-space:nowrap;padding-left:28px">&lt;bsdf type="itu-radio-material" id="mat-concrete"&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#C9D3E3;white-space:nowrap;padding-left:56px">&lt;string name="type" value="concrete"/&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#C9D3E3;white-space:nowrap;padding-left:56px">&lt;float name="thickness" value="0.2"/&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F0A36B;white-space:nowrap;padding-left:28px">&lt;/bsdf&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:28px">&lt;shape type="ply" id="building_1"&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#C9D3E3;white-space:nowrap;padding-left:56px">&lt;string name="filename" value="meshes/b1.ply"/&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F0A36B;white-space:nowrap;padding-left:56px">&lt;ref id="mat-concrete" name="bsdf"/&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:28px">&lt;/shape&gt;</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#8DB8E8;white-space:nowrap">&lt;/scene&gt;</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">형식</b> Mitsuba 3 XML — 메시(PLY)마다 재질을 연결</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">불러오기</b> load_scene(파일, merge_shapes=True)</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">내장 장면</b> munich · etoile · florence · san_francisco · simple_street_canyon 등</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">직접 만들기</b> OSM 건물 → Blender → Mitsuba 내보내기</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">좌표</b> 단위 m, z축이 위 — 지면도 메시로 넣어야 반사가 생긴다</p>
+<div style="background:#F7DDCB;border-radius:12px;padding:14px 18px">
+<p style="font-size:24px;line-height:1.45">merge_shapes는 같은 재질을 하나로 합쳐 빠르지만, 건물 하나씩 재질을 바꾸려면 끈다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">XML은 구조를 보여 주기 위한 단순화 예 · 실제 내보내기 결과는 도구 · 버전에 따라 다름 · sionna.rt.scene 내장 장면</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 55초) 첫 번째 입력은 장면입니다. Sionna RT의 장면은 Mitsuba 3의 XML 파일과 메시 파일들로 이루어집니다. XML은 목차 역할을 합니다. 왼쪽 예처럼 재질을 하나 정의하고, 건물 메시 파일을 불러와 그 재질을 연결합니다. 실제 기하 정보는 PLY 같은 메시 파일에 있습니다. 코드에서는 load_scene으로 불러오고, munich, etoile, florence 같은 내장 장면도 바로 쓸 수 있습니다. 우리 지역 장면이 필요하면 OpenStreetMap 건물을 Blender로 가져와 Mitsuba 형식으로 내보내는 방식이 흔합니다. 좌표는 미터 단위이고 z축이 위쪽입니다. 지면도 메시로 넣어야 지면 반사가 생긴다는 점을 잊기 쉽습니다. load_scene의 merge_shapes 옵션은 같은 재질의 물체를 하나로 합쳐 계산을 빠르게 하는데, 건물마다 재질을 따로 바꾸거나 옮기려면 끄는 게 좋습니다.</aside>
+</section>

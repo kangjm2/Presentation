@@ -1,0 +1,18 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-19T22:00:00Z"},
+  "lists": "css",
+  "title": "Sionna RT 입력 데이터",
+  "order": ["cover", "map", "scene", "material", "antenna", "devices", "frequency", "solver", "code", "shape", "pitfalls", "summary"],
+  "sections": {
+    "intro": {"description": "Sionna RT로 채널을 만들 때 무엇을 넣어야 하는가: 입력 지도", "start": "cover"},
+    "inputs": {"description": "입력 여섯 가지: 장면, 재질, 안테나, 송수신기, 주파수, 솔버 설정", "start": "scene"},
+    "together": {"description": "한 번에 보는 코드, 입력과 출력 모양의 관계, 흔한 실수", "start": "code"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}

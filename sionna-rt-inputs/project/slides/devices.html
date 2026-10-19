@@ -1,0 +1,33 @@
+<section id="devices" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">입력 ④ · 송신기 · 수신기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">어디에, 어느 쪽을 보고, 얼마나 빨리 움직이나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="position:relative;width:760px;height:500px">
+<svg aria-label="건물 옥상의 송신기와 지면 높이 1.5미터의 수신기, 송신기의 x축이 수신기를 향하고, 수신기에 속도 화살표가 있는 측면도와 x y z 축" style="position:absolute;left:0px;top:0px;width:760px;height:500px" width="760" height="500" viewBox="0 0 760 500"><line x1="20" y1="440" x2="740" y2="440" stroke="#5E6675" stroke-width="4"/><rect x="60" y="180" width="160" height="260" fill="#DCD8CE"/><rect x="430" y="300" width="120" height="140" fill="#DCD8CE"/><line x1="140" y1="180" x2="140" y2="140" stroke="#14213D" stroke-width="5"/><polygon points="140,110 124,145 156,145" fill="#A84A16"/><line x1="156" y1="128" x2="620" y2="404" stroke="#A84A16" stroke-width="3" stroke-dasharray="12 8"/><rect x="612" y="396" width="20" height="40" rx="4" fill="#255E9E"/><line x1="640" y1="416" x2="720" y2="416" stroke="#255E9E" stroke-width="5"/><polygon points="735,416 718,406 718,426" fill="#255E9E"/><g stroke="#14213D" stroke-width="3"><line x1="40" y1="90" x2="110" y2="90"/><line x1="40" y1="90" x2="40" y2="20"/></g><g fill="#14213D"><polygon points="122,90 106,82 106,98"/><polygon points="40,8 32,24 48,24"/></g></svg>
+<p style="position:absolute;left:120px;top:72px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px">x</p>
+<p style="position:absolute;left:52px;top:0px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px">z</p>
+<p style="position:absolute;left:170px;top:84px;width:280px;font-size:24px;font-weight:600;color:#A84A16">Tx · 높이 30 m</p>
+<p style="position:absolute;left:390px;top:150px;width:360px;font-size:24px;color:#A84A16">look_at(rx) → 안테나 x축이 Rx로</p>
+<p style="position:absolute;left:560px;top:340px;width:200px;font-size:24px;font-weight:600;color:#255E9E">Rx · 1.5 m</p>
+<p style="position:absolute;left:600px;top:452px;width:160px;font-size:24px;color:#255E9E">velocity</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:34%;text-align:left;color:#F5F3EE">인자</th><th style="width:66%;text-align:left;color:#F5F3EE">의미 · 단위</th></tr>
+<tr style="background:#FBFAF7"><td>position</td><td>[x, y, z] m</td></tr>
+<tr><td>orientation</td><td>[yaw, pitch, roll] rad — 또는 look_at</td></tr>
+<tr style="background:#FBFAF7"><td>velocity</td><td>[vx, vy, vz] m/s → 도플러</td></tr>
+<tr><td>power_dbm</td><td>송신 전력, 기본 44 dBm (Tx만)</td></tr>
+</table>
+<div style="background:#F7DDCB;border-radius:12px;padding:14px 18px">
+<p style="font-size:24px;line-height:1.45">Rx가 건물 안 · 지면 아래에 있으면 경로가 거의 없다 — 좌표를 장면 미리보기로 확인</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">scene.add([tx, rx]) — 여러 개를 리스트로 한 번에 넣으면 빠르다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Radio Devices · orientation과 look_at은 동시에 줄 수 없음 · 그림은 개념도</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 50초) 네 번째 입력은 송신기와 수신기입니다. 위치는 미터 단위의 x, y, z이고, 방향은 yaw, pitch, roll 세 각도로 주거나 look_at으로 특정 지점이나 장치를 바라보게 합니다. look_at을 쓰면 안테나의 x축, 즉 보어사이트가 그 대상을 향합니다. 둘을 동시에 줄 수는 없습니다. 속도를 주면 경로마다 도플러가 계산되고, 이후 시간 축을 여러 단계로 만들 때 쓰입니다. 송신기에는 송신 전력도 있는데 기본값은 44 dBm입니다. 가장 흔한 실수는 수신기가 건물 안이나 지면 아래에 들어가 있는 경우입니다. 그러면 경로가 거의 안 나오기 때문에, 장면 미리보기로 좌표를 꼭 확인하는 게 좋습니다. 여러 장치를 넣을 때는 리스트로 한 번에 add하면 장면을 한 번만 다시 만들어 빠릅니다.</aside>
+</section>

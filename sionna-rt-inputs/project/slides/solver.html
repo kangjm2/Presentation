@@ -1,0 +1,20 @@
+<section id="solver" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D;letter-spacing:2px">입력 ⑥ · 솔버 설정 (PathSolver)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">어떤 현상을, 몇 번까지, 몇 개의 광선으로 볼 것인가</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:28%;text-align:left;color:#F5F3EE">파라미터</th><th style="width:14%;text-align:left;color:#F5F3EE">기본값</th><th style="width:30%;text-align:left;color:#F5F3EE">올리거나 켜면</th><th style="width:28%;text-align:left;color:#F5F3EE">주의</th></tr>
+<tr style="background:#FBFAF7"><td>max_depth</td><td>3</td><td>더 많은 반사 · 투과 경로</td><td>계산량 급증</td></tr>
+<tr><td>samples_per_src</td><td>10⁶</td><td>멀리 있는 경로 누락 감소</td><td>GPU 메모리</td></tr>
+<tr style="background:#FBFAF7"><td>max_num_paths_per_src</td><td>10⁶</td><td>경로 버퍼가 커짐</td><td>넘치면 조용히 버림</td></tr>
+<tr><td>los · specular_reflection · refraction</td><td>켜짐</td><td>직접 · 정반사 · 투과</td><td>실내 · 관통 분석은 refraction 필수</td></tr>
+<tr style="background:#FBFAF7"><td>diffuse_reflection</td><td>꺼짐</td><td>확산 산란 경로</td><td>재질 산란 계수와 함께</td></tr>
+<tr><td>diffraction · edge_diffraction</td><td>꺼짐</td><td>모서리 회절 (1차)</td><td>그림자 영역에 중요</td></tr>
+<tr style="background:#FBFAF7"><td>synthetic_array</td><td>True</td><td>False면 소자마다 따로 추적</td><td>근거리 · 큰 배열은 False 검토</td></tr>
+<tr><td>seed</td><td>42</td><td>샘플링 난수</td><td>완전 재현은 PathSolver(deterministic=True)</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Path Solvers (2.x 기준) · RadioMapSolver도 대부분 같은 스위치 + 격자 · 셀 크기 · samples_per_tx</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 55초) 여섯 번째 입력은 솔버 설정입니다. 어떤 현상을, 몇 번까지, 몇 개의 광선으로 볼지를 정합니다. max_depth는 경로당 최대 상호작용 횟수로 기본은 3이고, 올리면 더 많은 경로를 찾지만 계산량이 급격히 늘어납니다. samples_per_src는 송신점당 광선 수로 기본 백만 개이고, 올리면 멀리 있는 경로를 덜 놓치지만 GPU 메모리를 더 씁니다. max_num_paths_per_src는 경로 버퍼 크기인데, 넘치면 경고 없이 경로를 버린다는 점에 주의해야 합니다. 직접 경로, 정반사, 투과는 기본으로 켜져 있고, 확산 산란과 회절은 꺼져 있습니다. 확산은 재질의 산란 계수와 함께 켜야 하고, 회절은 건물 뒤 그림자 영역에서 중요합니다. synthetic_array는 배열 중심에서만 경로를 찾고 소자별로는 위상만 바꾸는 근사인데, 근거리나 큰 배열에서는 꺼 보는 것이 좋습니다. 같은 결과를 반복해서 얻으려면 솔버를 결정적 모드로 만듭니다.</aside>
+</section>
