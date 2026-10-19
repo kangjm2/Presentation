@@ -1,0 +1,41 @@
+<section id="llshistory" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">LLS ② · 발전 역사</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">수식으로 못 푸는 부분이 늘수록, 시뮬레이션이 커졌다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border-top:6px solid #8DB8E8;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">1948–1980s</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">이론과 몬테카를로</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">섀넌이 한계(채널 용량)를 제시. 모뎀 · 위성 링크의 BER을 컴퓨터로 반복 실험</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #5E8FC7;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">1990s</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">부호의 시대</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">터보 부호(1993)가 섀넌 한계에 근접 — 성능을 이론보다 시뮬레이션으로 증명. 3G 표준에 채택</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">2000s–2016</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">표준과 함께</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">LTE의 OFDM · MIMO, 공개 LLS(Vienna LTE, 2009~). 5G 부호 선택(LDPC · Polar, 2016)도 각 사 LLS 결과로 경쟁</p>
+</div>
+<div style="background:#14213D;border-top:6px solid #F0A36B;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F0A36B">2018–현재</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#F5F3EE">툴 · GPU · AI</h3>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">MATLAB 5G Toolbox · Vienna 5G · OAI. Sionna(2022)로 GPU · 미분 가능 LLS, AI 수신기 연구</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<div style="flex:1;background:#D5E3F3;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">왜 필요해졌나</h3>
+<p style="font-size:24px;line-height:1.45;color:#14213D">실제 부호 · 채널 추정 오차 · 다중 안테나 · 비선형은 닫힌 식으로 풀 수 없다 → 직접 돌려 볼 수밖에</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25">지금의 역할</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">표준 기술 비교, 장비 성능 요구 조건(RAN4), 수신기 설계, SLS용 요약표 생성</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Shannon (1948) · Berrou 외 터보 부호 (1993) · Vienna LTE Link Level Simulator (TU Wien) · Sionna (NVIDIA, 2022) · 연도는 대표 시점</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 50초) LLS의 역사는 수식으로 풀 수 없는 부분이 늘어난 역사입니다. 1948년 섀넌이 채널 용량이라는 한계를 제시한 뒤, 모뎀이나 위성 링크의 비트 오류율을 컴퓨터로 반복 실험하는 몬테카를로 시뮬레이션이 자리 잡았습니다. 1993년 터보 부호가 섀넌 한계에 가까운 성능을 보이면서, 성능을 이론보다 시뮬레이션으로 증명하는 시대가 열렸고 3G 표준에 채택됐습니다. LTE에서는 OFDM과 MIMO가 들어오며 링크가 훨씬 복잡해졌고, TU Wien의 Vienna LTE 시뮬레이터 같은 공개 LLS가 등장했습니다. 2016년 5G 부호를 LDPC와 Polar로 정할 때도 각 회사가 LLS 결과로 경쟁했습니다. 2018년 이후에는 MATLAB 5G Toolbox 같은 상용 툴과, 2022년 Sionna처럼 GPU에서 돌고 미분 가능한 LLS가 나와 AI 수신기 연구로 이어지고 있습니다. 지금은 표준 기술 비교, 장비 성능 요구 조건, 수신기 설계, 그리고 SLS용 요약표 생성에 씁니다.</aside>
+</section>

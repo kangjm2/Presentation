@@ -1,0 +1,27 @@
+<section id="bridge" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">다리 · 링크-시스템 매핑 (L2S)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">들쭉날쭉한 SINR을 숫자 하나로 줄여 표에서 찾는다</h2>
+</div>
+<div style="position:relative;width:1100px;height:400px">
+<svg aria-label="왼쪽에 주파수마다 높이가 다른 SINR 막대 열두 개, 화살표 뒤에 하나의 유효 SINR 막대, 다시 화살표 뒤에 BLER 곡선에서 유효 SINR에 해당하는 점을 찾는 점선이 그려진 그림" style="position:absolute;left:0px;top:0px;width:1100px;height:360px" width="1100" height="360" viewBox="0 0 1100 360"><g stroke="#5E6675" stroke-width="3"><line x1="40" y1="300" x2="420" y2="300"/></g><g fill="#255E9E"><rect x="50" y="146" width="22" height="154" rx="3"/><rect x="80" y="102" width="22" height="198" rx="3"/><rect x="110" y="69" width="22" height="231" rx="3"/><rect x="140" y="113" width="22" height="187" rx="3"/><rect x="170" y="201" width="22" height="99" rx="3"/><rect x="200" y="256" width="22" height="44" rx="3"/><rect x="230" y="234" width="22" height="66" rx="3"/><rect x="260" y="168" width="22" height="132" rx="3"/><rect x="290" y="91" width="22" height="209" rx="3"/><rect x="320" y="58" width="22" height="242" rx="3"/><rect x="350" y="124" width="22" height="176" rx="3"/><rect x="380" y="190" width="22" height="110" rx="3"/></g><g fill="#A84A16"><rect x="440" y="164" width="64" height="12"/><polygon points="540,170 502,148 502,192"/></g><rect x="560" y="174" width="60" height="126" rx="4" fill="#A84A16"/><line x1="560" y1="300" x2="640" y2="300" stroke="#5E6675" stroke-width="3"/><g fill="#A84A16"><rect x="640" y="164" width="52" height="12"/><polygon points="726,170 690,148 690,192"/></g><g stroke="#5E6675" stroke-width="3"><line x1="740" y1="40" x2="740" y2="300"/><line x1="740" y1="300" x2="1080" y2="300"/></g><polyline points="740,40 744,40 748,40 752,40 756,40 760,40 764,40 768,40 772,40 776,40 780,40 784,40 788,40 792,40 796,40 800,40 804,40 808,40 812,40 816,40 820,40 824,40 828,40 832,41 836,41 840,41 844,41 848,42 852,42 856,43 860,43 864,45 868,46 872,48 876,50 880,53 884,56 888,60 892,65 896,70 900,77 904,83 908,91 912,99 916,108 920,117 924,126 928,136 932,146 936,156 940,166 944,177 948,187 952,197 956,208 960,218 964,229 968,239 972,250 976,261 980,271 984,282 988,292 992,300 996,300 1000,300 1004,300 1008,300 1012,300 1016,300 1020,300 1024,300 1028,300 1032,300 1036,300 1040,300 1044,300 1048,300 1052,300 1056,300 1060,300 1064,300 1068,300 1072,300 1076,300 1080,300" fill="none" stroke="#14213D" stroke-width="5"/><g stroke="#A84A16" stroke-width="3" stroke-dasharray="8 6"><line x1="936" y1="300" x2="936" y2="155"/><line x1="936" y1="155" x2="740" y2="155"/></g><circle cx="936" cy="155" r="9" fill="#A84A16"/></svg>
+<p style="position:absolute;left:40px;top:316px;width:400px;font-size:24px;font-weight:600;color:#255E9E;text-align:center">① 부반송파별 SINR</p>
+<p style="position:absolute;left:470px;top:316px;width:240px;font-size:24px;font-weight:600;color:#A84A16;text-align:center">② 유효 SINR</p>
+<p style="position:absolute;left:740px;top:316px;width:360px;font-size:24px;font-weight:600;color:#14213D;text-align:center">③ LLS의 BLER 곡선</p>
+<p style="position:absolute;left:950px;top:120px;width:150px;font-size:24px;font-weight:600;color:#A84A16">BLER ≈ 5%</p>
+<p style="position:absolute;left:0px;top:360px;width:1100px;font-size:24px;color:#5E6675">SLS가 슬롯마다 계산하는 것은 ①뿐 — ②③은 미리 만든 표 찾기라서 빠르다</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="width:900px;background:#14213D;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#F5F3EE">EESM: SINR<span style="color:#F0A36B">eff</span> = −β · ln( 평균 e<span style="color:#F0A36B">−SINR/β</span> )</p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">약한 부반송파에 더 큰 무게 — 산술 평균보다 낮게 나온다. β는 MCS마다 LLS로 맞춘다 (MIESM은 상호 정보량 기반)</p>
+</div>
+<div style="flex:1;background:#F7DDCB;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">주의</h3>
+<p style="font-size:24px;line-height:1.45;color:#14213D">표를 만든 LLS 가정(채널 추정, 수신기)이 SLS 결과에 그대로 묻어 들어간다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">EESM: Ericsson 3GPP 기고 (2003) 이후 널리 사용 · MIESM: Brueninghaus 외 (2005) · 그림은 개념도</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 55초) 두 시뮬레이션을 잇는 다리가 링크-시스템 매핑, L2S입니다. SLS는 슬롯마다 단말의 SINR을 계산하는데, OFDM에서는 주파수마다 SINR이 들쭉날쭉합니다. 이걸 그대로는 LLS 곡선에 대입할 수 없으니, 숫자 하나, 유효 SINR로 줄입니다. 대표적인 방법이 EESM으로, 지수 함수로 평균을 내서 약한 부반송파에 더 큰 무게를 줍니다. 그래서 유효 SINR은 산술 평균보다 낮게 나옵니다. 식 안의 β는 MCS마다 LLS 결과와 맞도록 미리 정해 둡니다. 상호 정보량을 쓰는 MIESM도 많이 씁니다. 이렇게 구한 유효 SINR을 LLS가 만든 AWGN BLER 곡선에서 찾으면, 이번 전송이 성공할 확률이 나옵니다. SLS가 매 슬롯 실제로 계산하는 것은 SINR뿐이고 나머지는 표 찾기라서 빠릅니다. 주의할 점은 표를 만든 LLS의 가정, 예를 들어 채널 추정이 이상적이었는지가 SLS 결과에 그대로 묻어 들어간다는 것입니다.</aside>
+</section>
