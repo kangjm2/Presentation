@@ -1,0 +1,28 @@
+<section id="netconf" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">언어 선택 · 왜 NETCONF/YANG인가</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">사람이 읽는 명령어에서, 기계가 검증하는 모델로</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:22%;text-align:left;color:#F5F3EE"></th><th style="width:26%;text-align:left;color:#F5F3EE">CLI</th><th style="width:26%;text-align:left;color:#F5F3EE">SNMP / MIB</th><th style="width:26%;text-align:left;color:#8DB8E8">NETCONF / YANG</th></tr>
+<tr style="background:#FBFAF7"><td><b>누구를 위한</b></td><td>사람</td><td>모니터링 도구</td><td>프로그램 (자동화)</td></tr>
+<tr><td><b>데이터 정의</b></td><td>벤더마다 다른 문법</td><td>MIB (주로 읽기)</td><td>YANG 모델 — 구조 · 타입 · 범위</td></tr>
+<tr style="background:#FBFAF7"><td><b>여러 값 동시 변경</b></td><td>한 줄씩, 실패 시 반쯤 적용</td><td>원자성 보장 약함</td><td>트랜잭션 · 커밋 · 롤백</td></tr>
+<tr><td><b>상태 알림</b></td><td>로그 파싱</td><td>트랩</td><td>구독형 알림 (모델로 정의)</td></tr>
+<tr style="background:#FBFAF7"><td><b>장비 능력 확인</b></td><td>매뉴얼</td><td>MIB 목록</td><td>hello · YANG 라이브러리로 자동 확인</td></tr>
+</table>
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
+<p style="flex:1;font-size:24px;line-height:1.4;text-align:center;background:#FBFAF7;border-radius:10px;padding:12px 6px"><b>SNMP</b> 1988~</p>
+<p style="font-size:28px;color:#255E9E">→</p>
+<p style="flex:1;font-size:24px;line-height:1.4;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 6px"><b>NETCONF</b> 2006 · 2011</p>
+<p style="font-size:28px;color:#255E9E">→</p>
+<p style="flex:1;font-size:24px;line-height:1.4;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 6px"><b>YANG</b> 2010 · 1.1 2016</p>
+<p style="font-size:28px;color:#255E9E">→</p>
+<p style="flex:1;font-size:24px;line-height:1.4;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 6px"><b>Call Home · NACM</b> 2017 · 2018</p>
+<p style="font-size:28px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;line-height:1.4;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:12px 6px"><b>O-RAN M-Plane</b> 2019~</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NETCONF RFC 4741 → 6241 · YANG RFC 6020 → 7950 · Call Home RFC 8071 · NACM RFC 8341 · IETF 망 관리 흐름을 O-RAN이 채택</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 50초) 왜 하필 NETCONF와 YANG일까요. 기존 방식과 비교하면 이유가 보입니다. CLI는 사람을 위한 명령어라 벤더마다 문법이 다르고, 여러 줄을 입력하다 중간에 실패하면 반쯤 적용된 상태로 남습니다. SNMP는 오래된 표준이지만 주로 모니터링용이고, 여러 값을 한꺼번에 안전하게 바꾸는 데는 약합니다. NETCONF와 YANG은 IETF가 이 문제를 풀려고 만든 것입니다. YANG으로 데이터의 구조, 타입, 범위를 미리 정의하고, NETCONF로 그 모델에 맞는 메시지를 주고받습니다. 여러 값을 하나의 트랜잭션으로 바꾸고 실패하면 롤백할 수 있고, 알림도 모델로 정의되며, 장비가 어떤 기능을 가졌는지 연결하자마자 자동으로 확인할 수 있습니다. NETCONF는 2006년, YANG은 2010년에 나왔고, Call Home과 접근 제어 NACM까지 갖춰진 뒤 O-RAN이 2019년부터 M-Plane의 언어로 채택했습니다.</aside>
+</section>

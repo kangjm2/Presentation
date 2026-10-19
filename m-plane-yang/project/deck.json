@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-19T20:00:00Z"},
+  "lists": "css",
+  "title": "M-Plane과 YANG",
+  "order": ["cover", "why", "arch", "netconf", "yang", "message", "startup", "watchdog", "sync", "nacm", "together", "summary"],
+  "sections": {
+    "intro": {"description": "M-Plane이 왜 고안되었고 어떤 구조인가", "start": "cover"},
+    "model": {"description": "NETCONF/YANG: 모델로 메시지를 주고받는다는 것의 의미", "start": "netconf"},
+    "timing": {"description": "시작 절차, 감시 워치독, 동기 상태 — 시간에 관한 규칙", "start": "startup"},
+    "access": {"description": "권한 제어(NACM)와 통합 시나리오", "start": "nacm"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}
