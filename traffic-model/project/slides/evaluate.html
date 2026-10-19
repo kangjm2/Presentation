@@ -1,0 +1,41 @@
+<section id="evaluate" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">실행과 판정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">부하를 올려 가며, 기준이 깨지는 지점을 찾는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:820px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">판정 기준 (예시 · 사업자가 정한다)</h3>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:34%;text-align:left;color:#F5F3EE">항목</th><th style="width:66%;text-align:left;color:#F5F3EE">기준 예</th></tr>
+<tr style="background:#FBFAF7"><td>PRB 사용률</td><td>최번시 평균 [70~80%] 이하</td></tr>
+<tr><td>하위 5% 사용자 처리량</td><td>[__ Mbps] 이상 (셀 경계 체감)</td></tr>
+<tr style="background:#FBFAF7"><td>평균 사용자 처리량</td><td>[__ Mbps] 이상</td></tr>
+<tr><td>음성 (VoIP)</td><td>패킷 98%가 지연 한도 안 → 만족 UE 95% 이상</td></tr>
+<tr style="background:#FBFAF7"><td>접속 · 수용</td><td>접속 실패 · 블로킹 [__%] 이하, 동시 접속 수 장비 한도 이내</td></tr>
+</table>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">부하 스윕 (load sweep)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">같은 UE 배치에서 λ를 단계적으로 올려 각 기준이 처음 깨지는 부하를 찾는다</p>
+<div style="background:#14213D;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">결론의 형태</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">“이 구성은 최번시 [__ Mbps] · [__명]까지 기준 충족, 예측 수요 대비 [__년] 여유”</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">부족하면</b> 대역 추가 · MIMO 상향 · RU 추가 · 셀 분할 · DU 용량</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">대안끼리</b> 같은 UE · 트래픽으로 다시 돌려 비교</p>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#5E6675;align-self:center">스윕 예 (가상)<br>C = 400 Mbps</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#D5E3F3;border-radius:12px;padding:12px 18px">150 Mbps · ρ 0.38<br>하위 5% 31 Mbps · <b>충족</b></p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#D5E3F3;border-radius:12px;padding:12px 18px">250 Mbps · ρ 0.63<br>하위 5% 19 Mbps · <b>충족</b></p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#F7DDCB;border-radius:12px;padding:12px 18px">300 Mbps · ρ 0.75<br>하위 5% 13 Mbps · <b style="color:#A84A16">미달</b></p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 18px">350 Mbps · ρ 0.88<br>PRB 상한 초과 · <b style="color:#F0A36B">미달</b></p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">음성 기준은 3GPP 평가에서 흔히 쓰는 정의 · [ ]는 사업자 기준으로 채울 값 · 스윕 예는 하위 5% 기준 15 Mbps 가정</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 55초) UE 배치와 트래픽이 준비되면 시뮬레이션을 돌리고 판정합니다. 판정 기준은 사업자가 정하는데, 대표적으로 최번시 PRB 사용률 상한, 셀 경계 체감을 보여 주는 하위 5% 사용자 처리량, 평균 사용자 처리량, 음성 품질, 그리고 접속 실패와 동시 접속 수 같은 수용 기준이 있습니다. 음성은 3GPP 평가에서 흔히 패킷의 98%가 지연 한도 안에 도착하면 만족한 사용자로 보고, 만족 사용자가 95% 이상인지를 봅니다. 실행은 보통 부하 스윕으로 합니다. 같은 UE 배치에서 요청 도착률을 단계적으로 올리며 각 기준이 처음 깨지는 지점을 찾습니다. 그러면 “이 구성은 최번시 몇 메가, 몇 명까지 기준을 만족하고, 예측 수요 대비 몇 년의 여유가 있다”는 형태의 결론이 나옵니다. 부족하면 대역 추가, MIMO 상향, RU 추가나 셀 분할, DU 용량 같은 대안을 같은 UE와 트래픽으로 다시 돌려 비교합니다. 아래 가상의 예에서는 하위 5% 기준을 15메가로 두었을 때 제공 부하 300메가에서 처음 기준이 깨지므로, 이 구성의 한계는 250에서 300메가 사이입니다.</aside>
+</section>

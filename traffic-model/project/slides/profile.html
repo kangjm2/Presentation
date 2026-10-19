@@ -1,0 +1,42 @@
+<section id="profile" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">UE 배치 ③ · 단말의 성능</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">가상 UE마다 “누구인지”를 붙인다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#255E9E">단말 능력</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">지원 대역 · CA 조합</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">수신 안테나 · 최대 레이어 (2Rx / 4Rx)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">최대 변조 (256QAM 등)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">송신 전력 등급 (PC3 23 dBm · PC2 26 dBm)</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#A84A16">위치 속성</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">실내 · 실외 · 차량</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">건물 침투 손실 (저손실 · 고손실 건물)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">층 높이</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">이동 속도 (3 km/h · 30 km/h)</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #14213D;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">서비스 프로필</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">트래픽 모델 (다음 장)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">QoS 등급 (5QI) · 우선순위</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">목표 체감 속도 · 지연</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">요금제 · 속도 제한</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<div style="flex:1;background:#14213D;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">왜 중요한가</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">같은 자리, 같은 트래픽이라도 2Rx 단말은 4Rx보다 같은 데이터에 PRB를 더 쓴다 → 단말 믹스가 셀 용량을 바꾼다</p>
+</div>
+<div style="width:620px;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">단말 믹스 (입력값)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">4Rx [__%] · 2Rx [__%] · NSA 전용 [__%]<br>— 사업자 단말 통계에서 가져온다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">단말 능력 TS 38.306 · 전력 등급 TS 38.101-1 · 건물 침투 손실 TR 38.901 7.4.3 · [__%]는 직접 채울 값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 50초) 위치만 정한다고 UE가 완성되지는 않습니다. 각 가상 UE에는 “누구인지”를 나타내는 속성을 붙입니다. 첫째는 단말 능력입니다. 지원 대역과 CA 조합, 수신 안테나 수와 최대 레이어, 최대 변조 차수, 송신 전력 등급이 여기 들어갑니다. 둘째는 위치 속성입니다. 실내인지, 저손실 건물인지 고손실 건물인지에 따라 침투 손실이 크게 다르고, 층 높이와 이동 속도도 채널에 영향을 줍니다. 셋째는 서비스 프로필입니다. 어떤 트래픽 모델을 따르는지, QoS 등급과 목표 품질은 무엇인지입니다. 이게 중요한 이유는, 같은 자리에서 같은 트래픽을 쓰더라도 2Rx 단말은 4Rx 단말보다 같은 데이터에 더 많은 PRB를 쓰기 때문입니다. 즉 단말 믹스가 셀 용량 자체를 바꿉니다. 단말 믹스 비율은 사업자 단말 통계에서 가져와 입력합니다.</aside>
+</section>
