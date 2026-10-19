@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-19T14:00:00Z"},
+  "lists": "css",
+  "title": "가상 UE와 트래픽 모델",
+  "order": ["cover", "why", "framework", "drop", "spatial", "profile", "models", "load", "demand", "evaluate", "trust", "summary"],
+  "sections": {
+    "intro": {"description": "배경: 통신사가 가상 UE 시뮬레이션으로 장비 적합성을 평가하는 이유와 구성", "start": "cover"},
+    "placement": {"description": "UE 배치 원리: 표준 드롭, 실제 트래픽 분포, 단말 성능 속성", "start": "drop"},
+    "traffic": {"description": "트래픽 부여 원리: 트래픽 모델, 부하와 체감의 관계, 수요에서 UE별 트래픽으로", "start": "models"},
+    "wrap": {"description": "실행과 판정, 신뢰성 확보, 정리", "start": "evaluate"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}

@@ -1,0 +1,38 @@
+<section id="load" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트래픽 부여 ② · 부하와 체감의 이론</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">부하율 ρ가 오르면 체감은 C(1 − ρ)로 줄어든다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:860px;display:flex;flex-direction:column;gap:8px">
+<div style="position:relative;width:860px;height:500px">
+<svg aria-label="가로축은 부하율 0에서 1, 파란 실선은 평균 사용자 처리량이 C에서 0으로 직선으로 줄어들고, 주황 점선은 PRB 사용률이 0에서 1로 늘어난다. 부하율 0.7 이후는 혼잡 구간으로 음영 처리되고, 0.7 지점에 두 점이 표시되어 있다" style="position:absolute;left:0px;top:0px;width:860px;height:500px" width="860" height="500" viewBox="0 0 860 500"><g stroke="#5E6675" stroke-width="3"><line x1="70" y1="30" x2="70" y2="440"/><line x1="70" y1="440" x2="830" y2="440"/></g><rect x="595" y="40" width="225" height="400" fill="#F7DDCB" fill-opacity="0.6"/><g stroke="#DCD8CE" stroke-width="2"><line x1="258" y1="40" x2="258" y2="440"/><line x1="445" y1="40" x2="445" y2="440"/><line x1="632" y1="40" x2="632" y2="440"/><line x1="820" y1="40" x2="820" y2="440"/></g><line x1="70" y1="40" x2="820" y2="440" stroke="#255E9E" stroke-width="6"/><line x1="70" y1="440" x2="820" y2="40" stroke="#A84A16" stroke-width="4" stroke-dasharray="14 10"/><g fill="#14213D"><circle cx="595" cy="320" r="10"/><circle cx="595" cy="160" r="10"/></g></svg>
+<p style="position:absolute;left:0px;top:24px;width:60px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;text-align:right">C</p>
+<p style="position:absolute;left:0px;top:424px;width:60px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:right">0</p>
+<p style="position:absolute;left:240px;top:450px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">.25</p>
+<p style="position:absolute;left:425px;top:450px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">.5</p>
+<p style="position:absolute;left:612px;top:450px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">.75</p>
+<p style="position:absolute;left:800px;top:450px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">1</p>
+<p style="position:absolute;left:612px;top:250px;width:220px;font-size:24px;font-weight:600;color:#255E9E">체감 = 0.3 C</p>
+<p style="position:absolute;left:612px;top:168px;width:220px;font-size:24px;font-weight:600;color:#A84A16">PRB 70%</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<p style="font-size:24px;color:#255E9E;font-weight:600">━ 평균 사용자 처리량</p>
+<p style="font-size:24px;color:#A84A16;font-weight:600">┅ PRB 사용률 (≈ ρ)</p>
+<p style="font-size:24px;color:#5E6675">음영: 혼잡 구간 · 가로축 ρ</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:26px;line-height:1.45"><b style="color:#A84A16">제공 부하</b> = λ × S<br><span style="color:#4A5262">요청 도착률 × 요청당 데이터 크기</span></p>
+<p style="font-size:26px;line-height:1.45"><b style="color:#A84A16">셀 용량 C</b> = 대역폭 × 평균 스펙트럼 효율<br><span style="color:#4A5262">UE 위치 · 채널 · 단말 믹스가 정한다</span></p>
+<p style="font-size:26px;line-height:1.45"><b style="color:#A84A16">부하율 ρ</b> = λS ÷ C</p>
+<div style="background:#14213D;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">ρ = 0.7이면 PRB는 70%만 쓰는데, 체감은 용량의 30%</p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">ρ → 1이면 체감 → 0, 대기 폭증 → 그래서 PRB 사용률 상한을 증설 기준으로 쓴다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">처리기 공유(M/G/1-PS) 큐 근사 · 단일 셀, 동질 사용자, Poisson 도착 가정 · 실제 값은 SLS로 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 60초) 버스트 트래픽에서 부하와 체감이 어떻게 연결되는지, 간단한 이론으로 보겠습니다. 요청이 초당 λ개 도착하고 요청 하나가 S비트라면 제공 부하는 λ곱하기 S입니다. 셀 용량 C는 대역폭에 평균 스펙트럼 효율을 곱한 값인데, 이 효율은 UE가 어디에 있는지, 채널과 단말 믹스가 어떤지에 따라 정해집니다. 즉 앞에서 본 UE 배치가 여기서 C로 들어옵니다. 부하율 ρ는 제공 부하를 C로 나눈 값입니다. 사용자들이 자원을 나눠 쓰는 처리기 공유 큐로 근사하면, 평균 사용자 처리량은 C 곱하기 1 빼기 ρ가 됩니다. 그래프로 보면 ρ가 0.7일 때 PRB 사용률은 70%인데, 사용자가 체감하는 속도는 셀 용량의 30%에 불과합니다. ρ가 1에 가까워지면 체감은 0으로 떨어지고 대기가 폭증합니다. 통신사가 PRB 사용률 상한을 증설 기준으로 쓰는 이유가 여기 있습니다. 물론 단일 셀, 동질 사용자 같은 가정이 들어간 근사라서, 실제 수치는 시뮬레이션으로 확인합니다.</aside>
+</section>

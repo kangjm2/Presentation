@@ -1,0 +1,47 @@
+<section id="demand" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트래픽 부여 ③ · 수요에서 UE별 트래픽으로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">월 사용량을 최번시 초당 비트로 바꾼다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#FBFAF7;border-radius:10px;padding:12px 0px">가입자 · 단말 수</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#FBFAF7;border-radius:10px;padding:12px 0px">최번시 활성 UE</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#FBFAF7;border-radius:10px;padding:12px 0px">UE당 최번시 수요</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 0px">서비스별 모델 (λ, S)</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:12px 0px">× 연도별 성장률</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="width:900px;background:#14213D;border-radius:16px;padding:22px 28px;display:flex;flex-direction:column;gap:10px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">가상의 예 (수치는 설명용)</p>
+<p style="font-size:24px;line-height:1.5;color:#F5F3EE">월 30 GB → 하루 1 GB → 최번시 비중 10% → 시간당 100 MB</p>
+<p style="font-size:24px;line-height:1.5;color:#F5F3EE">100 MB × 8 ÷ 3600 s ≈ <b style="color:#F0A36B">UE당 0.22 Mbps</b></p>
+<p style="font-size:24px;line-height:1.5;color:#F5F3EE">셀당 최번시 활성 500명 → 제공 부하 ≈ <b style="color:#F0A36B">111 Mbps</b></p>
+<p style="font-size:24px;line-height:1.5;color:#F5F3EE">셀 용량 C = 400 Mbps라면 ρ ≈ 0.28</p>
+<p style="font-size:24px;line-height:1.5;color:#C9D3E3">연 25% 성장이면 약 4년 뒤 ρ = 0.7 도달 → 그 전에 증설 계획</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">서비스 믹스로 나눈다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">영상 [__%] · 웹 [__%] · 음성 [__%] → 서비스마다 다른 모델과 λ, S</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">단말 성능을 반영한다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">요구 속도 상한 = min(서비스 최대, 단말 최대) · 지원 안 하는 대역에는 붙이지 않는다</p>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#5E6675">UE #17에 붙는 값</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:10px 16px">위치: 밀집 bin · 실내 3층</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:10px 16px">단말: 4Rx · 256QAM · PC3</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:10px 16px">서비스: 영상, FTP형 S = 2 MB</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#F7DDCB;border-radius:10px;padding:10px 16px">λ = 0.22 Mbps ÷ 16 Mbit ≈ <b>73초에 1회</b></p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">모든 수치는 가상의 예 · 실제 입력은 사업자 트래픽 통계 · 단말 통계 · 수요 예측 · [__%]는 직접 채울 값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 55초) 그럼 실제로 UE마다 트래픽을 얼마나 줄까요. 출발점은 사업자의 수요 통계입니다. 가입자와 단말 수에서 최번시에 실제로 데이터를 쓰는 활성 UE 수를 구하고, UE당 최번시 수요를 구한 뒤, 서비스 믹스로 나눠 서비스마다 모델과 파라미터를 정하고, 연도별 성장률을 곱합니다. 가상의 숫자로 계산해 보겠습니다. 한 달에 30기가를 쓰면 하루 1기가이고, 그중 최번시 한 시간에 10%를 쓴다면 시간당 100메가바이트, 초당으로 바꾸면 약 0.22메가비트입니다. 한 셀에 최번시 활성 사용자가 500명이면 제공 부하는 약 111메가비트입니다. 셀 용량이 400메가라면 부하율은 0.28이고, 해마다 25%씩 늘면 약 4년 뒤 0.7에 도달하니 그 전에 증설을 계획해야 한다는 결론이 나옵니다. 여기서 단말 성능도 반영합니다. 각 UE가 받을 수 있는 속도 상한은 서비스 최대 속도와 단말 최대 속도 중 작은 값이고, 단말이 지원하지 않는 대역의 셀에는 붙이지 않습니다. 이렇게 정한 값이 UE 하나하나에 붙습니다. 예를 들어 실내 3층의 4Rx 단말이 2메가바이트 파일 단위의 영상 트래픽을 쓴다면, 0.22메가비트를 16메가비트로 나눠 약 73초에 한 번 요청이 도착하도록 λ를 정합니다. 오늘 숫자는 모두 설명용 가상 값입니다.</aside>
+</section>

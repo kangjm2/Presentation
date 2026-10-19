@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>가상 UE와 트래픽 모델</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="육각형 셀들 위에 가상 단말 점들이 흩어져 있고, 일부 단말에서 기지국으로 트래픽 막대가 쌓이는 그림" style="position:absolute;left:1040px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><g fill="none" stroke="#34446A" stroke-width="3"><polygon points="560,330 690,405 690,555 560,630 430,555 430,405"/><polygon points="820,480 950,555 950,705 820,780 690,705 690,555"/><polygon points="560,630 690,705 690,855 560,930 430,855 430,705"/><polygon points="300,480 430,555 430,705 300,780 170,705 170,555"/><polygon points="300,180 430,255 430,405 300,480 170,405 170,255"/><polygon points="820,180 950,255 950,405 820,480 690,405 690,255"/></g><g fill="#8DB8E8"><circle cx="500" cy="420" r="9"/><circle cx="610" cy="470" r="9"/><circle cx="470" cy="540" r="9"/><circle cx="640" cy="580" r="9"/><circle cx="260" cy="600" r="9"/><circle cx="350" cy="660" r="9"/><circle cx="760" cy="620" r="9"/><circle cx="560" cy="780" r="9"/><circle cx="300" cy="320" r="9"/><circle cx="830" cy="330" r="9"/><circle cx="520" cy="860" r="9"/><circle cx="220" cy="420" r="9"/></g><g fill="#F0A36B"><circle cx="560" cy="500" r="11"/><circle cx="330" cy="560" r="11"/><circle cx="800" cy="680" r="11"/><circle cx="620" cy="740" r="11"/></g><polygon points="560,452 540,492 580,492" fill="#F5F3EE"/><g fill="#F0A36B"><rect x="30" y="900" width="36" height="120" rx="4"/><rect x="80" y="840" width="36" height="180" rx="4"/><rect x="130" y="940" width="36" height="80" rx="4"/><rect x="180" y="780" width="36" height="240" rx="4"/><rect x="230" y="880" width="36" height="140" rx="4"/></g></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">트래픽 모델 세미나 · 10분</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">가상의 단말로<br>장비를 시험하다</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">장비 적합성 평가 시뮬레이션에서<br>UE를 어떻게 배치하고, 트래픽을 어떻게 부여하는가</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 오늘은 트래픽 모델을 다룹니다. 통신사는 장비를 배치하거나 증설할 때, 가상의 단말을 망 위에 뿌리고 트래픽을 부여하는 시뮬레이션으로 그 장비가 수요를 감당할 수 있는지 평가합니다. 이 시뮬레이션에서 단말을 어떤 원리로 배치하고, 트래픽을 어떤 원리로 부여하는지 정리하겠습니다.</aside>
+</section>
+<section id="why" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">배경 · 왜 시뮬레이션인가</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“그 수요가 오면, 이 장비가 버티는가”</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:760px;display:flex;flex-direction:column;gap:16px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">실망 시험만으로는 답할 수 없다</h3>
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:12px;padding:14px 20px"><b style="color:#A84A16">부하를 만들 수 없다</b> — 측정 단말 몇 대로는 최번시 수백 명의 경쟁을 재현하지 못한다</p>
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:12px;padding:14px 20px"><b style="color:#A84A16">미래 수요다</b> — 평가 대상은 1~3년 뒤 트래픽, 아직 없는 부하</p>
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:12px;padding:14px 20px"><b style="color:#A84A16">설치 전이다</b> — 장비 · 대역 · 안테나 구성을 바꾸기 전에 비교해야 한다</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">그래서 세 가지를 시뮬레이션으로 묻는다</h3>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:#D5E3F3;border-radius:12px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">커버리지</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">가상 UE가 있는 곳마다 신호가 닿는가</p>
+</div>
+<div style="background:#F7DDCB;border-radius:12px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">용량</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">부여한 트래픽을 자원 안에서 처리하는가</p>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F0A36B">품질</p>
+<p style="font-size:24px;line-height:1.4;color:#C9D3E3">각 UE가 목표 체감 속도 · 지연을 얻는가</p>
+</div>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">평가의 정확도는 시뮬레이터보다 “어디에 몇 명이, 얼마나 쓰는가”라는 가정에 달려 있다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<aside>(약 50초) 통신사가 이런 시뮬레이션을 하는 이유부터 보겠습니다. 장비 적합성 평가의 질문은 결국 “그 수요가 오면 이 장비가 버티는가”입니다. 그런데 실망 시험만으로는 답하기 어렵습니다. 측정 단말 몇 대로는 최번시 수백 명이 자원을 두고 경쟁하는 상황을 만들 수 없고, 평가 대상은 대개 1~3년 뒤의 트래픽이며, 장비를 설치하기 전에 여러 구성을 비교해야 하기 때문입니다. 그래서 가상 UE를 배치하고 트래픽을 부여해 세 가지를 묻습니다. 신호가 닿는가 하는 커버리지, 트래픽을 자원 안에서 처리하는가 하는 용량, 그리고 각 단말이 목표 체감 품질을 얻는가입니다. 미리 말씀드리면, 결과의 정확도는 시뮬레이터 자체보다 어디에 몇 명이 얼마나 쓰는가라는 가정에 더 크게 좌우됩니다. 오늘은 그 가정을 만드는 원리를 다룹니다.</aside>
+</section>
+<section id="framework" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">배경 · 시스템 레벨 시뮬레이션의 구성</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">네 가지 입력, 하나의 엔진, 세 가지 출력</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:stretch;gap:20px">
+<div style="width:520px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">입력</p>
+<p style="font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:12px 18px"><b>망 구성</b> 사이트 · RU · 안테나 · 틸트 · 출력 · 대역</p>
+<p style="font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:12px 18px"><b>전파 환경</b> 통계 채널(38.901) 또는 지도 기반 예측</p>
+<p style="font-size:24px;line-height:1.4;background:#F7DDCB;border:3px solid #A84A16;border-radius:10px;padding:10px 16px"><b style="color:#A84A16">UE 배치</b> 몇 명, 어디에, 어떤 단말로</p>
+<p style="font-size:24px;line-height:1.4;background:#F7DDCB;border:3px solid #A84A16;border-radius:10px;padding:10px 16px"><b style="color:#A84A16">트래픽</b> 언제, 얼마나, 어떤 패턴으로</p>
+</div>
+<p style="font-size:44px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#14213D;border-radius:16px;padding:22px 26px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">엔진 (SLS)</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">① 셀 연결: UE마다 가장 강한 셀 선택</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">② 간섭 계산: 다른 셀의 동시 전송</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">③ 스케줄링: 슬롯마다 RB를 UE에 배분</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">④ 링크 적응 · 링크-시스템 매핑: SINR → MCS → 성공 확률</p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">수천 슬롯 × 여러 번의 드롭을 반복</p>
+</div>
+<p style="font-size:44px;color:#A84A16;align-self:center">→</p>
+<div style="width:380px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675">출력</p>
+<p style="font-size:24px;line-height:1.4;background:#D5E3F3;border-radius:10px;padding:12px 18px"><b>자원</b> PRB 사용률, 동시 접속 수</p>
+<p style="font-size:24px;line-height:1.4;background:#D5E3F3;border-radius:10px;padding:12px 18px"><b>셀</b> 셀 처리량 · 스펙트럼 효율</p>
+<p style="font-size:24px;line-height:1.4;background:#D5E3F3;border-radius:10px;padding:12px 18px"><b>사용자</b> 처리량 분포 (평균 · 하위 5%), 지연</p>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">오늘의 주제는 주황색 두 입력이다. 같은 엔진이라도 UE 배치와 트래픽 가정이 바뀌면 결론이 뒤집힌다.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">평가 방법론 참고: 3GPP TR 38.901 · TR 38.913 · TR 36.814, ITU-R M.2412</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) 이런 평가는 보통 시스템 레벨 시뮬레이션, SLS로 합니다. 입력은 네 가지입니다. 사이트와 RU, 안테나 설정 같은 망 구성, 표준 통계 채널이나 지도 기반 예측으로 만드는 전파 환경, 그리고 UE 배치와 트래픽입니다. 엔진은 UE마다 가장 강한 셀을 고르고, 다른 셀의 동시 전송으로 간섭을 계산하고, 슬롯마다 자원 블록을 나눠 주고, SINR에 맞는 MCS와 전송 성공 확률을 계산합니다. 이걸 수천 슬롯, 여러 번의 드롭에 걸쳐 반복합니다. 출력은 PRB 사용률과 접속 수 같은 자원 지표, 셀 처리량, 그리고 사용자 처리량 분포입니다. 오늘은 이 중 주황색 두 입력, UE 배치와 트래픽에 집중합니다. 같은 엔진이라도 이 두 가정이 바뀌면 “충분하다”는 결론이 “부족하다”로 뒤집힐 수 있기 때문입니다.</aside>
+</section>
+<section id="drop" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">UE 배치 ① · 표준 방식 (드롭)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">육각 격자 위에 무작위로 뿌리고, 여러 번 반복한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:760px;display:flex;flex-direction:column;gap:12px">
+<svg aria-label="일곱 개 육각형 사이트, 각 사이트는 점선으로 세 섹터로 나뉘고, 사이트마다 열 개의 단말이 무작위로 흩어져 있다. 파란 원은 실내 단말, 주황 사각형은 실외 단말, 가운데 사이트 주변에 최소 거리 원이 있다" style="width:760px;height:540px" width="760" height="540" viewBox="0 0 760 540"><g fill="#FBFAF7" stroke="#5E6675" stroke-width="2"><polygon points="467,320 380,370 293,320 293,220 380,170 467,220"/><polygon points="640,320 553,370 467,320 467,220 553,170 640,220"/><polygon points="553,470 467,520 380,470 380,370 467,320 553,370"/><polygon points="380,470 293,520 207,470 207,370 293,320 380,370"/><polygon points="293,320 207,370 120,320 120,220 207,170 293,220"/><polygon points="380,170 293,220 207,170 207,70 293,20 380,70"/><polygon points="553,170 467,220 380,170 380,70 467,20 553,70"/></g><g stroke="#C9C4B8" stroke-width="2" stroke-dasharray="6 6"><line x1="380" y1="270" x2="380" y2="370"/><line x1="380" y1="270" x2="293" y2="220"/><line x1="380" y1="270" x2="467" y2="220"/><line x1="553" y1="270" x2="553" y2="370"/><line x1="553" y1="270" x2="467" y2="220"/><line x1="553" y1="270" x2="640" y2="220"/><line x1="467" y1="420" x2="467" y2="520"/><line x1="467" y1="420" x2="380" y2="370"/><line x1="467" y1="420" x2="553" y2="370"/><line x1="293" y1="420" x2="293" y2="520"/><line x1="293" y1="420" x2="207" y2="370"/><line x1="293" y1="420" x2="380" y2="370"/><line x1="207" y1="270" x2="207" y2="370"/><line x1="207" y1="270" x2="120" y2="220"/><line x1="207" y1="270" x2="293" y2="220"/><line x1="293" y1="120" x2="293" y2="220"/><line x1="293" y1="120" x2="207" y2="70"/><line x1="293" y1="120" x2="380" y2="70"/><line x1="467" y1="120" x2="467" y2="220"/><line x1="467" y1="120" x2="380" y2="70"/><line x1="467" y1="120" x2="553" y2="70"/></g><g fill="#255E9E"><circle cx="345" cy="200" r="6"/><circle cx="381" cy="177" r="6"/><circle cx="325" cy="295" r="6"/><circle cx="395" cy="249" r="6"/><circle cx="304" cy="232" r="6"/><circle cx="316" cy="286" r="6"/><circle cx="416" cy="256" r="6"/><circle cx="340" cy="329" r="6"/><circle cx="502" cy="285" r="6"/><circle cx="628" cy="316" r="6"/><circle cx="551" cy="178" r="6"/><circle cx="606" cy="285" r="6"/><circle cx="516" cy="309" r="6"/><circle cx="594" cy="299" r="6"/><circle cx="618" cy="227" r="6"/><circle cx="392" cy="370" r="6"/><circle cx="539" cy="376" r="6"/><circle cx="438" cy="497" r="6"/><circle cx="413" cy="367" r="6"/><circle cx="450" cy="394" r="6"/><circle cx="470" cy="444" r="6"/><circle cx="526" cy="398" r="6"/><circle cx="244" cy="389" r="6"/><circle cx="262" cy="373" r="6"/><circle cx="366" cy="459" r="6"/><circle cx="267" cy="353" r="6"/><circle cx="300" cy="476" r="6"/><circle cx="238" cy="482" r="6"/><circle cx="270" cy="318" r="6"/><circle cx="159" cy="309" r="6"/><circle cx="196" cy="357" r="6"/><circle cx="148" cy="295" r="6"/><circle cx="275" cy="266" r="6"/><circle cx="263" cy="320" r="6"/><circle cx="142" cy="328" r="6"/><circle cx="186" cy="250" r="6"/><circle cx="325" cy="90" r="6"/><circle cx="299" cy="207" r="6"/><circle cx="236" cy="70" r="6"/><circle cx="242" cy="137" r="6"/><circle cx="277" cy="46" r="6"/><circle cx="264" cy="112" r="6"/><circle cx="374" cy="104" r="6"/><circle cx="288" cy="165" r="6"/><circle cx="432" cy="124" r="6"/><circle cx="479" cy="70" r="6"/><circle cx="521" cy="122" r="6"/><circle cx="455" cy="143" r="6"/><circle cx="469" cy="159" r="6"/><circle cx="419" cy="132" r="6"/><circle cx="500" cy="177" r="6"/><circle cx="397" cy="163" r="6"/><circle cx="434" cy="59" r="6"/></g><g fill="#A84A16"><rect x="359" y="329" width="12" height="12"/><rect x="348" y="274" width="12" height="12"/><rect x="531" y="315" width="12" height="12"/><rect x="542" y="297" width="12" height="12"/><rect x="540" y="198" width="12" height="12"/><rect x="478" y="367" width="12" height="12"/><rect x="381" y="441" width="12" height="12"/><rect x="393" y="382" width="12" height="12"/><rect x="208" y="387" width="12" height="12"/><rect x="362" y="437" width="12" height="12"/><rect x="284" y="331" width="12" height="12"/><rect x="217" y="423" width="12" height="12"/><rect x="204" y="235" width="12" height="12"/><rect x="145" y="209" width="12" height="12"/><rect x="332" y="48" width="12" height="12"/><rect x="275" y="51" width="12" height="12"/><rect x="385" y="102" width="12" height="12"/></g><g fill="#14213D"><polygon points="380,258 370,278 390,278"/><polygon points="553,258 543,278 563,278"/><polygon points="467,408 457,428 477,428"/><polygon points="293,408 283,428 303,428"/><polygon points="207,258 197,278 217,278"/><polygon points="293,108 283,128 303,128"/><polygon points="467,108 457,128 477,128"/></g><circle cx="380" cy="270" r="22" fill="none" stroke="#14213D" stroke-width="2" stroke-dasharray="4 4"/></svg>
+<div style="display:flex;flex-direction:row;gap:28px">
+<p style="font-size:24px;color:#255E9E;font-weight:600">● 실내 UE 80%</p>
+<p style="font-size:24px;color:#A84A16;font-weight:600">■ 실외 UE 20%</p>
+<p style="font-size:24px;color:#14213D;font-weight:600">▲ 사이트 (3섹터)</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:34%;text-align:left;color:#F5F3EE">38.901</th><th style="width:22%;text-align:left;color:#F5F3EE">UMa</th><th style="width:22%;text-align:left;color:#F5F3EE">UMi</th><th style="width:22%;text-align:left;color:#F5F3EE">InH</th></tr>
+<tr style="background:#FBFAF7"><td>사이트 간격</td><td>500 m</td><td>200 m</td><td>20 m</td></tr>
+<tr><td>실내 UE 비율</td><td>80%</td><td>80%</td><td>100%</td></tr>
+<tr style="background:#FBFAF7"><td>UE 높이</td><td>1.5 m · 실내는 층별</td><td>1.5 m · 실내는 층별</td><td>1 m</td></tr>
+<tr><td>최소 거리</td><td>35 m</td><td>10 m</td><td>0 m</td></tr>
+</table>
+<div style="display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">드롭</b> UE 위치를 한 번 무작위로 정한 스냅숏</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">반복</b> 여러 드롭의 결과를 모아 분포(CDF)로 본다</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">랩어라운드</b> 19사이트 × 3섹터, 바깥 셀도 간섭을 받도록 둘러 붙인다</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">밀도</b> 예: Dense Urban은 셀(TRxP)당 10 UE</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">3GPP TR 38.901 Table 7.2-1 · TR 38.913 (Dense Urban) · 실내 UE 높이 = 3(층 − 1) + 1.5 m</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 60초) 표준 평가에서 UE를 배치하는 방식은 “드롭”입니다. 사이트를 육각 격자로 놓고, 각 셀 영역 안에 정해진 수의 UE를 균일 분포로 무작위 배치합니다. 이 한 번의 배치가 드롭이고, 위치가 우연에 좌우되지 않도록 드롭을 여러 번 반복해 결과를 분포로 봅니다. 격자 가장자리 셀이 간섭을 덜 받는 문제를 막기 위해 19개 사이트, 57개 셀을 둘러 붙이는 랩어라운드를 씁니다. 38.901은 시나리오별 배치 규칙을 정해 둡니다. 도심 매크로 UMa는 사이트 간격 500미터, UE의 80%가 실내이고, 실내 UE는 건물 층에 따라 높이가 달라집니다. 기지국 바로 아래에 UE가 몰리지 않도록 최소 거리도 둡니다. 밀도는 예를 들어 Dense Urban 시나리오에서 셀당 10명입니다. 이 방식은 장비나 알고리즘을 공정하게 비교하는 데는 좋지만, 실제 우리 망의 트래픽 분포와는 다릅니다. 그게 다음 장의 내용입니다.</aside>
+</section>
+<section id="spatial" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">UE 배치 ② · 실제 망 평가</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">트래픽은 균일하지 않다 — 트래픽 지도로 뿌린다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:760px;display:flex;flex-direction:column;gap:12px">
+<svg aria-label="격자 지도 위에 세 곳의 트래픽 밀집 지역이 진한 주황으로 표시되고, 단말 점들이 밀집 지역에 많이 모여 있으며, 파란 삼각형 사이트 세 개가 있는 그림" style="width:760px;height:520px" width="760" height="520" viewBox="0 0 760 520"><g><rect x="20" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="68" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="116" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="164" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="212" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="260" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="20" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="68" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="116" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="164" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="212" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="260" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="68" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="116" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="116" y="68" width="46" height="46" fill="#F5F3EE"/><rect x="116" y="116" width="46" height="46" fill="#F3E4D8"/><rect x="116" y="164" width="46" height="46" fill="#F3E4D8"/><rect x="116" y="212" width="46" height="46" fill="#F3E4D8"/><rect x="116" y="260" width="46" height="46" fill="#F5F3EE"/><rect x="116" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="116" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="116" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="116" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="164" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="164" y="68" width="46" height="46" fill="#F3E4D8"/><rect x="164" y="116" width="46" height="46" fill="#E9A97E"/><rect x="164" y="164" width="46" height="46" fill="#E9A97E"/><rect x="164" y="212" width="46" height="46" fill="#E9A97E"/><rect x="164" y="260" width="46" height="46" fill="#F3E4D8"/><rect x="164" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="164" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="164" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="164" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="212" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="212" y="68" width="46" height="46" fill="#F3E4D8"/><rect x="212" y="116" width="46" height="46" fill="#E9A97E"/><rect x="212" y="164" width="46" height="46" fill="#A84A16"/><rect x="212" y="212" width="46" height="46" fill="#E9A97E"/><rect x="212" y="260" width="46" height="46" fill="#F3E4D8"/><rect x="212" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="212" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="212" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="212" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="260" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="260" y="68" width="46" height="46" fill="#F3E4D8"/><rect x="260" y="116" width="46" height="46" fill="#E9A97E"/><rect x="260" y="164" width="46" height="46" fill="#D97F4C"/><rect x="260" y="212" width="46" height="46" fill="#E9A97E"/><rect x="260" y="260" width="46" height="46" fill="#F3E4D8"/><rect x="260" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="260" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="260" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="260" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="308" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="308" y="68" width="46" height="46" fill="#F5F3EE"/><rect x="308" y="116" width="46" height="46" fill="#F3E4D8"/><rect x="308" y="164" width="46" height="46" fill="#F3E4D8"/><rect x="308" y="212" width="46" height="46" fill="#F3E4D8"/><rect x="308" y="260" width="46" height="46" fill="#F5F3EE"/><rect x="308" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="308" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="308" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="308" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="68" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="116" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="164" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="212" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="260" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="356" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="404" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="404" y="68" width="46" height="46" fill="#F5F3EE"/><rect x="404" y="116" width="46" height="46" fill="#F5F3EE"/><rect x="404" y="164" width="46" height="46" fill="#F5F3EE"/><rect x="404" y="212" width="46" height="46" fill="#F3E4D8"/><rect x="404" y="260" width="46" height="46" fill="#F3E4D8"/><rect x="404" y="308" width="46" height="46" fill="#F0CDB3"/><rect x="404" y="356" width="46" height="46" fill="#F3E4D8"/><rect x="404" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="404" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="452" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="452" y="68" width="46" height="46" fill="#F5F3EE"/><rect x="452" y="116" width="46" height="46" fill="#F5F3EE"/><rect x="452" y="164" width="46" height="46" fill="#F5F3EE"/><rect x="452" y="212" width="46" height="46" fill="#F3E4D8"/><rect x="452" y="260" width="46" height="46" fill="#E9A97E"/><rect x="452" y="308" width="46" height="46" fill="#D97F4C"/><rect x="452" y="356" width="46" height="46" fill="#E9A97E"/><rect x="452" y="404" width="46" height="46" fill="#F3E4D8"/><rect x="452" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="500" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="500" y="68" width="46" height="46" fill="#F3E4D8"/><rect x="500" y="116" width="46" height="46" fill="#F3E4D8"/><rect x="500" y="164" width="46" height="46" fill="#F3E4D8"/><rect x="500" y="212" width="46" height="46" fill="#F0CDB3"/><rect x="500" y="260" width="46" height="46" fill="#D97F4C"/><rect x="500" y="308" width="46" height="46" fill="#A84A16"/><rect x="500" y="356" width="46" height="46" fill="#D97F4C"/><rect x="500" y="404" width="46" height="46" fill="#F0CDB3"/><rect x="500" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="548" y="20" width="46" height="46" fill="#F3E4D8"/><rect x="548" y="68" width="46" height="46" fill="#F0CDB3"/><rect x="548" y="116" width="46" height="46" fill="#E9A97E"/><rect x="548" y="164" width="46" height="46" fill="#F0CDB3"/><rect x="548" y="212" width="46" height="46" fill="#F0CDB3"/><rect x="548" y="260" width="46" height="46" fill="#E9A97E"/><rect x="548" y="308" width="46" height="46" fill="#D97F4C"/><rect x="548" y="356" width="46" height="46" fill="#E9A97E"/><rect x="548" y="404" width="46" height="46" fill="#F3E4D8"/><rect x="548" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="596" y="20" width="46" height="46" fill="#F3E4D8"/><rect x="596" y="68" width="46" height="46" fill="#F0CDB3"/><rect x="596" y="116" width="46" height="46" fill="#E9A97E"/><rect x="596" y="164" width="46" height="46" fill="#E9A97E"/><rect x="596" y="212" width="46" height="46" fill="#F0CDB3"/><rect x="596" y="260" width="46" height="46" fill="#F0CDB3"/><rect x="596" y="308" width="46" height="46" fill="#F0CDB3"/><rect x="596" y="356" width="46" height="46" fill="#F3E4D8"/><rect x="596" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="596" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="644" y="20" width="46" height="46" fill="#F3E4D8"/><rect x="644" y="68" width="46" height="46" fill="#F0CDB3"/><rect x="644" y="116" width="46" height="46" fill="#F0CDB3"/><rect x="644" y="164" width="46" height="46" fill="#F0CDB3"/><rect x="644" y="212" width="46" height="46" fill="#F3E4D8"/><rect x="644" y="260" width="46" height="46" fill="#F5F3EE"/><rect x="644" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="644" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="644" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="644" y="452" width="46" height="46" fill="#F5F3EE"/><rect x="692" y="20" width="46" height="46" fill="#F5F3EE"/><rect x="692" y="68" width="46" height="46" fill="#F3E4D8"/><rect x="692" y="116" width="46" height="46" fill="#F3E4D8"/><rect x="692" y="164" width="46" height="46" fill="#F3E4D8"/><rect x="692" y="212" width="46" height="46" fill="#F5F3EE"/><rect x="692" y="260" width="46" height="46" fill="#F5F3EE"/><rect x="692" y="308" width="46" height="46" fill="#F5F3EE"/><rect x="692" y="356" width="46" height="46" fill="#F5F3EE"/><rect x="692" y="404" width="46" height="46" fill="#F5F3EE"/><rect x="692" y="452" width="46" height="46" fill="#F5F3EE"/></g><g fill="#14213D"><circle cx="555" cy="285" r="5"/><circle cx="459" cy="133" r="5"/><circle cx="523" cy="364" r="5"/><circle cx="725" cy="203" r="5"/><circle cx="179" cy="171" r="5"/><circle cx="563" cy="366" r="5"/><circle cx="441" cy="390" r="5"/><circle cx="271" cy="153" r="5"/><circle cx="530" cy="269" r="5"/><circle cx="145" cy="232" r="5"/><circle cx="202" cy="96" r="5"/><circle cx="605" cy="55" r="5"/><circle cx="151" cy="377" r="5"/><circle cx="333" cy="250" r="5"/><circle cx="270" cy="188" r="5"/><circle cx="270" cy="31" r="5"/><circle cx="129" cy="181" r="5"/><circle cx="292" cy="276" r="5"/><circle cx="464" cy="374" r="5"/><circle cx="83" cy="171" r="5"/><circle cx="573" cy="272" r="5"/><circle cx="490" cy="318" r="5"/><circle cx="617" cy="139" r="5"/><circle cx="615" cy="139" r="5"/><circle cx="587" cy="134" r="5"/><circle cx="626" cy="144" r="5"/><circle cx="422" cy="268" r="5"/><circle cx="172" cy="243" r="5"/><circle cx="272" cy="125" r="5"/><circle cx="632" cy="193" r="5"/><circle cx="274" cy="180" r="5"/><circle cx="463" cy="281" r="5"/><circle cx="299" cy="155" r="5"/><circle cx="514" cy="203" r="5"/><circle cx="278" cy="314" r="5"/><circle cx="378" cy="427" r="5"/><circle cx="235" cy="170" r="5"/><circle cx="269" cy="136" r="5"/><circle cx="123" cy="132" r="5"/><circle cx="238" cy="332" r="5"/><circle cx="576" cy="338" r="5"/><circle cx="615" cy="325" r="5"/><circle cx="703" cy="195" r="5"/><circle cx="507" cy="390" r="5"/><circle cx="623" cy="387" r="5"/><circle cx="607" cy="92" r="5"/><circle cx="486" cy="389" r="5"/><circle cx="622" cy="152" r="5"/><circle cx="578" cy="130" r="5"/><circle cx="127" cy="86" r="5"/><circle cx="198" cy="189" r="5"/><circle cx="527" cy="385" r="5"/><circle cx="458" cy="341" r="5"/><circle cx="571" cy="332" r="5"/><circle cx="508" cy="483" r="5"/><circle cx="269" cy="131" r="5"/><circle cx="561" cy="291" r="5"/><circle cx="715" cy="87" r="5"/><circle cx="481" cy="340" r="5"/><circle cx="528" cy="317" r="5"/><circle cx="227" cy="99" r="5"/><circle cx="285" cy="266" r="5"/><circle cx="131" cy="289" r="5"/><circle cx="577" cy="132" r="5"/><circle cx="474" cy="426" r="5"/><circle cx="200" cy="225" r="5"/><circle cx="730" cy="123" r="5"/><circle cx="486" cy="299" r="5"/><circle cx="467" cy="225" r="5"/><circle cx="657" cy="238" r="5"/><circle cx="188" cy="394" r="5"/><circle cx="198" cy="283" r="5"/><circle cx="626" cy="370" r="5"/><circle cx="619" cy="411" r="5"/><circle cx="43" cy="185" r="5"/><circle cx="271" cy="278" r="5"/><circle cx="343" cy="74" r="5"/><circle cx="583" cy="318" r="5"/><circle cx="674" cy="153" r="5"/><circle cx="279" cy="231" r="5"/><circle cx="718" cy="422" r="5"/><circle cx="419" cy="412" r="5"/><circle cx="198" cy="180" r="5"/><circle cx="658" cy="179" r="5"/><circle cx="464" cy="375" r="5"/><circle cx="680" cy="294" r="5"/><circle cx="537" cy="394" r="5"/><circle cx="530" cy="172" r="5"/><circle cx="569" cy="292" r="5"/><circle cx="516" cy="412" r="5"/></g><polygon points="150,314 136,342 164,342" fill="#255E9E" stroke="#FBFAF7" stroke-width="3"/><polygon points="420,134 406,162 434,162" fill="#255E9E" stroke="#FBFAF7" stroke-width="3"/><polygon points="610,384 596,412 624,412" fill="#255E9E" stroke="#FBFAF7" stroke-width="3"/></svg>
+<div style="display:flex;flex-direction:row;gap:28px">
+<p style="font-size:24px;color:#A84A16;font-weight:600">■ 진할수록 트래픽 밀도 높음</p>
+<p style="font-size:24px;color:#14213D;font-weight:600">● 가상 UE</p>
+<p style="font-size:24px;color:#255E9E;font-weight:600">▲ 사이트</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:row;gap:16px;align-items:start">
+<p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">01</p>
+<p style="flex:1;font-size:24px;line-height:1.45"><b>셀별 최번시 트래픽</b> OSS 데이터량 · PRB 사용률 · 접속 수</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:start">
+<p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">02</p>
+<p style="flex:1;font-size:24px;line-height:1.45"><b>셀 영역 안에서 나누기</b> 건물 · 인구 · 용도지역 · 도로 가중치, 또는 MDT · 위치 측위 데이터</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:start">
+<p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">03</p>
+<p style="flex:1;font-size:24px;line-height:1.45"><b>bin별 밀도 → UE 수</b> 활성 UE 수로 환산</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:start">
+<p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">04</p>
+<p style="flex:1;font-size:24px;line-height:1.45"><b>bin 안에서 무작위 배치</b> 실내 여부 · 층은 건물 데이터로</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:start">
+<p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">05</p>
+<p style="flex:1;font-size:24px;line-height:1.45"><b>미래 연도로 확장</b> 성장률 · 신규 개발지 반영</p>
+</div>
+<div style="background:#14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">균일 드롭 = 장비 · 알고리즘 <b style="color:#8DB8E8">비교</b>용</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">트래픽 지도 드롭 = 우리 망 <b style="color:#F0A36B">적합성</b> 평가용</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">일반적인 셀 계획 도구의 트래픽 맵 방식 · 데이터 원천과 가중치는 사업자 내부 기준에 따름 · 그림은 개념도</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 55초) 실제 망의 적합성을 평가할 때는 균일 분포가 맞지 않습니다. 트래픽은 역세권, 상업지, 대형 건물처럼 특정 지역에 몰리기 때문입니다. 그래서 통신사는 트래픽 지도를 만들어 그 밀도에 비례해 UE를 뿌립니다. 순서는 이렇습니다. 먼저 OSS에서 셀별 최번시 트래픽, 즉 데이터량과 PRB 사용률, 접속 수를 가져옵니다. 셀 단위 값이라 위치 정보가 없으니, 그 셀이 서비스하는 영역 안에서 건물, 인구, 용도지역, 도로 같은 가중치로 나눕니다. MDT나 위치 측위 데이터가 있으면 더 정확하게 나눌 수 있습니다. 그렇게 만든 격자, 즉 bin별 밀도를 활성 UE 수로 바꾸고, 각 bin 안에서 무작위로 배치합니다. 실내 여부와 층은 건물 데이터로 정합니다. 마지막으로 성장률과 신규 개발지를 반영해 미래 연도 지도를 만듭니다. 정리하면 균일 드롭은 장비 비교용이고, 트래픽 지도 기반 드롭이 우리 망 적합성 평가용입니다.</aside>
+</section>
+<section id="profile" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">UE 배치 ③ · 단말의 성능</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">가상 UE마다 “누구인지”를 붙인다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#255E9E">단말 능력</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">지원 대역 · CA 조합</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">수신 안테나 · 최대 레이어 (2Rx / 4Rx)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">최대 변조 (256QAM 등)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">송신 전력 등급 (PC3 23 dBm · PC2 26 dBm)</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#A84A16">위치 속성</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">실내 · 실외 · 차량</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">건물 침투 손실 (저손실 · 고손실 건물)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">층 높이</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">이동 속도 (3 km/h · 30 km/h)</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #14213D;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">서비스 프로필</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">트래픽 모델 (다음 장)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">QoS 등급 (5QI) · 우선순위</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">목표 체감 속도 · 지연</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">요금제 · 속도 제한</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<div style="flex:1;background:#14213D;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">왜 중요한가</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">같은 자리, 같은 트래픽이라도 2Rx 단말은 4Rx보다 같은 데이터에 PRB를 더 쓴다 → 단말 믹스가 셀 용량을 바꾼다</p>
+</div>
+<div style="width:620px;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">단말 믹스 (입력값)</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">4Rx [__%] · 2Rx [__%] · NSA 전용 [__%]<br>— 사업자 단말 통계에서 가져온다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">단말 능력 TS 38.306 · 전력 등급 TS 38.101-1 · 건물 침투 손실 TR 38.901 7.4.3 · [__%]는 직접 채울 값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 50초) 위치만 정한다고 UE가 완성되지는 않습니다. 각 가상 UE에는 “누구인지”를 나타내는 속성을 붙입니다. 첫째는 단말 능력입니다. 지원 대역과 CA 조합, 수신 안테나 수와 최대 레이어, 최대 변조 차수, 송신 전력 등급이 여기 들어갑니다. 둘째는 위치 속성입니다. 실내인지, 저손실 건물인지 고손실 건물인지에 따라 침투 손실이 크게 다르고, 층 높이와 이동 속도도 채널에 영향을 줍니다. 셋째는 서비스 프로필입니다. 어떤 트래픽 모델을 따르는지, QoS 등급과 목표 품질은 무엇인지입니다. 이게 중요한 이유는, 같은 자리에서 같은 트래픽을 쓰더라도 2Rx 단말은 4Rx 단말보다 같은 데이터에 더 많은 PRB를 쓰기 때문입니다. 즉 단말 믹스가 셀 용량 자체를 바꿉니다. 단말 믹스 비율은 사업자 단말 통계에서 가져와 입력합니다.</aside>
+</section>
+<section id="models" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트래픽 부여 ① · 트래픽 모델</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“얼마나”만큼 “어떤 모양으로”가 중요하다</h2>
+</div>
+<div style="position:relative;width:1664px;height:430px">
+<svg aria-label="시간축 위 네 줄의 트래픽 패턴. 첫 줄은 끊김 없이 꽉 찬 막대, 둘째 줄은 길이가 제각각인 막대가 불규칙한 간격으로, 셋째 줄은 촘촘한 작은 막대가 말하는 구간과 쉬는 구간을 번갈아, 넷째 줄은 일정한 간격의 중간 크기 막대" style="position:absolute;left:0px;top:0px;width:900px;height:430px" width="900" height="430" viewBox="0 0 900 430"><g stroke="#C9C4B8" stroke-width="2"><line x1="40" y1="90" x2="880" y2="90"/><line x1="40" y1="195" x2="880" y2="195"/><line x1="40" y1="300" x2="880" y2="300"/><line x1="40" y1="405" x2="880" y2="405"/></g><rect x="40" y="40" width="840" height="50" fill="#5E6675"/><g fill="#255E9E"><rect x="50" y="145" width="85" height="50"/><rect x="150" y="145" width="53" height="50"/><rect x="249" y="145" width="41" height="50"/><rect x="438" y="145" width="88" height="50"/><rect x="559" y="145" width="66" height="50"/><rect x="665" y="145" width="59" height="50"/><rect x="779" y="145" width="32" height="50"/><rect x="830" y="145" width="35" height="50"/></g><g fill="#A84A16"><rect x="44" y="250" width="6" height="50"/><rect x="64" y="250" width="6" height="50"/><rect x="84" y="250" width="6" height="50"/><rect x="104" y="250" width="6" height="50"/><rect x="124" y="250" width="6" height="50"/><rect x="144" y="250" width="6" height="50"/><rect x="164" y="250" width="6" height="50"/><rect x="184" y="250" width="6" height="50"/><rect x="204" y="250" width="6" height="50"/><rect x="224" y="250" width="6" height="50"/><rect x="244" y="250" width="6" height="50"/><rect x="264" y="250" width="6" height="50"/><rect x="284" y="250" width="6" height="50"/><rect x="304" y="250" width="6" height="50"/><rect x="324" y="282" width="6" height="18"/><rect x="384" y="282" width="6" height="18"/><rect x="444" y="282" width="6" height="18"/><rect x="504" y="282" width="6" height="18"/><rect x="564" y="282" width="6" height="18"/><rect x="624" y="250" width="6" height="50"/><rect x="644" y="250" width="6" height="50"/><rect x="664" y="250" width="6" height="50"/><rect x="684" y="250" width="6" height="50"/><rect x="704" y="250" width="6" height="50"/><rect x="724" y="250" width="6" height="50"/><rect x="744" y="250" width="6" height="50"/><rect x="764" y="250" width="6" height="50"/><rect x="784" y="250" width="6" height="50"/><rect x="804" y="250" width="6" height="50"/><rect x="824" y="250" width="6" height="50"/><rect x="844" y="250" width="6" height="50"/><rect x="864" y="250" width="6" height="50"/></g><g fill="#14213D"><rect x="46" y="355" width="22" height="50"/><rect x="106" y="355" width="19" height="50"/><rect x="166" y="355" width="27" height="50"/><rect x="226" y="355" width="28" height="50"/><rect x="286" y="355" width="21" height="50"/><rect x="346" y="355" width="18" height="50"/><rect x="406" y="355" width="18" height="50"/><rect x="466" y="355" width="17" height="50"/><rect x="526" y="355" width="20" height="50"/><rect x="586" y="355" width="17" height="50"/><rect x="646" y="355" width="19" height="50"/><rect x="706" y="355" width="19" height="50"/><rect x="766" y="355" width="23" height="50"/><rect x="826" y="355" width="27" height="50"/></g></svg>
+<p style="position:absolute;left:40px;top:0px;width:500px;font-size:24px;font-weight:600;color:#5E6675">Full buffer</p>
+<p style="position:absolute;left:40px;top:105px;width:500px;font-size:24px;font-weight:600;color:#255E9E">FTP (버스트)</p>
+<p style="position:absolute;left:40px;top:210px;width:500px;font-size:24px;font-weight:600;color:#A84A16">VoIP · VoNR</p>
+<p style="position:absolute;left:40px;top:315px;width:500px;font-size:24px;font-weight:600;color:#14213D">비디오 · XR</p>
+<p style="position:absolute;left:940px;top:30px;width:724px;font-size:24px;line-height:1.4;color:#4A5262">항상 보낼 데이터가 있다 → <b style="color:#14213D">셀 용량 · 스펙트럼 효율의 상한</b></p>
+<p style="position:absolute;left:940px;top:135px;width:724px;font-size:24px;line-height:1.4;color:#4A5262">파일 요청이 무작위(Poisson)로 도착 → <b style="color:#14213D">부하별 사용자 체감 처리량</b></p>
+<p style="position:absolute;left:940px;top:240px;width:724px;font-size:24px;line-height:1.4;color:#4A5262">20 ms마다 작은 패킷, 말하기 · 쉬기 반복 → <b style="color:#14213D">지연 기준 수용 인원</b></p>
+<p style="position:absolute;left:940px;top:345px;width:724px;font-size:24px;line-height:1.4;color:#4A5262">주기적인 큰 프레임, 엄격한 지연 예산 → <b style="color:#14213D">만족 UE 비율</b></p>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#D5E3F3;border-radius:12px;padding:14px 20px"><b>Full buffer는 최악이 아니라 비현실</b> — PRB가 늘 100%라 사용자 체감은 과소평가된다</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:14px 20px"><b>적합성 평가는 버스트 모델</b> — 실제 망처럼 부하에 따라 PRB 사용률과 체감이 함께 움직인다</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">FTP model 1 · 3 (TR 36.814, 36.872 · 파일 0.5 / 2 MB 예) · VoIP (TR 36.814) · XR (TR 38.838) · 그림은 개념도</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 55초) 이제 트래픽을 부여하는 원리입니다. 트래픽은 양뿐 아니라 시간에 따른 모양이 중요합니다. 표준 평가에서 쓰는 대표 모델이 네 가지입니다. Full buffer는 모든 단말이 항상 보낼 데이터를 가진 상태로, 셀이 낼 수 있는 용량과 스펙트럼 효율의 상한을 볼 때 씁니다. FTP 모델은 파일 요청이 Poisson 과정, 즉 무작위 시각에 도착하고 단말이 파일 하나를 받은 뒤 쉬는 버스트형 트래픽입니다. 0.5메가나 2메가바이트 파일이 흔히 쓰이고, 부하에 따른 사용자 체감 처리량을 봅니다. VoIP는 20밀리초마다 작은 패킷을 보내며 말하기와 쉬기를 반복하는데, 지연 기준을 만족하는 수용 인원을 봅니다. 비디오나 XR은 주기적으로 큰 프레임을 보내고 지연 예산이 엄격해서, 기준을 만족하는 단말 비율을 봅니다. 주의할 점은 Full buffer가 최악의 경우가 아니라 비현실적인 경우라는 것입니다. PRB가 늘 100%라서 체감 속도를 과소평가합니다. 장비 적합성 평가에는 실제 망처럼 부하에 따라 PRB 사용률과 체감이 함께 움직이는 버스트 모델이 맞습니다.</aside>
+</section>
+<section id="load" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트래픽 부여 ② · 부하와 체감의 이론</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">부하율 ρ가 오르면 체감은 C(1 − ρ)로 줄어든다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:860px;display:flex;flex-direction:column;gap:8px">
+<div style="position:relative;width:860px;height:500px">
+<svg aria-label="가로축은 부하율 0에서 1, 파란 실선은 평균 사용자 처리량이 C에서 0으로 직선으로 줄어들고, 주황 점선은 PRB 사용률이 0에서 1로 늘어난다. 부하율 0.7 이후는 혼잡 구간으로 음영 처리되고, 0.7 지점에 두 점이 표시되어 있다" style="position:absolute;left:0px;top:0px;width:860px;height:500px" width="860" height="500" viewBox="0 0 860 500"><g stroke="#5E6675" stroke-width="3"><line x1="70" y1="30" x2="70" y2="440"/><line x1="70" y1="440" x2="830" y2="440"/></g><rect x="595" y="40" width="225" height="400" fill="#F7DDCB" fill-opacity="0.6"/><g stroke="#DCD8CE" stroke-width="2"><line x1="258" y1="40" x2="258" y2="440"/><line x1="445" y1="40" x2="445" y2="440"/><line x1="632" y1="40" x2="632" y2="440"/><line x1="820" y1="40" x2="820" y2="440"/></g><line x1="70" y1="40" x2="820" y2="440" stroke="#255E9E" stroke-width="6"/><line x1="70" y1="440" x2="820" y2="40" stroke="#A84A16" stroke-width="4" stroke-dasharray="14 10"/><g fill="#14213D"><circle cx="595" cy="320" r="10"/><circle cx="595" cy="160" r="10"/></g></svg>
+<p style="position:absolute;left:0px;top:24px;width:60px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;text-align:right">C</p>
+<p style="position:absolute;left:0px;top:424px;width:60px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:right">0</p>
+<p style="position:absolute;left:240px;top:450px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">.25</p>
+<p style="position:absolute;left:425px;top:450px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">.5</p>
+<p style="position:absolute;left:612px;top:450px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">.75</p>
+<p style="position:absolute;left:800px;top:450px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center">1</p>
+<p style="position:absolute;left:612px;top:250px;width:220px;font-size:24px;font-weight:600;color:#255E9E">체감 = 0.3 C</p>
+<p style="position:absolute;left:612px;top:168px;width:220px;font-size:24px;font-weight:600;color:#A84A16">PRB 70%</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<p style="font-size:24px;color:#255E9E;font-weight:600">━ 평균 사용자 처리량</p>
+<p style="font-size:24px;color:#A84A16;font-weight:600">┅ PRB 사용률 (≈ ρ)</p>
+<p style="font-size:24px;color:#5E6675">음영: 혼잡 구간 · 가로축 ρ</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:26px;line-height:1.45"><b style="color:#A84A16">제공 부하</b> = λ × S<br><span style="color:#4A5262">요청 도착률 × 요청당 데이터 크기</span></p>
+<p style="font-size:26px;line-height:1.45"><b style="color:#A84A16">셀 용량 C</b> = 대역폭 × 평균 스펙트럼 효율<br><span style="color:#4A5262">UE 위치 · 채널 · 단말 믹스가 정한다</span></p>
+<p style="font-size:26px;line-height:1.45"><b style="color:#A84A16">부하율 ρ</b> = λS ÷ C</p>
+<div style="background:#14213D;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">ρ = 0.7이면 PRB는 70%만 쓰는데, 체감은 용량의 30%</p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">ρ → 1이면 체감 → 0, 대기 폭증 → 그래서 PRB 사용률 상한을 증설 기준으로 쓴다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">처리기 공유(M/G/1-PS) 큐 근사 · 단일 셀, 동질 사용자, Poisson 도착 가정 · 실제 값은 SLS로 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 60초) 버스트 트래픽에서 부하와 체감이 어떻게 연결되는지, 간단한 이론으로 보겠습니다. 요청이 초당 λ개 도착하고 요청 하나가 S비트라면 제공 부하는 λ곱하기 S입니다. 셀 용량 C는 대역폭에 평균 스펙트럼 효율을 곱한 값인데, 이 효율은 UE가 어디에 있는지, 채널과 단말 믹스가 어떤지에 따라 정해집니다. 즉 앞에서 본 UE 배치가 여기서 C로 들어옵니다. 부하율 ρ는 제공 부하를 C로 나눈 값입니다. 사용자들이 자원을 나눠 쓰는 처리기 공유 큐로 근사하면, 평균 사용자 처리량은 C 곱하기 1 빼기 ρ가 됩니다. 그래프로 보면 ρ가 0.7일 때 PRB 사용률은 70%인데, 사용자가 체감하는 속도는 셀 용량의 30%에 불과합니다. ρ가 1에 가까워지면 체감은 0으로 떨어지고 대기가 폭증합니다. 통신사가 PRB 사용률 상한을 증설 기준으로 쓰는 이유가 여기 있습니다. 물론 단일 셀, 동질 사용자 같은 가정이 들어간 근사라서, 실제 수치는 시뮬레이션으로 확인합니다.</aside>
+</section>
+<section id="demand" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트래픽 부여 ③ · 수요에서 UE별 트래픽으로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">월 사용량을 최번시 초당 비트로 바꾼다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#FBFAF7;border-radius:10px;padding:12px 0px">가입자 · 단말 수</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#FBFAF7;border-radius:10px;padding:12px 0px">최번시 활성 UE</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#FBFAF7;border-radius:10px;padding:12px 0px">UE당 최번시 수요</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 0px">서비스별 모델 (λ, S)</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:12px 0px">× 연도별 성장률</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="width:900px;background:#14213D;border-radius:16px;padding:22px 28px;display:flex;flex-direction:column;gap:10px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">가상의 예 (수치는 설명용)</p>
+<p style="font-size:24px;line-height:1.5;color:#F5F3EE">월 30 GB → 하루 1 GB → 최번시 비중 10% → 시간당 100 MB</p>
+<p style="font-size:24px;line-height:1.5;color:#F5F3EE">100 MB × 8 ÷ 3600 s ≈ <b style="color:#F0A36B">UE당 0.22 Mbps</b></p>
+<p style="font-size:24px;line-height:1.5;color:#F5F3EE">셀당 최번시 활성 500명 → 제공 부하 ≈ <b style="color:#F0A36B">111 Mbps</b></p>
+<p style="font-size:24px;line-height:1.5;color:#F5F3EE">셀 용량 C = 400 Mbps라면 ρ ≈ 0.28</p>
+<p style="font-size:24px;line-height:1.5;color:#C9D3E3">연 25% 성장이면 약 4년 뒤 ρ = 0.7 도달 → 그 전에 증설 계획</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">서비스 믹스로 나눈다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">영상 [__%] · 웹 [__%] · 음성 [__%] → 서비스마다 다른 모델과 λ, S</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">단말 성능을 반영한다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">요구 속도 상한 = min(서비스 최대, 단말 최대) · 지원 안 하는 대역에는 붙이지 않는다</p>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#5E6675">UE #17에 붙는 값</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:10px 16px">위치: 밀집 bin · 실내 3층</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:10px 16px">단말: 4Rx · 256QAM · PC3</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:10px 16px">서비스: 영상, FTP형 S = 2 MB</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#F7DDCB;border-radius:10px;padding:10px 16px">λ = 0.22 Mbps ÷ 16 Mbit ≈ <b>73초에 1회</b></p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">모든 수치는 가상의 예 · 실제 입력은 사업자 트래픽 통계 · 단말 통계 · 수요 예측 · [__%]는 직접 채울 값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 55초) 그럼 실제로 UE마다 트래픽을 얼마나 줄까요. 출발점은 사업자의 수요 통계입니다. 가입자와 단말 수에서 최번시에 실제로 데이터를 쓰는 활성 UE 수를 구하고, UE당 최번시 수요를 구한 뒤, 서비스 믹스로 나눠 서비스마다 모델과 파라미터를 정하고, 연도별 성장률을 곱합니다. 가상의 숫자로 계산해 보겠습니다. 한 달에 30기가를 쓰면 하루 1기가이고, 그중 최번시 한 시간에 10%를 쓴다면 시간당 100메가바이트, 초당으로 바꾸면 약 0.22메가비트입니다. 한 셀에 최번시 활성 사용자가 500명이면 제공 부하는 약 111메가비트입니다. 셀 용량이 400메가라면 부하율은 0.28이고, 해마다 25%씩 늘면 약 4년 뒤 0.7에 도달하니 그 전에 증설을 계획해야 한다는 결론이 나옵니다. 여기서 단말 성능도 반영합니다. 각 UE가 받을 수 있는 속도 상한은 서비스 최대 속도와 단말 최대 속도 중 작은 값이고, 단말이 지원하지 않는 대역의 셀에는 붙이지 않습니다. 이렇게 정한 값이 UE 하나하나에 붙습니다. 예를 들어 실내 3층의 4Rx 단말이 2메가바이트 파일 단위의 영상 트래픽을 쓴다면, 0.22메가비트를 16메가비트로 나눠 약 73초에 한 번 요청이 도착하도록 λ를 정합니다. 오늘 숫자는 모두 설명용 가상 값입니다.</aside>
+</section>
+<section id="evaluate" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">실행과 판정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">부하를 올려 가며, 기준이 깨지는 지점을 찾는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:820px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">판정 기준 (예시 · 사업자가 정한다)</h3>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:34%;text-align:left;color:#F5F3EE">항목</th><th style="width:66%;text-align:left;color:#F5F3EE">기준 예</th></tr>
+<tr style="background:#FBFAF7"><td>PRB 사용률</td><td>최번시 평균 [70~80%] 이하</td></tr>
+<tr><td>하위 5% 사용자 처리량</td><td>[__ Mbps] 이상 (셀 경계 체감)</td></tr>
+<tr style="background:#FBFAF7"><td>평균 사용자 처리량</td><td>[__ Mbps] 이상</td></tr>
+<tr><td>음성 (VoIP)</td><td>패킷 98%가 지연 한도 안 → 만족 UE 95% 이상</td></tr>
+<tr style="background:#FBFAF7"><td>접속 · 수용</td><td>접속 실패 · 블로킹 [__%] 이하, 동시 접속 수 장비 한도 이내</td></tr>
+</table>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">부하 스윕 (load sweep)</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">같은 UE 배치에서 λ를 단계적으로 올려 각 기준이 처음 깨지는 부하를 찾는다</p>
+<div style="background:#14213D;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">결론의 형태</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">“이 구성은 최번시 [__ Mbps] · [__명]까지 기준 충족, 예측 수요 대비 [__년] 여유”</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">부족하면</b> 대역 추가 · MIMO 상향 · RU 추가 · 셀 분할 · DU 용량</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">대안끼리</b> 같은 UE · 트래픽으로 다시 돌려 비교</p>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#5E6675;align-self:center">스윕 예 (가상)<br>C = 400 Mbps</p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#D5E3F3;border-radius:12px;padding:12px 18px">150 Mbps · ρ 0.38<br>하위 5% 31 Mbps · <b>충족</b></p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#D5E3F3;border-radius:12px;padding:12px 18px">250 Mbps · ρ 0.63<br>하위 5% 19 Mbps · <b>충족</b></p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#F7DDCB;border-radius:12px;padding:12px 18px">300 Mbps · ρ 0.75<br>하위 5% 13 Mbps · <b style="color:#A84A16">미달</b></p>
+<p style="flex:1;font-size:24px;line-height:1.4;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 18px">350 Mbps · ρ 0.88<br>PRB 상한 초과 · <b style="color:#F0A36B">미달</b></p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">음성 기준은 3GPP 평가에서 흔히 쓰는 정의 · [ ]는 사업자 기준으로 채울 값 · 스윕 예는 하위 5% 기준 15 Mbps 가정</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 55초) UE 배치와 트래픽이 준비되면 시뮬레이션을 돌리고 판정합니다. 판정 기준은 사업자가 정하는데, 대표적으로 최번시 PRB 사용률 상한, 셀 경계 체감을 보여 주는 하위 5% 사용자 처리량, 평균 사용자 처리량, 음성 품질, 그리고 접속 실패와 동시 접속 수 같은 수용 기준이 있습니다. 음성은 3GPP 평가에서 흔히 패킷의 98%가 지연 한도 안에 도착하면 만족한 사용자로 보고, 만족 사용자가 95% 이상인지를 봅니다. 실행은 보통 부하 스윕으로 합니다. 같은 UE 배치에서 요청 도착률을 단계적으로 올리며 각 기준이 처음 깨지는 지점을 찾습니다. 그러면 “이 구성은 최번시 몇 메가, 몇 명까지 기준을 만족하고, 예측 수요 대비 몇 년의 여유가 있다”는 형태의 결론이 나옵니다. 부족하면 대역 추가, MIMO 상향, RU 추가나 셀 분할, DU 용량 같은 대안을 같은 UE와 트래픽으로 다시 돌려 비교합니다. 아래 가상의 예에서는 하위 5% 기준을 15메가로 두었을 때 제공 부하 300메가에서 처음 기준이 깨지므로, 이 구성의 한계는 250에서 300메가 사이입니다.</aside>
+</section>
+<section id="trust" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">신뢰성 · 결과를 믿으려면</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">보정하고, 수렴시키고, 실망과 맞춘다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<div style="background:#FBFAF7;border-left:6px solid #255E9E;border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#255E9E">① 시뮬레이터 보정</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">표준 시나리오로 돌려 결합 손실 · 지오메트리 SINR 분포가 3GPP 보정 결과와 맞는지 먼저 확인</p>
+</div>
+<div style="background:#FBFAF7;border-left:6px solid #255E9E;border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#255E9E">② 통계적 수렴</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">드롭 수와 시뮬레이션 시간을 늘려도 결과가 변하지 않을 때까지, 초기 워밍업 구간은 제외</p>
+</div>
+<div style="background:#FBFAF7;border-left:6px solid #A84A16;border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#A84A16">③ 실망과 맞추기</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">현재 트래픽으로 돌린 PRB 사용률 · 처리량을 OSS 통계, 드라이브 테스트 KPI와 비교해 보정</p>
+</div>
+<div style="background:#FBFAF7;border-left:6px solid #A84A16;border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#A84A16">④ 가정을 드러내기</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">실내 비율 · 단말 믹스 · 성장률을 바꿔 보는 민감도 분석, 결론과 함께 가정을 기록</p>
+</div>
+</div>
+<div style="background:#14213D;border-radius:16px;padding:22px 28px">
+<p style="font-size:28px;line-height:1.45;color:#F5F3EE">현재를 재현하지 못하는 시뮬레이션은 미래를 예측하지 못한다 — <b style="color:#F0A36B">③이 가장 중요하다</b></p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">보정 지표 예: 3GPP 보정 결과(결합 손실 · 지오메트리 CDF) · 실망 비교는 지난 KPI 세미나의 OSS · DM 로그 활용</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 45초) 결과를 믿으려면 네 가지가 필요합니다. 먼저 시뮬레이터 자체가 맞는지, 표준 시나리오로 돌려 결합 손실과 지오메트리 SINR 분포를 3GPP 보정 결과와 비교합니다. 둘째, 드롭 수와 시뮬레이션 시간을 늘려도 결과가 변하지 않을 때까지 돌리고, 초기 워밍업 구간은 뺍니다. 셋째, 현재 트래픽으로 돌린 PRB 사용률과 처리량을 실제 OSS 통계, 지난 세미나에서 본 드라이브 테스트 KPI와 비교해 보정합니다. 넷째, 실내 비율, 단말 믹스, 성장률 같은 가정을 바꿔 보는 민감도 분석을 하고, 결론과 함께 가정을 기록합니다. 이 중 가장 중요한 건 셋째입니다. 현재를 재현하지 못하는 시뮬레이션은 미래도 예측하지 못하기 때문입니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리 · TAKEAWAY</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">어디에, 누가, 얼마나 — 세 가정이 결론을 정한다</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F5F3EE">어디에</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">비교는 균일 드롭, 적합성은 트래픽 지도 기반 드롭</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#8DB8E8">누가</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">단말 능력 · 실내외 · 서비스 프로필 — 단말 믹스가 용량을 바꾼다</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F0A36B">얼마나</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">버스트 모델로, 최번시 수요 × 성장률, 부하율 ρ로 판단</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#C9D3E3">믿으려면</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">현재 망을 먼저 재현하고, 가정을 함께 기록</p>
+</div>
+</div>
+<p style="font-family:'Noto Serif KR', Georgia, serif;font-size:44px;font-weight:700;line-height:1.35;color:#F0A36B">PRB 사용률 70%는 여유가 아니라<br>체감 30%라는 뜻일 수 있다</p>
+<p style="font-size:24px;line-height:1.45;color:#8DB8E8">다음 단계 제안: [대상 지역] 현재 트래픽 재현 → 성장 시나리오별 증설 시점 산출</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#C9D3E3;text-align:right">12 / 12</p>
+<aside>(약 30초) 정리하겠습니다. 결론을 정하는 건 세 가지 가정입니다. 어디에 놓을지는 비교용이면 균일 드롭, 우리 망 적합성 평가용이면 트래픽 지도 기반 드롭을 씁니다. 누구인지는 단말 능력, 실내외, 서비스 프로필로 정하고, 단말 믹스가 용량 자체를 바꾼다는 점을 기억해야 합니다. 얼마나 쓰는지는 버스트 모델에 최번시 수요와 성장률을 넣고 부하율로 판단합니다. 그리고 현재 망을 먼저 재현해서 믿을 수 있게 만들고, 가정을 함께 기록합니다. 한 줄로 줄이면, PRB 사용률 70%는 여유가 아니라 체감 속도가 용량의 30%라는 뜻일 수 있다는 것입니다. 다음 단계로 대상 지역의 현재 트래픽을 재현하고, 성장 시나리오별 증설 시점을 산출해 보기를 제안드립니다. 감사합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>
