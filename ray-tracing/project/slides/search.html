@@ -25,6 +25,6 @@
 </div>
 <p style="font-size:24px;line-height:1.45;color:#4A5262">SBR = Shooting and Bouncing Rays. 광선 수를 늘리면 누락은 줄지만 계산량이 늘고, 이미지법은 반사 차수가 오를수록 감당하기 어렵다.</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림은 개념도 · 수신 구(reception sphere)는 이산 광선을 받기 위한 근사</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
 <aside>(약 55초) 그럼 경로는 어떻게 찾을까요. 방법은 크게 둘입니다. 이미지법은 반사면마다 송신점의 거울상을 만들고, 거울상과 수신점을 직선으로 이어 반사점을 정확히 구합니다. 경로와 위상이 정확하지만, 면이 N개이고 반사를 k번까지 보면 후보가 N의 k제곱으로 늘어나 복잡한 도시에서는 감당하기 어렵습니다. SBR, 즉 광선 발사 방식은 송신점에서 사방으로 광선을 많이 쏘고 부딪힐 때마다 튕기게 한 뒤, 수신점 둘레의 수신 구에 걸린 광선을 경로로 봅니다. 빠르고 GPU에 잘 맞지만, 수신 구라는 근사 때문에 위상 오차가 생기고, 광선 사이로 경로가 빠지거나 같은 경로가 중복될 수 있습니다. 그래서 최근 엔진은 둘을 결합합니다. SBR로 어떤 면들을 거치는지 후보를 빠르게 찾고, 이미지법으로 그 경로를 정확히 다시 계산합니다. Sionna RT와 Remcom의 Wireless InSite X3D가 이 방식입니다.</aside>
 </section>

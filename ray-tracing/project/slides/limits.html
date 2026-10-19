@@ -25,6 +25,6 @@
 <p style="font-size:28px;line-height:1.45;color:#F5F3EE">가장 큰 한계는 엔진이 아니라 <b style="color:#F0A36B">보정 안 된 입력</b> — 그래서 그대로 쓰면 상용 툴보다 덜 맞을 수 있다</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT Technical Report의 제약 사항 · 릴리스 노트 (2.2 기준) · “기본 제공 안 함”은 직접 후처리로 보완 가능</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
 <aside>(약 55초) Sionna의 한계는 네 곳에 있습니다. 물리 모델에서는 회절이 1차까지만 되고, 회절과 확산이 섞인 경로는 만들 수 없습니다. 투과는 얇은 판으로 가정해 굴절 방향이 바뀌지 않고, 식생, 강우, 대기 감쇠는 기본으로 제공하지 않으며, RIS는 1.x로 오면서 빠졌습니다. 알고리즘은 확률적 샘플링이라 실행마다 결과가 조금씩 흔들리는데, 2.1에서 결정적 모드가 추가됐습니다. 또 버퍼가 차면 경로를 조용히 버리고, 해시 충돌로 경로가 빠질 수 있습니다. 입력 데이터 측면에서는 OSM 건물이 단순한 상자이고 재질은 추정 라벨이며, 차량이나 간판 같은 작은 물체가 없습니다. 실제 오차의 대부분은 여기서 옵니다. 운영 측면에서는 GPU 메모리가 장면 크기를 제한하고, 송수신점이 많아지면 비용이 급증하며, 셀 계획이나 보정, 리포트 같은 망 설계 기능은 없습니다. 결국 가장 큰 한계는 엔진이 아니라 보정되지 않은 입력이어서, 그대로 쓰면 실측으로 보정된 상용 툴보다 덜 맞을 수 있습니다.</aside>
 </section>

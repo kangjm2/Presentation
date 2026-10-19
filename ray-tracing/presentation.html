@@ -137,7 +137,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">기하광학(GO) · 회절의 기하 이론(GTD/UTD) · 그림은 평면도 개념도</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
 <aside>(약 50초) 레이 트레이싱의 출발점은 기하광학 근사입니다. 파장이 건물이나 벽 같은 물체보다 훨씬 작으면, 전파를 빛처럼 직선으로 가는 광선으로 다룰 수 있습니다. 3.5기가헤르츠의 파장은 약 8.6센티미터, 28기가헤르츠는 약 1센티미터라서 도심 환경에서는 이 근사가 잘 맞습니다. 광선 하나는 실제로는 조금씩 퍼지는 원뿔, 즉 광선관을 대표하고, 거리에 따라 세기가 줄어듭니다. 그림처럼 송신점과 수신점 사이에는 직접 경로와 벽에 반사된 경로들이 있고, 반사점은 송신점의 거울상과 수신점을 직선으로 이어 벽과 만나는 곳으로 정해집니다. 이렇게 찾은 경로마다 복소 이득과 지연, 출발과 도착 각도를 계산하면, 그 합이 채널 임펄스 응답이 됩니다. 지난 Sionna 채널 세미나에서 본 CIR이 바로 이 결과물입니다.</aside>
 </section>
 <section id="interact" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
@@ -180,7 +180,7 @@ body.fs.idle .stage { cursor: none }
 <p style="flex:1;font-size:24px;line-height:1.45;color:#F5F3EE">상대 유전율 ε′ = a · f<span style="color:#F0A36B">ᵇ</span>, 도전율 σ = c · f<span style="color:#F0A36B">ᵈ</span> (ITU-R P.2040, 콘크리트 · 유리 · 금속 등) — 확산은 산란 계수 S와 산란 패턴(Lambertian · directive)을 더한다</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">UTD: Kouyoumjian–Pathak (1974) · 확산 산란: Degli-Esposti의 유효 거칠기 모델 · 재질: ITU-R P.2040</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 14</p>
 <aside>(약 55초) 광선이 물체를 만나면 네 가지 일이 일어납니다. 정반사는 거울처럼 같은 각도로 튕겨 나가는 것이고, 얼마나 세게 반사되는지는 프레넬 계수가 정합니다. 이 계수는 재질의 유전율과 도전율, 입사각, 편파에 따라 달라집니다. 투과는 일부가 벽을 통과하는 것으로, 재질과 두께만큼 감쇠되며 실내 커버리지를 계산할 때 핵심입니다. 회절은 건물 모서리에서 전파가 그림자 영역으로 휘어 들어가는 현상이고, 균일 회절 이론, UTD의 계수로 계산합니다. 회절된 광선은 모서리를 축으로 하는 켈러 원뿔 위에 놓입니다. 확산 산란은 거친 표면이나 작은 구조물이 에너지를 여러 방향으로 흩뿌리는 현상으로, 주파수가 높을수록 중요해집니다. 그리고 이 모든 계산의 입력은 재질입니다. ITU-R P.2040은 콘크리트, 유리, 금속 같은 재질의 유전율과 도전율을 주파수의 함수로 줍니다. 결국 레이 트레이싱의 정확도는 기하 구조와 함께 이 재질 숫자에 크게 좌우됩니다.</aside>
 </section>
 <section id="search" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -210,7 +210,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 <p style="font-size:24px;line-height:1.45;color:#4A5262">SBR = Shooting and Bouncing Rays. 광선 수를 늘리면 누락은 줄지만 계산량이 늘고, 이미지법은 반사 차수가 오를수록 감당하기 어렵다.</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림은 개념도 · 수신 구(reception sphere)는 이산 광선을 받기 위한 근사</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
 <aside>(약 55초) 그럼 경로는 어떻게 찾을까요. 방법은 크게 둘입니다. 이미지법은 반사면마다 송신점의 거울상을 만들고, 거울상과 수신점을 직선으로 이어 반사점을 정확히 구합니다. 경로와 위상이 정확하지만, 면이 N개이고 반사를 k번까지 보면 후보가 N의 k제곱으로 늘어나 복잡한 도시에서는 감당하기 어렵습니다. SBR, 즉 광선 발사 방식은 송신점에서 사방으로 광선을 많이 쏘고 부딪힐 때마다 튕기게 한 뒤, 수신점 둘레의 수신 구에 걸린 광선을 경로로 봅니다. 빠르고 GPU에 잘 맞지만, 수신 구라는 근사 때문에 위상 오차가 생기고, 광선 사이로 경로가 빠지거나 같은 경로가 중복될 수 있습니다. 그래서 최근 엔진은 둘을 결합합니다. SBR로 어떤 면들을 거치는지 후보를 빠르게 찾고, 이미지법으로 그 경로를 정확히 다시 계산합니다. Sionna RT와 Remcom의 Wireless InSite X3D가 이 방식입니다.</aside>
 </section>
 <section id="sionna" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -259,7 +259,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT Technical Report (arXiv 2504.21719) · PathSolver · RadioMapSolver · 기본값은 버전에 따라 다를 수 있음</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 14</p>
 <aside>(약 55초) Sionna RT는 이 하이브리드 방식을 이렇게 구현합니다. 장면은 Mitsuba 3 형식의 메시와 재질이고, 보통 OSM과 Blender로 만듭니다. 송신점에서 피보나치 격자로 기본 백만 개의 광선을 고르게 쏩니다. 광선이 물체에 부딪힐 때마다 반사, 확산, 투과, 회절 중 하나를 확률적으로 고르는데, 프레넬 세기에 비례해 고르고 가중치로 보정합니다. 모든 갈래로 쪼개면 광선 수가 폭증하기 때문이고, 기술 보고서에 따르면 균일하게 고를 때보다 약 백 배 적은 샘플로 수렴합니다. 확산은 확산점에서 각 수신점이 보이는지 바로 확인해 경로로 만듭니다. 반사가 이어지는 경로는 SBR로는 수신점에 정확히 닿을 수 없으니 후보로 두고 이미지법으로 정확히 계산하고, 회절점은 경로 길이가 최소가 되는 페르마 원리로 구합니다. 같은 경로가 여러 광선에서 나오므로 해시로 중복을 지우면, 경로별 이득, 지연, 각도가 나오고 이것이 CIR이 됩니다. 커버리지 맵은 다른 솔버를 쓰는데, 이미지법 없이 격자 셀마다 지나간 광선 세기를 모으는 순수 SBR 방식입니다.</aside>
 </section>
 <section id="diff" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -296,7 +296,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NVlabs/sionna-rt 릴리스 노트 · Sionna RT Technical Report · Apache 2.0 오픈소스</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 14</p>
 <aside>(약 50초) Sionna RT의 가장 큰 차별점은 미분이 가능하다는 것입니다. 레이 트레이싱 전체가 Dr.Jit라는 자동 미분 컴파일러 위에서 돌기 때문에, 결과의 오차를 재질, 위치, 방향, 안테나 같은 입력에 대해 거꾸로 미분할 수 있습니다. 그러면 측정한 RSRP나 지연과의 차이를 줄이도록 재질 값을 학습하는 보정, 커버리지가 커지도록 송신기 위치와 방향을 경사하강으로 찾는 배치 최적화, 그리고 신경망과 하나의 그래프로 묶는 학습이 가능합니다. 상용 툴에는 없는 기능입니다. 버전 흐름도 알아 두면 좋습니다. 2025년 3월 1.0에서 Mitsuba와 Dr.Jit 기반으로 새로 작성되면서 투과가 들어오고 회절은 잠시 빠졌다가, 9월 1.2에서 회절이 돌아왔습니다. 올해 9월 2.1에서는 최신 P.2040 재질과 커버리지 맵 회절, 같은 입력에 항상 같은 결과를 내는 결정적 모드가 추가됐고, 2.2에서는 레이더 단면적과 센싱 대상이 들어왔습니다. 빠르게 바뀌고 있어서 버전을 꼭 명시해야 합니다.</aside>
 </section>
 <section id="tools" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -326,7 +326,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 <p style="font-size:24px;line-height:1.45;color:#4A5262">공통점: 지도 · 건물 데이터 처리, 실측 보정, 셀 계획 기능이 함께 묶여 있다. 레이 트레이싱은 그 안의 한 엔진이다.</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">각 사 제품 자료 · 문서 기준 · 내부 알고리즘 세부는 공개 범위가 제한적 (Atoll · VIAVI는 특히)</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 14</p>
 <aside>(약 60초) 상용 툴은 어떻게 다를까요. Forsk의 Atoll에는 대표적으로 두 모델이 있습니다. Aster는 지붕 위로 넘어가는 성분을 수직면에서 여러 칼날 회절로 계산하고, 건물 사이를 도는 성분은 수평면 레이 런칭으로 반사와 회절을 계산하는 방식이라, 완전한 3D 추적이 아니라 두 평면으로 나눈 준 3D 방식에 가깝습니다. 그리고 많은 실측점으로 미리 보정한 파라미터와 자동 보정 기능이 핵심입니다. CrossWave는 Orange가 만든 반경험적 모델로 넓은 지역 설계에 씁니다. VIAVI의 TeraVM AI RSG는 3D 지도 기반 레이 트레이싱 채널 생성기를 현장 측정으로 보정한 무선 구간 트윈입니다. 엔진 내부는 공개되지 않았고 NVIDIA AODT와 연동할 수도 있습니다. 목적이 커버리지 예측보다 RAN 시험 시나리오라는 점이 다릅니다. Remcom의 Wireless InSite X3D는 GPU SBR과 exact path 보정을 쓰는, Sionna와 같은 계열의 정밀 엔진입니다. Altair WinProp은 가시성을 미리 계산해 두는 IRT와, 가장 센 경로 하나만 보는 DPM을 제공합니다. 정리하면 상용 툴은 모든 경로를 다 추적하기보다, 빠르고 실측으로 보정된 예측을 망 설계 기능과 함께 제공합니다.</aside>
 </section>
 <section id="compare" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -349,8 +349,73 @@ body.fs.idle .stage { cursor: none }
 <p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:16px 22px"><b style="color:#A84A16">상용이 앞서는 곳</b> 지도 데이터 처리, 실측 보정 노하우, 대규모 운영 워크플로</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">공개 자료 기준의 발표자 정리 · 상용 툴의 세부 기능은 버전 · 라이선스 구성에 따라 다름</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
 <aside>(약 55초) 한 장으로 비교해 보겠습니다. 경로를 찾는 엔진만 보면 Sionna와 Wireless InSite는 같은 계열이고, Atoll Aster는 두 평면으로 나눈 방식, VIAVI는 공개되지 않았습니다. 하지만 실제 차이는 엔진보다 출력, 보정, 규모에 있습니다. Sionna는 경로마다 CIR과 각도, 편파까지 내놓는 반면, Atoll은 망 설계에 필요한 경로손실과 커버리지 맵에 집중합니다. 실측 보정은 Atoll이 사전 보정과 자동 보정을 기본 제공하고, VIAVI도 현장 데이터로 보정하지만, Sionna는 미분 기능으로 직접 만들어야 합니다. 규모도 Sionna는 GPU 한 대에 올라가는 장면이 기본이고, Atoll은 수천 사이트, VIAVI는 도시 규모 에뮬레이션을 겨냥합니다. 그래서 Sionna가 앞서는 곳은 미분 가능성과 경로 단위 출력, 그리고 코드로 마음대로 바꿀 수 있다는 점이고, 상용이 앞서는 곳은 지도 데이터 처리와 실측 보정 노하우, 대규모 운영 워크플로입니다.</aside>
+</section>
+<section id="academic" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">학계 ① · 경로 탐색을 빠르고 정확하게</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">상용 엔진의 뼈대는 대부분 논문에서 나왔다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">빔 트레이싱</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">가는 광선 대신 다각형 빔을 추적 → 경로 누락 없음, 대신 빔 분할이 폭증</p>
+<p style="font-size:24px;line-height:1.4;color:#5E6675">1990년대 Bell Labs 실내 예측 연구 등</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">광선 밀도 정규화</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">수신 구 대신 도착한 광선의 밀도로 세기를 계산 → 중복 · 누락 오차 완화</p>
+<p style="font-size:24px;line-height:1.4;color:#5E6675">Didascalou 외 (터널 전파, 2000)</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">가시성 전처리</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">벽 · 모서리 사이 가시성을 한 번 계산해 재사용 → 송신점이 바뀌어도 빠름</p>
+<p style="font-size:24px;line-height:1.4;color:#5E6675">Stuttgart대 IRT 연구 → WinProp</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">GPU 레이 교차</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">그래픽용 RT 하드웨어(OptiX 등)로 광선 발사 → 수십 배 이상 가속</p>
+<p style="font-size:24px;line-height:1.4;color:#5E6675">Opal (Egea-López 외, 2021) 등</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">Min-Path-Tracing</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">이미지법 대신 경로 길이 최소화로 반사 · 회절 경로를 한 틀에서 계산</p>
+<p style="font-size:24px;line-height:1.4;color:#5E6675">Eertmans 외 (UCLouvain, 2023)</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">학습한 후보 생성</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">생성 모델이 유망한 면 조합을 먼저 제안 → 탐색할 후보 수를 줄인다</p>
+<p style="font-size:24px;line-height:1.4;color:#5E6675">Eertmans 외 (2025) 등</p>
+</div>
+</div>
+<div style="background:#14213D;border-radius:16px;padding:20px 28px">
+<p style="font-size:26px;line-height:1.45;color:#F5F3EE">Sionna의 페르마 원리 기반 회절점 계산, InSite의 exact path도 이 흐름 위에 있다 — <b style="color:#F0A36B">파랑은 정확도, 주황은 속도</b>를 겨냥한 연구</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">연구 계보는 대표 사례 중심의 발표자 정리 · 연도는 대표 논문 기준</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 14</p>
+<aside>(약 50초) 학계에서 제안된 방식도 보겠습니다. 먼저 경로 탐색을 정확하고 빠르게 만드는 연구입니다. 정확도 쪽에서는, 가는 광선 대신 다각형 빔을 추적해 경로를 놓치지 않는 빔 트레이싱이 1990년대부터 연구됐고, 수신 구 대신 도착한 광선의 밀도로 세기를 계산해 중복과 누락 오차를 줄이는 광선 밀도 정규화가 제안됐습니다. 벽과 모서리 사이의 가시성을 미리 계산해 재사용하는 방법은 Stuttgart대 연구에서 나와 WinProp의 IRT로 이어졌습니다. 속도 쪽에서는 그래픽용 레이 트레이싱 하드웨어로 광선을 쏘는 GPU 가속이 일반화됐습니다. 최근 UCLouvain 그룹은 이미지법 대신 경로 길이 최소화로 반사와 회절 경로를 한 틀에서 계산하는 Min-Path-Tracing과, 생성 모델이 유망한 면 조합을 먼저 제안해 탐색량을 줄이는 방법을 내놓았습니다. Sionna가 회절점을 페르마 원리로 구하는 것도 이 흐름 위에 있습니다. 상용 엔진의 뼈대 대부분이 이런 논문에서 나왔다고 보면 됩니다.</aside>
+</section>
+<section id="learning" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">학계 ② · 미분과 학습으로 현실에 맞추기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">물리를 학습시키거나, 물리를 학습으로 대신한다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:20%;text-align:left;color:#F5F3EE">갈래</th><th style="width:40%;text-align:left;color:#F5F3EE">아이디어</th><th style="width:22%;text-align:left;color:#F5F3EE">대표 연구</th><th style="width:18%;text-align:left;color:#F5F3EE">약점</th></tr>
+<tr style="background:#FBFAF7"><td><b style="color:#255E9E">미분 RT + 보정</b></td><td>측정 CIR로 재질 · 산란 · 안테나 파라미터를 경사하강</td><td>Hoydis 외 (NVIDIA, 2023~24)</td><td>장면 기하는 그대로</td></tr>
+<tr><td><b style="color:#255E9E">불연속 처리</b></td><td>경로가 생기고 사라지는 경계를 부드럽게 해 기울기 확보</td><td>DiffeRT (Eertmans 외, 2024)</td><td>근사 오차</td></tr>
+<tr style="background:#FBFAF7"><td><b style="color:#A84A16">신경 대리 모델</b></td><td>건물 지도 → 경로손실 맵을 CNN이 즉시 예측 (RT 결과로 학습)</td><td>RadioUNet (2021)</td><td>학습 분포 밖에 약함</td></tr>
+<tr><td><b style="color:#A84A16">신경 레이 트레이싱</b></td><td>광선 구조는 두고, 면과의 상호작용을 신경망이 학습</td><td>WiNeRT (ICLR 2023)</td><td>학습 데이터 필요</td></tr>
+<tr style="background:#FBFAF7"><td><b style="color:#14213D">신경 전파장</b></td><td>3D 모델 없이 측정만으로 공간의 전파장을 학습 (NeRF · 가우시안 스플래팅)</td><td>NeRF2 (MobiCom 2023), WRF-GS · RF-3DGS (2024~25)</td><td>장면마다 재학습</td></tr>
+</table>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#D5E3F3;border-radius:12px;padding:14px 20px"><b>위 두 줄</b>은 Sionna 개선(12쪽 ①)과 직결 — 공개 코드(NVlabs diff-rt-calibration)로 바로 시도 가능</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:14px 20px"><b>아래 세 줄</b>은 속도 · 실측 적합에 강하지만 일반화가 숙제 — 물리 + 학습 하이브리드가 흐름</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Hoydis 외 (arXiv 2311.18558) · 학습 기반 전파 지도 튜토리얼 (arXiv 2603.17499) · 연도는 대표 논문 기준</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 14</p>
+<aside>(약 55초) 두 번째 흐름은 미분과 학습입니다. 크게 다섯 갈래가 있습니다. 첫째, NVIDIA의 Hoydis 그룹은 미분 가능한 레이 트레이서에 실측 채널을 넣어 재질과 산란, 안테나 파라미터를 경사하강으로 보정하는 방법을 보였고, 코드도 공개했습니다. 흥미로운 점은 보정된 값이 기하 오차와 측정 오차까지 흡수하기 때문에 실제 재질 값과 꼭 같지 않다는 것입니다. 둘째, 경로가 생기고 사라지는 경계에서는 기울기가 끊기는데, DiffeRT는 이 불연속을 부드럽게 만들어 미분을 가능하게 합니다. 셋째, RadioUNet처럼 건물 지도를 넣으면 경로손실 맵을 CNN이 바로 내놓는 신경 대리 모델이 있습니다. 매우 빠르지만 학습한 분포 밖에서는 약합니다. 넷째, WiNeRT는 광선 구조는 유지하고 면과의 상호작용만 신경망이 배우는 신경 레이 트레이싱입니다. 다섯째, NeRF2나 가우시안 스플래팅 기반 방법은 3D 모델 없이 측정만으로 공간의 전파장을 학습하지만, 장면마다 다시 학습해야 합니다. 앞의 두 갈래는 앞으로 볼 Sionna 개선과 바로 연결되고, 나머지는 속도와 실측 적합에 강하지만 일반화가 숙제라서, 물리와 학습을 섞는 하이브리드가 흐름입니다.</aside>
 </section>
 <section id="limits" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
 <div style="display:flex;flex-direction:column;gap:16px">
@@ -379,7 +444,7 @@ body.fs.idle .stage { cursor: none }
 <p style="font-size:28px;line-height:1.45;color:#F5F3EE">가장 큰 한계는 엔진이 아니라 <b style="color:#F0A36B">보정 안 된 입력</b> — 그래서 그대로 쓰면 상용 툴보다 덜 맞을 수 있다</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT Technical Report의 제약 사항 · 릴리스 노트 (2.2 기준) · “기본 제공 안 함”은 직접 후처리로 보완 가능</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
 <aside>(약 55초) Sionna의 한계는 네 곳에 있습니다. 물리 모델에서는 회절이 1차까지만 되고, 회절과 확산이 섞인 경로는 만들 수 없습니다. 투과는 얇은 판으로 가정해 굴절 방향이 바뀌지 않고, 식생, 강우, 대기 감쇠는 기본으로 제공하지 않으며, RIS는 1.x로 오면서 빠졌습니다. 알고리즘은 확률적 샘플링이라 실행마다 결과가 조금씩 흔들리는데, 2.1에서 결정적 모드가 추가됐습니다. 또 버퍼가 차면 경로를 조용히 버리고, 해시 충돌로 경로가 빠질 수 있습니다. 입력 데이터 측면에서는 OSM 건물이 단순한 상자이고 재질은 추정 라벨이며, 차량이나 간판 같은 작은 물체가 없습니다. 실제 오차의 대부분은 여기서 옵니다. 운영 측면에서는 GPU 메모리가 장면 크기를 제한하고, 송수신점이 많아지면 비용이 급증하며, 셀 계획이나 보정, 리포트 같은 망 설계 기능은 없습니다. 결국 가장 큰 한계는 엔진이 아니라 보정되지 않은 입력이어서, 그대로 쓰면 실측으로 보정된 상용 툴보다 덜 맞을 수 있습니다.</aside>
 </section>
 <section id="improve" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -391,7 +456,7 @@ body.fs.idle .stage { cursor: none }
 <div style="width:760px;background:#14213D;border-radius:16px;padding:22px 28px;display:flex;flex-direction:column;gap:12px">
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">① 실측 기반 보정 루프</p>
 <p style="font-size:24px;line-height:1.45;color:#F5F3EE">드라이브 테스트 RSRP · DM 로그 (KPI 세미나) → 같은 지점을 Sionna로 계산 → 차이를 손실로 → 재질 ε, σ와 산란 계수를 경사하강</p>
-<p style="font-size:24px;line-height:1.45;color:#C9D3E3">Atoll의 자동 보정에 해당하는 기능을 직접 만들고, 보정된 재질 라이브러리를 지역별로 쌓는다</p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">Atoll의 자동 보정에 해당하는 기능을 직접 만든다 (10쪽 Hoydis 외 방법, 공개 코드). 보정된 재질 라이브러리를 지역별로 쌓는다</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:14px">
 <p style="font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:14px 20px"><b style="color:#255E9E">② 장면 품질</b> LoD2 건물 · 지형 메시, 항공 영상으로 재질 분류, 식생을 감쇠 볼륨으로 추가</p>
@@ -404,8 +469,8 @@ body.fs.idle .stage { cursor: none }
 <p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:14px 20px"><b style="color:#A84A16">⑥ 툴 연동</b> 경로손실 · CIR을 망 설계 · 시험 툴 입력 형식으로 내보내기</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">개선 방향은 발표자 제안 · ③④는 정확도와 속도의 절충이므로 실측으로 효과 확인 필요</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
-<aside>(약 55초) 그럼 무엇을 개선할 수 있을까요. 가장 중요한 건 Sionna의 미분 가능성을 자동 보정으로 바꾸는 것입니다. 지난 KPI 세미나에서 본 드라이브 테스트 RSRP와 DM 로그를 같은 지점의 Sionna 계산과 비교하고, 그 차이를 손실 함수로 삼아 재질의 유전율, 도전율, 산란 계수를 경사하강으로 맞춥니다. Atoll의 자동 보정에 해당하는 기능을 직접 만드는 셈이고, 보정된 재질을 지역별 라이브러리로 쌓아 갈 수 있습니다. 둘째, 장면 품질을 높입니다. 상세 건물과 지형 메시를 쓰고, 항공 영상으로 재질을 분류하고, 식생은 감쇠 볼륨으로 넣습니다. 셋째, 식생이나 대기 감쇠는 후처리로, 다차 회절은 Deygout 같은 반경험식으로 보완합니다. 넷째, 관심 지역만 레이 트레이싱하고 바깥은 통계 모델로 처리하는 하이브리드로 규모 문제를 풉니다. 다섯째, 38.901 통계와 실측으로 검증하는 체계를 갖추고 버전과 설정을 고정합니다. 마지막으로 결과를 망 설계나 시험 툴이 읽을 수 있는 형식으로 내보내면, 상용 툴과 함께 쓸 수 있습니다.</aside>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 14</p>
+<aside>(약 55초) 그럼 무엇을 개선할 수 있을까요. 가장 중요한 건 Sionna의 미분 가능성을 자동 보정으로 바꾸는 것입니다. 지난 KPI 세미나에서 본 드라이브 테스트 RSRP와 DM 로그를 같은 지점의 Sionna 계산과 비교하고, 그 차이를 손실 함수로 삼아 재질의 유전율, 도전율, 산란 계수를 경사하강으로 맞춥니다. Atoll의 자동 보정에 해당하는 기능을 직접 만드는 셈이고, 앞에서 본 Hoydis 그룹의 방법과 공개 코드를 출발점으로 쓸 수 있습니다. 그리고 보정된 재질을 지역별 라이브러리로 쌓아 갈 수 있습니다. 둘째, 장면 품질을 높입니다. 상세 건물과 지형 메시를 쓰고, 항공 영상으로 재질을 분류하고, 식생은 감쇠 볼륨으로 넣습니다. 셋째, 식생이나 대기 감쇠는 후처리로, 다차 회절은 Deygout 같은 반경험식으로 보완합니다. 넷째, 관심 지역만 레이 트레이싱하고 바깥은 통계 모델로 처리하는 하이브리드로 규모 문제를 풉니다. 다섯째, 38.901 통계와 실측으로 검증하는 체계를 갖추고 버전과 설정을 고정합니다. 마지막으로 결과를 망 설계나 시험 툴이 읽을 수 있는 형식으로 내보내면, 상용 툴과 함께 쓸 수 있습니다.</aside>
 </section>
 <section id="choose" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
 <div style="display:flex;flex-direction:column;gap:16px">
@@ -430,7 +495,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">목적별 선택은 발표자 의견 · 실제 도입은 대상 지역 실측 비교로 결정</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 14</p>
 <aside>(약 45초) 그래서 이 도구들은 경쟁이라기보다 역할 분담으로 보는 게 맞습니다. 전국이나 광역 커버리지 설계에는 빠르고 사전 보정된 Atoll이, RAN 시험이나 디지털 트윈 시나리오에는 채널과 셀, UE 에뮬레이션이 한 플랫폼에 있는 VIAVI가, mmWave나 실내 정밀 분석에는 Wireless InSite나 WinProp 같은 검증된 정밀 엔진이, 그리고 AI 학습 데이터, 역문제, 새로운 기술 연구에는 미분 가능하고 자유롭게 고칠 수 있는 Sionna가 맞습니다. 실무적으로는 같은 지역과 같은 실측으로 Sionna와 상용 툴을 함께 돌려 교차 검증하고, 지도와 재질, 실측 데이터는 어느 엔진에도 쓰이는 공통 자산으로 관리하기를 권합니다.</aside>
 </section>
 <section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -452,14 +517,14 @@ body.fs.idle .stage { cursor: none }
 <p style="flex:1;font-size:30px;color:#C9D3E3">빠른 준 3D · 실측 보정 · 망 설계 / 시험 워크플로</p>
 </div>
 <div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px">
-<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#C9D3E3">개선</p>
-<p style="flex:1;font-size:30px;color:#C9D3E3">미분 기반 자동 보정 + 장면 품질 + 하이브리드 규모</p>
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#C9D3E3">학계 · 개선</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">미분 기반 보정 · 신경 대리 모델 → 물리 + 학습 하이브리드</p>
 </div>
 </div>
 <p style="font-family:'Noto Serif KR', Georgia, serif;font-size:44px;font-weight:700;line-height:1.35;color:#F0A36B">정밀한 광선보다<br>정확한 지도와 보정된 재질이 먼저다</p>
 <p style="font-size:24px;line-height:1.45;color:#8DB8E8">다음 단계 제안: [대상 지역] 드라이브 테스트로 Sionna 재질 보정 PoC → 상용 툴 결과와 비교</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#C9D3E3;text-align:right">12 / 12</p>
-<aside>(약 30초) 정리하겠습니다. 레이 트레이싱은 기하광학 근사 위에서 반사, 투과, 회절, 산란을 계산하고, 재질 숫자가 세기를 정합니다. Sionna는 SBR과 이미지법을 결합한 하이브리드에 미분 가능성을 더해 연구와 학습에 강하고, 상용 툴은 빠른 준 3D 계산과 실측 보정, 망 설계와 시험 워크플로에 강합니다. Sionna를 실무에 쓰려면 미분 기반 자동 보정, 장면 품질, 하이브리드 규모 처리를 보강하면 됩니다. 한 줄로 줄이면, 정밀한 광선보다 정확한 지도와 보정된 재질이 먼저입니다. 다음 단계로 대상 지역의 드라이브 테스트 데이터로 Sionna 재질 보정 PoC를 하고 상용 툴 결과와 비교해 보기를 제안드립니다. 감사합니다.</aside>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#C9D3E3;text-align:right">14 / 14</p>
+<aside>(약 30초) 정리하겠습니다. 레이 트레이싱은 기하광학 근사 위에서 반사, 투과, 회절, 산란을 계산하고, 재질 숫자가 세기를 정합니다. Sionna는 SBR과 이미지법을 결합한 하이브리드에 미분 가능성을 더해 연구와 학습에 강하고, 상용 툴은 빠른 준 3D 계산과 실측 보정, 망 설계와 시험 워크플로에 강합니다. 학계는 미분 기반 보정과 신경 대리 모델을 거쳐 물리와 학습을 섞는 방향으로 가고 있고, Sionna를 실무에 쓰려면 이 흐름을 따라 자동 보정, 장면 품질, 하이브리드 규모 처리를 보강하면 됩니다. 한 줄로 줄이면, 정밀한 광선보다 정확한 지도와 보정된 재질이 먼저입니다. 다음 단계로 대상 지역의 드라이브 테스트 데이터로 Sionna 재질 보정 PoC를 하고 상용 툴 결과와 비교해 보기를 제안드립니다. 감사합니다.</aside>
 </section>
     </div>
   </div>
