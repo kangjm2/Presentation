@@ -1,0 +1,37 @@
+<section id="together" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">활용 ③ · 함께 쓰는 법</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">dB에서 시작해 %로, %에서 결정으로</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:stretch;gap:12px">
+<div style="flex:1;background:#D5E3F3;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#255E9E">1 LLS</p>
+<p style="font-size:24px;line-height:1.4">새 수신기: BLER 10% 지점에서 <b>1 dB 이득</b></p>
+</div>
+<p style="font-size:36px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#FBFAF7;border:2px dashed #A84A16;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#A84A16">2 L2S</p>
+<p style="font-size:24px;line-height:1.4">BLER 표 · β를 새 수신기 기준으로 갱신</p>
+</div>
+<p style="font-size:36px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#F7DDCB;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#A84A16">3 SLS</p>
+<p style="font-size:24px;line-height:1.4">하위 5% <b>[+__%]</b> · 평균 <b>[+__%]</b> · 부하별 곡선</p>
+</div>
+<p style="font-size:36px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#14213D;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#F0A36B">4 확인 · 결정</p>
+<p style="font-size:24px;line-height:1.4;color:#F5F3EE">트윈 · 실망 시험으로 확인 후 도입</p>
+</div>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:34%;text-align:left;color:#F5F3EE">질문</th><th style="width:30%;text-align:left;color:#F5F3EE">어디서 시작</th><th style="width:36%;text-align:left;color:#F5F3EE">함께 쓸 것</th></tr>
+<tr style="background:#FBFAF7"><td>수신기 · 채널 추정 알고리즘</td><td>LLS</td><td>SLS로 망 이득 환산</td></tr>
+<tr><td>스케줄러 · 핸드오버 · 간섭 조정</td><td>SLS</td><td>기본 L2S 표</td></tr>
+<tr style="background:#FBFAF7"><td>커버리지 · 장비 적합성</td><td>SLS + 트래픽 모델</td><td>레이 트레이싱 · 실망 통계</td></tr>
+<tr><td>장비의 실제 처리 한계</td><td>UE 에뮬레이터 시험</td><td>SLS 시나리오</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">흐름의 수치는 예시 · [+__%]는 실제 SLS 결과로 채울 값 · 레이 트레이싱 · 트윈 · 트래픽 모델은 이전 세미나 참조</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 50초) 두 시뮬레이션은 함께 써야 의미가 있습니다. 예를 들어 새 수신기를 개발했다고 해 보겠습니다. LLS에서 BLER 10% 지점 기준으로 1 dB 이득을 확인합니다. 그다음 L2S 표와 β 값을 새 수신기 기준으로 갱신하고, SLS에 넣어 하위 5% 사용자와 평균 처리량이 몇 퍼센트 좋아지는지, 부하에 따라 어떻게 달라지는지 봅니다. 마지막으로 디지털 트윈이나 실망 시험으로 확인한 뒤 도입을 결정합니다. dB에서 시작해 퍼센트로, 퍼센트에서 결정으로 가는 흐름입니다. 질문에 따라 시작점이 다릅니다. 수신기 알고리즘은 LLS에서 시작해 SLS로 환산하고, 스케줄러나 핸드오버는 SLS에서 시작하며 기본 L2S 표를 씁니다. 커버리지와 장비 적합성은 SLS와 트래픽 모델에 레이 트레이싱과 실망 통계를 더하고, 장비의 실제 처리 한계는 UE 에뮬레이터 시험으로 봅니다. 지난 세미나들에서 다룬 도구들이 이 지도 위에 놓인다고 보시면 됩니다.</aside>
+</section>

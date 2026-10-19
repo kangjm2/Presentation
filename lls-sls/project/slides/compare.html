@@ -1,0 +1,22 @@
+<section id="compare" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">비교 · 한 장으로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">같은 망, 다른 해상도</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:18%;text-align:left;color:#F5F3EE"></th><th style="width:41%;text-align:left;color:#8DB8E8">LLS</th><th style="width:41%;text-align:left;color:#F0A36B">SLS</th></tr>
+<tr style="background:#FBFAF7"><td><b>질문</b></td><td>이 링크는 얼마나 잘 전송하나</td><td>이 망은 몇 명에게 얼마를 주나</td></tr>
+<tr><td><b>범위</b></td><td>송신기 1 ↔ 수신기 1 (간섭은 잡음으로)</td><td>수십 셀 · 수천 UE, 간섭 · 이동</td></tr>
+<tr style="background:#FBFAF7"><td><b>해상도</b></td><td>비트 · 심볼 · 샘플</td><td>슬롯 · 패킷 · 사용자</td></tr>
+<tr><td><b>정밀한 것</b></td><td>부호 · 변조 · 채널 추정 · 검출</td><td>스케줄링 · 간섭 · 부하 · 이동성</td></tr>
+<tr style="background:#FBFAF7"><td><b>대표 출력</b></td><td>BLER–SNR 곡선, 링크 처리량</td><td>셀 · 사용자 처리량 분포, 용량</td></tr>
+<tr><td><b>대표 도구</b></td><td>MATLAB 5G Toolbox, Sionna PHY, Vienna 5G LLS, OAI</td><td>ns-3 5G-LENA, Vienna 5G SLS, Sionna SYS, 사내 · 상용 SLS</td></tr>
+</table>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#D5E3F3;border-radius:12px;padding:16px 22px"><b style="color:#255E9E">LLS 결과만으로</b> 망 용량을 말하면 간섭 · 부하 · 스케줄링이 빠진다</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:16px 22px"><b style="color:#A84A16">SLS 결과만으로</b> 수신기 이득을 말하면 L2S 표의 가정이 결과를 정한다</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">도구는 대표 예시 · 상용 SLS는 장비사 · 계측사 · 사업자 사내 도구가 많다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 45초) 한 장으로 비교하면 이렇습니다. LLS는 “이 링크가 얼마나 잘 전송하나”를, SLS는 “이 망이 몇 명에게 얼마를 주나”를 묻습니다. LLS는 송신기와 수신기 하나를 비트와 샘플 단위로 보고 간섭은 잡음처럼 다루며, 부호와 변조, 채널 추정, 검출이 정밀합니다. SLS는 수십 셀과 수천 단말을 슬롯과 패킷 단위로 보고, 스케줄링과 간섭, 부하, 이동성이 정밀합니다. 대표 도구로 LLS는 MATLAB 5G Toolbox, Sionna PHY, Vienna 5G, OpenAirInterface가 있고, SLS는 ns-3 5G-LENA, Vienna 5G SLS, Sionna SYS, 그리고 장비사나 사업자의 사내 도구가 많습니다. 흔한 실수는 하나만 보고 결론을 내는 것입니다. LLS만으로 망 용량을 말하면 간섭과 부하가 빠지고, SLS만으로 수신기 이득을 말하면 L2S 표의 가정이 결과를 정해 버립니다.</aside>
+</section>
