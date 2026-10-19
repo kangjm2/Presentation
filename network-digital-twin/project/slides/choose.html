@@ -1,0 +1,30 @@
+<section id="choose" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">시사점 · 목적별 조합</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">무엇을 하려는지에 따라 조합이 달라진다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:26%;text-align:left;color:#F5F3EE">목적</th><th style="width:44%;text-align:left;color:#F5F3EE">추천 조합</th><th style="width:30%;text-align:left;color:#F5F3EE">주의할 점</th></tr>
+<tr style="background:#F5F3EE"><td>AI 모델 학습 데이터 (채널 · PHY)</td><td>AODT 또는 Sionna RT + 실측 보정</td><td>지도·재질 품질이 곧 데이터 품질</td></tr>
+<tr><td>장비 성능 · 용량 검증</td><td>실제 gNB + UE 에뮬레이터 (TM500/E500, UeSIM) + 채널 에뮬레이터</td><td>장비 비용, 시나리오의 현실성</td></tr>
+<tr style="background:#F5F3EE"><td>대규모 RAN 동작 · rApp 검증</td><td>시스템 레벨 시뮬레이터 (TeraVM AI RSG 등) + 핵심 지역만 레이 트레이싱</td><td>프로토콜 단순화 수준 확인</td></tr>
+<tr><td>구축 · 운영 최적화</td><td>사이트 트윈 · 운영 데이터 트윈 (Ericsson Site DT 등)</td><td>실시간 동기화, 데이터 관리</td></tr>
+</table>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#F5F3EE;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">종속 위험</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">GPU · 플랫폼 하나에 묶이지 않도록 인터페이스를 나눠 둔다</p>
+</div>
+<div style="background:#F5F3EE;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">표준 미비</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">O-RAN nGRG 등에서 아직 연구 단계, 트윈 간 호환 없음</p>
+</div>
+<div style="background:#F5F3EE;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">보정 데이터</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">실측 데이터 확보가 트윈 품질의 상한을 정한다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">조합 제안은 발표자 의견 · 제품 선택은 시나리오별 PoC로 확인 필요</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 50초) 그럼 우리는 무엇을 쓰면 될까요. 목적에 따라 다릅니다. AI 모델 학습용 채널 데이터가 목적이면 AODT나 Sionna 같은 레이 트레이싱에 실측 보정을 더하는 조합이 맞고, 이때는 지도와 재질 품질이 곧 데이터 품질입니다. 장비 성능과 용량을 검증하려면 실제 기지국에 TM500, E500이나 UeSIM 같은 UE 에뮬레이터와 채널 에뮬레이터를 붙이는 게 맞습니다. 넓은 지역의 RAN 동작이나 rApp을 검증하려면 시스템 레벨 시뮬레이터를 쓰고 핵심 지역만 레이 트레이싱으로 정밀하게 보는 방식이 현실적입니다. 구축과 운영 최적화에는 사이트 트윈과 운영 데이터 트윈이 맞습니다. 공통 위험으로는 특정 GPU나 플랫폼 종속, 아직 연구 단계인 표준화, 그리고 실측 데이터 확보가 있습니다. 이 조합은 제 의견이고, 실제 선택은 시나리오별 PoC로 확인해야 합니다.</aside>
+</section>

@@ -1,0 +1,29 @@
+<section id="ue" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">단말 계층 · UE 시뮬레이션 도구</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">UE 에뮬레이터: 트윈에 “진짜 부하”를 건다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:48px">
+<div style="width:560px;display:flex;flex-direction:column;gap:20px">
+<div style="background:#F7DDCB;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">하드웨어 UE 에뮬레이터</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">실제 기지국에 RF나 O-RAN 프런트홀로 붙어 수천~수만 대의 단말 행동을 재현. 프로토콜 스택 전체가 돈다</p>
+</div>
+<div style="background:#D5E3F3;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">시뮬레이션 속 UE</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">AODT · AI RSG 안의 가상 단말. 규모와 속도는 좋지만 프로토콜은 단순화</p>
+</div>
+<p style="font-size:26px;line-height:1.45;font-weight:600;color:#A84A16">AODT의 빈칸(RAN·UE 스택)을 채우는 것이 바로 이 층</p>
+</div>
+<table style="flex:1;font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:24%;text-align:left;color:#F5F3EE">제품</th><th style="width:38%;text-align:left;color:#F5F3EE">공개 자료상 규모</th><th style="width:38%;text-align:left;color:#F5F3EE">특징</th></tr>
+<tr style="background:#FBFAF7"><td>VIAVI TM500</td><td>수천 대 (회사 자료)</td><td>4G·5G·O-RAN, RedCap, O-RU 테스터</td></tr>
+<tr><td>VIAVI E500 (E500-D)</td><td>TM500 기반, 최대 24 캐리어 · 36,000 UE (카탈로그)</td><td>대규모 부하·성능 시험 시스템</td></tr>
+<tr style="background:#FBFAF7"><td>Keysight UeSIM</td><td>수천 대 동시 세션</td><td>RF·O-RAN 프런트홀, KDDI 트윈의 UE 에뮬레이션</td></tr>
+<tr><td>Amarisoft UE Simbox</td><td>256(E) · 1,000(MBS) · 서버당 5,000(Infinity)</td><td>소프트웨어 기반, API 자동화, 상대적으로 저렴</td></tr>
+</table>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">VIAVI·Keysight·Amarisoft 제품 자료 기준 · 규모는 구성·소프트웨어 버전에 따라 다르니 최신 데이터시트로 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 55초) 앞에서 AODT의 빈칸이 RAN과 UE 스택이라고 했는데, 그 빈칸을 채우는 것이 UE 시뮬레이션 도구입니다. 두 종류가 있습니다. 하드웨어 UE 에뮬레이터는 실제 기지국에 RF나 O-RAN 프런트홀로 붙어 수천에서 수만 대 단말의 행동을 프로토콜 스택 전체로 재현합니다. 시뮬레이션 속 UE는 AODT나 AI RSG 안의 가상 단말로, 규모와 속도는 좋지만 프로토콜은 단순화됩니다. 대표 제품을 보면, VIAVI TM500은 4G, 5G, O-RAN과 RedCap을 지원하고 회사 자료상 수천 대를 다룹니다. E500은 TM500 기반의 대규모 성능 시험 시스템으로, 데이터센터형 E500-D는 카탈로그상 24 캐리어, 3만 6천 UE까지 지원합니다. Keysight UeSIM은 KDDI 트윈 프로젝트에서 UE 에뮬레이션을 맡고, Amarisoft UE Simbox는 소프트웨어 기반으로 비교적 저렴하게 수백에서 수천 대를 만듭니다. 규모는 구성과 버전에 따라 다르니 최신 데이터시트로 확인해야 합니다.</aside>
+</section>

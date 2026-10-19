@@ -1,0 +1,18 @@
+<section id="limits" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">NVIDIA ③ · 한계</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">AODT가 아직 못 하는 것</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:16%;text-align:left;color:#F5F3EE">영역</th><th style="width:48%;text-align:left;color:#F7DDCB">문서에 나온 제약</th><th style="width:36%;text-align:left;color:#D5E3F3">우리에게 뜻하는 것</th></tr>
+<tr style="background:#F5F3EE"><td>RAN · UE 스택</td><td>전체 RAN/UE 스택은 미구현. MCS 선택은 단일 레이어 SINR→MCS 표</td><td>프로토콜 동작·용량 검증은 별도 RAN·UE 도구 필요</td></tr>
+<tr><td>EM 모델</td><td>회절은 광선당 1회, 확산 산란은 Lambertian 패턴만</td><td>다중 회절·거친 표면 환경에서 오차 가능</td></tr>
+<tr style="background:#F5F3EE"><td>규모</td><td>RU당 광선 수·산란 횟수·UE 수에 상한 (예: 1M rays, 5회, 10,000 UE)</td><td>도시 전체는 분할하거나 해상도를 낮춰야</td></tr>
+<tr><td>하드웨어</td><td>백엔드에 대용량 GPU 메모리 (예: 48 GB 이상, 참조 시스템 RTX 6000 Ada ×2)</td><td>장비 비용, NVIDIA GPU 종속</td></tr>
+<tr style="background:#F5F3EE"><td>데이터</td><td>3D 지도·재질 준비와 실측 보정은 사용자 몫</td><td>트윈의 정확도는 결국 우리 데이터에 달림</td></tr>
+</table>
+<p style="font-size:28px;line-height:1.4;font-weight:600;color:#A84A16">전파는 강하지만, “망”과 “단말”과 “실측 보정”은 다른 도구로 채워야 한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">AODT 문서 1.0–1.4 · NVIDIA 포럼 답변 기준 · 최신 버전에서 일부 완화됐을 수 있음</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 55초) 반대로 한계도 분명합니다. AODT 문서에 따르면 전체 RAN과 UE 프로토콜 스택은 구현되어 있지 않고, MCS 선택도 단일 레이어 기준의 SINR 대 MCS 표를 씁니다. 그래서 프로토콜 동작이나 용량을 검증하려면 별도의 RAN·UE 도구가 필요합니다. EM 모델은 회절을 광선당 한 번만 고려하고, 확산 산란은 Lambertian 패턴만 지원합니다. 규모에도 상한이 있어서 초기 문서 기준으로 RU당 광선 100만 개, 산란 5회, UE 1만 개 같은 제약이 있고, 도시 전체를 하려면 나눠야 합니다. 하드웨어는 백엔드에 대용량 메모리 GPU가 필요하고 NVIDIA GPU에 종속됩니다. 마지막으로 3D 지도와 재질 준비, 실측 보정은 사용자 몫이라, 트윈의 정확도는 결국 우리 데이터에 달려 있습니다. 이 값들은 1.0에서 1.4 문서 기준이라 최신 버전에서는 일부 완화됐을 수 있습니다.</aside>
+</section>
