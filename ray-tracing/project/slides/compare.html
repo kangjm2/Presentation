@@ -1,0 +1,23 @@
+<section id="compare" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">비교 · 한 장으로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">차이는 엔진보다 출력 · 보정 · 규모에 있다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:14%;text-align:left;color:#F5F3EE"></th><th style="width:22%;text-align:left;color:#F0A36B">Sionna RT</th><th style="width:22%;text-align:left;color:#F5F3EE">Atoll (Aster)</th><th style="width:21%;text-align:left;color:#F5F3EE">VIAVI AI RSG</th><th style="width:21%;text-align:left;color:#F5F3EE">Wireless InSite</th></tr>
+<tr style="background:#FBFAF7"><td><b>경로 탐색</b></td><td>SBR + 이미지법</td><td>수직면 회절 + 수평면 레이 런칭</td><td>3D 레이 트레이싱 (비공개)</td><td>GPU SBR + exact path</td></tr>
+<tr><td><b>출력</b></td><td>경로별 CIR · 각도 · 편파</td><td>경로손실 · 커버리지 맵</td><td>채널 + 망 KPI 시나리오</td><td>경로 · CIR · MIMO 채널</td></tr>
+<tr style="background:#FBFAF7"><td><b>실측 보정</b></td><td>미분으로 직접 구현</td><td>사전 보정 + 자동 보정</td><td>현장 데이터로 보정</td><td>재질 조정 (수동)</td></tr>
+<tr><td><b>규모</b></td><td>GPU 한 대에 올라가는 장면</td><td>수천 사이트 망 설계</td><td>도시 규모 셀 · UE 에뮬레이션</td><td>지역 · 실내 정밀 분석</td></tr>
+<tr style="background:#FBFAF7"><td><b>회절 · 산란</b></td><td>회절 1차, 확산 산란</td><td>지붕 · 모서리 회절 중심</td><td>공개 자료 없음</td><td>UTD 회절, 확산 산란</td></tr>
+<tr><td><b>미분</b></td><td>가능 (Dr.Jit)</td><td>없음</td><td>없음 (공개 자료 기준)</td><td>없음</td></tr>
+<tr style="background:#FBFAF7"><td><b>성격</b></td><td>오픈소스 라이브러리</td><td>상용 망 설계 툴</td><td>상용 시험 플랫폼</td><td>상용 EM 해석 툴</td></tr>
+</table>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:16px 22px"><b style="color:#F0A36B">Sionna가 앞서는 곳</b> 미분 가능성, 경로 단위 출력, 코드로 마음대로 바꿀 수 있음</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:16px 22px"><b style="color:#A84A16">상용이 앞서는 곳</b> 지도 데이터 처리, 실측 보정 노하우, 대규모 운영 워크플로</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">공개 자료 기준의 발표자 정리 · 상용 툴의 세부 기능은 버전 · 라이선스 구성에 따라 다름</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 55초) 한 장으로 비교해 보겠습니다. 경로를 찾는 엔진만 보면 Sionna와 Wireless InSite는 같은 계열이고, Atoll Aster는 두 평면으로 나눈 방식, VIAVI는 공개되지 않았습니다. 하지만 실제 차이는 엔진보다 출력, 보정, 규모에 있습니다. Sionna는 경로마다 CIR과 각도, 편파까지 내놓는 반면, Atoll은 망 설계에 필요한 경로손실과 커버리지 맵에 집중합니다. 실측 보정은 Atoll이 사전 보정과 자동 보정을 기본 제공하고, VIAVI도 현장 데이터로 보정하지만, Sionna는 미분 기능으로 직접 만들어야 합니다. 규모도 Sionna는 GPU 한 대에 올라가는 장면이 기본이고, Atoll은 수천 사이트, VIAVI는 도시 규모 에뮬레이션을 겨냥합니다. 그래서 Sionna가 앞서는 곳은 미분 가능성과 경로 단위 출력, 그리고 코드로 마음대로 바꿀 수 있다는 점이고, 상용이 앞서는 곳은 지도 데이터 처리와 실측 보정 노하우, 대규모 운영 워크플로입니다.</aside>
+</section>

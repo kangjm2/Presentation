@@ -1,0 +1,30 @@
+<section id="search" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">원리 ③ · 경로를 찾는 알고리즘</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">정확한 이미지법, 빠른 SBR, 그리고 둘의 결합</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #255E9E;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#255E9E">이미지법</h3>
+<svg aria-label="벽 아래쪽에 송신점의 거울상을 만들고, 거울상과 수신점을 잇는 점선이 벽과 만나는 곳을 반사점으로 정하는 그림" style="width:460px;height:190px" width="460" height="190" viewBox="0 0 460 190"><line x1="20" y1="110" x2="440" y2="110" stroke="#5E6675" stroke-width="6"/><polyline points="80,40 230,110 380,40" fill="none" stroke="#255E9E" stroke-width="5"/><line x1="230" y1="110" x2="80" y2="180" stroke="#5E6675" stroke-width="3" stroke-dasharray="8 6"/><g fill="#14213D"><circle cx="80" cy="40" r="10"/><circle cx="380" cy="40" r="10"/></g><circle cx="80" cy="180" r="9" fill="none" stroke="#14213D" stroke-width="3"/></svg>
+<p style="font-size:24px;line-height:1.45"><b>장점</b> 정확한 경로 · 위상</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262"><b style="color:#14213D">단점</b> 면 N개, 반사 k차면 후보가 Nᵏ로 폭증</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #A84A16;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#A84A16">SBR (광선 발사)</h3>
+<svg aria-label="송신점에서 사방으로 광선을 쏘고 벽에 튕긴 광선 하나가 수신점 둘레의 수신 구에 걸리는 그림" style="width:460px;height:190px" width="460" height="190" viewBox="0 0 460 190"><line x1="20" y1="170" x2="440" y2="170" stroke="#5E6675" stroke-width="6"/><g stroke="#A84A16" stroke-width="2" stroke-opacity="0.55"><line x1="80" y1="60" x2="200" y2="10"/><line x1="80" y1="60" x2="250" y2="40"/><line x1="80" y1="60" x2="260" y2="80"/><line x1="80" y1="60" x2="240" y2="130"/><line x1="80" y1="60" x2="20" y2="10"/><line x1="80" y1="60" x2="20" y2="120"/><line x1="80" y1="60" x2="140" y2="170"/></g><polyline points="80,60 210,170 360,52" fill="none" stroke="#A84A16" stroke-width="4"/><g fill="#14213D"><circle cx="80" cy="60" r="10"/><circle cx="370" cy="60" r="8"/></g><circle cx="370" cy="60" r="26" fill="none" stroke="#14213D" stroke-width="2" stroke-dasharray="5 4"/></svg>
+<p style="font-size:24px;line-height:1.45"><b>장점</b> 빠름, 복잡한 장면 · GPU에 적합</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262"><b style="color:#14213D">단점</b> 수신 구 근사 → 위상 오차, 경로 누락 · 중복</p>
+</div>
+<div style="background:#14213D;border-top:6px solid #F0A36B;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25;color:#F0A36B">하이브리드</h3>
+<svg aria-label="흐린 광선 여러 개 위에 정확히 수신점에 닿는 굵은 경로 하나가 겹쳐 그려진 그림" style="width:460px;height:190px" width="460" height="190" viewBox="0 0 460 190"><line x1="20" y1="170" x2="440" y2="170" stroke="#5E6675" stroke-width="6"/><g stroke="#8DB8E8" stroke-width="2" stroke-opacity="0.5"><polyline points="80,60 200,170 350,40" fill="none"/><polyline points="80,60 220,170 380,75" fill="none"/></g><polyline points="80,60 212,170 370,60" fill="none" stroke="#F0A36B" stroke-width="5"/><g fill="#F5F3EE"><circle cx="80" cy="60" r="10"/><circle cx="370" cy="60" r="10"/></g></svg>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE"><b>SBR로 후보 찾기 → 이미지법으로 정확히</b></p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">Sionna RT · Wireless InSite X3D 등 최근 엔진의 주류</p>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">SBR = Shooting and Bouncing Rays. 광선 수를 늘리면 누락은 줄지만 계산량이 늘고, 이미지법은 반사 차수가 오를수록 감당하기 어렵다.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림은 개념도 · 수신 구(reception sphere)는 이산 광선을 받기 위한 근사</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 55초) 그럼 경로는 어떻게 찾을까요. 방법은 크게 둘입니다. 이미지법은 반사면마다 송신점의 거울상을 만들고, 거울상과 수신점을 직선으로 이어 반사점을 정확히 구합니다. 경로와 위상이 정확하지만, 면이 N개이고 반사를 k번까지 보면 후보가 N의 k제곱으로 늘어나 복잡한 도시에서는 감당하기 어렵습니다. SBR, 즉 광선 발사 방식은 송신점에서 사방으로 광선을 많이 쏘고 부딪힐 때마다 튕기게 한 뒤, 수신점 둘레의 수신 구에 걸린 광선을 경로로 봅니다. 빠르고 GPU에 잘 맞지만, 수신 구라는 근사 때문에 위상 오차가 생기고, 광선 사이로 경로가 빠지거나 같은 경로가 중복될 수 있습니다. 그래서 최근 엔진은 둘을 결합합니다. SBR로 어떤 면들을 거치는지 후보를 빠르게 찾고, 이미지법으로 그 경로를 정확히 다시 계산합니다. Sionna RT와 Remcom의 Wireless InSite X3D가 이 방식입니다.</aside>
+</section>

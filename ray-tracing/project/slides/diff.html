@@ -1,0 +1,37 @@
+<section id="diff" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">Sionna RT ② · 미분 가능한 레이 트레이서</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">결과에서 거꾸로, 입력의 기울기를 구한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:48px">
+<div style="width:860px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
+<p style="flex:1;font-size:24px;font-weight:600;text-align:center;background:#FBFAF7;border-radius:10px;padding:14px 0px">재질 ε, σ · 위치 · 방향 · 안테나</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="width:200px;font-size:24px;font-weight:600;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:14px 0px">레이 트레이싱</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="width:200px;font-size:24px;font-weight:600;text-align:center;background:#FBFAF7;border-radius:10px;padding:14px 0px">CIR · 커버리지</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#A84A16;text-align:center">← ∂(오차) / ∂(입력) : Dr.Jit 자동 미분으로 역전파</p>
+<div style="display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:10px;padding:12px 18px"><b style="color:#A84A16">재질 보정</b> 측정 RSRP · 지연과의 차이를 줄이도록 ε, σ를 학습</p>
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:10px;padding:12px 18px"><b style="color:#A84A16">배치 최적화</b> 커버리지가 커지도록 송신기 위치 · 방향을 경사하강</p>
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:10px;padding:12px 18px"><b style="color:#A84A16">학습 연동</b> TensorFlow · PyTorch 모델과 한 그래프로 묶는다</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">버전 흐름</h3>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:30%;text-align:left;color:#F5F3EE">버전</th><th style="width:70%;text-align:left;color:#F5F3EE">변화</th></tr>
+<tr style="background:#FBFAF7"><td>0.x</td><td>TensorFlow 기반, RIS 지원</td></tr>
+<tr><td>1.0 (2025.3)</td><td>Mitsuba 3 · Dr.Jit로 재작성, 투과 추가, 회절 잠시 빠짐</td></tr>
+<tr style="background:#FBFAF7"><td>1.2 (2025.9)</td><td>회절 복귀, 더 많은 경로 · 메모리 절감</td></tr>
+<tr><td>2.1 (2026.9)</td><td>P.2040-4 재질, 커버리지 맵 회절, 결정적 모드</td></tr>
+<tr style="background:#FBFAF7"><td>2.2 (2026.9)</td><td>레이더 단면적(RCS) · 센싱 대상</td></tr>
+</table>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NVlabs/sionna-rt 릴리스 노트 · Sionna RT Technical Report · Apache 2.0 오픈소스</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 50초) Sionna RT의 가장 큰 차별점은 미분이 가능하다는 것입니다. 레이 트레이싱 전체가 Dr.Jit라는 자동 미분 컴파일러 위에서 돌기 때문에, 결과의 오차를 재질, 위치, 방향, 안테나 같은 입력에 대해 거꾸로 미분할 수 있습니다. 그러면 측정한 RSRP나 지연과의 차이를 줄이도록 재질 값을 학습하는 보정, 커버리지가 커지도록 송신기 위치와 방향을 경사하강으로 찾는 배치 최적화, 그리고 신경망과 하나의 그래프로 묶는 학습이 가능합니다. 상용 툴에는 없는 기능입니다. 버전 흐름도 알아 두면 좋습니다. 2025년 3월 1.0에서 Mitsuba와 Dr.Jit 기반으로 새로 작성되면서 투과가 들어오고 회절은 잠시 빠졌다가, 9월 1.2에서 회절이 돌아왔습니다. 올해 9월 2.1에서는 최신 P.2040 재질과 커버리지 맵 회절, 같은 입력에 항상 같은 결과를 내는 결정적 모드가 추가됐고, 2.2에서는 레이더 단면적과 센싱 대상이 들어왔습니다. 빠르게 바뀌고 있어서 버전을 꼭 명시해야 합니다.</aside>
+</section>
