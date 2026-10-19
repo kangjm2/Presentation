@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-19T16:00:00Z"},
+  "lists": "css",
+  "title": "레이 트레이싱: Sionna RT와 상용 툴",
+  "order": ["cover", "geo", "interact", "search", "sionna", "diff", "tools", "compare", "limits", "improve", "choose", "summary"],
+  "sections": {
+    "physics": {"description": "물리·전자기적 원리: 기하광학 근사, 상호작용, 경로 탐색 알고리즘", "start": "cover"},
+    "sionna": {"description": "Sionna RT의 처리 방식: 경로 탐색 파이프라인과 미분 가능성", "start": "sionna"},
+    "market": {"description": "상용 툴(Atoll, VIAVI, Wireless InSite, WinProp)의 방식과 비교", "start": "tools"},
+    "wrap": {"description": "Sionna의 한계, 개선 여지, 목적별 선택과 정리", "start": "limits"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}
