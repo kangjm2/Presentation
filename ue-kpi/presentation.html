@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>UE KPI로 읽는 RAN</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="기지국 주변을 지나는 드라이브 테스트 경로와, 경로 위 측정 지점이 기지국에서 멀어질수록 파랑에서 주황, 빨강으로 바뀌는 커버리지 지도" style="position:absolute;left:1040px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><g fill="none" stroke="#F0A36B" stroke-width="3"><circle cx="560" cy="600" r="120" stroke-opacity="0.6"/><circle cx="560" cy="600" r="260" stroke-opacity="0.35"/><circle cx="560" cy="600" r="420" stroke-opacity="0.18"/></g><polyline points="80,1000 190,920 300,950 400,860 470,760 560,740 660,690 720,580 680,470 760,360 840,280" fill="none" stroke="#34446A" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><g><circle cx="80" cy="1000" r="13" fill="#E2725B"/><circle cx="190" cy="920" r="13" fill="#E2725B"/><circle cx="300" cy="950" r="13" fill="#F0A36B"/><circle cx="400" cy="860" r="13" fill="#F0A36B"/><circle cx="470" cy="760" r="13" fill="#8DB8E8"/><circle cx="560" cy="740" r="13" fill="#8DB8E8"/><circle cx="660" cy="690" r="13" fill="#8DB8E8"/><circle cx="720" cy="580" r="13" fill="#8DB8E8"/><circle cx="680" cy="470" r="13" fill="#8DB8E8"/><circle cx="760" cy="360" r="13" fill="#F0A36B"/><circle cx="840" cy="280" r="13" fill="#E2725B"/></g><polygon points="560,566 534,616 586,616" fill="#F0A36B"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">KPI 세미나 · 10분</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">단말이 본 망을 읽다<br>UE KPI와 RAN 최적화</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">XCAL5 같은 UE DM 툴이 수집하는 KPI의 의미,<br>그리고 DU 최적화와 RU 배치에 쓰는 법</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 오늘은 단말 쪽에서 수집하는 KPI를 다룹니다. XCAL5 같은 UE DM 툴이 보여 주는 숫자 하나하나가 무엇을 뜻하는지 정리하고, 이 숫자로 DU 파라미터를 어떻게 고치고 RU를 어디에 어떻게 세울지 판단하는 방법까지 이어서 보겠습니다.</aside>
+</section>
+<section id="dm" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">도입 · UE DM 툴</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">단말 칩셋의 로그를 위치와 함께 모은다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="width:620px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-left:6px solid #14213D;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">시험 단말 (칩셋)</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">모뎀이 L1~L3 진단(DM) 로그를 낸다</p>
+</div>
+<p style="font-size:28px;color:#A84A16;text-align:center">↓ USB 진단 포트</p>
+<div style="background:#F7DDCB;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">XCAL5 (수집)</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">실시간 표시 · GPS 위치 결합 · 시험 자동화</p>
+</div>
+<p style="font-size:28px;color:#A84A16;text-align:center">↓ 로그 파일</p>
+<div style="background:#D5E3F3;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">후처리 (XCAP 등)</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">KPI 지도 · 통계 · 이벤트 추적</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:22%;text-align:left;color:#F5F3EE"></th><th style="width:39%;text-align:left;color:#F7DDCB">UE DM 로그</th><th style="width:39%;text-align:left;color:#D5E3F3">기지국 OSS 카운터</th></tr>
+<tr style="background:#FBFAF7"><td>관점</td><td>단말 한 대가 겪은 그대로</td><td>셀 전체 단말의 평균</td></tr>
+<tr><td>위치</td><td>GPS로 지점마다</td><td>셀 · 섹터 단위</td></tr>
+<tr style="background:#FBFAF7"><td>시간 해상도</td><td>슬롯 · 메시지 단위</td><td>15분 ~ 1시간 집계</td></tr>
+<tr><td>범위</td><td>측정한 경로만</td><td>모든 단말 · 모든 시간</td></tr>
+<tr style="background:#FBFAF7"><td>강점</td><td>원인 추적 (L1~L3 메시지)</td><td>추세 · 부하 파악</td></tr>
+</table>
+<div style="background:#14213D;border-radius:16px;padding:22px 28px">
+<p style="font-size:28px;line-height:1.45;color:#F5F3EE">OSS는 <b style="color:#F0A36B">어느 셀이</b> 아픈지, DM 로그는 <b style="color:#F0A36B">어디서 왜</b> 아픈지 알려 준다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Accuver XCAL5 제품 소개 기준 · 지원 칩셋 · 화면 구성은 버전에 따라 다름</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<aside>(약 50초) 먼저 DM 툴이 무엇인지부터 보겠습니다. 시험 단말의 모뎀 칩셋은 물리 계층부터 RRC까지 진단 로그, 즉 DM 로그를 내보냅니다. XCAL5는 이 로그를 USB 진단 포트로 받아 실시간으로 보여 주고, GPS 위치와 묶어서 저장합니다. 저장한 로그는 XCAP 같은 후처리 도구로 지도와 통계로 만듭니다. 이 데이터는 기지국의 OSS 카운터와 성격이 다릅니다. OSS는 셀 전체 단말을 15분이나 1시간 단위로 평균한 값이고, DM 로그는 단말 한 대가 특정 지점, 특정 순간에 겪은 일을 메시지 단위로 보여 줍니다. 그래서 OSS는 어느 셀이 아픈지 알려 주고, DM 로그는 어디서 왜 아픈지 알려 준다고 정리할 수 있습니다. 두 가지를 함께 써야 합니다.</aside>
+</section>
+<section id="map" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">KPI 지도 · 여섯 묶음</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">아래층이 나쁘면 위층이 따라 나빠진다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">① 수신 세기 · 품질</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">SS-RSRP · SS-RSRQ · SS-SINR, CSI-RSRP · CSI-SINR</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">② 셀 · 빔 식별</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">PCI · NR-ARFCN · SSB 인덱스 · 이웃 셀 · TA</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">③ 링크 적응</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">CQI · RI · PMI · MCS · BLER · HARQ 재전송</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">④ 자원 · 처리량</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">RB 수 · 스케줄링 비율 · 레이어 · PHY~App 처리량</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">⑤ 상향 링크</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">UL 송신 전력 · PHR · UL MCS · UL BLER</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">⑥ 이동성 · 신뢰성</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">HO 시도 · 성공, RLF, RACH, 접속 성공 · 호 단절</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px">
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#F7DDCB;border-radius:10px;padding:12px 0px">무선 환경 ① ②</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 0px">링크 적응 ③ ⑤</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 0px">자원 · 처리량 ④</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:12px 0px">사용자 체감 ⑥</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">분석 순서: 위층(처리량 · 끊김)에서 증상을 찾고, 아래층으로 내려가며 원인을 찾는다. 주황 = 주로 RU 배치, 파랑 = 주로 DU 설정과 연결</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">KPI 이름은 3GPP 용어 기준 · XCAL5 화면 · 필드 이름은 버전과 칩셋에 따라 다를 수 있음</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) DM 툴이 보여 주는 KPI는 수백 개지만, 여섯 묶음으로 나누면 정리가 됩니다. 수신 세기와 품질, 어느 셀과 빔인지 알려 주는 식별 정보, CQI부터 BLER까지의 링크 적응, 자원과 처리량, 상향 링크, 그리고 핸드오버와 끊김 같은 이동성·신뢰성입니다. 중요한 건 이 묶음들이 층을 이룬다는 점입니다. 무선 환경이 나쁘면 링크 적응이 낮은 MCS를 고르고, 그러면 처리량이 떨어지고, 결국 사용자 체감이 나빠집니다. 그래서 분석할 때는 위층에서 증상을 찾고, 아래층으로 내려가며 원인을 찾습니다. 색으로 구분했듯이 아래층 무선 환경은 주로 RU 배치와, 가운데 링크 적응과 자원은 주로 DU 설정과 연결됩니다. 오늘 쓰는 이름은 3GPP 용어 기준이고, XCAL5 화면의 필드 이름은 버전에 따라 조금 다를 수 있습니다.</aside>
+</section>
+<section id="radio" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">의미 ① · 수신 세기와 품질</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RSRP는 크기, SINR은 깨끗함</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:17%;text-align:left;color:#F5F3EE">KPI</th><th style="width:38%;text-align:left;color:#F5F3EE">정의 (TS 38.215)</th><th style="width:17%;text-align:left;color:#F5F3EE">보고 범위</th><th style="width:28%;text-align:left;color:#F5F3EE">해석 예시 (경험치)</th></tr>
+<tr style="background:#FBFAF7"><td><b>SS-RSRP</b></td><td>SSS가 실린 자원 요소(RE) 하나당 평균 수신 전력</td><td>−156 ~ −31 dBm</td><td>−90 이상 양호, −110 이하 커버리지 부족</td></tr>
+<tr><td><b>SS-RSRQ</b></td><td>N × RSRP ÷ RSSI — 전체 수신 전력 중 내 셀 신호의 비중</td><td>−43 ~ 20 dB</td><td>−10 이상 양호, −15 이하 간섭 · 부하 의심</td></tr>
+<tr style="background:#FBFAF7"><td><b>SS-SINR</b></td><td>SSS 전력 ÷ (간섭 + 잡음), 같은 RE에서</td><td>−23 ~ 40 dB</td><td>20 이상 우수, 0 이하 간섭 심함</td></tr>
+<tr><td><b>CSI-RSRP · SINR</b></td><td>CSI-RS 기준. 연결 상태에서 단말별로 설정된 신호</td><td>SS와 같은 방식</td><td>실제 데이터 빔의 품질에 더 가깝다</td></tr>
+</table>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">SS vs CSI-RS</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">SSB는 셀 공통 빔(접속 · 셀 선택용), CSI-RS는 단말 맞춤(데이터용)</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">RSRQ가 낮다면</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">RSSI에 이웃 셀 신호와 내 셀의 데이터 부하가 함께 들어간다</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">같이 봐야 한다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">RSRP만 좋아도, SINR만 좋아도 안 된다 → 10쪽의 네 칸 진단</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">정의 TS 38.215 · 보고 범위 TS 38.133 · 해석 기준은 사업자 · 대역 · 서비스에 따라 다른 예시값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 55초) 가장 기본인 세 가지부터 보겠습니다. SS-RSRP는 동기 신호 중 SSS가 실린 자원 요소 하나당 평균 수신 전력입니다. 대역폭과 상관없이 신호가 얼마나 크게 들어오는지를 봅니다. SS-RSRQ는 RSRP에 자원 블록 수를 곱해 전체 수신 전력인 RSSI로 나눈 값으로, 받은 전력 중 내 셀 신호의 비중입니다. RSSI에는 이웃 셀 신호와 내 셀의 데이터 부하가 같이 들어가서, 부하가 많을 때도 낮아질 수 있습니다. SS-SINR은 같은 자원에서 신호 전력을 간섭과 잡음의 합으로 나눈 값으로, 신호가 얼마나 깨끗한지를 봅니다. 연결 상태에서는 단말별로 설정한 CSI-RS 기준 값도 나오는데, 실제 데이터 빔 품질에 더 가깝습니다. 오른쪽 해석 기준은 흔히 쓰는 경험치일 뿐이고, 사업자와 대역마다 다릅니다. 핵심은 RSRP는 크기, SINR은 깨끗함이라서, 둘을 같이 봐야 원인이 갈린다는 점입니다.</aside>
+</section>
+<section id="beam" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">의미 ② · 셀과 빔 식별</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“어느 셀의 어느 빔”인지가 먼저다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="position:relative;width:760px;height:560px">
+<svg aria-label="왼쪽 아래 RU에서 오른쪽 위로 부채꼴처럼 퍼지는 SSB 빔 여덟 개 가운데 여섯 번째 빔이 강조되어 있고, 그 빔 안에 단말이 있는 그림" style="position:absolute;left:0px;top:0px;width:760px;height:560px" width="760" height="560" viewBox="0 0 760 560"><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-75 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-65 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-55 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-45 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-35 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-25 90 470)" fill="#A84A16" fill-opacity="0.55" stroke="#A84A16" stroke-width="3" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-15 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-5 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><polygon points="90,440 66,490 114,490" fill="#14213D"/><rect x="420" y="290" width="28" height="44" rx="6" fill="#14213D"/><line x1="90" y1="520" x2="560" y2="520" stroke="#5E6675" stroke-width="3" stroke-dasharray="10 8"/><polygon points="560,520 546,513 546,527" fill="#5E6675"/></svg>
+<p style="position:absolute;left:180px;top:0px;width:80px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E">#0</p>
+<p style="position:absolute;left:560px;top:400px;width:80px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E">#7</p>
+<p style="position:absolute;left:462px;top:290px;width:230px;font-size:24px;font-weight:600;color:#A84A16;background:#FBFAF7;border:2px solid #A84A16;border-radius:8px;padding:2px 10px">UE · best SSB #5</p>
+<p style="position:absolute;left:0px;top:498px;width:60px;font-size:24px;font-weight:600">RU</p>
+<p style="position:absolute;left:130px;top:528px;width:600px;font-size:24px;color:#5E6675">TA: RU까지의 거리 (30 kHz SCS에서 1단계 ≈ 39 m)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px;border-bottom:1px solid #DCD8CE">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">PCI (0 ~ 1007)</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">셀 구분 번호. 가까운 셀끼리 겹치면 혼동 · 간섭</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px;border-bottom:1px solid #DCD8CE">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">NR-ARFCN · 대역 · SCS</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">어느 반송파 · 대역폭에 붙었는지 (NSA면 LTE 앵커도 함께)</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px;border-bottom:1px solid #DCD8CE">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">SSB 인덱스 (빔 번호)</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">빔 최대 개수: 저대역 4 · FR1 중대역 8 · FR2 64</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px;border-bottom:1px solid #DCD8CE">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">이웃 셀 목록</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">주변 셀의 PCI · RSRP — 겹침 정도와 HO 후보</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">Timing Advance</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">상향 송신 시점 보정 → 서빙 RU까지 거리 추정</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.211 (PCI · TA 단위) · TS 38.213 (SSB 빔 개수 · TA 명령) · 그림의 빔 개수와 방향은 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 50초) 수신 세기를 해석하려면 그 값이 어느 셀의 어느 빔에서 온 것인지 먼저 알아야 합니다. PCI는 0부터 1007까지의 셀 구분 번호이고, 가까운 셀끼리 겹치면 혼동이나 간섭이 생깁니다. NR-ARFCN과 대역, 부반송파 간격은 어느 반송파에 붙었는지 알려 주고, NSA 망이라면 LTE 앵커 셀도 함께 봐야 합니다. 5G에서는 SSB를 여러 빔으로 나눠 보내기 때문에, SSB 인덱스가 곧 빔 번호입니다. 그림처럼 단말이 몇 번 빔에 잡혔는지 보면 RU의 어느 방향이 이 지점을 맡고 있는지 알 수 있습니다. 이웃 셀 목록은 주변 셀이 얼마나 겹치는지 보여 주고, Timing Advance는 상향 송신 시점 보정값이라 서빙 RU까지의 거리를 추정할 수 있습니다. 30 kHz 부반송파 간격에서 한 단계가 약 39미터입니다. 이 정보들이 뒤에서 RU 배치 문제를 짚는 단서가 됩니다.</aside>
+</section>
+<section id="linkadapt" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">의미 ③ · 링크 적응</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">단말이 추천하고, DU가 결정하고, BLER로 채점한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="position:relative;width:860px;height:560px">
+<svg aria-label="네 상자가 시계 방향으로 도는 순환: 단말 측정과 보고, DU 스케줄러 결정, PDSCH 전송, HARQ 피드백. 가운데 OLLA 상자가 HARQ 결과를 받아 스케줄러로 보정값을 넘긴다" style="position:absolute;left:0px;top:0px;width:860px;height:560px" width="860" height="560" viewBox="0 0 860 560"><g stroke="#14213D" stroke-width="4"><line x1="360" y1="75" x2="484" y2="75"/><line x1="680" y1="160" x2="680" y2="384"/><line x1="500" y1="475" x2="376" y2="475"/><line x1="180" y1="400" x2="180" y2="176"/></g><g fill="#14213D"><polygon points="500,75 484,67 484,83"/><polygon points="680,400 672,384 688,384"/><polygon points="360,475 376,467 376,483"/><polygon points="180,160 172,176 188,176"/></g><g stroke="#A84A16" stroke-width="3" stroke-dasharray="10 8"><line x1="300" y1="400" x2="300" y2="346"/><line x1="560" y1="230" x2="560" y2="176"/></g><g fill="#A84A16"><polygon points="300,330 292,346 308,346"/><polygon points="560,160 552,176 568,176"/></g></svg>
+<div style="position:absolute;left:0px;top:0px;width:360px;height:160px;background:#F7DDCB;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">① UE 측정 · 보고</h3>
+<p style="font-size:24px;color:#4A5262">CSI-RS → CQI · RI · PMI</p>
+</div>
+<div style="position:absolute;left:500px;top:0px;width:360px;height:160px;background:#D5E3F3;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">② DU 스케줄러</h3>
+<p style="font-size:24px;color:#4A5262">MCS · 레이어 · RB 결정</p>
+</div>
+<div style="position:absolute;left:500px;top:400px;width:360px;height:160px;background:#D5E3F3;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">③ PDSCH 전송</h3>
+<p style="font-size:24px;color:#4A5262">DU → RU → UE</p>
+</div>
+<div style="position:absolute;left:0px;top:400px;width:360px;height:160px;background:#F7DDCB;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">④ HARQ 피드백</h3>
+<p style="font-size:24px;color:#4A5262">ACK / NACK → BLER</p>
+</div>
+<div style="position:absolute;left:200px;top:230px;width:460px;height:100px;background:#FBFAF7;border:3px dashed #A84A16;border-radius:14px;padding:10px 18px;display:flex;flex-direction:column;justify-content:center;gap:2px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.2;color:#A84A16;text-align:center">OLLA (외부 루프 보정)</h3>
+<p style="font-size:24px;color:#4A5262;text-align:center">BLER 목표(흔히 10%)에 맞춰 MCS 가감</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;line-height:1.4"><b style="color:#A84A16">CQI (0~15)</b> “이 MCS면 BLER 10% 안쪽”이라는 단말의 추천</p>
+<p style="font-size:24px;line-height:1.4"><b style="color:#A84A16">RI</b> 받을 수 있는 레이어 수 (채널 랭크)</p>
+<p style="font-size:24px;line-height:1.4"><b style="color:#A84A16">PMI</b> 단말이 선호하는 프리코더 (코드북 번호)</p>
+<p style="font-size:24px;line-height:1.4"><b style="color:#255E9E">MCS</b> 실제 쓰인 변조 · 부호율 (256QAM 표 0~27)</p>
+<p style="font-size:24px;line-height:1.4"><b style="color:#255E9E">BLER</b> 첫 전송 실패율(Initial) · 재전송 후 실패율(Residual)</p>
+<div style="background:#14213D;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">CQI ↑ 인데 MCS ↓ → DU가 <b style="color:#F0A36B">보수적</b></p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">MCS ↑ 인데 BLER ↑ → DU가 <b style="color:#F0A36B">공격적</b></p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">CQI · MCS 표 TS 38.214 · BLER 목표와 OLLA 방식은 벤더 구현에 따라 다름</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 55초) 다음은 링크 적응입니다. 단말은 CSI-RS를 측정해서 CQI, RI, PMI를 보고합니다. CQI는 이 정도 MCS를 쓰면 블록 오류율이 10% 안쪽일 거라는 단말의 추천이고, RI는 동시에 받을 수 있는 레이어 수, PMI는 선호하는 프리코더 번호입니다. 이걸 받은 DU 스케줄러가 실제 MCS와 레이어 수, RB를 정해서 보내고, 단말은 성공하면 ACK, 실패하면 NACK을 돌려줍니다. 이 실패 비율이 BLER입니다. 첫 전송 기준의 Initial BLER와, 재전송까지 해도 실패한 Residual BLER를 구분해서 봅니다. 그리고 DU는 BLER가 목표, 흔히 10%에 맞도록 MCS를 조금씩 올리거나 내리는데, 이걸 OLLA라고 합니다. 그래서 해석은 간단합니다. CQI는 높은데 MCS가 낮으면 DU가 보수적인 것이고, MCS는 높은데 BLER가 높으면 DU가 공격적인 것입니다. 둘 다 DU 쪽에서 고칠 여지가 있다는 신호입니다.</aside>
+</section>
+<section id="throughput" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">의미 ④ · 자원과 처리량</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">처리량을 곱셈으로 쪼개면 범인이 보인다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:stretch;gap:12px">
+<div style="flex:1;background:#D5E3F3;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">RB 수</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">할당받은 자원 블록</p>
+<p style="font-size:24px;line-height:1.4;color:#255E9E;font-weight:600">→ 부하 · 스케줄러</p>
+</div>
+<p style="font-size:40px;color:#A84A16;align-self:center">×</p>
+<div style="flex:1;background:#D5E3F3;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">스케줄링 비율</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">데이터를 받은 슬롯 비율</p>
+<p style="font-size:24px;line-height:1.4;color:#255E9E;font-weight:600">→ 부하 · TDD 패턴</p>
+</div>
+<p style="font-size:40px;color:#A84A16;align-self:center">×</p>
+<div style="flex:1;background:#F7DDCB;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">레이어 수</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">RI · 실제 할당 레이어</p>
+<p style="font-size:24px;line-height:1.4;color:#A84A16;font-weight:600">→ 채널 랭크 · 안테나</p>
+</div>
+<p style="font-size:40px;color:#A84A16;align-self:center">×</p>
+<div style="flex:1;background:#F7DDCB;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">MCS 효율</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">변조 차수 × 부호율</p>
+<p style="font-size:24px;line-height:1.4;color:#A84A16;font-weight:600">→ SINR · 링크 적응</p>
+</div>
+<p style="font-size:40px;color:#A84A16;align-self:center">×</p>
+<div style="flex:1;background:#D5E3F3;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">(1 − BLER)</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">성공한 전송 비율</p>
+<p style="font-size:24px;line-height:1.4;color:#255E9E;font-weight:600">→ 링크 적응</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="width:820px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">층별 처리량을 나란히 본다</h3>
+<div style="display:flex;flex-direction:row;gap:8px">
+<p style="flex:1;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;text-align:center;background:#14213D;color:#F5F3EE;border-radius:8px;padding:8px 0px">PHY</p>
+<p style="flex:1;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;text-align:center;background:#34446A;color:#F5F3EE;border-radius:8px;padding:8px 0px">MAC</p>
+<p style="flex:1;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;text-align:center;background:#5E6675;color:#F5F3EE;border-radius:8px;padding:8px 0px">RLC</p>
+<p style="flex:1;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;text-align:center;background:#8A92A0;color:#F5F3EE;border-radius:8px;padding:8px 0px">PDCP</p>
+<p style="flex:1;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;text-align:center;background:#FBFAF7;border:2px solid #14213D;border-radius:8px;padding:6px 0px">App</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">PHY는 충분한데 App만 낮다 → RAN 밖 (코어 · 서버 · TCP) 문제일 가능성</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">파랑</b> 무선은 괜찮은데 작다 → DU 설정 · 부하</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">주황</b> 무선 자체가 받쳐 주지 못한다 → RU 위치 · 방향</p>
+<p style="font-size:24px;line-height:1.45;color:#5E6675">UL은 송신 전력 · PHR이 MCS와 RB를 제한</p>
+</div>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:16%;text-align:left;color:#F5F3EE">가상의 예</th><th style="width:14%;text-align:left;color:#D5E3F3">RB</th><th style="width:16%;text-align:left;color:#D5E3F3">슬롯 비율</th><th style="width:14%;text-align:left;color:#F7DDCB">레이어</th><th style="width:14%;text-align:left;color:#F7DDCB">MCS</th><th style="width:26%;text-align:left;color:#D5E3F3">Initial BLER</th></tr>
+<tr style="background:#FBFAF7"><td>측정값</td><td>270 / 273</td><td><b style="color:#A84A16">35%</b></td><td>3.8</td><td>25</td><td>10%</td></tr>
+<tr><td>판단</td><td>정상</td><td><b style="color:#A84A16">범인</b> → 부하 · 스케줄러</td><td>정상</td><td>정상</td><td>목표 수준</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">단순화한 근사식 · 정확한 최대 전송률은 TS 38.306 4.1.2 참조</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 55초) 처리량은 결과 지표라서 낮다는 사실만으로는 원인을 알 수 없습니다. 그래서 곱셈으로 쪼개 봅니다. 처리량은 대략 할당받은 RB 수, 데이터를 받은 슬롯 비율, 레이어 수, MCS가 주는 비트 효율, 그리고 성공한 전송 비율의 곱입니다. XCAL5에는 이 항목들이 각각 따로 기록되기 때문에, 어느 항이 작은지 바로 볼 수 있습니다. RB나 슬롯이 적으면 셀 부하나 스케줄러 정책 문제라 DU 쪽이고, 레이어 수나 MCS가 낮으면 채널 자체가 받쳐 주지 못하는 것이라 RU 위치나 방향을 의심합니다. BLER는 다시 링크 적응 문제입니다. 아래 가상의 예처럼 RB, 레이어, MCS, BLER는 정상인데 데이터를 받은 슬롯 비율만 35%라면, 무선이 아니라 셀 부하나 스케줄러가 원인입니다. 또 하나, PHY부터 App까지 층별 처리량을 나란히 보면, PHY는 충분한데 App만 낮을 때는 RAN이 아니라 코어나 서버, TCP 쪽 문제일 가능성이 큽니다. 상향 링크는 단말 송신 전력이 한계라서, 송신 전력과 PHR이 MCS와 RB를 제한한다는 점도 기억해 두면 좋습니다.</aside>
+</section>
+<section id="mobility" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">의미 ⑤ · 이동성과 신뢰성</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">핸드오버는 타이밍 싸움이다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="width:900px;display:flex;flex-direction:column;gap:12px">
+<div style="position:relative;width:900px;height:490px">
+<svg aria-label="시간에 따라 서빙 셀 RSRP는 내려가고 이웃 셀 RSRP는 올라가 교차하는 그래프. 교차 뒤 이웃이 오프셋만큼 더 강해지는 시점, TTT 구간 뒤 측정 보고 시점, 핸드오버 완료 시점이 세로 점선으로 표시되어 있다" style="position:absolute;left:0px;top:0px;width:900px;height:490px" width="900" height="490" viewBox="0 0 900 490"><rect x="550" y="20" width="110" height="420" fill="#F7DDCB" fill-opacity="0.7"/><g stroke="#5E6675" stroke-width="3"><line x1="60" y1="20" x2="60" y2="440"/><line x1="60" y1="440" x2="890" y2="440"/></g><g stroke="#5E6675" stroke-width="2" stroke-dasharray="8 8"><line x1="550" y1="20" x2="550" y2="440"/><line x1="660" y1="20" x2="660" y2="440"/><line x1="740" y1="20" x2="740" y2="440"/></g><polyline points="60,90 80,92 100,105 120,109 140,120 160,128 180,125 200,131 220,153 240,149 260,156 280,177 300,174 320,188 340,189 360,199 380,197 400,213 420,224 440,225 460,236 480,242 500,238 520,257 540,261 560,263 580,265 600,288 620,288 640,299 660,309 680,313 700,324 720,322 740,336 760,337 780,352 800,359 820,352 840,359 860,368 880,380" fill="none" stroke="#14213D" stroke-width="5" stroke-linejoin="round"/><polyline points="60,400 80,401 100,384 120,380 140,367 160,364 180,354 200,346 220,343 240,336 260,334 280,323 300,320 320,311 340,306 360,293 380,277 400,282 420,277 440,268 460,255 480,250 500,234 520,238 540,226 560,213 580,202 600,209 620,204 640,180 660,186 680,172 700,160 720,155 740,156 760,151 780,128 800,131 820,114 840,119 860,104 880,100" fill="none" stroke="#A84A16" stroke-width="5" stroke-linejoin="round"/><g fill="#255E9E"><circle cx="550" cy="440" r="9"/><circle cx="660" cy="440" r="9"/><circle cx="740" cy="440" r="9"/></g></svg>
+<p style="position:absolute;left:70px;top:0px;width:140px;font-size:24px;color:#5E6675">RSRP</p>
+<p style="position:absolute;left:780px;top:450px;width:110px;font-size:24px;color:#5E6675;text-align:right">시간 →</p>
+<p style="position:absolute;left:560px;top:24px;width:90px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#A84A16;text-align:center">TTT</p>
+<p style="position:absolute;left:110px;top:44px;width:160px;font-size:24px;font-weight:600;color:#14213D">서빙 셀</p>
+<p style="position:absolute;left:110px;top:410px;width:160px;font-size:24px;font-weight:600;color:#A84A16">이웃 셀</p>
+<p style="position:absolute;left:530px;top:450px;width:40px;font-size:24px;font-weight:700;color:#255E9E;text-align:center">①</p>
+<p style="position:absolute;left:640px;top:450px;width:40px;font-size:24px;font-weight:700;color:#255E9E;text-align:center">②</p>
+<p style="position:absolute;left:720px;top:450px;width:40px;font-size:24px;font-weight:700;color:#255E9E;text-align:center">③</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">① A3 진입 (이웃 ① 이웃이 서빙보다 오프셋만큼 강해짐 (A3 진입) ② TTT 동안 유지 → 측정 보고 ③ HO 명령 · 완료gt; 서빙 + 오프셋) ② TTT 동안 유지 → 측정 보고 ③ HO 완료</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:18px">
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">측정 보고 이벤트</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">A2 서빙 약화 · A3 이웃이 더 강함 · A5 서빙 &lt; 임계1, 이웃 &gt; 임계2 · B1 (NSA) NR 셀 추가</p>
+</div>
+<div style="background:#FBFAF7;border:1px solid #DCD8CE;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#255E9E">신뢰성 KPI</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">HO 시도 · 성공률, RLF, RACH 실패, 접속 성공률, 호 단절률</p>
+</div>
+<div style="background:#14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#F0A36B">실패 세 가지</h3>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">늦은 HO: 보고 전에 RLF<br>이른 HO: 넘어가자마자 실패<br>핑퐁: 두 셀 사이 왕복</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">이벤트 정의 TS 38.331 · 그래프는 개념도 · XCAL5에서는 L3 메시지(Measurement Report, RRC Reconfiguration)로 시점 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 55초) 이동성 KPI는 핸드오버를 중심으로 봅니다. 그래프처럼 단말이 이동하면 서빙 셀 신호는 내려가고 이웃 셀 신호는 올라갑니다. 이웃이 서빙보다 정해진 오프셋만큼 강해지면 A3 조건에 들어가고, 그 상태가 TTT, 즉 Time to Trigger 동안 유지되면 단말이 측정 보고를 보냅니다. 그러면 기지국이 핸드오버 명령을 내리고 단말이 새 셀로 넘어갑니다. XCAL5에서는 측정 보고와 RRC 재설정 같은 L3 메시지로 이 시점을 정확히 볼 수 있습니다. 이벤트는 A3 외에도 서빙 약화를 알리는 A2, 두 임계값을 쓰는 A5, NSA에서 NR 셀을 붙이는 B1이 자주 나옵니다. 실패는 세 가지로 나눕니다. 보고하기 전에 신호가 끊기는 늦은 HO, 넘어가자마자 실패하는 이른 HO, 두 셀 사이를 오가는 핑퐁입니다. 어느 유형인지에 따라 다음 장에서 볼 파라미터를 반대 방향으로 조정하게 됩니다.</aside>
+</section>
+<section id="du" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">활용 ① · DU 최적화</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">무선은 좋은데 성능이 낮다면, DU를 본다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:36%;text-align:left;color:#F5F3EE">KPI 패턴 (증상)</th><th style="width:24%;text-align:left;color:#F5F3EE">의심 원인</th><th style="width:40%;text-align:left;color:#D5E3F3">DU에서 볼 파라미터</th></tr>
+<tr style="background:#FBFAF7"><td>SINR · CQI 양호, MCS가 낮게 머묾</td><td>링크 적응이 보수적</td><td>BLER 목표, OLLA 스텝, MCS · CQI 표 (256QAM)</td></tr>
+<tr><td>MCS 높음, Initial BLER가 목표보다 훨씬 높음</td><td>링크 적응이 공격적 · CSI가 늦음</td><td>OLLA 스텝, CSI 보고 주기, 이동 속도 대응</td></tr>
+<tr style="background:#FBFAF7"><td>SINR 양호, RI가 1~2에 머묾</td><td>랭크 적응 · CSI-RS 설정</td><td>CSI-RS 포트 수, 최대 레이어 · 랭크 제한, 코드북 종류</td></tr>
+<tr><td>무선 양호, RB · 슬롯 할당이 적음</td><td>부하 · 스케줄러 정책</td><td>스케줄러 가중치(PF), 사용자 수 제한, TDD 패턴, BWP</td></tr>
+<tr style="background:#FBFAF7"><td>RLF 뒤 재접속 · HO 실패 / 짧은 시간 HO 왕복</td><td>늦은 HO / 핑퐁</td><td>A3 오프셋 · 히스테리시스 · TTT, 셀별 오프셋(CIO) — 방향은 반대로</td></tr>
+<tr><td>셀 경계에서 UL BLER 높음, PHR 음수</td><td>UL 전력 한계</td><td>p0-nominal · alpha (전력 제어), UL MCS · RB, 안 되면 RU 쪽 문제</td></tr>
+</table>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#D5E3F3;border-radius:12px;padding:14px 20px"><b>한 번에 하나만</b> 바꾸고, 같은 경로 · 같은 시간대로 다시 잰다</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#D5E3F3;border-radius:12px;padding:14px 20px"><b>OSS 카운터로 확인</b> — 측정 경로 밖 단말에 부작용은 없는지</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">파라미터 이름과 조정 범위는 벤더마다 다름 · 표는 대표적인 대응 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 60초) 이제 활용입니다. 먼저 DU 최적화는 무선 환경은 좋은데 성능이 낮은 경우에 해당합니다. SINR과 CQI는 좋은데 MCS가 낮게 머물면 링크 적응이 보수적인 것이니 BLER 목표와 OLLA 스텝, MCS 표를 봅니다. 반대로 MCS는 높은데 첫 전송 BLER가 목표보다 훨씬 높으면 공격적이거나 CSI가 늦게 반영되는 것이니 OLLA와 CSI 보고 주기를 봅니다. SINR이 좋은데 랭크가 1이나 2에 머물면 CSI-RS 포트 수나 랭크 제한 설정을 확인합니다. 무선은 좋은데 RB나 슬롯을 적게 받으면 부하나 스케줄러 정책 문제입니다. 핸드오버는 늦은 HO면 오프셋이나 TTT를 줄이고, 핑퐁이면 히스테리시스나 TTT를 늘립니다. 방향이 반대라는 점이 중요합니다. 셀 경계에서 상향 BLER가 높고 PHR이 음수면 전력 제어 파라미터를 보되, 단말 전력이 이미 최대라면 DU로는 한계가 있어서 RU 쪽 문제로 넘어갑니다. 그리고 항상 한 번에 하나만 바꾸고, 같은 조건으로 다시 재고, OSS 카운터로 다른 단말에 부작용이 없는지 확인합니다.</aside>
+</section>
+<section id="ru" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">활용 ② · RU 배치</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">무선 자체가 나쁘면, RU를 옮기거나 돌린다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:48px">
+<div style="width:820px;display:grid;grid-template-columns:150px 1fr 1fr;grid-template-rows:1fr 1fr 44px;gap:12px;height:580px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;align-self:center">SINR 높음</p>
+<div style="background:#FBFAF7;border:2px solid #DCD8CE;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2;color:#255E9E">잡음 한계</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">멀지만 깨끗하다 → 업틸트 · 출력, UL도 함께 확인</p>
+</div>
+<div style="background:#D5E3F3;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">정상</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">그래도 성능이 낮다면 → 9쪽 DU 최적화</p>
+</div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;align-self:center">SINR 낮음</p>
+<div style="background:#14213D;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2;color:#F0A36B">커버리지 홀</h3>
+<p style="font-size:24px;line-height:1.4;color:#C9D3E3">RU 추가 · 스몰셀 · 중계, 위치 · 높이 변경</p>
+</div>
+<div style="background:#F7DDCB;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2;color:#A84A16">간섭 · 파일럿 오염</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">비슷한 세기의 셀이 여럿 → 다운틸트 · 방위각 · 출력으로 우세 셀을 만든다</p>
+</div>
+<div></div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center;align-self:center">RSRP 낮음</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center;align-self:center">RSRP 높음</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0px;border-bottom:1px solid #C9C4B8">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">오버슈팅</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">먼 셀이 서빙 (PCI 확인 · TA 큼), 섬처럼 떨어진 서빙 영역 → 다운틸트</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0px;border-bottom:1px solid #C9C4B8">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">빔 방향</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">best SSB가 가장자리 빔에 몰림 → 방위각 조정</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0px;border-bottom:1px solid #C9C4B8">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">UL 한계</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">UL 전력 최대 · PHR 음수 구간이 넓음 → RU 간격을 줄인다</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">신규 RU 위치</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">약전계 지점(bin)이 모인 곳 → 후보지 → 레이 트레이싱 · 트윈으로 미리 검증</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">“높음 · 낮음” 기준은 4쪽의 예시값처럼 사업자 · 대역마다 정한다 · 틸트 · 방위각 변경은 이웃 셀 영향까지 함께 본다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 60초) 무선 환경 자체가 나쁘면 RU 배치를 봅니다. 가장 쓸모 있는 도구는 RSRP와 SINR 네 칸 진단입니다. 둘 다 높으면 무선은 정상이니 성능 문제는 DU 쪽입니다. RSRP는 낮지만 SINR이 높으면 멀지만 깨끗한 잡음 한계 상황이라, 업틸트나 출력 조정을 검토하고 상향 링크도 같이 봅니다. 둘 다 낮으면 커버리지 홀이라 RU 추가나 스몰셀, 위치 변경이 필요합니다. RSRP는 높은데 SINR이 낮으면 비슷한 세기의 셀이 여럿 겹치는 간섭, 파일럿 오염이라, 틸트와 방위각, 출력으로 한 셀이 확실히 우세하게 만들어야 합니다. 여기에 식별 정보를 더합니다. 먼 셀이 서빙하고 TA가 크면 오버슈팅이니 다운틸트, 최적 빔이 가장자리 빔에 몰리면 방위각 조정, 상향 전력이 최대인 구간이 넓으면 RU 간격 자체를 줄여야 합니다. 새 RU 위치는 약전계 지점이 모인 곳을 후보로 잡고, 지난 세미나에서 본 레이 트레이싱이나 디지털 트윈으로 미리 검증하는 흐름이 좋습니다.</aside>
+</section>
+<section id="workflow" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">절차 · 측정에서 조치까지</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">재고, 가르고, 하나만 바꾸고, 다시 잰다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #14213D;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">01</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">계획</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">경로 · 시간대 · 단말, 서비스 (DL/UL 전송, ping, 통화)</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #14213D;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">02</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">수집</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">XCAL5로 DM 로그 + GPS, 필요하면 스캐너 병행</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #14213D;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">03</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">분석</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">bin 단위 KPI 지도, 임계값 통계, 이벤트 · 메시지 추적</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border:1px solid #DCD8CE;border-top:6px solid #14213D;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">04</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">판단</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">무선(RU) · 설정(DU) · 부하 · RAN 밖 중 어디인가</p>
+</div>
+<div style="flex:1;background:#14213D;border-top:6px solid #F0A36B;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#F0A36B">05</p>
+<h3 style="font-size:28px;font-weight:600;line-height:1.2;color:#F5F3EE">조치 · 검증</h3>
+<p style="font-size:24px;line-height:1.4;color:#C9D3E3">하나만 바꾸고 같은 조건으로 재측정 → 01로</p>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#EAE7DF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">조건을 고정한다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">단말 · 칩셋, 차량 안 손실, 시간대(부하)가 바뀌면 KPI도 바뀐다</p>
+</div>
+<div style="background:#EAE7DF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">OSS와 맞춰 본다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">단말 한 대의 경로는 표본일 뿐 — 셀 통계로 일반화를 확인</p>
+</div>
+<div style="background:#EAE7DF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">트윈 보정에 쓴다</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">측정 RSRP로 레이 트레이싱 · 트윈을 보정하면 다음 배치 검토가 빨라진다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">후처리 도구와 리포트 형식은 조직 표준에 맞춰 사용 · bin 크기와 임계값은 사전에 합의</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 50초) 실제 작업 순서를 정리하면 다섯 단계입니다. 먼저 경로와 시간대, 단말, 시험할 서비스를 정합니다. XCAL5로 DM 로그와 GPS를 함께 수집하고, 필요하면 스캐너를 같이 돌려 단말이 붙지 않은 셀까지 봅니다. 후처리에서는 경로를 일정 크기의 bin으로 나눠 KPI 지도와 임계값 통계를 만들고, 문제 구간의 이벤트와 메시지를 추적합니다. 그다음 원인이 무선이라 RU 쪽인지, 설정이라 DU 쪽인지, 부하나 RAN 밖 문제인지 가릅니다. 조치는 한 번에 하나만 하고, 같은 조건으로 다시 잽니다. 주의할 점은 세 가지입니다. 단말과 칩셋, 차량 안 손실, 시간대가 바뀌면 KPI도 바뀌니 조건을 고정하고, 단말 한 대의 경로는 표본일 뿐이니 OSS 통계로 확인하고, 측정 데이터는 지난 세미나에서 다룬 레이 트레이싱이나 디지털 트윈 보정에도 쓸 수 있습니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리 · TAKEAWAY</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">KPI는 층으로 읽고, 원인으로 나눈다</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F5F3EE">의미</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">무선 → 링크 적응 → 자원 → 체감, 위에서 증상 · 아래에서 원인</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#8DB8E8">DU</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">무선은 좋은데 낮다 → 링크 적응 · 스케줄러 · HO 파라미터</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F0A36B">RU</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">무선 자체가 나쁘다 → 틸트 · 방위각 · 출력 · 추가 배치</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#C9D3E3">방법</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">하나만 바꾸고 같은 조건으로 재측정, OSS로 교차 확인</p>
+</div>
+</div>
+<p style="font-family:'Noto Serif KR', Georgia, serif;font-size:44px;font-weight:700;line-height:1.35;color:#F0A36B">RSRP와 SINR로 “어디가”를,<br>나머지 KPI로 “왜”를 찾는다</p>
+<p style="font-size:24px;line-height:1.45;color:#8DB8E8">다음 단계 제안: [대상 클러스터] 드라이브 테스트 → DU · RU 개선안을 같은 조건으로 비교</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#C9D3E3;text-align:right">12 / 12</p>
+<aside>(약 30초) 정리하겠습니다. UE KPI는 무선, 링크 적응, 자원, 체감의 층으로 읽고, 위에서 증상을 찾아 아래로 내려가며 원인을 찾습니다. 무선은 좋은데 성능이 낮으면 DU의 링크 적응, 스케줄러, 핸드오버 파라미터를 보고, 무선 자체가 나쁘면 RU의 틸트, 방위각, 출력, 추가 배치를 봅니다. 그리고 한 번에 하나만 바꾸고 같은 조건으로 다시 재며, OSS로 교차 확인합니다. 한 줄로 줄이면, RSRP와 SINR로 어디가 문제인지 찾고, 나머지 KPI로 왜 그런지 찾는 것입니다. 다음 단계로 대상 클러스터를 정해 드라이브 테스트를 하고 DU와 RU 개선안을 비교해 보기를 제안드립니다. 감사합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

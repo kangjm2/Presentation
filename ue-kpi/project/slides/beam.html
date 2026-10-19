@@ -1,0 +1,41 @@
+<section id="beam" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">의미 ② · 셀과 빔 식별</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“어느 셀의 어느 빔”인지가 먼저다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px">
+<div style="position:relative;width:760px;height:560px">
+<svg aria-label="왼쪽 아래 RU에서 오른쪽 위로 부채꼴처럼 퍼지는 SSB 빔 여덟 개 가운데 여섯 번째 빔이 강조되어 있고, 그 빔 안에 단말이 있는 그림" style="position:absolute;left:0px;top:0px;width:760px;height:560px" width="760" height="560" viewBox="0 0 760 560"><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-75 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-65 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-55 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-45 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-35 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-25 90 470)" fill="#A84A16" fill-opacity="0.55" stroke="#A84A16" stroke-width="3" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-15 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><ellipse cx="310" cy="470" rx="220" ry="32" transform="rotate(-5 90 470)" fill="#255E9E" fill-opacity="0.14" stroke="#255E9E" stroke-width="2" stroke-opacity="0.7"/><polygon points="90,440 66,490 114,490" fill="#14213D"/><rect x="420" y="290" width="28" height="44" rx="6" fill="#14213D"/><line x1="90" y1="520" x2="560" y2="520" stroke="#5E6675" stroke-width="3" stroke-dasharray="10 8"/><polygon points="560,520 546,513 546,527" fill="#5E6675"/></svg>
+<p style="position:absolute;left:180px;top:0px;width:80px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E">#0</p>
+<p style="position:absolute;left:560px;top:400px;width:80px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E">#7</p>
+<p style="position:absolute;left:462px;top:290px;width:230px;font-size:24px;font-weight:600;color:#A84A16;background:#FBFAF7;border:2px solid #A84A16;border-radius:8px;padding:2px 10px">UE · best SSB #5</p>
+<p style="position:absolute;left:0px;top:498px;width:60px;font-size:24px;font-weight:600">RU</p>
+<p style="position:absolute;left:130px;top:528px;width:600px;font-size:24px;color:#5E6675">TA: RU까지의 거리 (30 kHz SCS에서 1단계 ≈ 39 m)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px;border-bottom:1px solid #DCD8CE">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">PCI (0 ~ 1007)</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">셀 구분 번호. 가까운 셀끼리 겹치면 혼동 · 간섭</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px;border-bottom:1px solid #DCD8CE">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">NR-ARFCN · 대역 · SCS</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">어느 반송파 · 대역폭에 붙었는지 (NSA면 LTE 앵커도 함께)</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px;border-bottom:1px solid #DCD8CE">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">SSB 인덱스 (빔 번호)</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">빔 최대 개수: 저대역 4 · FR1 중대역 8 · FR2 64</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px;border-bottom:1px solid #DCD8CE">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">이웃 셀 목록</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">주변 셀의 PCI · RSRP — 겹침 정도와 HO 후보</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 0px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">Timing Advance</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">상향 송신 시점 보정 → 서빙 RU까지 거리 추정</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.211 (PCI · TA 단위) · TS 38.213 (SSB 빔 개수 · TA 명령) · 그림의 빔 개수와 방향은 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 50초) 수신 세기를 해석하려면 그 값이 어느 셀의 어느 빔에서 온 것인지 먼저 알아야 합니다. PCI는 0부터 1007까지의 셀 구분 번호이고, 가까운 셀끼리 겹치면 혼동이나 간섭이 생깁니다. NR-ARFCN과 대역, 부반송파 간격은 어느 반송파에 붙었는지 알려 주고, NSA 망이라면 LTE 앵커 셀도 함께 봐야 합니다. 5G에서는 SSB를 여러 빔으로 나눠 보내기 때문에, SSB 인덱스가 곧 빔 번호입니다. 그림처럼 단말이 몇 번 빔에 잡혔는지 보면 RU의 어느 방향이 이 지점을 맡고 있는지 알 수 있습니다. 이웃 셀 목록은 주변 셀이 얼마나 겹치는지 보여 주고, Timing Advance는 상향 송신 시점 보정값이라 서빙 RU까지의 거리를 추정할 수 있습니다. 30 kHz 부반송파 간격에서 한 단계가 약 39미터입니다. 이 정보들이 뒤에서 RU 배치 문제를 짚는 단서가 됩니다.</aside>
+</section>

@@ -1,0 +1,45 @@
+<section id="linkadapt" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">의미 ③ · 링크 적응</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">단말이 추천하고, DU가 결정하고, BLER로 채점한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="position:relative;width:860px;height:560px">
+<svg aria-label="네 상자가 시계 방향으로 도는 순환: 단말 측정과 보고, DU 스케줄러 결정, PDSCH 전송, HARQ 피드백. 가운데 OLLA 상자가 HARQ 결과를 받아 스케줄러로 보정값을 넘긴다" style="position:absolute;left:0px;top:0px;width:860px;height:560px" width="860" height="560" viewBox="0 0 860 560"><g stroke="#14213D" stroke-width="4"><line x1="360" y1="75" x2="484" y2="75"/><line x1="680" y1="160" x2="680" y2="384"/><line x1="500" y1="475" x2="376" y2="475"/><line x1="180" y1="400" x2="180" y2="176"/></g><g fill="#14213D"><polygon points="500,75 484,67 484,83"/><polygon points="680,400 672,384 688,384"/><polygon points="360,475 376,467 376,483"/><polygon points="180,160 172,176 188,176"/></g><g stroke="#A84A16" stroke-width="3" stroke-dasharray="10 8"><line x1="300" y1="400" x2="300" y2="346"/><line x1="560" y1="230" x2="560" y2="176"/></g><g fill="#A84A16"><polygon points="300,330 292,346 308,346"/><polygon points="560,160 552,176 568,176"/></g></svg>
+<div style="position:absolute;left:0px;top:0px;width:360px;height:160px;background:#F7DDCB;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">① UE 측정 · 보고</h3>
+<p style="font-size:24px;color:#4A5262">CSI-RS → CQI · RI · PMI</p>
+</div>
+<div style="position:absolute;left:500px;top:0px;width:360px;height:160px;background:#D5E3F3;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">② DU 스케줄러</h3>
+<p style="font-size:24px;color:#4A5262">MCS · 레이어 · RB 결정</p>
+</div>
+<div style="position:absolute;left:500px;top:400px;width:360px;height:160px;background:#D5E3F3;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">③ PDSCH 전송</h3>
+<p style="font-size:24px;color:#4A5262">DU → RU → UE</p>
+</div>
+<div style="position:absolute;left:0px;top:400px;width:360px;height:160px;background:#F7DDCB;border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">④ HARQ 피드백</h3>
+<p style="font-size:24px;color:#4A5262">ACK / NACK → BLER</p>
+</div>
+<div style="position:absolute;left:200px;top:230px;width:460px;height:100px;background:#FBFAF7;border:3px dashed #A84A16;border-radius:14px;padding:10px 18px;display:flex;flex-direction:column;justify-content:center;gap:2px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.2;color:#A84A16;text-align:center">OLLA (외부 루프 보정)</h3>
+<p style="font-size:24px;color:#4A5262;text-align:center">BLER 목표(흔히 10%)에 맞춰 MCS 가감</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;line-height:1.4"><b style="color:#A84A16">CQI (0~15)</b> “이 MCS면 BLER 10% 안쪽”이라는 단말의 추천</p>
+<p style="font-size:24px;line-height:1.4"><b style="color:#A84A16">RI</b> 받을 수 있는 레이어 수 (채널 랭크)</p>
+<p style="font-size:24px;line-height:1.4"><b style="color:#A84A16">PMI</b> 단말이 선호하는 프리코더 (코드북 번호)</p>
+<p style="font-size:24px;line-height:1.4"><b style="color:#255E9E">MCS</b> 실제 쓰인 변조 · 부호율 (256QAM 표 0~27)</p>
+<p style="font-size:24px;line-height:1.4"><b style="color:#255E9E">BLER</b> 첫 전송 실패율(Initial) · 재전송 후 실패율(Residual)</p>
+<div style="background:#14213D;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">CQI ↑ 인데 MCS ↓ → DU가 <b style="color:#F0A36B">보수적</b></p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">MCS ↑ 인데 BLER ↑ → DU가 <b style="color:#F0A36B">공격적</b></p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">CQI · MCS 표 TS 38.214 · BLER 목표와 OLLA 방식은 벤더 구현에 따라 다름</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 55초) 다음은 링크 적응입니다. 단말은 CSI-RS를 측정해서 CQI, RI, PMI를 보고합니다. CQI는 이 정도 MCS를 쓰면 블록 오류율이 10% 안쪽일 거라는 단말의 추천이고, RI는 동시에 받을 수 있는 레이어 수, PMI는 선호하는 프리코더 번호입니다. 이걸 받은 DU 스케줄러가 실제 MCS와 레이어 수, RB를 정해서 보내고, 단말은 성공하면 ACK, 실패하면 NACK을 돌려줍니다. 이 실패 비율이 BLER입니다. 첫 전송 기준의 Initial BLER와, 재전송까지 해도 실패한 Residual BLER를 구분해서 봅니다. 그리고 DU는 BLER가 목표, 흔히 10%에 맞도록 MCS를 조금씩 올리거나 내리는데, 이걸 OLLA라고 합니다. 그래서 해석은 간단합니다. CQI는 높은데 MCS가 낮으면 DU가 보수적인 것이고, MCS는 높은데 BLER가 높으면 DU가 공격적인 것입니다. 둘 다 DU 쪽에서 고칠 여지가 있다는 신호입니다.</aside>
+</section>

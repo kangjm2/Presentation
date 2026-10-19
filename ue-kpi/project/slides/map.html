@@ -1,0 +1,45 @@
+<section id="map" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">KPI 지도 · 여섯 묶음</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">아래층이 나쁘면 위층이 따라 나빠진다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">① 수신 세기 · 품질</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">SS-RSRP · SS-RSRQ · SS-SINR, CSI-RSRP · CSI-SINR</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">② 셀 · 빔 식별</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">PCI · NR-ARFCN · SSB 인덱스 · 이웃 셀 · TA</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">③ 링크 적응</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">CQI · RI · PMI · MCS · BLER · HARQ 재전송</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">④ 자원 · 처리량</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">RB 수 · 스케줄링 비율 · 레이어 · PHY~App 처리량</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">⑤ 상향 링크</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">UL 송신 전력 · PHR · UL MCS · UL BLER</p>
+</div>
+<div style="background:#FBFAF7;border-top:6px solid #14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.25">⑥ 이동성 · 신뢰성</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">HO 시도 · 성공, RLF, RACH, 접속 성공 · 호 단절</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px">
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#F7DDCB;border-radius:10px;padding:12px 0px">무선 환경 ① ②</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 0px">링크 적응 ③ ⑤</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#D5E3F3;border-radius:10px;padding:12px 0px">자원 · 처리량 ④</p>
+<p style="font-size:32px;color:#A84A16">→</p>
+<p style="flex:1;font-size:26px;font-weight:600;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:12px 0px">사용자 체감 ⑥</p>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">분석 순서: 위층(처리량 · 끊김)에서 증상을 찾고, 아래층으로 내려가며 원인을 찾는다. 주황 = 주로 RU 배치, 파랑 = 주로 DU 설정과 연결</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">KPI 이름은 3GPP 용어 기준 · XCAL5 화면 · 필드 이름은 버전과 칩셋에 따라 다를 수 있음</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) DM 툴이 보여 주는 KPI는 수백 개지만, 여섯 묶음으로 나누면 정리가 됩니다. 수신 세기와 품질, 어느 셀과 빔인지 알려 주는 식별 정보, CQI부터 BLER까지의 링크 적응, 자원과 처리량, 상향 링크, 그리고 핸드오버와 끊김 같은 이동성·신뢰성입니다. 중요한 건 이 묶음들이 층을 이룬다는 점입니다. 무선 환경이 나쁘면 링크 적응이 낮은 MCS를 고르고, 그러면 처리량이 떨어지고, 결국 사용자 체감이 나빠집니다. 그래서 분석할 때는 위층에서 증상을 찾고, 아래층으로 내려가며 원인을 찾습니다. 색으로 구분했듯이 아래층 무선 환경은 주로 RU 배치와, 가운데 링크 적응과 자원은 주로 DU 설정과 연결됩니다. 오늘 쓰는 이름은 3GPP 용어 기준이고, XCAL5 화면의 필드 이름은 버전에 따라 조금 다를 수 있습니다.</aside>
+</section>

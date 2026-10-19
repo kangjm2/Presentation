@@ -1,0 +1,52 @@
+<section id="ru" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">활용 ② · RU 배치</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">무선 자체가 나쁘면, RU를 옮기거나 돌린다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:48px">
+<div style="width:820px;display:grid;grid-template-columns:150px 1fr 1fr;grid-template-rows:1fr 1fr 44px;gap:12px;height:580px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;align-self:center">SINR 높음</p>
+<div style="background:#FBFAF7;border:2px solid #DCD8CE;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2;color:#255E9E">잡음 한계</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">멀지만 깨끗하다 → 업틸트 · 출력, UL도 함께 확인</p>
+</div>
+<div style="background:#D5E3F3;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2">정상</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">그래도 성능이 낮다면 → 9쪽 DU 최적화</p>
+</div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;align-self:center">SINR 낮음</p>
+<div style="background:#14213D;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2;color:#F0A36B">커버리지 홀</h3>
+<p style="font-size:24px;line-height:1.4;color:#C9D3E3">RU 추가 · 스몰셀 · 중계, 위치 · 높이 변경</p>
+</div>
+<div style="background:#F7DDCB;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:28px;font-weight:600;line-height:1.2;color:#A84A16">간섭 · 파일럿 오염</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">비슷한 세기의 셀이 여럿 → 다운틸트 · 방위각 · 출력으로 우세 셀을 만든다</p>
+</div>
+<div></div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center;align-self:center">RSRP 낮음</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5E6675;text-align:center;align-self:center">RSRP 높음</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0px;border-bottom:1px solid #C9C4B8">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">오버슈팅</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">먼 셀이 서빙 (PCI 확인 · TA 큼), 섬처럼 떨어진 서빙 영역 → 다운틸트</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0px;border-bottom:1px solid #C9C4B8">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">빔 방향</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">best SSB가 가장자리 빔에 몰림 → 방위각 조정</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0px;border-bottom:1px solid #C9C4B8">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">UL 한계</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">UL 전력 최대 · PHR 음수 구간이 넓음 → RU 간격을 줄인다</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0px">
+<h3 style="font-size:26px;font-weight:600;line-height:1.25;color:#A84A16">신규 RU 위치</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">약전계 지점(bin)이 모인 곳 → 후보지 → 레이 트레이싱 · 트윈으로 미리 검증</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">“높음 · 낮음” 기준은 4쪽의 예시값처럼 사업자 · 대역마다 정한다 · 틸트 · 방위각 변경은 이웃 셀 영향까지 함께 본다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 60초) 무선 환경 자체가 나쁘면 RU 배치를 봅니다. 가장 쓸모 있는 도구는 RSRP와 SINR 네 칸 진단입니다. 둘 다 높으면 무선은 정상이니 성능 문제는 DU 쪽입니다. RSRP는 낮지만 SINR이 높으면 멀지만 깨끗한 잡음 한계 상황이라, 업틸트나 출력 조정을 검토하고 상향 링크도 같이 봅니다. 둘 다 낮으면 커버리지 홀이라 RU 추가나 스몰셀, 위치 변경이 필요합니다. RSRP는 높은데 SINR이 낮으면 비슷한 세기의 셀이 여럿 겹치는 간섭, 파일럿 오염이라, 틸트와 방위각, 출력으로 한 셀이 확실히 우세하게 만들어야 합니다. 여기에 식별 정보를 더합니다. 먼 셀이 서빙하고 TA가 크면 오버슈팅이니 다운틸트, 최적 빔이 가장자리 빔에 몰리면 방위각 조정, 상향 전력이 최대인 구간이 넓으면 RU 간격 자체를 줄여야 합니다. 새 RU 위치는 약전계 지점이 모인 곳을 후보로 잡고, 지난 세미나에서 본 레이 트레이싱이나 디지털 트윈으로 미리 검증하는 흐름이 좋습니다.</aside>
+</section>
