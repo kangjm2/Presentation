@@ -1,6 +1,6 @@
 # Presentation
 
-최대 10분 발표용 시각 자료를 만드는 리포지토리. 발표 자료(덱)마다 폴더 하나 (예: `propagation-models/`, 신입 사원용 입문판 `propagation-models-intro/`, `sionna-channel/`, `ran-architecture/`).
+최대 10분 발표용 시각 자료를 만드는 리포지토리. 발표 자료(덱)마다 폴더 하나 (예: `propagation-models/`, 신입 사원용 입문판 `propagation-models-intro/`, `sionna-channel/`, `ran-architecture/`, `network-digital-twin/`).
 
 ## Git 기본 룰
 

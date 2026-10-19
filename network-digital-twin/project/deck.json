@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-19T09:00:00Z"},
+  "lists": "css",
+  "title": "네트워크 디지털 트윈 동향",
+  "order": ["cover", "concept", "whynow", "landscape", "aodt", "strengths", "limits", "players", "ue", "combo", "choose", "summary"],
+  "sections": {
+    "intro": {"description": "도입: 네트워크 디지털 트윈이 무엇이고 왜 지금 주목받는가", "start": "cover"},
+    "nvidia": {"description": "NVIDIA AODT: 구성, 장점, 한계", "start": "landscape"},
+    "market": {"description": "경쟁·협력 구도와 UE 시뮬레이션 도구 (VIAVI TM500/E500 등)", "start": "players"},
+    "wrap": {"description": "조합 사례, 목적별 선택, 정리", "start": "combo"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}
