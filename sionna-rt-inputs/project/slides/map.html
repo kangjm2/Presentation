@@ -1,0 +1,35 @@
+<section id="map" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">입력 지도 · 한 장으로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">여섯 가지를 넣으면 경로가 나오고, 경로에서 채널이 나온다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:20px">
+<div style="width:760px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="background:#FBFAF7;border-left:6px solid #255E9E;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:600;color:#255E9E">① 장면</p><p style="font-size:24px;line-height:1.35;color:#4A5262">건물 · 지형 메시</p></div>
+<div style="background:#FBFAF7;border-left:6px solid #255E9E;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:600;color:#255E9E">② 재질</p><p style="font-size:24px;line-height:1.35;color:#4A5262">메시마다 전기적 성질</p></div>
+<div style="background:#FBFAF7;border-left:6px solid #A84A16;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:600;color:#A84A16">③ 안테나 배열</p><p style="font-size:24px;line-height:1.35;color:#4A5262">소자 수 · 간격 · 패턴 · 편파</p></div>
+<div style="background:#FBFAF7;border-left:6px solid #A84A16;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:600;color:#A84A16">④ 송수신기</p><p style="font-size:24px;line-height:1.35;color:#4A5262">위치 · 방향 · 속도 · 전력</p></div>
+<div style="background:#FBFAF7;border-left:6px solid #14213D;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:600">⑤ 주파수</p><p style="font-size:24px;line-height:1.35;color:#4A5262">반송파 · 대역폭</p></div>
+<div style="background:#FBFAF7;border-left:6px solid #14213D;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:600">⑥ 솔버 설정</p><p style="font-size:24px;line-height:1.35;color:#4A5262">반사 차수 · 광선 수 · 현상 on/off</p></div>
+</div>
+<p style="font-size:44px;color:#A84A16">→</p>
+<div style="width:260px;background:#14213D;border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F0A36B">PathSolver</p>
+<p style="font-size:24px;line-height:1.4;color:#C9D3E3">경로마다 이득 a, 지연 τ, 각도, 도플러</p>
+</div>
+<p style="font-size:44px;color:#A84A16">→</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;background:#D5E3F3;border-radius:10px;padding:12px 16px">paths.cir() → CIR</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;background:#D5E3F3;border-radius:10px;padding:12px 16px">paths.cfr() → CFR</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;background:#D5E3F3;border-radius:10px;padding:12px 16px">paths.taps() → FIR 탭</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#D5E3F3;border-radius:12px;padding:14px 20px"><b style="color:#255E9E">파랑 ①②</b> 환경 — 결과 정확도의 상한을 정한다</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:14px 20px"><b style="color:#A84A16">주황 ③④</b> 링크 — 출력 텐서의 모양을 정한다</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border:1px solid #DCD8CE;border-radius:12px;padding:14px 20px"><b>검정 ⑤⑥</b> 조건 — 재질 값 · 계산량 · 재현성</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT 1.x · 2.x API 기준 · CIR · CFR · 탭 변환은 Sionna 채널 세미나 참조</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<aside>(약 50초) 먼저 전체 지도입니다. Sionna RT에 넣는 것은 크게 여섯 가지입니다. 건물과 지형 같은 장면, 그 장면의 각 물체에 붙는 재질, 송수신 안테나 배열, 송수신기의 위치와 방향, 주파수, 그리고 솔버 설정입니다. 이걸 PathSolver에 넣으면 경로마다 이득, 지연, 각도, 도플러가 나오고, 이 경로에서 cir, cfr, taps 함수로 CIR, CFR, FIR 탭을 만듭니다. 이 부분은 지난 Sionna 채널 세미나에서 다뤘습니다. 여섯 입력은 역할로 묶으면 이해가 쉽습니다. 장면과 재질은 환경이라 결과가 얼마나 정확할 수 있는지 상한을 정하고, 안테나와 송수신기는 링크라 출력 텐서의 모양을 정하며, 주파수와 솔버 설정은 조건이라 재질 값과 계산량, 재현성을 정합니다.</aside>
+</section>

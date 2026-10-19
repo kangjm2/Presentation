@@ -1,0 +1,25 @@
+<section id="shape" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">입력 → 출력 · 텐서 모양 읽기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">출력의 차원 하나하나가 입력 하나에서 온다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:stretch;gap:12px">
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">R = 1</p><p style="font-size:24px;line-height:1.35">수신기 수 ④</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">RA = 2</p><p style="font-size:24px;line-height:1.35">수신 배열 소자 ③</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">T = 1</p><p style="font-size:24px;line-height:1.35">송신기 수 ④</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">TA = 16</p><p style="font-size:24px;line-height:1.35">2×4×편파2 ③</p></div>
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#255E9E">P</p><p style="font-size:24px;line-height:1.35">경로 수 ①②⑥</p></div>
+<div style="flex:1;background:#14213D;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#F0A36B">시간 · 주파수</p><p style="font-size:24px;line-height:1.35;color:#F5F3EE">cir · cfr 인자</p></div>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:26%;text-align:left;color:#F5F3EE">출력</th><th style="width:44%;text-align:left;color:#F5F3EE">모양 (9쪽 코드 기준)</th><th style="width:30%;text-align:left;color:#F5F3EE">마지막 차원을 정하는 것</th></tr>
+<tr style="background:#FBFAF7"><td>paths.a</td><td>[1, 2, 1, 16, P] (실수 · 허수)</td><td>경로 수 P</td></tr>
+<tr><td>cir → a</td><td>[1, 2, 1, 16, P, 14]</td><td>num_time_steps = 14</td></tr>
+<tr style="background:#FBFAF7"><td>cfr → h</td><td>[1, 2, 1, 16, 14, 1024]</td><td>frequencies 개수 1024</td></tr>
+<tr><td>taps → h</td><td>[1, 2, 1, 16, 14, L]</td><td>L = l_max − l_min + 1</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">synthetic_array=True면 지연 · 각도는 배열 중심 기준이라 [R, T, P] 모양 — 소자 차원 없이 나온다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Paths (모양 표기 [R, RA, T, TA, P]) · cir · cfr · taps 출력 모양은 사용 버전 문서로 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 50초) 입력과 출력의 관계를 텐서 모양으로 보면 훨씬 명확해집니다. Sionna RT 경로 결과의 기본 모양은 수신기 수, 수신 안테나 수, 송신기 수, 송신 안테나 수, 경로 수입니다. 앞 장의 코드라면 수신기 하나, 수신 소자 2개, 송신기 하나, 송신 소자 2행 4열에 교차 편파라 16개, 그리고 경로 수 P입니다. 이 중 R과 T는 송수신기 입력에서, RA와 TA는 안테나 배열 입력에서, P는 장면과 재질, 솔버 설정에서 나옵니다. 여기에 cir은 시간 단계 수를, cfr은 주파수 개수를, taps는 탭 개수를 마지막 차원으로 붙입니다. 그래서 모양이 예상과 다르면 어느 입력을 잘못 넣었는지 바로 찾을 수 있습니다. synthetic_array가 켜져 있으면 지연과 각도는 배열 중심 기준이라 안테나 차원 없이 나온다는 점도 알아 두면 좋습니다.</aside>
+</section>

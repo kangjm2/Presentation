@@ -1,0 +1,30 @@
+<section id="antenna" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">입력 ③ · 안테나 배열</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">배열은 장면 단위 — Tx 전체가 하나, Rx 전체가 하나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="width:760px;display:flex;flex-direction:column;gap:16px">
+<div style="background:#14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:0px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap">scene.tx_array = PlanarArray(</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap;padding-left:28px">num_rows=2, num_cols=4,</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#C9D3E3;white-space:nowrap;padding-left:28px">vertical_spacing=0.5, horizontal_spacing=0.5,</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F0A36B;white-space:nowrap;padding-left:28px">pattern="tr38901", polarization="cross")</p>
+</div>
+<svg aria-label="2행 4열로 배치된 안테나 소자, 각 소자는 ±45도로 교차된 두 편파 선으로 그려져 있고 소자 간격 0.5 파장이 표시된 그림" style="width:760px;height:250px" width="760" height="250" viewBox="0 0 760 250"><g fill="#FBFAF7" stroke="#5E6675" stroke-width="2"><rect x="120" y="20" width="100" height="90" rx="8"/><rect x="250" y="20" width="100" height="90" rx="8"/><rect x="380" y="20" width="100" height="90" rx="8"/><rect x="510" y="20" width="100" height="90" rx="8"/><rect x="120" y="130" width="100" height="90" rx="8"/><rect x="250" y="130" width="100" height="90" rx="8"/><rect x="380" y="130" width="100" height="90" rx="8"/><rect x="510" y="130" width="100" height="90" rx="8"/></g><g stroke="#A84A16" stroke-width="5"><line x1="145" y1="40" x2="195" y2="90"/><line x1="195" y1="40" x2="145" y2="90"/><line x1="275" y1="40" x2="325" y2="90"/><line x1="325" y1="40" x2="275" y2="90"/><line x1="405" y1="40" x2="455" y2="90"/><line x1="455" y1="40" x2="405" y2="90"/><line x1="535" y1="40" x2="585" y2="90"/><line x1="585" y1="40" x2="535" y2="90"/><line x1="145" y1="150" x2="195" y2="200"/><line x1="195" y1="150" x2="145" y2="200"/><line x1="275" y1="150" x2="325" y2="200"/><line x1="325" y1="150" x2="275" y2="200"/><line x1="405" y1="150" x2="455" y2="200"/><line x1="455" y1="150" x2="405" y2="200"/><line x1="535" y1="150" x2="585" y2="200"/><line x1="585" y1="150" x2="535" y2="200"/></g><g stroke="#255E9E" stroke-width="3"><line x1="170" y1="238" x2="300" y2="238"/><line x1="170" y1="230" x2="170" y2="246"/><line x1="300" y1="230" x2="300" y2="246"/></g></svg>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">2 × 4 소자 × 편파 2 = <b style="color:#14213D">안테나 16개</b> · 간격은 파장 배수 (0.5λ)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">pattern</b> iso (등방) · dipole · hw_dipole · tr38901 (3GPP 섹터 안테나)</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">polarization</b> V · H · VH (두 편파) · cross (±45°)</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">방향</b> 배열 자체가 아니라 Tx · Rx의 orientation이 정한다</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">출력 영향</b> 소자 수가 출력의 TA · RA 차원이 된다</p>
+<div style="background:#14213D;border-radius:12px;padding:14px 18px">
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">Tx마다 다른 배열이 필요하면 장면을 나눠 계산하거나 가장 큰 배열 기준으로 잡는다</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Antenna Arrays · Antenna Patterns · 편파 모델 기본 tr38901_2 · 그림은 개념도</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 50초) 세 번째 입력은 안테나 배열입니다. Sionna RT에서 배열은 장면 단위로 설정합니다. scene.tx_array는 모든 송신기가, scene.rx_array는 모든 수신기가 공유합니다. PlanarArray에 행과 열의 수, 소자 간격, 패턴, 편파를 넣습니다. 간격은 미터가 아니라 파장의 배수라서, 주파수가 바뀌면 실제 간격도 함께 바뀝니다. 패턴은 등방, 다이폴, 반파장 다이폴, 그리고 3GPP 38.901 섹터 안테나 패턴이 있고, 편파는 수직, 수평, 수직 수평 쌍, ±45도 교차 쌍이 있습니다. 예시처럼 2행 4열에 교차 편파를 쓰면 안테나는 16개가 되고, 이 숫자가 출력 텐서의 안테나 차원이 됩니다. 배열이 어느 쪽을 보는지는 배열이 아니라 송수신기의 방향 설정이 정합니다. 송신기마다 다른 배열이 필요하면 장면을 나눠 계산하는 식으로 우회합니다.</aside>
+</section>
