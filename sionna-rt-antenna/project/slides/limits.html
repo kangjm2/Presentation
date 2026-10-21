@@ -1,0 +1,22 @@
+<section id="limits" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">한계 · Sionna 안테나 모델이 생략하는 것</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">실제 안테나를 옮기면 배열은 줄고, 상세는 빠진다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-left:6px solid #255E9E;border-radius:12px;padding:14px 20px"><b style="color:#255E9E">배열 축소</b> 계산량 때문에 소자 수를 줄임 (예: 소자 192개 → 포트 64개 → 1개) — 빔이 넓어지고 배열 이득이 사라진다</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-left:6px solid #A84A16;border-radius:12px;padding:14px 20px"><b style="color:#A84A16">상세 손실</b> 측정 패턴 · 틸트 · 결합 같은 세부를 내장 수식으로 대체 — 부엽 · 널 · 빔 모양이 달라진다</p>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:28%;text-align:left;color:#F5F3EE">실제 안테나</th><th style="width:34%;text-align:left;color:#F5F3EE">Sionna 기본 모델</th><th style="width:38%;text-align:left;color:#F5F3EE">메우는 방법</th></tr>
+<tr style="background:#FBFAF7"><td>측정 3D 패턴</td><td>수식 패턴, 부엽 없음</td><td>측정값을 보간하는 패턴 등록</td></tr>
+<tr><td>전기적 틸트 · 빔 세트</td><td>파라미터 없음</td><td>소자별 채널에 가중치 곱하기</td></tr>
+<tr style="background:#FBFAF7"><td>수백 개 소자</td><td>그대로 넣으면 출력 · 메모리 급증</td><td>포트 단위로 묶고 이득 · 빔폭 차이 보정</td></tr>
+<tr><td>소자 간 결합 · 편차</td><td>모든 소자 같은 패턴, 결합 없음</td><td>측정 기반 보정, 해석 시 감안</td></tr>
+<tr style="background:#FBFAF7"><td>주파수별 패턴 차이</td><td>패턴은 주파수와 무관</td><td>대역별로 패턴을 바꿔 따로 계산</td></tr>
+<tr><td>송신기마다 다른 안테나</td><td>scene.tx_array 하나를 공유</td><td>배열이 다른 송신기는 나눠 계산</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">“배열 축소” · “상세 손실”은 Sionna API 이름이 아니라 변환 과정을 설명하기 위한 용어 · 소자 · 포트 수는 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 55초) 마지막으로 Sionna 안테나 모델이 생략하는 것을 알아 두면 결과를 해석할 때 도움이 됩니다. 실제 장비의 안테나를 Sionna로 옮기면 크게 두 가지가 일어납니다. 하나는 배열 축소입니다. 실제 대형 안테나는 소자가 백 개가 넘는데, 그대로 넣으면 출력 텐서와 메모리가 급증하니 포트 단위로 묶거나 아예 한 개로 줄입니다. 그러면 빔이 넓어지고 배열 이득이 사라집니다. 다른 하나는 상세 손실입니다. 측정 패턴, 전기적 틸트, 소자 간 결합 같은 세부가 내장 수식으로 대체되어 부엽이나 널, 빔 모양이 달라집니다. 표처럼 항목마다 메우는 방법이 있습니다. 측정 패턴은 보간 함수를 패턴으로 등록하고, 틸트와 빔은 소자별 채널에 가중치를 곱하고, 줄인 배열은 이득과 빔폭 차이를 보정합니다. Sionna의 패턴은 주파수와 무관하고, 송신 배열 하나를 모든 송신기가 공유한다는 점도 기억해 두세요. 참고로 배열 축소와 상세 손실은 Sionna의 API 이름이 아니라 이 과정을 설명하려고 쓴 용어입니다.</aside>
+</section>

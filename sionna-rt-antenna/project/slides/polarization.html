@@ -1,0 +1,34 @@
+<section id="polarization" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">소자 ③ · antenna.polarization</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">편파는 세로 패턴을 몇 도 기울여, 몇 개 겹치느냐다</h2>
+</div>
+<div style="position:relative;width:1664px;height:220px">
+<svg aria-label="네 가지 편파 기호: V는 세로 막대, H는 가로 막대, VH는 십자, cross는 X자 모양" style="position:absolute;left:0px;top:0px;width:1664px;height:220px" width="1664" height="220" viewBox="0 0 1664 220"><rect x="30" y="30" width="160" height="160" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><line x1="110.0" y1="170.0" x2="110.0" y2="50.0" stroke="#A84A16" stroke-width="9" stroke-linecap="round"/><rect x="430" y="30" width="160" height="160" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><line x1="450.0" y1="110.0" x2="570.0" y2="110.0" stroke="#A84A16" stroke-width="9" stroke-linecap="round"/><rect x="830" y="30" width="160" height="160" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><line x1="910.0" y1="170.0" x2="910.0" y2="50.0" stroke="#A84A16" stroke-width="9" stroke-linecap="round"/><line x1="850.0" y1="110.0" x2="970.0" y2="110.0" stroke="#255E9E" stroke-width="9" stroke-linecap="round"/><rect x="1230" y="30" width="160" height="160" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><line x1="1352.4" y1="152.4" x2="1267.6" y2="67.6" stroke="#A84A16" stroke-width="9" stroke-linecap="round"/><line x1="1267.6" y1="152.4" x2="1352.4" y2="67.6" stroke="#255E9E" stroke-width="9" stroke-linecap="round"/></svg>
+<p style="position:absolute;left:210px;top:56px;width:180px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#14213D">"V"</p>
+<p style="position:absolute;left:210px;top:104px;width:180px;font-size:24px;line-height:1.35;color:#4A5262">ζ = 0°<br>단일 편파</p>
+<p style="position:absolute;left:610px;top:56px;width:180px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#14213D">"H"</p>
+<p style="position:absolute;left:610px;top:104px;width:180px;font-size:24px;line-height:1.35;color:#4A5262">ζ = 90°<br>단일 편파</p>
+<p style="position:absolute;left:1010px;top:56px;width:200px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#14213D">"VH"</p>
+<p style="position:absolute;left:1010px;top:104px;width:200px;font-size:24px;line-height:1.35;color:#4A5262">ζ = 0°, 90°<br>이중 편파</p>
+<p style="position:absolute;left:1410px;top:56px;width:254px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#A84A16">"cross"</p>
+<p style="position:absolute;left:1410px;top:104px;width:254px;font-size:24px;line-height:1.35;color:#4A5262">ζ = −45°, +45°<br>이중 편파 · 기지국 표준</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;font-weight:600;color:#255E9E">만드는 방법</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">세로 편파 패턴 하나를 기울기 ζ만큼 돌려서 쓴다 — 이중 편파는 같은 위치에 두 개를 겹친 것</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;font-weight:600;color:#255E9E">개수 세기</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#14213D">2×4, "cross"<br>array_size = 8  <span style="color:#5E6675"># 위치</span><br>num_ant    = 16 <span style="color:#A84A16"># 출력 TA</span></p>
+</div>
+<div style="flex:1;background:#14213D;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;font-weight:600;color:#F0A36B">왜 중요한가</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">이중 편파는 같은 자리에서 독립 경로 2개 → MIMO 계층 · 다이버시티</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT 소스: register_polarization("V", [0]) · ("H", [π/2]) · ("VH", [0, π/2]) · ("cross", [−π/4, π/4]) · AntennaArray.num_ant</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 55초) 두 번째 파라미터는 polarization, 편파입니다. 편파는 전기장이 어느 방향으로 떨리는지입니다. Sionna는 세로 편파 패턴 하나를 기울기 각 ζ만큼 돌려서 다른 편파를 만듭니다. V는 0도, H는 90도로 단일 편파이고, VH는 0도와 90도, cross는 −45도와 +45도 두 개를 같은 위치에 겹친 이중 편파입니다. 기지국은 보통 cross를 씁니다. 개수를 셀 때 주의할 점이 있습니다. 2행 4열에 cross를 쓰면 소자 위치는 8개지만 안테나는 16개로 셉니다. array_size는 위치 수, num_ant는 편파까지 센 수이고, 출력 텐서의 안테나 차원은 num_ant입니다. 이중 편파가 중요한 이유는 같은 자리에서 서로 거의 독립인 두 경로를 얻을 수 있어서, 배열을 키우지 않고도 MIMO 계층이나 다이버시티를 얻기 때문입니다.</aside>
+</section>
