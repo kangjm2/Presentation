@@ -23,6 +23,6 @@
 </table>
 <p style="font-size:24px;line-height:1.45;color:#4A5262">하이브리드에서는 O-DU = <b style="color:#14213D">hybrid-odu</b>, SMO = <b style="color:#14213D">smo</b> 권장 — 캐리어는 O-DU가, SW · 성능은 SMO가. <b style="color:#14213D">carrier</b>는 여러 사업자가 RU를 나눠 쓸 때(sro-id로 범위 제한)</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NACM RFC 8341 · M-Plane 사양 Table 6.5-1에서 발췌 (R 읽기 · W 쓰기 · X RPC 실행 · 알림 구독) · 사양 버전에 따라 다를 수 있음</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 16</p>
 <aside>(약 60초) 이제 권한 제어입니다. 클라이언트가 여럿이니 누가 무엇을 바꿀 수 있는지 정해야 합니다. M-Plane은 IETF의 NETCONF 접근 제어 모델, NACM을 씁니다. 흐름은 이렇습니다. SSH 계정이나 TLS 인증서로 인증하고, 인증서라면 사용자 이름으로 매핑합니다. 사용자는 하나 이상의 그룹에 속하고, 권한은 그룹 권한의 합집합입니다. 그룹마다 모듈별로 읽기 R, 쓰기 W, 실행 X 권한이 정해져 있는데, 실행에는 RPC 호출과 알림 구독이 포함됩니다. 표는 사양의 일부입니다. sudo는 거의 모든 것을 할 수 있고, nms는 관리 시스템, fm-pm은 경보와 성능만, swm은 소프트웨어 관리만 합니다. 하이브리드 구성에서는 O-DU에 hybrid-odu, SMO에 smo를 주는 것을 권장하는데, 표를 보면 캐리어 설정인 uplane-conf는 hybrid-odu만 쓸 수 있고 smo는 읽기만 됩니다. 반대로 동기와 성능 설정은 smo가 씁니다. 역할이 겹치지 않게 나눈 것입니다. carrier 그룹은 여러 사업자가 RU 하나를 나눠 쓸 때 자기 몫만 다루도록 범위를 좁힌 그룹입니다.</aside>
 </section>

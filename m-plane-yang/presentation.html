@@ -145,7 +145,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">O-RAN WG4 Open Fronthaul M-Plane (O-RAN.WG4.MP.0, ETSI TS 104 023) · 평면 구분은 RAN 아키텍처 세미나 참조</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 16</p>
 <aside>(약 50초) M-Plane이 왜 생겼는지부터 보겠습니다. CPRI 시대에는 DU와 RU를 같은 회사가 만들었기 때문에, RU 관리는 그 회사 고유의 방식으로 DU가 대신했습니다. 설정 항목도, 경보 형식도, 소프트웨어 업데이트 방법도 회사마다 달랐고, 다른 회사 RU를 붙이려면 연동 개발부터 해야 했습니다. O-RAN 7.2x는 DU와 RU를 서로 다른 회사에서 살 수 있도록 프런트홀을 열었고, 그러려면 데이터를 나르는 C, U 평면과 동기 S 평면뿐 아니라, RU를 관리하는 방법도 표준이 되어야 했습니다. 그게 M-Plane입니다. 목표는 세 가지로 볼 수 있습니다. 어느 O-DU나 SMO든 어느 O-RU를 같은 방식으로 관리하는 상호운용, 사람이 아니라 프로그램이 읽고 쓰는 자동화, 그리고 전파를 내는 장비이기 때문에 관리자가 사라지면 스스로 멈추는 안전입니다. 오늘 볼 YANG, 타이밍, 권한이 각각 이 세 목표에 대응합니다.</aside>
 </section>
 <section id="arch" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -180,7 +180,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NETCONF Call Home: RFC 8071 · 포트는 IANA 할당값 · 그림은 개념도</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 16</p>
 <aside>(약 50초) 구조는 두 가지입니다. 계층형에서는 SMO가 O1으로 O-DU를 관리하고, O-RU는 O-DU만 M-Plane으로 관리합니다. 하이브리드에서는 SMO도 O-RU에 직접 M-Plane으로 연결해, 예를 들어 소프트웨어 관리나 성능 수집을 SMO가 직접 합니다. 어느 쪽이든 역할은 같습니다. 데이터를 가진 O-RU가 NETCONF 서버이고, O-DU와 SMO가 클라이언트입니다. 표준 문서에서는 클라이언트를 O-RU 컨트롤러라고 부릅니다. 메시지는 SSH나 TLS로 암호화된 연결 위에서 오갑니다. 특이한 점은 Call Home입니다. 보통은 클라이언트가 서버에 접속하지만, M-Plane에서는 막 켜진 O-RU가 먼저 컨트롤러에 접속합니다. SSH면 4334, TLS면 4335 포트를 씁니다. 그래서 설치자가 RU 주소를 몰라도 RU가 스스로 관리자를 찾아갑니다. 그리고 클라이언트가 여럿일 수 있기 때문에, 누가 무엇을 바꿀 수 있는지 정하는 권한 제어가 필요해집니다.</aside>
 </section>
 <section id="netconf" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -208,7 +208,7 @@ body.fs.idle .stage { cursor: none }
 <p style="flex:1;font-size:24px;line-height:1.4;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:12px 6px"><b>O-RAN M-Plane</b> 2019~</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NETCONF RFC 4741 → 6241 · YANG RFC 6020 → 7950 · Call Home RFC 8071 · NACM RFC 8341 · IETF 망 관리 흐름을 O-RAN이 채택</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 16</p>
 <aside>(약 50초) 왜 하필 NETCONF와 YANG일까요. 기존 방식과 비교하면 이유가 보입니다. CLI는 사람을 위한 명령어라 벤더마다 문법이 다르고, 여러 줄을 입력하다 중간에 실패하면 반쯤 적용된 상태로 남습니다. SNMP는 오래된 표준이지만 주로 모니터링용이고, 여러 값을 한꺼번에 안전하게 바꾸는 데는 약합니다. NETCONF와 YANG은 IETF가 이 문제를 풀려고 만든 것입니다. YANG으로 데이터의 구조, 타입, 범위를 미리 정의하고, NETCONF로 그 모델에 맞는 메시지를 주고받습니다. 여러 값을 하나의 트랜잭션으로 바꾸고 실패하면 롤백할 수 있고, 알림도 모델로 정의되며, 장비가 어떤 기능을 가졌는지 연결하자마자 자동으로 확인할 수 있습니다. NETCONF는 2006년, YANG은 2010년에 나왔고, Call Home과 접근 제어 NACM까지 갖춰진 뒤 O-RAN이 2019년부터 M-Plane의 언어로 채택했습니다.</aside>
 </section>
 <section id="yang" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -240,7 +240,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">o-ran-uplane-conf에서 발췌 · 단순화 (실제 모델은 더 많은 leaf 포함) · YANG 1.1 RFC 7950</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 16</p>
 <aside>(약 50초) YANG은 데이터의 설계도입니다. 값을 담는 것이 아니라, 값이 어떤 모양이어야 하는지를 정합니다. 왼쪽은 O-RU의 U-Plane 설정 모델에서 송신 캐리어 부분을 단순화한 것입니다. module은 하나의 기능 묶음이고, O-RAN은 동기, 경보, 소프트웨어처럼 기능별로 모듈을 나눕니다. container는 폴더, list는 표라고 생각하면 되고, key로 각 행을 구분합니다. leaf는 값 하나인데, 타입과 단위, 허용 범위가 함께 정의됩니다. 예를 들어 active는 INACTIVE, SLEEP, ACTIVE 세 값만 가질 수 있습니다. config false가 붙은 state는 장비가 알려 주는 상태라서 클라이언트가 쓸 수 없습니다. 이 밖에 rpc로 재시작 같은 동작 요청을, notification으로 이벤트를 정의하고, feature와 deviation으로 장비가 지원하는 선택 기능과 표준과 다른 점을 스스로 선언합니다.</aside>
 </section>
 <section id="message" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -273,7 +273,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">메시지는 개념 예 (네임스페이스 생략) · 설정 방식 3가지는 M-Plane 사양 9장 · NETCONF RFC 6241</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 16</p>
 <aside>(약 55초) 그럼 YANG 형식으로 메시지를 주고받는 것은 어떤 의미가 있을까요. 왼쪽은 송신 캐리어를 켜는 NETCONF 요청입니다. 태그 이름과 구조가 앞에서 본 YANG 모델과 그대로 일치합니다. 네 가지 의미가 있습니다. 첫째, 계약입니다. 양쪽이 같은 모델을 알기 때문에, 이름이 틀리거나 범위를 벗어난 값은 장비가 오류로 거절하고, 반쯤 적용되는 일이 없습니다. 둘째, 자기 소개입니다. 연결하자마자 hello 메시지와 YANG 라이브러리로 어떤 모듈과 기능을 지원하는지 알려 주고, 필요하면 모델 파일 자체를 받아 갈 수 있습니다. 셋째, 트랜잭션입니다. running에 바로 쓰는 1단계, candidate에 쓰고 commit하는 2단계, 확인이 없으면 자동으로 되돌리는 confirmed-commit 3단계가 있습니다. 넷째, 자동화입니다. 모델에서 코드와 검증기, 시험을 자동으로 만들 수 있어 벤더가 바뀌어도 같은 도구를 씁니다.</aside>
 </section>
 <section id="startup" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
@@ -301,7 +301,7 @@ body.fs.idle .stage { cursor: none }
 <p style="position:absolute;left:1200px;top:472px;width:300px;font-size:24px;font-weight:600;color:#14213D">운용 준비</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 6장 “Start-up installation” 요약 · 실제로는 PKI 등록 · 802.1X · pnfRegistration 등 선택 단계 포함</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 16</p>
 <aside>(약 55초) 이제 타이밍, 즉 시간에 관한 규칙입니다. 먼저 시작 절차입니다. O-RU 전원을 켜면, DHCP로 IP와 VLAN, 그리고 컨트롤러 주소를 받습니다. 동기는 이와 병렬로 시작합니다. 그다음 O-RU가 컨트롤러에 먼저 접속하는 Call Home을 하고, 컨트롤러가 SSH나 TLS로 연결을 맺으며 인증합니다. 연결되면 hello 메시지로 서로 지원 기능을 교환하고, 컨트롤러가 YANG 라이브러리와 스키마를 읽어 이 장비가 어떤 모델을 쓰는지 알아봅니다. 그다음 중요한 단계가 감시 구독입니다. 이때부터 워치독 타이머가 돌기 시작합니다. 이후 소프트웨어 관리, 지연 프로파일 조회, U-Plane 설정을 하고, 경보 구독과 성능 측정을 켠 뒤 캐리어를 활성화합니다. 순서가 정해져 있기 때문에, 어느 회사 컨트롤러든 어느 회사 RU든 같은 흐름으로 올라옵니다. 실제 사양에는 인증서 등록 같은 선택 단계가 더 있습니다.</aside>
 </section>
 <section id="watchdog" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
@@ -332,7 +332,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">o-ran-supervision.yang · M-Plane 사양 6.7절 · 14.1절 (감시 실패 처리) · 기본값은 사양 기준 · 그림 시각은 예시</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 16</p>
 <aside>(약 55초) 두 번째 타이밍 규칙은 감시 워치독입니다. 감시를 구독한 클라이언트가 있으면 O-RU는 두 개의 타이머를 돌립니다. 알림 타이머는 기본 60초로, 그 안에 O-RU가 “나 살아 있다”는 감시 알림을 보냅니다. 감시 타이머는 60초에 여유 10초를 더한 70초로, 그 안에 클라이언트가 리셋 RPC를 보내야 합니다. 리셋은 “나도 살아 있다”는 뜻이고, 리셋 RPC로 두 타이머 값을 바꿀 수도 있습니다. 그림처럼 마지막 리셋 이후 70초 동안 리셋이 오지 않으면 감시 실패입니다. 그러면 O-RU는 그 세션을 닫고 다시 Call Home을 시도합니다. 그리고 감시 중인 다른 세션이 하나도 없으면 모든 송신을 멈추고 스스로 리셋합니다. 관리자가 사라진 상태로 전파를 계속 내지 않기 위한 안전장치입니다. 실무에서 자주 걸리는 함정이 있습니다. confirmed-commit의 기본 확인 시간은 600초인데, 이 값이 감시 주기보다 길면 두 타이머가 엉킵니다. 사양은 확인 시간을 감시 주기보다 짧게 두라고 요구합니다.</aside>
 </section>
 <section id="sync" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
@@ -362,7 +362,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">o-ran-sync.yang · M-Plane 사양 13장 (동기 상태) · 15.3.3절 (동기 상실과 캐리어 상태) · HOLDOVER는 장비 구현에 따라 선택</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 16</p>
 <aside>(약 50초) 세 번째 타이밍은 말 그대로 시간 동기입니다. 동기 신호 자체는 S-Plane으로 오지만, 그 상태와 설정은 M-Plane의 o-ran-sync YANG 모델로 보고 바꿉니다. 상태는 세 가지입니다. 기준 신호에 잠긴 LOCKED, 기준 신호를 잃었지만 내부 시계로 버티는 HOLDOVER, 그리고 시계가 풀린 FREERUN입니다. HOLDOVER는 장비에 따라 선택 사항입니다. 모델에는 상태 외에도 GNSS, PTP, SyncE 중 무엇을 지원하는지, PTP 도메인이나 허용할 clock class 같은 설정 값, 그리고 상태가 바뀌는 즉시 보내는 알림이 정의되어 있습니다. 중요한 규칙은 FREERUN에서는 캐리어가 비활성 상태만 가질 수 있다는 것입니다. 시계가 맞지 않는 장비가 전파를 내면 다른 셀에 간섭을 주기 때문에, 동기를 잃으면 송신을 멈추고 상태 변경 알림을 보냅니다. 감시 워치독과 같은 철학입니다. 믿을 수 없는 상태면 전파를 멈춥니다.</aside>
 </section>
 <section id="nacm" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
@@ -390,7 +390,7 @@ body.fs.idle .stage { cursor: none }
 </table>
 <p style="font-size:24px;line-height:1.45;color:#4A5262">하이브리드에서는 O-DU = <b style="color:#14213D">hybrid-odu</b>, SMO = <b style="color:#14213D">smo</b> 권장 — 캐리어는 O-DU가, SW · 성능은 SMO가. <b style="color:#14213D">carrier</b>는 여러 사업자가 RU를 나눠 쓸 때(sro-id로 범위 제한)</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NACM RFC 8341 · M-Plane 사양 Table 6.5-1에서 발췌 (R 읽기 · W 쓰기 · X RPC 실행 · 알림 구독) · 사양 버전에 따라 다를 수 있음</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 16</p>
 <aside>(약 60초) 이제 권한 제어입니다. 클라이언트가 여럿이니 누가 무엇을 바꿀 수 있는지 정해야 합니다. M-Plane은 IETF의 NETCONF 접근 제어 모델, NACM을 씁니다. 흐름은 이렇습니다. SSH 계정이나 TLS 인증서로 인증하고, 인증서라면 사용자 이름으로 매핑합니다. 사용자는 하나 이상의 그룹에 속하고, 권한은 그룹 권한의 합집합입니다. 그룹마다 모듈별로 읽기 R, 쓰기 W, 실행 X 권한이 정해져 있는데, 실행에는 RPC 호출과 알림 구독이 포함됩니다. 표는 사양의 일부입니다. sudo는 거의 모든 것을 할 수 있고, nms는 관리 시스템, fm-pm은 경보와 성능만, swm은 소프트웨어 관리만 합니다. 하이브리드 구성에서는 O-DU에 hybrid-odu, SMO에 smo를 주는 것을 권장하는데, 표를 보면 캐리어 설정인 uplane-conf는 hybrid-odu만 쓸 수 있고 smo는 읽기만 됩니다. 반대로 동기와 성능 설정은 smo가 씁니다. 역할이 겹치지 않게 나눈 것입니다. carrier 그룹은 여러 사업자가 RU 하나를 나눠 쓸 때 자기 몫만 다루도록 범위를 좁힌 그룹입니다.</aside>
 </section>
 <section id="together" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
@@ -409,8 +409,140 @@ body.fs.idle .stage { cursor: none }
 <div style="display:flex;flex-direction:row;align-items:center;gap:20px;background:#14213D;border-radius:12px;padding:10px 20px"><p style="width:120px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;text-align:center;background:#F0A36B;color:#14213D;border-radius:8px;padding:4px 0px">타이밍</p><p style="flex:1;font-size:24px;line-height:1.4;color:#F5F3EE">운용 중 리셋이 끊기면 → 감시 실패 → (다른 감시 세션 없으면) 송신 중지 · 자동 리셋</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">흐름은 단순화한 예 · 실제 캐리어 생성 · 엔드포인트 설정 단계는 M-Plane 사양 15장 참조</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 16</p>
 <aside>(약 55초) 지금까지 본 세 가지가 캐리어 하나를 켜는 요청 안에서 어떻게 만나는지 보겠습니다. 먼저 Call Home 이후 TLS 인증서로 신원을 확인하고, 사용자 이름을 통해 hybrid-odu 그룹 권한을 얻습니다. 다음으로 hello와 YANG 라이브러리로 이 RU가 쓰는 U-Plane 모델의 버전과 기능을 확인합니다. 감시를 구독하면 워치독이 돌기 시작합니다. 이제 캐리어를 ACTIVE로 바꾸는 edit-config를 보냅니다. 권한 검사에서 hybrid-odu는 이 모듈에 쓸 수 있으니 통과합니다. smo 계정이었다면 여기서 거부됩니다. 그다음 YANG 모델로 이름, 타입, 범위를 검증하고 candidate에 반영한 뒤 commit합니다. 하지만 동기 상태가 FREERUN이면 캐리어는 켜지지 않습니다. LOCKED나 HOLDOVER여야 합니다. 켜지면 상태 변경 알림이 오고, 컨트롤러가 확인합니다. 운용 중에 컨트롤러의 리셋이 끊기면 감시 실패로 송신을 멈춥니다. 이렇게 YANG은 무엇을 말할지, 권한은 누가 말할 수 있는지, 타이밍은 언제까지 믿을 수 있는지를 정합니다.</aside>
+</section>
+<section id="lifecycle" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">운용 흐름 ① · 한눈에 보기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">접속 → 자기 소개 → 구독 → 경보 → 조치 → 해제</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="position:relative;width:1664px;height:230px">
+<svg aria-label="O-RU 쪽 레인: 여섯 단계 열로 나뉜 주황색 띠" style="position:absolute;left:0px;top:0px;width:1664px;height:230px" width="1664" height="230" viewBox="0 0 1664 230"><rect x="0" y="60" width="1664" height="170" rx="12" fill="#F7DDCB"/><line x1="419" y1="72" x2="419" y2="218" stroke="#E7B996" stroke-width="2" stroke-dasharray="6 6"/><line x1="668" y1="72" x2="668" y2="218" stroke="#E7B996" stroke-width="2" stroke-dasharray="6 6"/><line x1="917" y1="72" x2="917" y2="218" stroke="#E7B996" stroke-width="2" stroke-dasharray="6 6"/><line x1="1166" y1="72" x2="1166" y2="218" stroke="#E7B996" stroke-width="2" stroke-dasharray="6 6"/><line x1="1415" y1="72" x2="1415" y2="218" stroke="#E7B996" stroke-width="2" stroke-dasharray="6 6"/></svg>
+<p style="position:absolute;left:176px;top:0px;width:237px;font-size:24px;font-weight:700;text-align:center;background:#14213D;color:#F5F3EE;border-radius:8px;padding:6px 0px">① Call Home</p>
+<p style="position:absolute;left:425px;top:0px;width:237px;font-size:24px;font-weight:700;text-align:center;background:#14213D;color:#F5F3EE;border-radius:8px;padding:6px 0px">② 능력 보고</p>
+<p style="position:absolute;left:674px;top:0px;width:237px;font-size:24px;font-weight:700;text-align:center;background:#14213D;color:#F5F3EE;border-radius:8px;padding:6px 0px">③ 구독</p>
+<p style="position:absolute;left:923px;top:0px;width:237px;font-size:24px;font-weight:700;text-align:center;background:#A84A16;color:#F5F3EE;border-radius:8px;padding:6px 0px">④ 경보 발생</p>
+<p style="position:absolute;left:1172px;top:0px;width:237px;font-size:24px;font-weight:700;text-align:center;background:#A84A16;color:#F5F3EE;border-radius:8px;padding:6px 0px">⑤ 조치</p>
+<p style="position:absolute;left:1421px;top:0px;width:237px;font-size:24px;font-weight:700;text-align:center;background:#A84A16;color:#F5F3EE;border-radius:8px;padding:6px 0px">⑥ 해제</p>
+<p style="position:absolute;left:16px;top:122px;width:140px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">O-RU</p>
+<p style="position:absolute;left:184px;top:76px;width:221px;font-size:24px;line-height:1.35">DHCP로 받은<br>컨트롤러 주소에<br>먼저 접속</p>
+<p style="position:absolute;left:433px;top:76px;width:221px;font-size:24px;line-height:1.35">hello, 모듈 목록,<br>module-cap으로<br>자기 소개</p>
+<p style="position:absolute;left:682px;top:76px;width:221px;font-size:24px;line-height:1.35">워치독 시작,<br>경보 받을 곳 등록</p>
+<p style="position:absolute;left:931px;top:76px;width:221px;font-size:24px;line-height:1.35">고장 감지 →<br>경보 목록에 추가</p>
+<p style="position:absolute;left:1180px;top:76px;width:221px;font-size:24px;line-height:1.35">경보별 자체 보호:<br>캐리어 끄기 ·<br>RF 차단</p>
+<p style="position:absolute;left:1429px;top:76px;width:221px;font-size:24px;line-height:1.35">원인 해소 →<br>목록에서 제거</p>
+</div>
+<div style="position:relative;width:1664px;height:390px">
+<svg aria-label="단계마다 O-RU와 컨트롤러 사이를 오가는 화살표, 아래쪽 파란 컨트롤러 레인, 마지막 단계에서 첫 단계로 돌아가는 점선 화살표" style="position:absolute;left:0px;top:0px;width:1664px;height:390px" width="1664" height="390" viewBox="0 0 1664 390"><rect x="0" y="140" width="1664" height="170" rx="12" fill="#D5E3F3"/><line x1="419" y1="152" x2="419" y2="298" stroke="#A9C3E2" stroke-width="2" stroke-dasharray="6 6"/><line x1="668" y1="152" x2="668" y2="298" stroke="#A9C3E2" stroke-width="2" stroke-dasharray="6 6"/><line x1="917" y1="152" x2="917" y2="298" stroke="#A9C3E2" stroke-width="2" stroke-dasharray="6 6"/><line x1="1166" y1="152" x2="1166" y2="298" stroke="#A9C3E2" stroke-width="2" stroke-dasharray="6 6"/><line x1="1415" y1="152" x2="1415" y2="298" stroke="#A9C3E2" stroke-width="2" stroke-dasharray="6 6"/><line x1="200" y1="6" x2="200" y2="120" stroke="#A84A16" stroke-width="5"/><polygon points="200,136 190,118 210,118" fill="#A84A16"/><line x1="441" y1="134" x2="441" y2="22" stroke="#14213D" stroke-width="5"/><polygon points="441,4 431,22 451,22" fill="#14213D"/><line x1="463" y1="6" x2="463" y2="120" stroke="#A84A16" stroke-width="5"/><polygon points="463,136 453,118 473,118" fill="#A84A16"/><line x1="698" y1="134" x2="698" y2="22" stroke="#14213D" stroke-width="5"/><polygon points="698,4 688,22 708,22" fill="#14213D"/><line x1="947" y1="6" x2="947" y2="120" stroke="#A84A16" stroke-width="5"/><polygon points="947,136 937,118 957,118" fill="#A84A16"/><line x1="1196" y1="134" x2="1196" y2="22" stroke="#14213D" stroke-width="5"/><polygon points="1196,4 1186,22 1206,22" fill="#14213D"/><line x1="1445" y1="6" x2="1445" y2="120" stroke="#A84A16" stroke-width="5"/><polygon points="1445,136 1435,118 1455,118" fill="#A84A16"/><path d="M 1539 312 V 368 H 294 V 330" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 8"/><polygon points="294,314 284,332 304,332" fill="#A84A16"/></svg>
+<p style="position:absolute;left:226px;top:44px;width:185px;font-size:24px;font-weight:600;color:#A84A16">TCP 접속</p>
+<p style="position:absolute;left:485px;top:30px;width:176px;font-size:24px;font-weight:600;color:#14213D">get ↑<br><span style="color:#A84A16">응답 ↓</span></p>
+<p style="position:absolute;left:724px;top:44px;width:185px;font-size:24px;font-weight:600;color:#14213D">구독 요청</p>
+<p style="position:absolute;left:973px;top:44px;width:185px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#A84A16">alarm-notif</p>
+<p style="position:absolute;left:1222px;top:30px;width:185px;font-size:24px;font-weight:600;color:#14213D">reset ·<br>설정 변경</p>
+<p style="position:absolute;left:1471px;top:30px;width:185px;font-size:24px;font-weight:600;color:#A84A16">alarm-notif<br>(해제)</p>
+<p style="position:absolute;left:16px;top:190px;width:150px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">O-RU<br>컨트롤러</p>
+<p style="position:absolute;left:184px;top:156px;width:221px;font-size:24px;line-height:1.35">SSH · TLS 인증 →<br>NACM 그룹 결정</p>
+<p style="position:absolute;left:433px;top:156px;width:221px;font-size:24px;line-height:1.35">할 수 있는 범위<br>안에서 설정 계획</p>
+<p style="position:absolute;left:682px;top:156px;width:221px;font-size:24px;line-height:1.35">supervision ·<br>alarm-notif 구독</p>
+<p style="position:absolute;left:931px;top:156px;width:221px;font-size:24px;line-height:1.35">fault-id · 위치 ·<br>심각도 확인</p>
+<p style="position:absolute;left:1180px;top:156px;width:221px;font-size:24px;line-height:1.35">리셋 · 재설정 ·<br>현장 출동</p>
+<p style="position:absolute;left:1429px;top:156px;width:221px;font-size:24px;line-height:1.35">해제 확인 ·<br>서비스 복구</p>
+<p style="position:absolute;left:420px;top:318px;width:820px;font-size:24px;font-weight:600;text-align:center;color:#A84A16">리셋하면 ①부터 다시 — 원인은 restart-cause로 확인</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 6.3 Call Home · 6.6 · 9.2 · 15.1 능력 조회 · 11장 경보 · 9.5 리셋 — 흐름은 단순화</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 16</p>
+<aside>(약 60초) 지금까지 본 내용을 O-RU 한 대의 일생으로 한 장에 놓아 보겠습니다. 위 주황 띠가 O-RU, 아래 파란 띠가 O-RU 컨트롤러입니다. 첫째, Call Home입니다. O-RU가 DHCP로 받은 컨트롤러 주소로 먼저 TCP 접속을 하고, 컨트롤러가 SSH나 TLS로 인증하면서 NACM 그룹이 정해집니다. 둘째, 능력 보고입니다. 컨트롤러가 get으로 물으면 O-RU는 hello, 모듈 목록, module-cap으로 자기가 무엇을 얼마나 할 수 있는지 밝히고, 컨트롤러는 그 범위 안에서 설정을 계획합니다. 셋째, 감시와 경보를 구독합니다. 여기서 워치독이 돌기 시작하고, 경보를 받을 곳이 등록됩니다. 운용 중 고장이 나면 넷째, O-RU가 경보 목록에 올리고 alarm-notif로 알립니다. 다섯째, 조치입니다. 경보에 따라 O-RU가 스스로 캐리어를 끄거나 RF를 차단하고, 컨트롤러는 리셋, 재설정, 현장 출동을 결정합니다. 여섯째, 원인이 사라지면 해제 알림이 옵니다. 리셋을 했다면 O-RU는 다시 Call Home부터 시작하고, 원인은 restart-cause로 확인합니다. 다음 세 장에서 능력 보고, 경보 발생, 경보 이후 동작을 하나씩 보겠습니다.</aside>
+</section>
+<section id="capability" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">운용 흐름 ② · RU 능력 보고</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">설정하기 전에, RU가 “나는 이런 장비다”를 밝힌다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div style="background:#FBFAF7;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">hello</p>
+<p style="font-size:24px;font-weight:600;color:#A84A16">어떻게 바꿀 수 있나?</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">candidate · confirmed-commit<br>notification · xpath 지원 여부</p>
+</div>
+<div style="background:#FBFAF7;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">ietf-yang-library</p>
+<p style="font-size:24px;font-weight:600;color:#A84A16">어떤 기능이 있나?</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">모듈 · 버전 · feature 목록<br>없는 모듈 = 미지원 선택 기능</p>
+</div>
+<div style="background:#FBFAF7;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">o-ran-module-cap</p>
+<p style="font-size:24px;font-weight:600;color:#A84A16">얼마나 할 수 있나?</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">ru-capabilities:<br>카테고리 · 포트 · 스트림 · 압축<br>band-capabilities:<br>밴드 · 주파수 · 캐리어 수 · 대역폭</p>
+</div>
+<div style="background:#FBFAF7;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">hardware · operations · sync</p>
+<p style="font-size:24px;font-weight:600;color:#A84A16">누구이고, 지금 어떤가?</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">제조사 · 시리얼 · product-code<br>지원 M-Plane 버전<br>restart-cause · sync-state</p>
+</div>
+</div>
+<div style="width:560px;display:flex;flex-direction:column;gap:16px">
+<div style="background:#14213D;border-radius:16px;padding:18px 22px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8">&lt;module-capability&gt;</span><br>  <span style="color:#8DB8E8">&lt;ru-capabilities&gt;</span><br>    &lt;ru-supported-category&gt;CAT_B<br>    &lt;number-of-ru-ports-dl&gt;4<br>  <span style="color:#F0A36B">&lt;band-capabilities&gt;</span><br>    &lt;band-number&gt;78<br>    &lt;max-num-carriers-dl&gt;2<br>    &lt;max-carrier-bandwidth-dl&gt;<br>      100000000  <span style="color:#C9D3E3"># Hz</span></p>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:14px 20px">컨트롤러는 이 값을 넘지 않게 캐리어 · 압축 · eAxC를 설정한다 — 넘는 값은 RU가 받아들이지 않을 수 있다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 6.6 · 9.2 · 15.1, Annex D.6.1 o-ran-module-cap · XML은 닫는 태그를 줄인 예시 값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 16</p>
+<aside>(약 55초) Call Home으로 연결되면 컨트롤러는 설정하기 전에 먼저 이 RU가 어떤 장비인지 확인합니다. 네 가지 질문으로 보면 쉽습니다. 첫째, 어떻게 바꿀 수 있나. hello 메시지에서 candidate, confirmed-commit, 알림, XPath 같은 NETCONF 기능을 봅니다. 둘째, 어떤 기능이 있나. ietf-yang-library에 모듈과 버전, feature 목록이 있고, 목록에 없는 모듈은 지원하지 않는 선택 기능으로 판단합니다. 셋째, 얼마나 할 수 있나. 핵심이 o-ran-module-cap입니다. ru-capabilities에는 카테고리 A인지 B인지, 포트 수, 공간 스트림 수, 지원하는 압축 방식이 있고, band-capabilities에는 밴드별 주파수 범위, 최대 캐리어 수, 최대 캐리어 대역폭이 있습니다. 넷째, 누구이고 지금 어떤가. 하드웨어 모듈의 제조사, 시리얼, 제품 코드, 지원 M-Plane 버전, 마지막 재시작 원인, 동기 상태입니다. 오른쪽은 3.5 GHz 대역 n78에서 하향 포트 4개, 캐리어 최대 2개, 캐리어당 100 MHz라고 밝힌 예입니다. 컨트롤러는 이 값을 넘지 않게 캐리어와 압축, eAxC를 설정하고, 이 범위를 넘는 값은 RU가 받아들이지 않을 수 있습니다.</aside>
+</section>
+<section id="alarm" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">운용 흐름 ③ · 경보 발생 (o-ran-fm)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">고장이 나면, 바뀐 경보만 구독자 모두에게 알린다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:18px;background:#FBFAF7;border-radius:12px;padding:12px 18px"><p style="width:56px;font-size:28px;font-weight:700;text-align:center;color:#A84A16">1</p><p style="flex:1;font-size:24px;line-height:1.4"><b>감지</b> — 장비별 조건, 필터링 시간(예: 1분)으로 깜빡임 방지</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:18px;background:#FBFAF7;border-radius:12px;padding:12px 18px"><p style="width:56px;font-size:28px;font-weight:700;text-align:center;color:#A84A16">2</p><p style="flex:1;font-size:24px;line-height:1.4"><b>목록에 추가</b> — active-alarm-list (WARNING은 제외)</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:18px;background:#FBFAF7;border-radius:12px;padding:12px 18px"><p style="width:56px;font-size:28px;font-weight:700;text-align:center;color:#A84A16">3</p><p style="flex:1;font-size:24px;line-height:1.4"><b>알림</b> — 구독한 모든 클라이언트 · 이벤트 수집기에 alarm-notif, 새로 생기거나 해제된 것만</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:18px;background:#FBFAF7;border-radius:12px;padding:12px 18px"><p style="width:56px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">4</p><p style="flex:1;font-size:24px;line-height:1.4"><b>해제</b> — 원인이 사라지면 is-cleared = true로 다시 알리고 목록에서 제거</p></div>
+<div style="display:flex;flex-direction:row;gap:12px">
+<p style="flex:1;font-size:24px;line-height:1.4;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 16px"><b style="color:#F0A36B">CRITICAL</b> 못 씀<br><b style="color:#F0A36B">MAJOR</b> 성능 저하<br><b style="color:#F0A36B">MINOR</b> 아직 동작</p>
+<p style="flex:1.4;font-size:24px;line-height:1.4;background:#EAE7DF;border-radius:12px;padding:12px 16px">심각도가 바뀌면 새 경보 + 이전 경보 해제<br>fault-id 공통 1~35, 벤더 1000~65535</p>
+</div>
+</div>
+<div style="width:700px;background:#14213D;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;font-weight:600;color:#F0A36B">예: 동기를 잃었을 때 (fault-id 18)</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8">&lt;alarm-notif xmlns="urn:o-ran:fm:1.0"&gt;</span><br>  &lt;fault-id&gt;18&lt;/fault-id&gt;<br>  &lt;fault-source&gt;ru-module&lt;/fault-source&gt;<br>  &lt;affected-objects&gt;<br>    &lt;name&gt;tx-array-1&lt;/name&gt;<br>  &lt;/affected-objects&gt;<br>  <span style="color:#F0A36B">&lt;fault-severity&gt;CRITICAL</span>&lt;/…&gt;<br>  <span style="color:#F0A36B">&lt;is-cleared&gt;false</span>&lt;/…&gt;<br>  &lt;fault-text&gt;Synchronization Error&lt;/…&gt;<br>  &lt;event-time&gt;2026-10-21T09:12:05Z&lt;/…&gt;<br><span style="color:#8DB8E8">&lt;/alarm-notif&gt;</span></p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 11.1~11.6, Annex A(공통 경보), D.2.5 o-ran-fm · 이름 · 시각은 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 16</p>
+<aside>(약 55초) 이제 경보가 어떻게 발생하는지 보겠습니다. 모델은 o-ran-fm입니다. 첫째, O-RU가 고장을 감지합니다. 감지 조건은 장비마다 다르고, 경보가 켜졌다 꺼졌다 깜빡이지 않도록 1분 정도의 필터링 시간을 둡니다. 둘째, active-alarm-list에 올립니다. 심각도 WARNING은 목록에 넣지 않습니다. 셋째, 경보를 구독한 모든 클라이언트와 이벤트 수집기에 alarm-notif를 보냅니다. 이때 전체 목록이 아니라 새로 생기거나 해제된 경보만 보냅니다. 넷째, 원인이 사라지면 is-cleared를 true로 해서 다시 알리고 목록에서 뺍니다. 심각도는 CRITICAL이 못 쓰는 상태, MAJOR가 성능 저하, MINOR가 아직 동작하는 상태입니다. 심각도가 바뀌면 같은 경보를 고치는 게 아니라, 새 심각도로 경보를 새로 올리고 이전 것을 해제합니다. fault-id는 사양 부록 A의 공통 번호와 1000번 이상의 벤더 번호로 나뉩니다. 오른쪽은 동기를 잃었을 때의 예로, 어디서 났는지, 무엇이 영향을 받는지, 얼마나 심각한지, 언제 났는지를 한 메시지에 담습니다. 컨트롤러는 이걸로 다음 조치를 정합니다.</aside>
+</section>
+<section id="recovery" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">운용 흐름 ④ · 경보 이후 동작</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RU가 스스로 할 일과 관리자가 할 일이 정해져 있다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:5%;text-align:left;color:#F5F3EE">ID</th><th style="width:19%;text-align:left;color:#F5F3EE">경보</th><th style="width:15%;text-align:left;color:#F5F3EE">심각도</th><th style="width:25%;text-align:left;color:#F5F3EE">RU가 바로 하는 일</th><th style="width:17%;text-align:left;color:#F5F3EE">관리자 복구 (참고)</th><th style="width:19%;text-align:left;color:#F5F3EE">해제 조건</th></tr>
+<tr style="background:#FBFAF7"><td>2</td><td>과열 위험</td><td>CRITICAL</td><td>모든 캐리어 비활성화</td><td>—</td><td>온도가 정상 범위로</td></tr>
+<tr><td>18</td><td>동기 오류</td><td>CRITICAL</td><td>RF 송신 차단, 모든 캐리어 비활성화</td><td>리셋 또는 없음</td><td>동기 회복</td></tr>
+<tr style="background:#FBFAF7"><td>17</td><td>외부 동기원 없음</td><td>MAJOR</td><td>—</td><td>리셋 또는 없음</td><td>장비별 조건</td></tr>
+<tr><td>11</td><td>설정 실패</td><td>CRITICAL</td><td>—</td><td>리셋</td><td>정의 없음</td></tr>
+<tr style="background:#FBFAF7"><td>28</td><td>C/U-Plane 연결 고장</td><td>MAJOR · MINOR 등</td><td>—</td><td>관련 캐리어 끄기 · 삭제</td><td>해당 캐리어 비활성 · 삭제</td></tr>
+<tr><td>22</td><td>자체 시험 실패</td><td>CRITICAL</td><td>복구를 위해 정해진 횟수만큼 리셋</td><td>—</td><td>정의 없음</td></tr>
+</table>
+<div style="display:flex;flex-direction:row;align-items:center;gap:14px">
+<p style="font-size:24px;font-weight:700;color:#A84A16">다시 ①로</p>
+<p style="flex:1;font-size:24px;line-height:1.35;background:#FBFAF7;border:2px solid #DCD8CE;border-radius:10px;padding:10px 14px">감시 실패 → 송신 중지 · 자율 리셋</p>
+<p style="flex:1;font-size:24px;line-height:1.35;background:#FBFAF7;border:2px solid #DCD8CE;border-radius:10px;padding:10px 14px">Call Home 반복 실패 → 자율 리셋</p>
+<p style="flex:1;font-size:24px;line-height:1.35;background:#FBFAF7;border:2px solid #DCD8CE;border-radius:10px;padding:10px 14px">reset RPC → 재시작 · Call Home</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 Annex A Table A.1-1 발췌(관리자 복구 열은 참고용) · 6.3 · 9.5 · 14.1 · 경보 이름은 우리말로 줄임</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 16</p>
+<aside>(약 55초) 경보가 올라온 뒤에는 무엇이 일어날까요. 사양 부록 A의 공통 경보 표에는 경보마다 RU가 감지 즉시 할 일, 관리자 쪽 복구 조치, 해제 조건이 적혀 있습니다. 대표적인 것만 보겠습니다. 과열 위험은 RU가 하드웨어를 지키기 위해 모든 캐리어를 스스로 끕니다. 동기 오류는 주변에 간섭을 주지 않도록 RF 송신을 차단하고 캐리어를 끄며, 관리자는 필요하면 리셋합니다. 외부 동기원을 잃은 경우와 설정 실패는 RU가 따로 하는 일은 없고, 관리자 쪽에서 리셋을 검토합니다. C/U-Plane 연결 고장은 관련 캐리어를 끄거나 지우면 해제되고, 자체 시험 실패는 RU가 정해진 횟수만큼 스스로 리셋해 복구를 시도합니다. 관리자 복구 열은 사양에서도 참고용이라 실제 조치는 운영 정책에 따릅니다. 아래 세 가지는 경보가 아니라도 RU를 처음으로 돌려보내는 경우입니다. 감시 실패, Call Home을 정해진 횟수만큼 실패한 경우, 그리고 컨트롤러가 reset RPC를 보낸 경우입니다. 이때 RU는 재시작하고 다시 Call Home부터 시작합니다.</aside>
 </section>
 <section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
 <div style="display:flex;flex-direction:column;gap:16px">
@@ -430,15 +562,19 @@ body.fs.idle .stage { cursor: none }
 <p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F0A36B">NACM</p>
 <p style="flex:1;font-size:30px;color:#C9D3E3">누가 말할 수 있는지 — 그룹별 모듈 R · W · X</p>
 </div>
-<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
 <p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#C9D3E3">타이밍</p>
 <p style="flex:1;font-size:30px;color:#C9D3E3">언제까지 믿을지 — 시작 순서 · 워치독 · 동기 상태</p>
 </div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F0A36B">운용</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">Call Home → 능력 보고 → 경보 → 자체 보호 · 복구 → 다시 Call Home</p>
+</div>
 </div>
 <p style="font-family:'Noto Serif KR', Georgia, serif;font-size:44px;font-weight:700;line-height:1.35;color:#F0A36B">믿을 수 없는 상태가 되면<br>RU는 스스로 전파를 멈춘다</p>
-<p style="font-size:24px;line-height:1.45;color:#8DB8E8">다음 단계 제안: [시험 대상 O-RU] YANG 트리 · NACM 계정 · 워치독 설정 점검 체크리스트 작성</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#C9D3E3;text-align:right">12 / 12</p>
-<aside>(약 30초) 정리하겠습니다. M-Plane은 열린 프런트홀에서 어느 회사 RU든 같은 방식으로, 자동으로, 안전하게 관리하기 위해 만들어졌습니다. 그 안에 세 개의 약속이 있습니다. YANG은 무엇을 말할지 정하는 계약이고, 검증과 트랜잭션, 자기 소개를 가능하게 합니다. NACM은 누가 말할 수 있는지를 그룹별 모듈 권한으로 정합니다. 타이밍은 시작 순서, 워치독, 동기 상태로 언제까지 믿을 수 있는지 정합니다. 한 줄로 줄이면, 믿을 수 없는 상태가 되면 RU는 스스로 전파를 멈춥니다. 다음 단계로 시험 대상 RU의 YANG 트리, NACM 계정, 워치독 설정을 점검하는 체크리스트를 만들어 보기를 제안드립니다. 감사합니다.</aside>
+<p style="font-size:24px;line-height:1.45;color:#8DB8E8">다음 단계 제안: [시험 대상 O-RU] YANG 트리 · NACM 계정 · 워치독 · 경보 점검 체크리스트 작성</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#C9D3E3;text-align:right">16 / 16</p>
+<aside>(약 35초) 정리하겠습니다. M-Plane은 열린 프런트홀에서 어느 회사 RU든 같은 방식으로, 자동으로, 안전하게 관리하기 위해 만들어졌습니다. 그 안에 세 개의 약속이 있습니다. YANG은 무엇을 말할지 정하는 계약이고, 검증과 트랜잭션, 자기 소개를 가능하게 합니다. NACM은 누가 말할 수 있는지를 그룹별 모듈 권한으로 정합니다. 타이밍은 시작 순서, 워치독, 동기 상태로 언제까지 믿을 수 있는지 정합니다. 그리고 운용은 Call Home, 능력 보고, 경보, 자체 보호와 복구, 그리고 다시 Call Home으로 이어지는 한 바퀴입니다. 한 줄로 줄이면, 믿을 수 없는 상태가 되면 RU는 스스로 전파를 멈춥니다. 다음 단계로 시험 대상 RU의 YANG 트리, NACM 계정, 워치독 설정, 경보 목록을 점검하는 체크리스트를 만들어 보기를 제안드립니다. 감사합니다.</aside>
 </section>
     </div>
   </div>
