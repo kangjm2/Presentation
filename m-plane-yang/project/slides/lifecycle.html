@@ -39,6 +39,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 6.3 Call Home · 6.6 · 9.2 · 15.1 능력 조회 · 11장 경보 · 9.5 리셋 — 흐름은 단순화</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 16</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 18</p>
 <aside>(약 60초) 지금까지 본 내용을 O-RU 한 대의 일생으로 한 장에 놓아 보겠습니다. 위 주황 띠가 O-RU, 아래 파란 띠가 O-RU 컨트롤러입니다. 첫째, Call Home입니다. O-RU가 DHCP로 받은 컨트롤러 주소로 먼저 TCP 접속을 하고, 컨트롤러가 SSH나 TLS로 인증하면서 NACM 그룹이 정해집니다. 둘째, 능력 보고입니다. 컨트롤러가 get으로 물으면 O-RU는 hello, 모듈 목록, module-cap으로 자기가 무엇을 얼마나 할 수 있는지 밝히고, 컨트롤러는 그 범위 안에서 설정을 계획합니다. 셋째, 감시와 경보를 구독합니다. 여기서 워치독이 돌기 시작하고, 경보를 받을 곳이 등록됩니다. 운용 중 고장이 나면 넷째, O-RU가 경보 목록에 올리고 alarm-notif로 알립니다. 다섯째, 조치입니다. 경보에 따라 O-RU가 스스로 캐리어를 끄거나 RF를 차단하고, 컨트롤러는 리셋, 재설정, 현장 출동을 결정합니다. 여섯째, 원인이 사라지면 해제 알림이 옵니다. 리셋을 했다면 O-RU는 다시 Call Home부터 시작하고, 원인은 restart-cause로 확인합니다. 다음 세 장에서 능력 보고, 경보 발생, 경보 이후 동작을 하나씩 보겠습니다.</aside>
 </section>

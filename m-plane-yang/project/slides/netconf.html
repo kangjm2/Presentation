@@ -23,6 +23,6 @@
 <p style="flex:1;font-size:24px;line-height:1.4;text-align:center;background:#14213D;color:#F5F3EE;border-radius:10px;padding:12px 6px"><b>O-RAN M-Plane</b> 2019~</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">NETCONF RFC 4741 → 6241 · YANG RFC 6020 → 7950 · Call Home RFC 8071 · NACM RFC 8341 · IETF 망 관리 흐름을 O-RAN이 채택</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 16</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 18</p>
 <aside>(약 50초) 왜 하필 NETCONF와 YANG일까요. 기존 방식과 비교하면 이유가 보입니다. CLI는 사람을 위한 명령어라 벤더마다 문법이 다르고, 여러 줄을 입력하다 중간에 실패하면 반쯤 적용된 상태로 남습니다. SNMP는 오래된 표준이지만 주로 모니터링용이고, 여러 값을 한꺼번에 안전하게 바꾸는 데는 약합니다. NETCONF와 YANG은 IETF가 이 문제를 풀려고 만든 것입니다. YANG으로 데이터의 구조, 타입, 범위를 미리 정의하고, NETCONF로 그 모델에 맞는 메시지를 주고받습니다. 여러 값을 하나의 트랜잭션으로 바꾸고 실패하면 롤백할 수 있고, 알림도 모델로 정의되며, 장비가 어떤 기능을 가졌는지 연결하자마자 자동으로 확인할 수 있습니다. NETCONF는 2006년, YANG은 2010년에 나왔고, Call Home과 접근 제어 NACM까지 갖춰진 뒤 O-RAN이 2019년부터 M-Plane의 언어로 채택했습니다.</aside>
 </section>
