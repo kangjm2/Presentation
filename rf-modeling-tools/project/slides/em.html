@@ -1,0 +1,26 @@
+<section id="em" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">① EM · 회로 툴</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">맥스웰 방정식을 직접 풀어 부품 하나를 설계한다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:22%;text-align:left;color:#F5F3EE">해석 방법</th><th style="width:34%;text-align:left;color:#F5F3EE">원리 · 잘하는 것</th><th style="width:44%;text-align:left;color:#F5F3EE">대표 툴</th></tr>
+<tr style="background:#FBFAF7"><td><b>FEM</b> 유한요소</td><td>공간을 사면체로 나눔 · 복잡한 3D 구조</td><td>Ansys HFSS</td></tr>
+<tr><td><b>FDTD · FIT</b> 시간영역</td><td>격자 위 시간 진행 · 광대역 한 번에</td><td>Dassault Systèmes CST Studio Suite</td></tr>
+<tr style="background:#FBFAF7"><td><b>MoM</b> 모멘트법</td><td>표면 전류만 풂 · 금속 · 큰 구조물</td><td>Altair Feko (MLFMM · PO 등 혼합)</td></tr>
+<tr><td><b>회로 · 시스템</b></td><td>회로망 · 비선형 PA · 정합</td><td>Keysight ADS · Cadence AWR Microwave Office</td></tr>
+</table>
+<div style="display:flex;flex-direction:row;gap:20px">
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:26px;font-weight:600;color:#255E9E">어디에 쓰나</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">안테나 · 배열 설계, 레이돔 영향, 소자 간 결합, 필터 · PA, 인체 노출(SAR)</p>
+</div>
+<div style="flex:1;background:#14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:26px;font-weight:600;color:#F0A36B">위층으로</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">3D 패턴 · 이득 · 틸트별 패턴 파일 → 망 설계 툴과 레이 트레이서의 안테나 입력</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">각 툴은 주 해석 방법 기준 분류 (대부분 여러 방법을 함께 제공) · 계산량이 커서 부품 · 장비 단위에 씀</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) 첫 번째 층은 EM, 즉 전자기 해석과 회로 툴입니다. 맥스웰 방정식을 거의 근사 없이 풀어서 부품 하나를 정밀하게 설계합니다. 방법에 따라 툴의 성격이 다릅니다. 유한요소법은 공간을 작은 사면체로 나눠 복잡한 3D 구조에 강하고, 대표가 HFSS입니다. 시간영역 방법은 격자 위에서 시간을 진행시켜 넓은 대역을 한 번에 보고, CST가 대표적입니다. 모멘트법은 금속 표면의 전류만 풀어서 큰 금속 구조물에 강하고, Feko가 대표입니다. 회로와 시스템 툴인 ADS나 Microwave Office는 필터, 정합, 비선형 전력 증폭기를 다룹니다. 계산량이 커서 부품이나 장비 단위에 쓰고, 결과물인 3D 패턴과 틸트별 패턴 파일이 망 설계 툴과 레이 트레이서의 안테나 입력이 됩니다. 실제로 망 설계 툴에 넣는 안테나 파일은 대개 이런 해석이나 챔버 측정에서 나옵니다.</aside>
+</section>
