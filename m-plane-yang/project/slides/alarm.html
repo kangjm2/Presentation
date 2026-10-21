@@ -1,0 +1,25 @@
+<section id="alarm" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">운용 흐름 ③ · 경보 발생 (o-ran-fm)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">고장이 나면, 바뀐 경보만 구독자 모두에게 알린다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:18px;background:#FBFAF7;border-radius:12px;padding:12px 18px"><p style="width:56px;font-size:28px;font-weight:700;text-align:center;color:#A84A16">1</p><p style="flex:1;font-size:24px;line-height:1.4"><b>감지</b> — 장비별 조건, 필터링 시간(예: 1분)으로 깜빡임 방지</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:18px;background:#FBFAF7;border-radius:12px;padding:12px 18px"><p style="width:56px;font-size:28px;font-weight:700;text-align:center;color:#A84A16">2</p><p style="flex:1;font-size:24px;line-height:1.4"><b>목록에 추가</b> — active-alarm-list (WARNING은 제외)</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:18px;background:#FBFAF7;border-radius:12px;padding:12px 18px"><p style="width:56px;font-size:28px;font-weight:700;text-align:center;color:#A84A16">3</p><p style="flex:1;font-size:24px;line-height:1.4"><b>알림</b> — 구독한 모든 클라이언트 · 이벤트 수집기에 alarm-notif, 새로 생기거나 해제된 것만</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:18px;background:#FBFAF7;border-radius:12px;padding:12px 18px"><p style="width:56px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">4</p><p style="flex:1;font-size:24px;line-height:1.4"><b>해제</b> — 원인이 사라지면 is-cleared = true로 다시 알리고 목록에서 제거</p></div>
+<div style="display:flex;flex-direction:row;gap:12px">
+<p style="flex:1;font-size:24px;line-height:1.4;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 16px"><b style="color:#F0A36B">CRITICAL</b> 못 씀<br><b style="color:#F0A36B">MAJOR</b> 성능 저하<br><b style="color:#F0A36B">MINOR</b> 아직 동작</p>
+<p style="flex:1.4;font-size:24px;line-height:1.4;background:#EAE7DF;border-radius:12px;padding:12px 16px">심각도가 바뀌면 새 경보 + 이전 경보 해제<br>fault-id 공통 1~35, 벤더 1000~65535</p>
+</div>
+</div>
+<div style="width:700px;background:#14213D;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;font-weight:600;color:#F0A36B">예: 동기를 잃었을 때 (fault-id 18)</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8">&lt;alarm-notif xmlns="urn:o-ran:fm:1.0"&gt;</span><br>  &lt;fault-id&gt;18&lt;/fault-id&gt;<br>  &lt;fault-source&gt;ru-module&lt;/fault-source&gt;<br>  &lt;affected-objects&gt;<br>    &lt;name&gt;tx-array-1&lt;/name&gt;<br>  &lt;/affected-objects&gt;<br>  <span style="color:#F0A36B">&lt;fault-severity&gt;CRITICAL</span>&lt;/…&gt;<br>  <span style="color:#F0A36B">&lt;is-cleared&gt;false</span>&lt;/…&gt;<br>  &lt;fault-text&gt;Synchronization Error&lt;/…&gt;<br>  &lt;event-time&gt;2026-10-21T09:12:05Z&lt;/…&gt;<br><span style="color:#8DB8E8">&lt;/alarm-notif&gt;</span></p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 11.1~11.6, Annex A(공통 경보), D.2.5 o-ran-fm · 이름 · 시각은 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 16</p>
+<aside>(약 55초) 이제 경보가 어떻게 발생하는지 보겠습니다. 모델은 o-ran-fm입니다. 첫째, O-RU가 고장을 감지합니다. 감지 조건은 장비마다 다르고, 경보가 켜졌다 꺼졌다 깜빡이지 않도록 1분 정도의 필터링 시간을 둡니다. 둘째, active-alarm-list에 올립니다. 심각도 WARNING은 목록에 넣지 않습니다. 셋째, 경보를 구독한 모든 클라이언트와 이벤트 수집기에 alarm-notif를 보냅니다. 이때 전체 목록이 아니라 새로 생기거나 해제된 경보만 보냅니다. 넷째, 원인이 사라지면 is-cleared를 true로 해서 다시 알리고 목록에서 뺍니다. 심각도는 CRITICAL이 못 쓰는 상태, MAJOR가 성능 저하, MINOR가 아직 동작하는 상태입니다. 심각도가 바뀌면 같은 경보를 고치는 게 아니라, 새 심각도로 경보를 새로 올리고 이전 것을 해제합니다. fault-id는 사양 부록 A의 공통 번호와 1000번 이상의 벤더 번호로 나뉩니다. 오른쪽은 동기를 잃었을 때의 예로, 어디서 났는지, 무엇이 영향을 받는지, 얼마나 심각한지, 언제 났는지를 한 메시지에 담습니다. 컨트롤러는 이걸로 다음 조치를 정합니다.</aside>
+</section>

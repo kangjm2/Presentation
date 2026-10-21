@@ -1,0 +1,39 @@
+<section id="capability" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">운용 흐름 ② · RU 능력 보고</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">설정하기 전에, RU가 “나는 이런 장비다”를 밝힌다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div style="background:#FBFAF7;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">hello</p>
+<p style="font-size:24px;font-weight:600;color:#A84A16">어떻게 바꿀 수 있나?</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">candidate · confirmed-commit<br>notification · xpath 지원 여부</p>
+</div>
+<div style="background:#FBFAF7;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">ietf-yang-library</p>
+<p style="font-size:24px;font-weight:600;color:#A84A16">어떤 기능이 있나?</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">모듈 · 버전 · feature 목록<br>없는 모듈 = 미지원 선택 기능</p>
+</div>
+<div style="background:#FBFAF7;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">o-ran-module-cap</p>
+<p style="font-size:24px;font-weight:600;color:#A84A16">얼마나 할 수 있나?</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">ru-capabilities:<br>카테고리 · 포트 · 스트림 · 압축<br>band-capabilities:<br>밴드 · 주파수 · 캐리어 수 · 대역폭</p>
+</div>
+<div style="background:#FBFAF7;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">hardware · operations · sync</p>
+<p style="font-size:24px;font-weight:600;color:#A84A16">누구이고, 지금 어떤가?</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5262">제조사 · 시리얼 · product-code<br>지원 M-Plane 버전<br>restart-cause · sync-state</p>
+</div>
+</div>
+<div style="width:560px;display:flex;flex-direction:column;gap:16px">
+<div style="background:#14213D;border-radius:16px;padding:18px 22px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8">&lt;module-capability&gt;</span><br>  <span style="color:#8DB8E8">&lt;ru-capabilities&gt;</span><br>    &lt;ru-supported-category&gt;CAT_B<br>    &lt;number-of-ru-ports-dl&gt;4<br>  <span style="color:#F0A36B">&lt;band-capabilities&gt;</span><br>    &lt;band-number&gt;78<br>    &lt;max-num-carriers-dl&gt;2<br>    &lt;max-carrier-bandwidth-dl&gt;<br>      100000000  <span style="color:#C9D3E3"># Hz</span></p>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:14px 20px">컨트롤러는 이 값을 넘지 않게 캐리어 · 압축 · eAxC를 설정한다 — 넘는 값은 RU가 받아들이지 않을 수 있다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 6.6 · 9.2 · 15.1, Annex D.6.1 o-ran-module-cap · XML은 닫는 태그를 줄인 예시 값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 16</p>
+<aside>(약 55초) Call Home으로 연결되면 컨트롤러는 설정하기 전에 먼저 이 RU가 어떤 장비인지 확인합니다. 네 가지 질문으로 보면 쉽습니다. 첫째, 어떻게 바꿀 수 있나. hello 메시지에서 candidate, confirmed-commit, 알림, XPath 같은 NETCONF 기능을 봅니다. 둘째, 어떤 기능이 있나. ietf-yang-library에 모듈과 버전, feature 목록이 있고, 목록에 없는 모듈은 지원하지 않는 선택 기능으로 판단합니다. 셋째, 얼마나 할 수 있나. 핵심이 o-ran-module-cap입니다. ru-capabilities에는 카테고리 A인지 B인지, 포트 수, 공간 스트림 수, 지원하는 압축 방식이 있고, band-capabilities에는 밴드별 주파수 범위, 최대 캐리어 수, 최대 캐리어 대역폭이 있습니다. 넷째, 누구이고 지금 어떤가. 하드웨어 모듈의 제조사, 시리얼, 제품 코드, 지원 M-Plane 버전, 마지막 재시작 원인, 동기 상태입니다. 오른쪽은 3.5 GHz 대역 n78에서 하향 포트 4개, 캐리어 최대 2개, 캐리어당 100 MHz라고 밝힌 예입니다. 컨트롤러는 이 값을 넘지 않게 캐리어와 압축, eAxC를 설정하고, 이 범위를 넘는 값은 RU가 받아들이지 않을 수 있습니다.</aside>
+</section>

@@ -3,12 +3,13 @@
   "createdOnFiles": {"v": 1, "at": "2026-10-19T20:00:00Z"},
   "lists": "css",
   "title": "M-Plane과 YANG",
-  "order": ["cover", "why", "arch", "netconf", "yang", "message", "startup", "watchdog", "sync", "nacm", "together", "summary"],
+  "order": ["cover", "why", "arch", "netconf", "yang", "message", "startup", "watchdog", "sync", "nacm", "together", "lifecycle", "capability", "alarm", "recovery", "summary"],
   "sections": {
     "intro": {"description": "M-Plane이 왜 고안되었고 어떤 구조인가", "start": "cover"},
     "model": {"description": "NETCONF/YANG: 모델로 메시지를 주고받는다는 것의 의미", "start": "netconf"},
     "timing": {"description": "시작 절차, 감시 워치독, 동기 상태 — 시간에 관한 규칙", "start": "startup"},
-    "access": {"description": "권한 제어(NACM)와 통합 시나리오", "start": "nacm"}
+    "access": {"description": "권한 제어(NACM)와 통합 시나리오", "start": "nacm"},
+    "ops": {"description": "운용 흐름: Call Home → 능력 보고 → 경보 발생 → 경보 이후 동작", "start": "lifecycle"}
   },
   "faces": {
     "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},

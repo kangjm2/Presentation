@@ -25,6 +25,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">o-ran-sync.yang · M-Plane 사양 13장 (동기 상태) · 15.3.3절 (동기 상실과 캐리어 상태) · HOLDOVER는 장비 구현에 따라 선택</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 16</p>
 <aside>(약 50초) 세 번째 타이밍은 말 그대로 시간 동기입니다. 동기 신호 자체는 S-Plane으로 오지만, 그 상태와 설정은 M-Plane의 o-ran-sync YANG 모델로 보고 바꿉니다. 상태는 세 가지입니다. 기준 신호에 잠긴 LOCKED, 기준 신호를 잃었지만 내부 시계로 버티는 HOLDOVER, 그리고 시계가 풀린 FREERUN입니다. HOLDOVER는 장비에 따라 선택 사항입니다. 모델에는 상태 외에도 GNSS, PTP, SyncE 중 무엇을 지원하는지, PTP 도메인이나 허용할 clock class 같은 설정 값, 그리고 상태가 바뀌는 즉시 보내는 알림이 정의되어 있습니다. 중요한 규칙은 FREERUN에서는 캐리어가 비활성 상태만 가질 수 있다는 것입니다. 시계가 맞지 않는 장비가 전파를 내면 다른 셀에 간섭을 주기 때문에, 동기를 잃으면 송신을 멈추고 상태 변경 알림을 보냅니다. 감시 워치독과 같은 철학입니다. 믿을 수 없는 상태면 전파를 멈춥니다.</aside>
 </section>
