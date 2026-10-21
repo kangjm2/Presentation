@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Sionna RT 안테나의 물리적 특성</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="4행 6열 교차 편파 안테나 배열과 정면으로 뻗는 빔 모양" style="position:absolute;left:900px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><rect x="148" y="298" width="64" height="64" rx="8" fill="#34446A"/><line x1="160" y1="310" x2="200" y2="350" stroke="#F0A36B" stroke-width="5"/><line x1="160" y1="350" x2="200" y2="310" stroke="#8DB8E8" stroke-width="5"/><rect x="238" y="298" width="64" height="64" rx="8" fill="#34446A"/><line x1="250" y1="310" x2="290" y2="350" stroke="#F0A36B" stroke-width="5"/><line x1="250" y1="350" x2="290" y2="310" stroke="#8DB8E8" stroke-width="5"/><rect x="328" y="298" width="64" height="64" rx="8" fill="#34446A"/><line x1="340" y1="310" x2="380" y2="350" stroke="#F0A36B" stroke-width="5"/><line x1="340" y1="350" x2="380" y2="310" stroke="#8DB8E8" stroke-width="5"/><rect x="418" y="298" width="64" height="64" rx="8" fill="#34446A"/><line x1="430" y1="310" x2="470" y2="350" stroke="#F0A36B" stroke-width="5"/><line x1="430" y1="350" x2="470" y2="310" stroke="#8DB8E8" stroke-width="5"/><rect x="508" y="298" width="64" height="64" rx="8" fill="#34446A"/><line x1="520" y1="310" x2="560" y2="350" stroke="#F0A36B" stroke-width="5"/><line x1="520" y1="350" x2="560" y2="310" stroke="#8DB8E8" stroke-width="5"/><rect x="598" y="298" width="64" height="64" rx="8" fill="#34446A"/><line x1="610" y1="310" x2="650" y2="350" stroke="#F0A36B" stroke-width="5"/><line x1="610" y1="350" x2="650" y2="310" stroke="#8DB8E8" stroke-width="5"/><rect x="148" y="408" width="64" height="64" rx="8" fill="#34446A"/><line x1="160" y1="420" x2="200" y2="460" stroke="#F0A36B" stroke-width="5"/><line x1="160" y1="460" x2="200" y2="420" stroke="#8DB8E8" stroke-width="5"/><rect x="238" y="408" width="64" height="64" rx="8" fill="#34446A"/><line x1="250" y1="420" x2="290" y2="460" stroke="#F0A36B" stroke-width="5"/><line x1="250" y1="460" x2="290" y2="420" stroke="#8DB8E8" stroke-width="5"/><rect x="328" y="408" width="64" height="64" rx="8" fill="#34446A"/><line x1="340" y1="420" x2="380" y2="460" stroke="#F0A36B" stroke-width="5"/><line x1="340" y1="460" x2="380" y2="420" stroke="#8DB8E8" stroke-width="5"/><rect x="418" y="408" width="64" height="64" rx="8" fill="#34446A"/><line x1="430" y1="420" x2="470" y2="460" stroke="#F0A36B" stroke-width="5"/><line x1="430" y1="460" x2="470" y2="420" stroke="#8DB8E8" stroke-width="5"/><rect x="508" y="408" width="64" height="64" rx="8" fill="#34446A"/><line x1="520" y1="420" x2="560" y2="460" stroke="#F0A36B" stroke-width="5"/><line x1="520" y1="460" x2="560" y2="420" stroke="#8DB8E8" stroke-width="5"/><rect x="598" y="408" width="64" height="64" rx="8" fill="#34446A"/><line x1="610" y1="420" x2="650" y2="460" stroke="#F0A36B" stroke-width="5"/><line x1="610" y1="460" x2="650" y2="420" stroke="#8DB8E8" stroke-width="5"/><rect x="148" y="518" width="64" height="64" rx="8" fill="#34446A"/><line x1="160" y1="530" x2="200" y2="570" stroke="#F0A36B" stroke-width="5"/><line x1="160" y1="570" x2="200" y2="530" stroke="#8DB8E8" stroke-width="5"/><rect x="238" y="518" width="64" height="64" rx="8" fill="#34446A"/><line x1="250" y1="530" x2="290" y2="570" stroke="#F0A36B" stroke-width="5"/><line x1="250" y1="570" x2="290" y2="530" stroke="#8DB8E8" stroke-width="5"/><rect x="328" y="518" width="64" height="64" rx="8" fill="#34446A"/><line x1="340" y1="530" x2="380" y2="570" stroke="#F0A36B" stroke-width="5"/><line x1="340" y1="570" x2="380" y2="530" stroke="#8DB8E8" stroke-width="5"/><rect x="418" y="518" width="64" height="64" rx="8" fill="#34446A"/><line x1="430" y1="530" x2="470" y2="570" stroke="#F0A36B" stroke-width="5"/><line x1="430" y1="570" x2="470" y2="530" stroke="#8DB8E8" stroke-width="5"/><rect x="508" y="518" width="64" height="64" rx="8" fill="#34446A"/><line x1="520" y1="530" x2="560" y2="570" stroke="#F0A36B" stroke-width="5"/><line x1="520" y1="570" x2="560" y2="530" stroke="#8DB8E8" stroke-width="5"/><rect x="598" y="518" width="64" height="64" rx="8" fill="#34446A"/><line x1="610" y1="530" x2="650" y2="570" stroke="#F0A36B" stroke-width="5"/><line x1="610" y1="570" x2="650" y2="530" stroke="#8DB8E8" stroke-width="5"/><rect x="148" y="628" width="64" height="64" rx="8" fill="#34446A"/><line x1="160" y1="640" x2="200" y2="680" stroke="#F0A36B" stroke-width="5"/><line x1="160" y1="680" x2="200" y2="640" stroke="#8DB8E8" stroke-width="5"/><rect x="238" y="628" width="64" height="64" rx="8" fill="#34446A"/><line x1="250" y1="640" x2="290" y2="680" stroke="#F0A36B" stroke-width="5"/><line x1="250" y1="680" x2="290" y2="640" stroke="#8DB8E8" stroke-width="5"/><rect x="328" y="628" width="64" height="64" rx="8" fill="#34446A"/><line x1="340" y1="640" x2="380" y2="680" stroke="#F0A36B" stroke-width="5"/><line x1="340" y1="680" x2="380" y2="640" stroke="#8DB8E8" stroke-width="5"/><rect x="418" y="628" width="64" height="64" rx="8" fill="#34446A"/><line x1="430" y1="640" x2="470" y2="680" stroke="#F0A36B" stroke-width="5"/><line x1="430" y1="680" x2="470" y2="640" stroke="#8DB8E8" stroke-width="5"/><rect x="508" y="628" width="64" height="64" rx="8" fill="#34446A"/><line x1="520" y1="640" x2="560" y2="680" stroke="#F0A36B" stroke-width="5"/><line x1="520" y1="680" x2="560" y2="640" stroke="#8DB8E8" stroke-width="5"/><rect x="598" y="628" width="64" height="64" rx="8" fill="#34446A"/><line x1="610" y1="640" x2="650" y2="680" stroke="#F0A36B" stroke-width="5"/><line x1="610" y1="680" x2="650" y2="640" stroke="#8DB8E8" stroke-width="5"/><polygon points="760,495 767.5,426.7 769.7,422.0 772.1,417.6 774.6,413.5 777.3,409.8 780.2,406.3 783.2,403.3 786.3,400.5 789.5,398.2 792.8,396.2 796.3,394.5 799.7,393.3 803.2,392.4 806.8,391.9 810.4,391.8 814.0,392.1 817.5,392.7 821.1,393.8 824.6,395.1 828.1,396.9 831.5,399.0 834.8,401.5 838.1,404.2 841.2,407.4 844.2,410.8 847.1,414.5 849.9,418.5 852.5,422.8 855.0,427.3 857.3,432.1 859.5,437.1 861.4,442.3 863.2,447.7 864.8,453.2 866.1,458.9 867.3,464.7 868.3,470.7 869.0,476.7 869.6,482.7 869.9,488.9 870.0,495.0 869.9,501.1 869.6,507.3 869.0,513.3 868.3,519.3 867.3,525.3 866.1,531.1 864.8,536.8 863.2,542.3 861.4,547.7 859.5,552.9 857.3,557.9 855.0,562.7 852.5,567.2 849.9,571.5 847.1,575.5 844.2,579.2 841.2,582.6 838.1,585.8 834.8,588.5 831.5,591.0 828.1,593.1 824.6,594.9 821.1,596.2 817.5,597.3 814.0,597.9 810.4,598.2 806.8,598.1 803.2,597.6 799.7,596.7 796.3,595.5 792.8,593.8 789.5,591.8 786.3,589.5 783.2,586.7 780.2,583.7 777.3,580.2 774.6,576.5 772.1,572.4 769.7,568.0 767.5,563.3" fill="none" stroke="#F0A36B" stroke-width="5"/><line x1="700" y1="495" x2="760" y2="495" stroke="#F0A36B" stroke-width="4"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">Sionna 실습 세미나 · 10분</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">Sionna RT의<br>안테나는<br>무엇으로 정해지나</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">방사 패턴 · 편파 · 소자 간격 · 배열 · 방향 —<br>안테나의 물리적 특성을 정하는 파라미터</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 오늘은 Sionna RT에서 안테나의 물리적 특성을 정하는 파라미터를 정리합니다. 지난번 입력 데이터 세미나에서는 안테나 배열을 한 장으로 넘어갔는데, 오늘은 그 한 장을 풀어서 방사 패턴, 편파, 소자 간격, 배열 구성, 그리고 안테나가 어느 쪽을 보는지 정하는 방향까지 각 파라미터가 무엇이고 결과에 어떤 영향을 주는지 보겠습니다.</aside>
+</section>
+<section id="map" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">파라미터 지도 · 한 장으로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">안테나 = 소자의 성질 × 배열의 모양 × 설치 방향</h2>
+</div>
+<div style="background:#14213D;border-radius:16px;padding:20px 26px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.55;color:#F5F3EE;white-space:nowrap">scene.tx_array = rt.PlanarArray(<span style="color:#8DB8E8">num_rows=4, num_cols=8,</span><br>    <span style="color:#8DB8E8">vertical_spacing=0.7, horizontal_spacing=0.5,</span><br>    <span style="color:#F0A36B">pattern="tr38901", polarization="cross"</span>, polarization_model="tr38901_2")<br>tx = rt.Transmitter("gNB", position=[0, 0, 30], <span style="color:#F0A36B">orientation=[0, 0.17, 0]</span>)</p>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:18%;text-align:left;color:#F5F3EE">묶음</th><th style="width:40%;text-align:left;color:#F5F3EE">파라미터</th><th style="width:42%;text-align:left;color:#F5F3EE">정하는 물리적 특성</th></tr>
+<tr style="background:#FBFAF7"><td><b style="color:#A84A16">소자</b></td><td>pattern</td><td>방향별 이득 — 빔폭 · 최대 이득 · 앞뒤 비</td></tr>
+<tr><td><b style="color:#A84A16">소자</b></td><td>polarization · polarization_model</td><td>전기장이 떨리는 방향 — 단일 · 이중 편파</td></tr>
+<tr style="background:#FBFAF7"><td><b style="color:#255E9E">배열</b></td><td>num_rows · num_cols · *_spacing</td><td>소자 수와 배치 — 빔 폭 · 격자 엽 · 상관</td></tr>
+<tr><td><b>설치</b></td><td>position · orientation · look_at</td><td>어디서 · 어느 쪽을 · 몇 도 기울여 보나</td></tr>
+<tr style="background:#FBFAF7"><td><b>공통</b></td><td>scene.frequency · synthetic_array</td><td>간격의 실제 길이(λ) · 소자별 계산 여부</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Antenna Arrays · Antenna Patterns · Radio Devices (sionna-rt 2.2.0) · import sionna.rt as rt · 값은 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<aside>(약 50초) 먼저 전체 지도입니다. Sionna RT에서 안테나는 코드 두 줄로 정해집니다. PlanarArray로 배열을 만들고, 송신기나 수신기를 만들 때 위치와 방향을 줍니다. 파라미터는 네 묶음으로 보면 쉽습니다. 첫째, 소자 하나의 성질입니다. pattern은 방향별로 얼마나 세게 내보내는지, polarization은 전기장이 어느 방향으로 떨리는지를 정합니다. 둘째, 배열의 모양입니다. 행과 열의 수, 그리고 소자 사이 간격이 빔의 폭과 격자 엽, 소자 간 상관을 정합니다. 셋째, 설치입니다. 장치의 위치와 방향, 즉 어디서 어느 쪽을 몇 도 기울여 보는지입니다. 넷째, 공통 설정으로 주파수가 간격의 실제 길이를 정하고, 솔버의 synthetic_array가 소자마다 따로 계산할지를 정합니다. 오늘은 이 순서대로 하나씩 보겠습니다.</aside>
+</section>
+<section id="frame" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">기준 · 안테나 좌표계</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">정면은 x축, 배열은 y–z 평면 위에 놓인다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="position:relative;width:820px;height:460px">
+<svg aria-label="정면에서 본 2행 4열 배열. 가운데 장치 위치에서 y축은 오른쪽, z축은 위, x축은 화면 밖 정면 방향. 번호는 왼쪽 위에서 열 방향으로 아래로 먼저 매겨진다" style="position:absolute;left:0px;top:0px;width:820px;height:430px" width="820" height="430" viewBox="0 0 820 430"><rect x="150" y="90" width="520" height="300" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><rect x="187" y="132" width="76" height="76" rx="8" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="187" y="272" width="76" height="76" rx="8" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="311" y="132" width="76" height="76" rx="8" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="311" y="272" width="76" height="76" rx="8" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="435" y="132" width="76" height="76" rx="8" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="435" y="272" width="76" height="76" rx="8" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="559" y="132" width="76" height="76" rx="8" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="559" y="272" width="76" height="76" rx="8" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="410" y1="240" x2="740" y2="240" stroke="#A84A16" stroke-width="5"/><polygon points="760,240 740,230 740,250" fill="#A84A16"/><line x1="410" y1="240" x2="410" y2="40" stroke="#A84A16" stroke-width="5"/><polygon points="410,20 400,40 420,40" fill="#A84A16"/><circle cx="410" cy="240" r="16" fill="#F5F3EE" stroke="#A84A16" stroke-width="5"/><circle cx="410" cy="240" r="5" fill="#A84A16"/></svg>
+<p style="position:absolute;left:187px;top:153px;width:76px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;text-align:center;color:#255E9E">0</p>
+<p style="position:absolute;left:187px;top:293px;width:76px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;text-align:center;color:#255E9E">1</p>
+<p style="position:absolute;left:311px;top:153px;width:76px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;text-align:center;color:#255E9E">2</p>
+<p style="position:absolute;left:311px;top:293px;width:76px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;text-align:center;color:#255E9E">3</p>
+<p style="position:absolute;left:435px;top:153px;width:76px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;text-align:center;color:#255E9E">4</p>
+<p style="position:absolute;left:435px;top:293px;width:76px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;text-align:center;color:#255E9E">5</p>
+<p style="position:absolute;left:559px;top:153px;width:76px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;text-align:center;color:#255E9E">6</p>
+<p style="position:absolute;left:559px;top:293px;width:76px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;text-align:center;color:#255E9E">7</p>
+<p style="position:absolute;left:770px;top:220px;width:50px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">y</p>
+<p style="position:absolute;left:432px;top:4px;width:50px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#A84A16">z</p>
+<p style="position:absolute;left:150px;top:404px;width:560px;font-size:24px;font-weight:600;text-align:center;color:#A84A16">⊙ x = 정면(보어사이트), 화면 밖으로</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">중심</b> 배열 중심 = 송수신기 position, 소자는 그 둘레에 대칭 배치</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">번호</b> 왼쪽 위부터 열 방향(column-first)으로 — 출력의 TA · RA 순서</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">각도</b> θ = z축에서 잰 천정각, φ = x축에서 잰 방위각</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">정면</b> θ = 90°, φ = 0° 방향이 x축 — tr38901 패턴의 최대 이득 방향</p>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:14px 20px">장치의 orientation을 돌리면 이 좌표계 전체가 함께 돈다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: PlanarArray (y–z 평면, column-first 번호) · Antenna Patterns (θ, φ) · 그림은 2행 4열 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) 파라미터를 보기 전에 좌표계를 맞춰 두겠습니다. 그림은 2행 4열 배열을 정면에서 본 모습입니다. 안테나의 정면, 즉 보어사이트는 x축이고, 화면 밖으로 나오는 방향입니다. 배열은 y–z 평면에 놓이고, 중심이 송수신기의 position과 일치합니다. 소자 번호는 왼쪽 위에서 시작해 열 방향으로, 즉 위에서 아래로 먼저 내려가며 매겨집니다. 이 순서가 그대로 출력 텐서의 송신 안테나, 수신 안테나 차원 순서가 되므로, 빔포밍 가중치를 만들 때 꼭 맞춰야 합니다. 패턴의 각도는 z축에서 잰 천정각 θ와 x축에서 잰 방위각 φ로 표현하고, θ 90도, φ 0도가 정면입니다. 마지막으로, 장치의 orientation을 바꾸면 이 좌표계 전체가 함께 회전합니다.</aside>
+</section>
+<section id="pattern" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">소자 ① · antenna.pattern</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">패턴은 “어느 방향으로 얼마나 세게”를 정하는 함수다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:stretch">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:16px 22px"><span style="color:#F0A36B">정의</span>  방향 (θ, φ) → 복소 진폭 (C<span style="color:#8DB8E8">θ</span>, C<span style="color:#8DB8E8">φ</span>)<br>|Cθ|² + |Cφ|² = 그 방향의 이득</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:16px 22px">경로마다 출발 · 도착 방향의 패턴 값이 곱해져 경로 이득 a에 들어간다</p>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:18%;text-align:left;color:#F5F3EE">pattern</th><th style="width:30%;text-align:left;color:#F5F3EE">모양</th><th style="width:16%;text-align:left;color:#F5F3EE">최대 이득</th><th style="width:36%;text-align:left;color:#F5F3EE">언제 쓰나</th></tr>
+<tr style="background:#FBFAF7"><td>iso</td><td>모든 방향 같음</td><td>0 dBi</td><td>기준값 · 단말 단순화</td></tr>
+<tr><td>dipole</td><td>짧은 다이폴, 도넛 모양</td><td>1.76 dBi</td><td>이론 비교용</td></tr>
+<tr style="background:#FBFAF7"><td>hw_dipole</td><td>반파장 다이폴, 조금 더 납작한 도넛</td><td>2.16 dBi</td><td>단말 · 실내 AP 근사</td></tr>
+<tr><td><b style="color:#A84A16">tr38901</b></td><td>정면 빔, 3 dB 빔폭 65°</td><td>8 dBi</td><td>기지국 배열의 소자 하나 (3GPP)</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">compute_gain()으로 확인: tr38901은 지향성 9.83 dB · 이득 8.0 dB · 효율 65.7% — 패턴 값이 곧 “이득”</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Antenna Patterns · 다이폴 계수 √1.5 · √1.643 (Balanis) · tr38901은 TR 38.901 Table 7.3-1</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 55초) 첫 번째 파라미터는 pattern입니다. 패턴은 방향을 넣으면 그 방향으로 얼마나 세게 내보내는지를 돌려주는 함수입니다. 정확히는 천정각과 방위각을 넣으면 두 편파 성분의 복소 진폭이 나오고, 그 크기의 제곱이 그 방향의 이득입니다. 경로를 계산할 때 출발 방향과 도착 방향의 패턴 값이 곱해져 경로 이득에 들어갑니다. 기본 제공 패턴은 네 가지입니다. iso는 모든 방향이 같아 0 dBi로 기준값이나 단말 단순화에 씁니다. dipole은 짧은 다이폴, hw_dipole은 반파장 다이폴로 둘 다 도넛 모양이고 최대 이득이 1.76, 2.16 dBi입니다. tr38901은 3GPP 38.901의 기지국 소자 패턴으로, 빔폭 65도에 최대 8 dBi입니다. compute_gain 함수로 지향성, 이득, 효율을 확인할 수 있는데, tr38901은 지향성 9.8 dB에 이득 8 dB, 효율 66% 정도로 나옵니다. 즉 Sionna에서 패턴 값은 효율까지 반영된 이득입니다.</aside>
+</section>
+<section id="tr38901" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">소자 ② · pattern="tr38901" 들여다보기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">정면 8 dBi, 빔폭 65°, 바닥은 30 dB 아래</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="position:relative;width:700px;height:600px">
+<svg aria-label="수평면 이득 극좌표 그림. 주황색 tr38901 패턴은 정면 8 dBi에서 옆으로 갈수록 줄어 뒤쪽은 -22 dBi. 회색 원은 등방성 0 dBi, 파란 점선 원은 반파장 다이폴의 수평면 2.16 dBi" style="position:absolute;left:0px;top:0px;width:700px;height:600px" width="700" height="600" viewBox="0 0 700 600"><circle cx="300" cy="300" r="250.0" fill="none" stroke="#C9C4B8" stroke-width="2" stroke-dasharray="6 6"/><circle cx="300" cy="300" r="183.3" fill="none" stroke="#C9C4B8" stroke-width="2" stroke-dasharray="6 6"/><circle cx="300" cy="300" r="100.0" fill="none" stroke="#C9C4B8" stroke-width="2" stroke-dasharray="6 6"/><circle cx="300" cy="300" r="16.7" fill="none" stroke="#C9C4B8" stroke-width="2" stroke-dasharray="6 6"/><line x1="40" y1="300" x2="560" y2="300" stroke="#C9C4B8" stroke-width="2"/><line x1="300" y1="40" x2="300" y2="560" stroke="#C9C4B8" stroke-width="2"/><circle cx="300" cy="300" r="183.3" fill="none" stroke="#5E6675" stroke-width="4"/><circle cx="300" cy="300" r="201.3" fill="none" stroke="#255E9E" stroke-width="4" stroke-dasharray="12 6"/><polygon points="550.0,300.0 549.8,291.3 549.0,282.6 547.8,274.0 546.1,265.4 543.9,257.0 541.2,248.7 538.1,240.6 534.5,232.8 530.5,225.1 526.0,217.7 521.2,210.6 515.9,203.9 510.3,197.4 504.4,191.3 498.1,185.7 491.5,180.4 484.6,175.5 477.4,171.1 470.1,167.1 462.5,163.6 454.8,160.7 446.9,158.2 438.9,156.2 430.8,154.7 422.7,153.8 414.5,153.4 406.4,153.6 398.3,154.3 390.3,155.5 382.4,157.3 374.7,159.6 367.1,162.4 359.7,165.8 352.7,169.7 345.8,174.1 339.3,178.9 333.2,184.3 327.4,190.1 322.0,196.3 317.1,203.0 312.6,210.0 308.7,217.5 305.2,225.2 302.3,233.3 300.0,241.7 298.3,250.4 297.1,259.2 296.7,268.3 296.8,277.5 297.7,286.9 299.2,296.3 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 300.0,300.0 299.2,303.7 297.7,313.1 296.8,322.5 296.7,331.7 297.1,340.8 298.3,349.6 300.0,358.3 302.3,366.7 305.2,374.8 308.7,382.5 312.6,390.0 317.1,397.0 322.0,403.7 327.4,409.9 333.2,415.7 339.3,421.1 345.8,425.9 352.7,430.3 359.7,434.2 367.1,437.6 374.7,440.4 382.4,442.7 390.3,444.5 398.3,445.7 406.4,446.4 414.5,446.6 422.7,446.2 430.8,445.3 438.9,443.8 446.9,441.8 454.8,439.3 462.5,436.4 470.1,432.9 477.4,428.9 484.6,424.5 491.5,419.6 498.1,414.3 504.4,408.7 510.3,402.6 515.9,396.1 521.2,389.4 526.0,382.3 530.5,374.9 534.5,367.2 538.1,359.4 541.2,351.3 543.9,343.0 546.1,334.6 547.8,326.0 549.0,317.4 549.8,308.7 550.0,300.0" fill="#A84A16" fill-opacity="0.12" stroke="#A84A16" stroke-width="5"/><line x1="300" y1="300" x2="515.1" y2="163.0" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 5"/><line x1="300" y1="300" x2="515.1" y2="437.0" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 5"/></svg>
+<p style="position:absolute;left:56px;top:306px;width:40px;font-size:24px;color:#5E6675">8</p>
+<p style="position:absolute;left:123px;top:306px;width:40px;font-size:24px;color:#5E6675">0</p>
+<p style="position:absolute;left:204px;top:306px;width:60px;font-size:24px;color:#5E6675">−10</p>
+<p style="position:absolute;left:560px;top:262px;width:140px;font-size:24px;font-weight:600;color:#A84A16">정면 0°</p>
+<p style="position:absolute;left:500px;top:96px;width:200px;font-size:24px;font-weight:600;color:#A84A16">−3 dB · 65°</p>
+<p style="position:absolute;left:0px;top:262px;width:40px;font-size:24px;color:#5E6675">뒤</p>
+<p style="position:absolute;left:0px;top:556px;width:700px;font-size:24px;line-height:1.35"><span style="color:#A84A16">━ tr38901</span>   <span style="color:#5E6675">━ iso 0 dBi</span>   <span style="color:#255E9E">┅ hw_dipole 2.16 dBi</span>   <span style="color:#5E6675">눈금 dBi</span></p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="background:#14213D;border-radius:14px;padding:16px 22px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.6;color:#F5F3EE">A<span style="color:#8DB8E8">H</span>(φ) = −min(12(φ/65°)², 30)<br>A<span style="color:#8DB8E8">V</span>(θ) = −min(12((θ−90°)/65°)², 30)<br>A = −min(−(A<span style="color:#8DB8E8">V</span>+A<span style="color:#8DB8E8">H</span>), 30) <span style="color:#F0A36B">+ 8 dBi</span></p>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:50%;text-align:left;color:#F5F3EE">수평 방향 φ</th><th style="width:50%;text-align:left;color:#F5F3EE">이득</th></tr>
+<tr style="background:#FBFAF7"><td>0° (정면)</td><td>8 dBi</td></tr>
+<tr><td>±32.5°</td><td>5 dBi (−3 dB)</td></tr>
+<tr style="background:#FBFAF7"><td>±65°</td><td>−4 dBi</td></tr>
+<tr><td>±90°</td><td>−15 dBi</td></tr>
+<tr style="background:#FBFAF7"><td>뒤쪽 (±103° 넘어서)</td><td>−22 dBi (30 dB 아래)</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:12px 18px">소자 하나의 패턴이다 — 섹터 안테나의 높은 이득은 소자를 여러 개 묶은 배열에서 나온다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">3GPP TR 38.901 Table 7.3-1 · Sionna v_tr38901_pattern (65° · 30 dB · 8 dBi) · 수평 단면, dB 눈금</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 50초) 기지국에서 가장 많이 쓰는 tr38901 패턴을 들여다보겠습니다. 왼쪽은 수평 단면을 dB 눈금 극좌표로 그린 것입니다. 주황색이 tr38901, 회색 원이 등방성, 파란 점선이 반파장 다이폴입니다. 식은 오른쪽과 같습니다. 수평과 수직 방향 각각 정면에서 벗어난 각도의 제곱에 비례해 감쇠하고, 두 감쇠를 더한 뒤 최대 30 dB에서 자르고, 최대 이득 8 dBi를 더합니다. 숫자로 보면 정면 8 dBi, 32.5도에서 3 dB 줄어 빔폭이 65도이고, 65도에서 −4, 90도에서 −15, 뒤쪽은 −22 dBi로 바닥에 붙습니다. 주의할 점은 이것이 소자 하나의 패턴이라는 것입니다. 실제 섹터 안테나의 높은 이득은 이 소자를 여러 개 묶은 배열과 가중치에서 나옵니다. 그래서 배열을 1개 소자로 줄이면 그만큼 이득이 사라집니다.</aside>
+</section>
+<section id="polarization" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">소자 ③ · antenna.polarization</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">편파는 세로 패턴을 몇 도 기울여, 몇 개 겹치느냐다</h2>
+</div>
+<div style="position:relative;width:1664px;height:220px">
+<svg aria-label="네 가지 편파 기호: V는 세로 막대, H는 가로 막대, VH는 십자, cross는 X자 모양" style="position:absolute;left:0px;top:0px;width:1664px;height:220px" width="1664" height="220" viewBox="0 0 1664 220"><rect x="30" y="30" width="160" height="160" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><line x1="110.0" y1="170.0" x2="110.0" y2="50.0" stroke="#A84A16" stroke-width="9" stroke-linecap="round"/><rect x="430" y="30" width="160" height="160" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><line x1="450.0" y1="110.0" x2="570.0" y2="110.0" stroke="#A84A16" stroke-width="9" stroke-linecap="round"/><rect x="830" y="30" width="160" height="160" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><line x1="910.0" y1="170.0" x2="910.0" y2="50.0" stroke="#A84A16" stroke-width="9" stroke-linecap="round"/><line x1="850.0" y1="110.0" x2="970.0" y2="110.0" stroke="#255E9E" stroke-width="9" stroke-linecap="round"/><rect x="1230" y="30" width="160" height="160" rx="14" fill="#FBFAF7" stroke="#C9C4B8" stroke-width="3"/><line x1="1352.4" y1="152.4" x2="1267.6" y2="67.6" stroke="#A84A16" stroke-width="9" stroke-linecap="round"/><line x1="1267.6" y1="152.4" x2="1352.4" y2="67.6" stroke="#255E9E" stroke-width="9" stroke-linecap="round"/></svg>
+<p style="position:absolute;left:210px;top:56px;width:180px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#14213D">"V"</p>
+<p style="position:absolute;left:210px;top:104px;width:180px;font-size:24px;line-height:1.35;color:#4A5262">ζ = 0°<br>단일 편파</p>
+<p style="position:absolute;left:610px;top:56px;width:180px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#14213D">"H"</p>
+<p style="position:absolute;left:610px;top:104px;width:180px;font-size:24px;line-height:1.35;color:#4A5262">ζ = 90°<br>단일 편파</p>
+<p style="position:absolute;left:1010px;top:56px;width:200px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#14213D">"VH"</p>
+<p style="position:absolute;left:1010px;top:104px;width:200px;font-size:24px;line-height:1.35;color:#4A5262">ζ = 0°, 90°<br>이중 편파</p>
+<p style="position:absolute;left:1410px;top:56px;width:254px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#A84A16">"cross"</p>
+<p style="position:absolute;left:1410px;top:104px;width:254px;font-size:24px;line-height:1.35;color:#4A5262">ζ = −45°, +45°<br>이중 편파 · 기지국 표준</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;font-weight:600;color:#255E9E">만드는 방법</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">세로 편파 패턴 하나를 기울기 ζ만큼 돌려서 쓴다 — 이중 편파는 같은 위치에 두 개를 겹친 것</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;font-weight:600;color:#255E9E">개수 세기</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#14213D">2×4, "cross"<br>array_size = 8  <span style="color:#5E6675"># 위치</span><br>num_ant    = 16 <span style="color:#A84A16"># 출력 TA</span></p>
+</div>
+<div style="flex:1;background:#14213D;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;font-weight:600;color:#F0A36B">왜 중요한가</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">이중 편파는 같은 자리에서 독립 경로 2개 → MIMO 계층 · 다이버시티</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT 소스: register_polarization("V", [0]) · ("H", [π/2]) · ("VH", [0, π/2]) · ("cross", [−π/4, π/4]) · AntennaArray.num_ant</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 12</p>
+<aside>(약 55초) 두 번째 파라미터는 polarization, 편파입니다. 편파는 전기장이 어느 방향으로 떨리는지입니다. Sionna는 세로 편파 패턴 하나를 기울기 각 ζ만큼 돌려서 다른 편파를 만듭니다. V는 0도, H는 90도로 단일 편파이고, VH는 0도와 90도, cross는 −45도와 +45도 두 개를 같은 위치에 겹친 이중 편파입니다. 기지국은 보통 cross를 씁니다. 개수를 셀 때 주의할 점이 있습니다. 2행 4열에 cross를 쓰면 소자 위치는 8개지만 안테나는 16개로 셉니다. array_size는 위치 수, num_ant는 편파까지 센 수이고, 출력 텐서의 안테나 차원은 num_ant입니다. 이중 편파가 중요한 이유는 같은 자리에서 서로 거의 독립인 두 경로를 얻을 수 있어서, 배열을 키우지 않고도 MIMO 계층이나 다이버시티를 얻기 때문입니다.</aside>
+</section>
+<section id="polmodel" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">소자 ④ · polarization_model과 편파의 효과</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">편파가 어긋나면 같은 경로도 약하게 받는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="flex:1;background:#14213D;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F0A36B">"tr38901_2" (기본)</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE">[Cθ, Cφ] = [cos ζ, sin ζ] · C̃θ</p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">어느 방향이든 같은 비율로 나눈다 — 단순 · 빠름</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">"tr38901_1"</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5">[Cθ, Cφ] = [cos ψ, sin ψ] · C̃θ</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">ψ가 θ · φ에 따라 바뀜<br>기울어진 소자의 기하 반영 · 정면에선 같음</p>
+</div>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:34%;text-align:left;color:#F5F3EE">상황</th><th style="width:66%;text-align:left;color:#F5F3EE">결과에 미치는 영향</th></tr>
+<tr style="background:#FBFAF7"><td>Tx "cross" ↔ Rx "V", 가시 경로</td><td>±45° 소자와 세로 편파 → cos 45°, 소자당 약 −3 dB</td></tr>
+<tr><td>Tx "V" ↔ Rx "H", 가시 경로</td><td>이상적으로는 결합이 거의 0 — 교차 편파 손실</td></tr>
+<tr style="background:#FBFAF7"><td>반사 · 회절</td><td>편파 성분마다 계수가 달라 편파가 바뀐다 → 단일 편파 수신에서 변동</td></tr>
+<tr><td>확산 산란</td><td>재질의 xpd_coefficient만큼 교차 편파 쪽으로 에너지가 옮겨 간다</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: polarization_model (TR 38.901 식 7.3-3 · 7.3-4/5, 기본 "tr38901_2") · 재질 xpd_coefficient</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 50초) 편파에는 하나의 설정이 더 있습니다. polarization_model은 세로 패턴을 기울일 때 어떤 식을 쓸지 정하는데, 3GPP 38.901의 두 모델을 그대로 가져왔습니다. 기본값인 모델 2는 어느 방향이든 cos ζ와 sin ζ의 같은 비율로 두 성분을 나누는 단순한 식입니다. 모델 1은 비율이 방향에 따라 바뀌어서 기울어진 소자의 실제 기하를 더 잘 반영합니다. 정면에서는 두 모델이 같고, 옆이나 위아래 방향에서 차이가 납니다. 편파가 결과를 바꾸는 대표적인 경우는 아래 표와 같습니다. 기지국이 ±45도이고 단말이 세로 편파면 가시 경로에서 소자당 약 3 dB 손해를 봅니다. 세로와 가로처럼 완전히 어긋나면 이론상 거의 받지 못합니다. 반사나 회절은 편파 성분마다 계수가 달라 편파 자체를 바꾸고, 확산 산란은 재질의 XPD 계수만큼 에너지를 교차 편파로 옮깁니다. 그래서 편파는 단순한 옵션이 아니라 수신 전력과 MIMO 성능을 바꾸는 물리량입니다.</aside>
+</section>
+<section id="spacing" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">배열 ① · antenna.spacing (vertical · horizontal_spacing)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">간격은 미터가 아니라 파장의 배수로 준다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:820px;height:560px">
+<svg aria-label="4행 8열 교차 편파 배열. 아래쪽에 가로 간격 d_h, 오른쪽에 세로 간격 d_v, 맨 아래에 배열 전체 너비가 치수선으로 표시" style="position:absolute;left:0px;top:0px;width:820px;height:560px" width="820" height="560" viewBox="0 0 820 560"><rect x="54" y="44" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="65" y1="55" x2="95" y2="85" stroke="#A84A16" stroke-width="4"/><line x1="65" y1="85" x2="95" y2="55" stroke="#255E9E" stroke-width="4"/><rect x="146" y="44" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="157" y1="55" x2="187" y2="85" stroke="#A84A16" stroke-width="4"/><line x1="157" y1="85" x2="187" y2="55" stroke="#255E9E" stroke-width="4"/><rect x="238" y="44" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="249" y1="55" x2="279" y2="85" stroke="#A84A16" stroke-width="4"/><line x1="249" y1="85" x2="279" y2="55" stroke="#255E9E" stroke-width="4"/><rect x="330" y="44" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="341" y1="55" x2="371" y2="85" stroke="#A84A16" stroke-width="4"/><line x1="341" y1="85" x2="371" y2="55" stroke="#255E9E" stroke-width="4"/><rect x="422" y="44" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="433" y1="55" x2="463" y2="85" stroke="#A84A16" stroke-width="4"/><line x1="433" y1="85" x2="463" y2="55" stroke="#255E9E" stroke-width="4"/><rect x="514" y="44" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="525" y1="55" x2="555" y2="85" stroke="#A84A16" stroke-width="4"/><line x1="525" y1="85" x2="555" y2="55" stroke="#255E9E" stroke-width="4"/><rect x="606" y="44" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="617" y1="55" x2="647" y2="85" stroke="#A84A16" stroke-width="4"/><line x1="617" y1="85" x2="647" y2="55" stroke="#255E9E" stroke-width="4"/><rect x="698" y="44" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="709" y1="55" x2="739" y2="85" stroke="#A84A16" stroke-width="4"/><line x1="709" y1="85" x2="739" y2="55" stroke="#255E9E" stroke-width="4"/><rect x="54" y="162" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="65" y1="173" x2="95" y2="203" stroke="#A84A16" stroke-width="4"/><line x1="65" y1="203" x2="95" y2="173" stroke="#255E9E" stroke-width="4"/><rect x="146" y="162" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="157" y1="173" x2="187" y2="203" stroke="#A84A16" stroke-width="4"/><line x1="157" y1="203" x2="187" y2="173" stroke="#255E9E" stroke-width="4"/><rect x="238" y="162" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="249" y1="173" x2="279" y2="203" stroke="#A84A16" stroke-width="4"/><line x1="249" y1="203" x2="279" y2="173" stroke="#255E9E" stroke-width="4"/><rect x="330" y="162" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="341" y1="173" x2="371" y2="203" stroke="#A84A16" stroke-width="4"/><line x1="341" y1="203" x2="371" y2="173" stroke="#255E9E" stroke-width="4"/><rect x="422" y="162" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="433" y1="173" x2="463" y2="203" stroke="#A84A16" stroke-width="4"/><line x1="433" y1="203" x2="463" y2="173" stroke="#255E9E" stroke-width="4"/><rect x="514" y="162" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="525" y1="173" x2="555" y2="203" stroke="#A84A16" stroke-width="4"/><line x1="525" y1="203" x2="555" y2="173" stroke="#255E9E" stroke-width="4"/><rect x="606" y="162" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="617" y1="173" x2="647" y2="203" stroke="#A84A16" stroke-width="4"/><line x1="617" y1="203" x2="647" y2="173" stroke="#255E9E" stroke-width="4"/><rect x="698" y="162" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="709" y1="173" x2="739" y2="203" stroke="#A84A16" stroke-width="4"/><line x1="709" y1="203" x2="739" y2="173" stroke="#255E9E" stroke-width="4"/><rect x="54" y="280" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="65" y1="291" x2="95" y2="321" stroke="#A84A16" stroke-width="4"/><line x1="65" y1="321" x2="95" y2="291" stroke="#255E9E" stroke-width="4"/><rect x="146" y="280" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="157" y1="291" x2="187" y2="321" stroke="#A84A16" stroke-width="4"/><line x1="157" y1="321" x2="187" y2="291" stroke="#255E9E" stroke-width="4"/><rect x="238" y="280" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="249" y1="291" x2="279" y2="321" stroke="#A84A16" stroke-width="4"/><line x1="249" y1="321" x2="279" y2="291" stroke="#255E9E" stroke-width="4"/><rect x="330" y="280" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="341" y1="291" x2="371" y2="321" stroke="#A84A16" stroke-width="4"/><line x1="341" y1="321" x2="371" y2="291" stroke="#255E9E" stroke-width="4"/><rect x="422" y="280" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="433" y1="291" x2="463" y2="321" stroke="#A84A16" stroke-width="4"/><line x1="433" y1="321" x2="463" y2="291" stroke="#255E9E" stroke-width="4"/><rect x="514" y="280" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="525" y1="291" x2="555" y2="321" stroke="#A84A16" stroke-width="4"/><line x1="525" y1="321" x2="555" y2="291" stroke="#255E9E" stroke-width="4"/><rect x="606" y="280" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="617" y1="291" x2="647" y2="321" stroke="#A84A16" stroke-width="4"/><line x1="617" y1="321" x2="647" y2="291" stroke="#255E9E" stroke-width="4"/><rect x="698" y="280" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="709" y1="291" x2="739" y2="321" stroke="#A84A16" stroke-width="4"/><line x1="709" y1="321" x2="739" y2="291" stroke="#255E9E" stroke-width="4"/><rect x="54" y="398" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="65" y1="409" x2="95" y2="439" stroke="#A84A16" stroke-width="4"/><line x1="65" y1="439" x2="95" y2="409" stroke="#255E9E" stroke-width="4"/><rect x="146" y="398" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="157" y1="409" x2="187" y2="439" stroke="#A84A16" stroke-width="4"/><line x1="157" y1="439" x2="187" y2="409" stroke="#255E9E" stroke-width="4"/><rect x="238" y="398" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="249" y1="409" x2="279" y2="439" stroke="#A84A16" stroke-width="4"/><line x1="249" y1="439" x2="279" y2="409" stroke="#255E9E" stroke-width="4"/><rect x="330" y="398" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="341" y1="409" x2="371" y2="439" stroke="#A84A16" stroke-width="4"/><line x1="341" y1="439" x2="371" y2="409" stroke="#255E9E" stroke-width="4"/><rect x="422" y="398" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="433" y1="409" x2="463" y2="439" stroke="#A84A16" stroke-width="4"/><line x1="433" y1="439" x2="463" y2="409" stroke="#255E9E" stroke-width="4"/><rect x="514" y="398" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="525" y1="409" x2="555" y2="439" stroke="#A84A16" stroke-width="4"/><line x1="525" y1="439" x2="555" y2="409" stroke="#255E9E" stroke-width="4"/><rect x="606" y="398" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="617" y1="409" x2="647" y2="439" stroke="#A84A16" stroke-width="4"/><line x1="617" y1="439" x2="647" y2="409" stroke="#255E9E" stroke-width="4"/><rect x="698" y="398" width="52" height="52" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="709" y1="409" x2="739" y2="439" stroke="#A84A16" stroke-width="4"/><line x1="709" y1="439" x2="739" y2="409" stroke="#255E9E" stroke-width="4"/><line x1="80" y1="484" x2="172" y2="484" stroke="#A84A16" stroke-width="4"/><line x1="80" y1="472" x2="80" y2="496" stroke="#A84A16" stroke-width="4"/><line x1="172" y1="472" x2="172" y2="496" stroke="#A84A16" stroke-width="4"/><line x1="784" y1="70" x2="784" y2="188" stroke="#A84A16" stroke-width="4"/><line x1="772" y1="70" x2="796" y2="70" stroke="#A84A16" stroke-width="4"/><line x1="772" y1="188" x2="796" y2="188" stroke="#A84A16" stroke-width="4"/><line x1="54" y1="554" x2="750" y2="554" stroke="#5E6675" stroke-width="3"/><line x1="54" y1="542" x2="54" y2="566" stroke="#5E6675" stroke-width="3"/><line x1="750" y1="542" x2="750" y2="566" stroke="#5E6675" stroke-width="3"/></svg>
+<p style="position:absolute;left:54px;top:500px;width:200px;font-size:24px;font-weight:600;color:#A84A16">d_h = 0.5λ</p>
+<p style="position:absolute;left:670px;top:20px;width:150px;font-size:24px;font-weight:600;color:#A84A16;text-align:right">d_v</p>
+<p style="position:absolute;left:270px;top:500px;width:520px;font-size:24px;color:#5E6675">전체 너비 = 7 × d_h + 소자</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:40%;text-align:left;color:#F5F3EE">간격</th><th style="width:30%;text-align:left;color:#F5F3EE">3.5 GHz</th><th style="width:30%;text-align:left;color:#F5F3EE">28 GHz</th></tr>
+<tr style="background:#FBFAF7"><td>λ</td><td>8.6 cm</td><td>1.07 cm</td></tr>
+<tr><td>0.5λ</td><td>4.3 cm</td><td>0.54 cm</td></tr>
+<tr style="background:#FBFAF7"><td>0.7λ</td><td>6.0 cm</td><td>0.75 cm</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">빔폭</b> 개구가 클수록 좁다 — 8열 × 0.5λ면 수평 약 13°</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">격자 엽</b> 0.5λ 이하면 어디로 조향해도 없음, 넓히면 큰 각에서 생김</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">상관</b> 넓을수록 소자 간 채널이 덜 닮음 → 다이버시티</p>
+<p style="font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:12px 18px">frequency를 바꾸면 실제 간격도 바뀐다 — 치수 고정 시 배수 재계산</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: PlanarArray (vertical · horizontal_spacing, 기본 0.5, 파장 배수) · 빔폭 ≈ 0.886 λ / (N·d) rad (균일 선형 배열, 정면)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 55초) 이제 배열입니다. 세 번째 파라미터는 소자 간격으로, PlanarArray의 vertical_spacing과 horizontal_spacing입니다. 단위가 미터가 아니라 파장의 배수이고 기본값은 0.5입니다. 3.5 GHz에서 0.5파장은 4.3 cm, 28 GHz에서는 0.54 cm입니다. 간격은 세 가지를 바꿉니다. 첫째, 빔폭입니다. 소자 수와 간격을 곱한 개구가 클수록 빔이 좁아집니다. 8열에 0.5파장이면 수평 빔폭이 약 13도입니다. 둘째, 격자 엽입니다. 0.5파장 이하면 어느 방향으로 조향해도 원치 않는 큰 엽이 생기지 않지만, 넓히면 조향 각이 클 때 생깁니다. 셋째, 상관입니다. 간격이 넓을수록 소자 사이 채널이 덜 닮아 다이버시티 이득이 커집니다. 실제 기지국은 세로 간격을 0.7파장 안팎으로 넓게 쓰는 경우가 많습니다. 주의할 점은 주파수를 바꾸면 실제 간격도 같이 바뀐다는 것입니다. 장비의 물리 치수를 고정하려면 배수를 다시 계산해서 넣어야 합니다.</aside>
+</section>
+<section id="orientation" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">배열 ② · 설치 방향 (orientation · look_at)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">어느 쪽을 볼지는 배열이 아니라 장치가 정한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:920px;height:520px">
+<svg aria-label="측면도: 철탑 위 안테나의 정면 방향이 수평 점선에서 아래로 10도 기울어진 모습" style="position:absolute;left:0px;top:0px;width:920px;height:500px" width="920" height="500" viewBox="0 0 920 500"><line x1="20" y1="470" x2="900" y2="470" stroke="#5E6675" stroke-width="4"/><rect x="90" y="140" width="34" height="330" fill="#DCD8CE"/><rect x="124" y="120" width="26" height="110" rx="4" fill="#A84A16"/><line x1="150" y1="175" x2="880" y2="175" stroke="#5E6675" stroke-width="3" stroke-dasharray="10 8"/><line x1="150" y1="175" x2="859.1" y2="300.0" stroke="#A84A16" stroke-width="6"/><polygon points="863.1,301.0 841.1,288.0 845.1,310.0" fill="#A84A16"/><path d="M 410 175 A 260 260 0 0 1 406.1 220.1" fill="none" stroke="#255E9E" stroke-width="4"/></svg>
+<p style="position:absolute;left:790px;top:126px;width:130px;font-size:24px;color:#5E6675">수평</p>
+<p style="position:absolute;left:430px;top:174px;width:160px;font-size:24px;font-weight:700;color:#255E9E">β = 10°</p>
+<p style="position:absolute;left:640px;top:282px;width:260px;font-size:24px;font-weight:600;color:#A84A16">정면 (x축)</p>
+<p style="position:absolute;left:30px;top:480px;width:360px;font-size:24px;color:#5E6675">position z = 30 m</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;background:#14213D;color:#F5F3EE;border-radius:12px;padding:14px 18px">orientation = [α, β, γ] <span style="color:#8DB8E8"># rad</span><br><span style="color:#F0A36B">α</span> 방위 · <span style="color:#F0A36B">β</span> 기울기 · <span style="color:#F0A36B">γ</span> 회전</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">섹터</b> α = 0°, 120°, 240°로 3섹터</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">하향 틸트</b> β = 0.17 rad (10°) — 기계적 틸트</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">look_at</b> 대상 위치를 정면으로, orientation과 동시에는 불가</p>
+<p style="font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:12px 18px">전기적 틸트 · 빔 조향은 파라미터가 없다 → 출력 채널에 가중치를 곱하거나 패턴을 직접 등록</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Radio Devices (orientation (α, β, γ), look_at 상호 배타) · 회전 순서는 문서 식 (3) · 기울기 부호는 미리보기로 확인 권장</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 50초) 배열 파라미터에는 방향이 없습니다. 안테나가 어느 쪽을 보는지는 송신기나 수신기 장치의 orientation이 정합니다. orientation은 세 각도를 라디안으로 주는데, α는 방위, β는 기울기, γ는 정면 축을 중심으로 한 회전입니다. 예를 들어 3섹터 기지국이면 α를 0도, 120도, 240도로 바꿔 세 송신기를 둡니다. 그림처럼 β를 10도, 약 0.17 라디안 주면 정면이 아래로 기울어 기계적 하향 틸트가 됩니다. 기울기 부호는 미리보기로 한 번 확인하는 습관을 권합니다. look_at을 쓰면 대상 위치를 정면으로 향하게 할 수 있지만, orientation과 동시에 줄 수는 없습니다. 실무에서 중요한 차이가 있습니다. 실제 기지국은 전기적 틸트나 빔 조향을 많이 쓰는데, Sionna에는 이를 위한 파라미터가 없습니다. 소자별 채널을 받은 뒤 가중치를 곱하거나, 기울어진 패턴을 직접 등록하는 방식으로 표현합니다.</aside>
+</section>
+<section id="code" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">배열 ③ · 코드로 설정하고 확인하기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">설정한 뒤 이득 · 배치 · 계산 방식을 확인한다</h2>
+</div>
+<div style="background:#14213D;border-radius:16px;padding:18px 26px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">scene.frequency = 3.5e9<br>scene.tx_array = rt.PlanarArray(num_rows=4, num_cols=8, vertical_spacing=0.7,<br>    horizontal_spacing=0.5, pattern="tr38901", polarization="cross")  <span style="color:#8DB8E8"># 32 위치 · 64 안테나</span><br>scene.rx_array = rt.PlanarArray(num_rows=1, num_cols=2, pattern="iso", polarization="V")<br><span style="color:#F0A36B">scene.tx_array.antenna_pattern.compute_gain()</span>   <span style="color:#8DB8E8"># 지향성 · 이득 · 효율</span><br><span style="color:#F0A36B">scene.tx_array.show()</span>                          <span style="color:#8DB8E8"># 소자 번호 · 배치</span><br><span style="color:#F0A36B">scene.tx_array.positions(scene.wavelength)</span>     <span style="color:#8DB8E8"># 실제 위치 [m]</span><br>paths = rt.PathSolver()(scene, <span style="color:#F0A36B">synthetic_array=True</span>)</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">synthetic_array=True</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">배열 중심에서만 경로 추적<br>소자별로는 위상만 — 빠름</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">synthetic_array=False</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">소자마다 따로 추적<br>32열 0.5λ면 약 44 m 안쪽</p>
+</div>
+<div style="flex:1;background:#14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F0A36B">임의 배치 · 측정 패턴</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">AntennaArray로 위치 직접<br>register_antenna_pattern</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: AntennaArray · PlanarArray · compute_gain · show · positions · PathSolver synthetic_array · 거리 기준은 원역장 2D²/λ</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 55초) 지금까지 본 파라미터를 코드로 모으면 이렇습니다. 주파수를 정하고, 송신 배열은 4행 8열, 세로 간격 0.7, 가로 간격 0.5파장, tr38901 패턴에 교차 편파로 32개 위치, 64개 안테나입니다. 수신은 2소자 세로 편파입니다. 설정한 뒤에는 세 가지를 확인하는 습관을 권합니다. compute_gain으로 지향성, 이득, 효율을 보고, show로 소자 번호와 배치를, positions로 실제 위치를 미터 단위로 봅니다. 계산 방식도 중요합니다. 경로 솔버의 synthetic_array가 기본으로 켜져 있으면 배열 중심에서만 경로를 찾고 소자마다 위상만 바꿉니다. 빠르지만 먼 거리를 가정합니다. 배열이 크거나 단말이 가까우면 꺼서 소자마다 따로 추적해야 합니다. 원역장 거리 기준으로 3.5 GHz에서 32열 0.5파장 배열이면 약 44 m 안쪽이 그런 영역입니다. 직사각형이 아닌 배치는 AntennaArray에 위치를 직접 주고, 측정 패턴은 register_antenna_pattern으로 등록해서 이름으로 씁니다.</aside>
+</section>
+<section id="limits" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">한계 · Sionna 안테나 모델이 생략하는 것</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">실제 안테나를 옮기면 배열은 줄고, 상세는 빠진다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-left:6px solid #255E9E;border-radius:12px;padding:14px 20px"><b style="color:#255E9E">배열 축소</b> 계산량 때문에 소자 수를 줄임 (예: 소자 192개 → 포트 64개 → 1개) — 빔이 넓어지고 배열 이득이 사라진다</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-left:6px solid #A84A16;border-radius:12px;padding:14px 20px"><b style="color:#A84A16">상세 손실</b> 측정 패턴 · 틸트 · 결합 같은 세부를 내장 수식으로 대체 — 부엽 · 널 · 빔 모양이 달라진다</p>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:28%;text-align:left;color:#F5F3EE">실제 안테나</th><th style="width:34%;text-align:left;color:#F5F3EE">Sionna 기본 모델</th><th style="width:38%;text-align:left;color:#F5F3EE">메우는 방법</th></tr>
+<tr style="background:#FBFAF7"><td>측정 3D 패턴</td><td>수식 패턴, 부엽 없음</td><td>측정값을 보간하는 패턴 등록</td></tr>
+<tr><td>전기적 틸트 · 빔 세트</td><td>파라미터 없음</td><td>소자별 채널에 가중치 곱하기</td></tr>
+<tr style="background:#FBFAF7"><td>수백 개 소자</td><td>그대로 넣으면 출력 · 메모리 급증</td><td>포트 단위로 묶고 이득 · 빔폭 차이 보정</td></tr>
+<tr><td>소자 간 결합 · 편차</td><td>모든 소자 같은 패턴, 결합 없음</td><td>측정 기반 보정, 해석 시 감안</td></tr>
+<tr style="background:#FBFAF7"><td>주파수별 패턴 차이</td><td>패턴은 주파수와 무관</td><td>대역별로 패턴을 바꿔 따로 계산</td></tr>
+<tr><td>송신기마다 다른 안테나</td><td>scene.tx_array 하나를 공유</td><td>배열이 다른 송신기는 나눠 계산</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">“배열 축소” · “상세 손실”은 Sionna API 이름이 아니라 변환 과정을 설명하기 위한 용어 · 소자 · 포트 수는 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 55초) 마지막으로 Sionna 안테나 모델이 생략하는 것을 알아 두면 결과를 해석할 때 도움이 됩니다. 실제 장비의 안테나를 Sionna로 옮기면 크게 두 가지가 일어납니다. 하나는 배열 축소입니다. 실제 대형 안테나는 소자가 백 개가 넘는데, 그대로 넣으면 출력 텐서와 메모리가 급증하니 포트 단위로 묶거나 아예 한 개로 줄입니다. 그러면 빔이 넓어지고 배열 이득이 사라집니다. 다른 하나는 상세 손실입니다. 측정 패턴, 전기적 틸트, 소자 간 결합 같은 세부가 내장 수식으로 대체되어 부엽이나 널, 빔 모양이 달라집니다. 표처럼 항목마다 메우는 방법이 있습니다. 측정 패턴은 보간 함수를 패턴으로 등록하고, 틸트와 빔은 소자별 채널에 가중치를 곱하고, 줄인 배열은 이득과 빔폭 차이를 보정합니다. Sionna의 패턴은 주파수와 무관하고, 송신 배열 하나를 모든 송신기가 공유한다는 점도 기억해 두세요. 참고로 배열 축소와 상세 손실은 Sionna의 API 이름이 아니라 이 과정을 설명하려고 쓴 용어입니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리 · TAKEAWAY</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">소자 · 배열 · 설치 — 세 층으로 안테나를 읽는다</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F0A36B">pattern</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">방향별 이득 — tr38901은 정면 8 dBi · 빔폭 65° · 바닥 −22 dBi</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F0A36B">polarization</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">기울기 ζ와 개수 — 이중 편파는 안테나 수 × 2</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px;border-bottom:1px solid #34446A">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#8DB8E8">spacing</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">파장의 배수 — 빔폭 · 격자 엽 · 상관</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px;padding:14px 0px">
+<p style="width:240px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;font-weight:700;color:#F5F3EE">orientation</p>
+<p style="flex:1;font-size:30px;color:#C9D3E3">장치가 정하는 정면 · 틸트 — 전기적 틸트는 가중치로</p>
+</div>
+</div>
+<p style="font-family:'Noto Serif KR', Georgia, serif;font-size:44px;font-weight:700;line-height:1.35;color:#F0A36B">안테나를 줄이고 단순화한 만큼<br>결과의 이득과 빔 모양도 달라진다</p>
+<p style="font-size:24px;line-height:1.45;color:#8DB8E8">다음 단계 제안: [대상 장비] 안테나 데이터시트 → Sionna 파라미터 대응표 작성</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#C9D3E3;text-align:right">12 / 12</p>
+<aside>(약 30초) 정리하겠습니다. Sionna RT의 안테나는 소자, 배열, 설치 세 층으로 읽으면 됩니다. 소자의 패턴은 방향별 이득으로, tr38901은 정면 8 dBi, 빔폭 65도, 뒤쪽 −22 dBi입니다. 편파는 기울기 각과 개수이고, 이중 편파면 안테나 수가 두 배로 셉니다. 간격은 파장의 배수로 빔폭과 격자 엽, 상관을 정합니다. 방향은 배열이 아니라 장치의 orientation이 정하고, 전기적 틸트는 가중치로 표현합니다. 한 줄로 줄이면, 실제 안테나를 줄이고 단순화한 만큼 결과의 이득과 빔 모양도 달라진다는 것을 알고 써야 합니다. 다음 단계로 대상 장비의 안테나 데이터시트를 Sionna 파라미터에 대응시키는 표를 만들어 보기를 제안드립니다. 감사합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

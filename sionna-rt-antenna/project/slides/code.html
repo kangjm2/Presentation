@@ -1,0 +1,26 @@
+<section id="code" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">배열 ③ · 코드로 설정하고 확인하기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">설정한 뒤 이득 · 배치 · 계산 방식을 확인한다</h2>
+</div>
+<div style="background:#14213D;border-radius:16px;padding:18px 26px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">scene.frequency = 3.5e9<br>scene.tx_array = rt.PlanarArray(num_rows=4, num_cols=8, vertical_spacing=0.7,<br>    horizontal_spacing=0.5, pattern="tr38901", polarization="cross")  <span style="color:#8DB8E8"># 32 위치 · 64 안테나</span><br>scene.rx_array = rt.PlanarArray(num_rows=1, num_cols=2, pattern="iso", polarization="V")<br><span style="color:#F0A36B">scene.tx_array.antenna_pattern.compute_gain()</span>   <span style="color:#8DB8E8"># 지향성 · 이득 · 효율</span><br><span style="color:#F0A36B">scene.tx_array.show()</span>                          <span style="color:#8DB8E8"># 소자 번호 · 배치</span><br><span style="color:#F0A36B">scene.tx_array.positions(scene.wavelength)</span>     <span style="color:#8DB8E8"># 실제 위치 [m]</span><br>paths = rt.PathSolver()(scene, <span style="color:#F0A36B">synthetic_array=True</span>)</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">synthetic_array=True</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">배열 중심에서만 경로 추적<br>소자별로는 위상만 — 빠름</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#A84A16">synthetic_array=False</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">소자마다 따로 추적<br>32열 0.5λ면 약 44 m 안쪽</p>
+</div>
+<div style="flex:1;background:#14213D;border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F0A36B">임의 배치 · 측정 패턴</p>
+<p style="font-size:24px;line-height:1.45;color:#F5F3EE">AntennaArray로 위치 직접<br>register_antenna_pattern</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: AntennaArray · PlanarArray · compute_gain · show · positions · PathSolver synthetic_array · 거리 기준은 원역장 2D²/λ</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 55초) 지금까지 본 파라미터를 코드로 모으면 이렇습니다. 주파수를 정하고, 송신 배열은 4행 8열, 세로 간격 0.7, 가로 간격 0.5파장, tr38901 패턴에 교차 편파로 32개 위치, 64개 안테나입니다. 수신은 2소자 세로 편파입니다. 설정한 뒤에는 세 가지를 확인하는 습관을 권합니다. compute_gain으로 지향성, 이득, 효율을 보고, show로 소자 번호와 배치를, positions로 실제 위치를 미터 단위로 봅니다. 계산 방식도 중요합니다. 경로 솔버의 synthetic_array가 기본으로 켜져 있으면 배열 중심에서만 경로를 찾고 소자마다 위상만 바꿉니다. 빠르지만 먼 거리를 가정합니다. 배열이 크거나 단말이 가까우면 꺼서 소자마다 따로 추적해야 합니다. 원역장 거리 기준으로 3.5 GHz에서 32열 0.5파장 배열이면 약 44 m 안쪽이 그런 영역입니다. 직사각형이 아닌 배치는 AntennaArray에 위치를 직접 주고, 측정 패턴은 register_antenna_pattern으로 등록해서 이름으로 씁니다.</aside>
+</section>

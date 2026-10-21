@@ -1,0 +1,25 @@
+<section id="orientation" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">배열 ② · 설치 방향 (orientation · look_at)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">어느 쪽을 볼지는 배열이 아니라 장치가 정한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:920px;height:520px">
+<svg aria-label="측면도: 철탑 위 안테나의 정면 방향이 수평 점선에서 아래로 10도 기울어진 모습" style="position:absolute;left:0px;top:0px;width:920px;height:500px" width="920" height="500" viewBox="0 0 920 500"><line x1="20" y1="470" x2="900" y2="470" stroke="#5E6675" stroke-width="4"/><rect x="90" y="140" width="34" height="330" fill="#DCD8CE"/><rect x="124" y="120" width="26" height="110" rx="4" fill="#A84A16"/><line x1="150" y1="175" x2="880" y2="175" stroke="#5E6675" stroke-width="3" stroke-dasharray="10 8"/><line x1="150" y1="175" x2="859.1" y2="300.0" stroke="#A84A16" stroke-width="6"/><polygon points="863.1,301.0 841.1,288.0 845.1,310.0" fill="#A84A16"/><path d="M 410 175 A 260 260 0 0 1 406.1 220.1" fill="none" stroke="#255E9E" stroke-width="4"/></svg>
+<p style="position:absolute;left:790px;top:126px;width:130px;font-size:24px;color:#5E6675">수평</p>
+<p style="position:absolute;left:430px;top:174px;width:160px;font-size:24px;font-weight:700;color:#255E9E">β = 10°</p>
+<p style="position:absolute;left:640px;top:282px;width:260px;font-size:24px;font-weight:600;color:#A84A16">정면 (x축)</p>
+<p style="position:absolute;left:30px;top:480px;width:360px;font-size:24px;color:#5E6675">position z = 30 m</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;background:#14213D;color:#F5F3EE;border-radius:12px;padding:14px 18px">orientation = [α, β, γ] <span style="color:#8DB8E8"># rad</span><br><span style="color:#F0A36B">α</span> 방위 · <span style="color:#F0A36B">β</span> 기울기 · <span style="color:#F0A36B">γ</span> 회전</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">섹터</b> α = 0°, 120°, 240°로 3섹터</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">하향 틸트</b> β = 0.17 rad (10°) — 기계적 틸트</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#255E9E">look_at</b> 대상 위치를 정면으로, orientation과 동시에는 불가</p>
+<p style="font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:12px 18px">전기적 틸트 · 빔 조향은 파라미터가 없다 → 출력 채널에 가중치를 곱하거나 패턴을 직접 등록</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Radio Devices (orientation (α, β, γ), look_at 상호 배타) · 회전 순서는 문서 식 (3) · 기울기 부호는 미리보기로 확인 권장</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 12</p>
+<aside>(약 50초) 배열 파라미터에는 방향이 없습니다. 안테나가 어느 쪽을 보는지는 송신기나 수신기 장치의 orientation이 정합니다. orientation은 세 각도를 라디안으로 주는데, α는 방위, β는 기울기, γ는 정면 축을 중심으로 한 회전입니다. 예를 들어 3섹터 기지국이면 α를 0도, 120도, 240도로 바꿔 세 송신기를 둡니다. 그림처럼 β를 10도, 약 0.17 라디안 주면 정면이 아래로 기울어 기계적 하향 틸트가 됩니다. 기울기 부호는 미리보기로 한 번 확인하는 습관을 권합니다. look_at을 쓰면 대상 위치를 정면으로 향하게 할 수 있지만, orientation과 동시에 줄 수는 없습니다. 실무에서 중요한 차이가 있습니다. 실제 기지국은 전기적 틸트나 빔 조향을 많이 쓰는데, Sionna에는 이를 위한 파라미터가 없습니다. 소자별 채널을 받은 뒤 가중치를 곱하거나, 기울어진 패턴을 직접 등록하는 방식으로 표현합니다.</aside>
+</section>

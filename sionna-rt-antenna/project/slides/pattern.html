@@ -1,0 +1,21 @@
+<section id="pattern" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">소자 ① · antenna.pattern</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">패턴은 “어느 방향으로 얼마나 세게”를 정하는 함수다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:stretch">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:16px 22px"><span style="color:#F0A36B">정의</span>  방향 (θ, φ) → 복소 진폭 (C<span style="color:#8DB8E8">θ</span>, C<span style="color:#8DB8E8">φ</span>)<br>|Cθ|² + |Cφ|² = 그 방향의 이득</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:16px 22px">경로마다 출발 · 도착 방향의 패턴 값이 곱해져 경로 이득 a에 들어간다</p>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:18%;text-align:left;color:#F5F3EE">pattern</th><th style="width:30%;text-align:left;color:#F5F3EE">모양</th><th style="width:16%;text-align:left;color:#F5F3EE">최대 이득</th><th style="width:36%;text-align:left;color:#F5F3EE">언제 쓰나</th></tr>
+<tr style="background:#FBFAF7"><td>iso</td><td>모든 방향 같음</td><td>0 dBi</td><td>기준값 · 단말 단순화</td></tr>
+<tr><td>dipole</td><td>짧은 다이폴, 도넛 모양</td><td>1.76 dBi</td><td>이론 비교용</td></tr>
+<tr style="background:#FBFAF7"><td>hw_dipole</td><td>반파장 다이폴, 조금 더 납작한 도넛</td><td>2.16 dBi</td><td>단말 · 실내 AP 근사</td></tr>
+<tr><td><b style="color:#A84A16">tr38901</b></td><td>정면 빔, 3 dB 빔폭 65°</td><td>8 dBi</td><td>기지국 배열의 소자 하나 (3GPP)</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">compute_gain()으로 확인: tr38901은 지향성 9.83 dB · 이득 8.0 dB · 효율 65.7% — 패턴 값이 곧 “이득”</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: Antenna Patterns · 다이폴 계수 √1.5 · √1.643 (Balanis) · tr38901은 TR 38.901 Table 7.3-1</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 12</p>
+<aside>(약 55초) 첫 번째 파라미터는 pattern입니다. 패턴은 방향을 넣으면 그 방향으로 얼마나 세게 내보내는지를 돌려주는 함수입니다. 정확히는 천정각과 방위각을 넣으면 두 편파 성분의 복소 진폭이 나오고, 그 크기의 제곱이 그 방향의 이득입니다. 경로를 계산할 때 출발 방향과 도착 방향의 패턴 값이 곱해져 경로 이득에 들어갑니다. 기본 제공 패턴은 네 가지입니다. iso는 모든 방향이 같아 0 dBi로 기준값이나 단말 단순화에 씁니다. dipole은 짧은 다이폴, hw_dipole은 반파장 다이폴로 둘 다 도넛 모양이고 최대 이득이 1.76, 2.16 dBi입니다. tr38901은 3GPP 38.901의 기지국 소자 패턴으로, 빔폭 65도에 최대 8 dBi입니다. compute_gain 함수로 지향성, 이득, 효율을 확인할 수 있는데, tr38901은 지향성 9.8 dB에 이득 8 dB, 효율 66% 정도로 나옵니다. 즉 Sionna에서 패턴 값은 효율까지 반영된 이득입니다.</aside>
+</section>

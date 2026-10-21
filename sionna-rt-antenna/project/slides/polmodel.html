@@ -1,0 +1,28 @@
+<section id="polmodel" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">소자 ④ · polarization_model과 편파의 효과</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">편파가 어긋나면 같은 경로도 약하게 받는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="flex:1;background:#14213D;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#F0A36B">"tr38901_2" (기본)</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE">[Cθ, Cφ] = [cos ζ, sin ζ] · C̃θ</p>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">어느 방향이든 같은 비율로 나눈다 — 단순 · 빠름</p>
+</div>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;color:#255E9E">"tr38901_1"</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5">[Cθ, Cφ] = [cos ψ, sin ψ] · C̃θ</p>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">ψ가 θ · φ에 따라 바뀜<br>기울어진 소자의 기하 반영 · 정면에선 같음</p>
+</div>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:34%;text-align:left;color:#F5F3EE">상황</th><th style="width:66%;text-align:left;color:#F5F3EE">결과에 미치는 영향</th></tr>
+<tr style="background:#FBFAF7"><td>Tx "cross" ↔ Rx "V", 가시 경로</td><td>±45° 소자와 세로 편파 → cos 45°, 소자당 약 −3 dB</td></tr>
+<tr><td>Tx "V" ↔ Rx "H", 가시 경로</td><td>이상적으로는 결합이 거의 0 — 교차 편파 손실</td></tr>
+<tr style="background:#FBFAF7"><td>반사 · 회절</td><td>편파 성분마다 계수가 달라 편파가 바뀐다 → 단일 편파 수신에서 변동</td></tr>
+<tr><td>확산 산란</td><td>재질의 xpd_coefficient만큼 교차 편파 쪽으로 에너지가 옮겨 간다</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT API: polarization_model (TR 38.901 식 7.3-3 · 7.3-4/5, 기본 "tr38901_2") · 재질 xpd_coefficient</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 50초) 편파에는 하나의 설정이 더 있습니다. polarization_model은 세로 패턴을 기울일 때 어떤 식을 쓸지 정하는데, 3GPP 38.901의 두 모델을 그대로 가져왔습니다. 기본값인 모델 2는 어느 방향이든 cos ζ와 sin ζ의 같은 비율로 두 성분을 나누는 단순한 식입니다. 모델 1은 비율이 방향에 따라 바뀌어서 기울어진 소자의 실제 기하를 더 잘 반영합니다. 정면에서는 두 모델이 같고, 옆이나 위아래 방향에서 차이가 납니다. 편파가 결과를 바꾸는 대표적인 경우는 아래 표와 같습니다. 기지국이 ±45도이고 단말이 세로 편파면 가시 경로에서 소자당 약 3 dB 손해를 봅니다. 세로와 가로처럼 완전히 어긋나면 이론상 거의 받지 못합니다. 반사나 회절은 편파 성분마다 계수가 달라 편파 자체를 바꾸고, 확산 산란은 재질의 XPD 계수만큼 에너지를 교차 편파로 옮깁니다. 그래서 편파는 단순한 옵션이 아니라 수신 전력과 MIMO 성능을 바꾸는 물리량입니다.</aside>
+</section>

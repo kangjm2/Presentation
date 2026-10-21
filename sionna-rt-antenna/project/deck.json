@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-21T10:00:00Z"},
+  "lists": "css",
+  "title": "Sionna RT 안테나의 물리적 특성",
+  "order": ["cover", "map", "frame", "pattern", "tr38901", "polarization", "polmodel", "spacing", "orientation", "code", "limits", "summary"],
+  "sections": {
+    "intro": {"description": "Sionna RT에서 안테나를 정하는 파라미터 지도와 좌표계", "start": "cover"},
+    "element": {"description": "소자 하나의 성질: 방사 패턴과 편파", "start": "pattern"},
+    "array": {"description": "배열과 설치: 소자 간격, 방향과 기울기, 코드로 확인하기", "start": "spacing"},
+    "wrap": {"description": "Sionna 안테나 모델이 생략하는 것과 정리", "start": "limits"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}
