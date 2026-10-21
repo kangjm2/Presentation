@@ -1,0 +1,25 @@
+<section id="planning" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">④ 망 설계 툴 (RF planning)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">전파 모델 위에 망 전체를 올려놓고 결정한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="width:700px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:28px;font-weight:700">Atoll</p><p style="font-size:24px;line-height:1.35;color:#4A5262">Forsk · 실외 다기술 · SPM · Aster</p></div>
+<div style="background:#FBFAF7;border-top:6px solid #A84A16;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:28px;font-weight:700">Planet</p><p style="font-size:24px;line-height:1.35;color:#4A5262">Infovista · 실외 RAN · AI 3D 모델(AIM)</p></div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:28px;font-weight:700">iBwave Design</p><p style="font-size:24px;line-height:1.35;color:#4A5262">실내 · 건물 도면 · DAS · Wi-Fi</p></div>
+<div style="background:#FBFAF7;border-top:6px solid #255E9E;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:28px;font-weight:700">Ranplan</p><p style="font-size:24px;line-height:1.35;color:#4A5262">실내 · 실외 함께 · 3D 전파</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">예측 지도</b> RSRP · SINR · 최적 서버 · 처리량</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">용량</b> 트래픽 지도 + 몬테카를로 단말 배치</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">자동 최적화</b> 틸트 · 방위 · 전력 · 후보 사이트 선택</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">파라미터 계획</b> 주파수 · PCI · 이웃 목록</p>
+<p style="font-size:24px;line-height:1.45"><b style="color:#A84A16">측정 연동</b> CW · 드라이브 테스트로 모델 보정</p>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:14px 20px">공통 구조: 지리 데이터 + 사이트 · 안테나 DB + 전파 모델 → 예측 → 분석 · 최적화 → 보고서</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">제품 기능은 각사 공개 자료 기준 요약 · 버전 · 라이선스 모듈에 따라 다름 · 트래픽 모델은 트래픽 모델 세미나 참조</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 12</p>
+<aside>(약 55초) 세 번째로 볼 것은 사업자에게 가장 익숙한 망 설계 툴입니다. 층 번호로는 네 번째지만 실무에서 가장 많이 쓰니 먼저 봅니다. 실외 다기술 설계는 Forsk의 Atoll과 Infovista의 Planet이 대표적이고, 실내는 건물 도면 위에서 DAS나 Wi-Fi까지 설계하는 iBwave, 실내외를 함께 다루는 Ranplan이 있습니다. 툴마다 화면은 달라도 하는 일은 비슷합니다. 사이트별 RSRP, SINR, 최적 서버, 처리량 예측 지도를 만들고, 트래픽 지도와 몬테카를로 단말 배치로 용량을 분석합니다. 틸트, 방위각, 전력을 자동으로 최적화하고 후보 사이트를 고르며, 주파수, PCI, 이웃 목록 같은 파라미터도 계획합니다. 그리고 CW 측정이나 드라이브 테스트 결과로 전파 모델을 보정합니다. 구조로 보면 지리 데이터와 사이트, 안테나 데이터베이스에 전파 모델을 얹어 예측하고, 그 위에서 분석과 최적화를 하는 것입니다.</aside>
+</section>

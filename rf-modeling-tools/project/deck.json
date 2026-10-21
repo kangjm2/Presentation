@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-21T13:00:00Z"},
+  "lists": "css",
+  "title": "RF 모델링 툴",
+  "order": ["cover", "map", "em", "propagation", "planning", "simtwin", "data", "workflow", "calibration", "usecases", "choose", "summary"],
+  "sections": {
+    "intro": {"description": "RF 모델링 툴을 규모에 따라 다섯 층으로 나눈 지도", "start": "cover"},
+    "tools": {"description": "층별 대표 툴: EM · 회로, 전파 · 채널, 망 설계, 시뮬레이터와 디지털 트윈", "start": "em"},
+    "use": {"description": "어떻게 쓰나: 입력 데이터, 설계 흐름, 모델 보정, 단계별 활용", "start": "data"},
+    "wrap": {"description": "툴 고르는 기준과 정리", "start": "choose"}
+  },
+  "faces": {
+    "noto-serif-kr": {"family": "Noto Serif KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"},
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"}
+  },
+  "designSystems": []
+}

@@ -1,0 +1,17 @@
+<section id="map" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">툴 지도 · 규모에 따라 다섯 층</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">아래층의 출력이 위층의 입력이 된다</h2>
+</div>
+<table style="font-size:24px;color:#14213D">
+<tr style="background:#14213D"><th style="width:20%;text-align:left;color:#F5F3EE">층 (규모)</th><th style="width:27%;text-align:left;color:#F5F3EE">답하는 질문</th><th style="width:30%;text-align:left;color:#F5F3EE">대표 툴</th><th style="width:23%;text-align:left;color:#F5F3EE">위층으로 넘기는 것</th></tr>
+<tr style="background:#FBFAF7"><td><b style="color:#255E9E">① EM · 회로</b><br>mm ~ m</td><td>안테나 · 필터 · PA가 어떻게 동작하나</td><td>HFSS · CST · Feko · ADS</td><td>안테나 패턴 · S 파라미터</td></tr>
+<tr><td><b style="color:#255E9E">② 전파 · 채널</b><br>m ~ km</td><td>신호가 어떻게 퍼지고 약해지나</td><td>경험 모델 · 레이 트레이싱 · 38.901</td><td>경로 손실 · 채널 계수</td></tr>
+<tr style="background:#FBFAF7"><td><b style="color:#A84A16">③ 링크 · 시스템</b><br>셀 · 수십 셀</td><td>알고리즘 · 스케줄러가 얼마나 좋나</td><td>MATLAB · Sionna · ns-3</td><td>BLER 곡선 · 성능 통계</td></tr>
+<tr><td><b style="color:#A84A16">④ 망 설계</b><br>도시 · 전국</td><td>사이트를 어디에 몇 개 두나</td><td>Atoll · Planet · iBwave · Ranplan</td><td>커버리지 · 용량 지도</td></tr>
+<tr style="background:#FBFAF7"><td><b>⑤ 디지털 트윈</b><br>운용 중인 망</td><td>바꾸면 실제 망이 어떻게 되나</td><td>NVIDIA AODT · VIAVI AI RSG</td><td>what-if 결과 · AI 학습 데이터</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">발표자 정리 · 툴은 대표 예시이며 한 툴이 여러 층에 걸치기도 함 (예: MATLAB, Sionna)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 12</p>
+<aside>(약 55초) RF 모델링 툴은 다루는 규모에 따라 다섯 층으로 나누면 이해하기 쉽습니다. 맨 아래는 전자기 해석과 회로 툴로, 밀리미터에서 미터 크기의 안테나, 필터, 전력 증폭기가 어떻게 동작하는지 봅니다. 두 번째는 전파와 채널 모델로, 신호가 공간에서 어떻게 퍼지고 약해지는지를 계산합니다. 세 번째는 링크와 시스템 시뮬레이터로, 수신기 알고리즘이나 스케줄러 성능을 평가합니다. 네 번째가 우리에게 가장 익숙한 망 설계 툴로, 도시나 전국 단위에서 사이트를 어디에 몇 개 둘지 결정합니다. 마지막은 디지털 트윈으로, 운용 중인 망을 그대로 옮겨 놓고 무엇을 바꾸면 어떻게 되는지 미리 봅니다. 중요한 점은 층이 서로 연결된다는 것입니다. EM 툴이 만든 안테나 패턴이 망 설계 툴로, 채널 모델이 시뮬레이터로, 시뮬레이터의 BLER 곡선이 망 설계의 처리량 계산으로 올라갑니다.</aside>
+</section>
