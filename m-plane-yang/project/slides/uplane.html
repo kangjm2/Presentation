@@ -1,0 +1,28 @@
+<section id="uplane" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">YANG ③ · uplane-conf는 어떻게 만들어지나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RU가 보여 준 것 위에 O-DU가 다섯 단계로 쌓는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:12px;padding:10px 18px"><p style="width:44px;font-size:28px;font-weight:700;text-align:center;color:#5E6675">1</p><p style="flex:1;font-size:24px;line-height:1.4"><b>읽기</b> tx · rx-arrays, static 끝점, 인터페이스 — RU가 가진 것 확인</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:12px;padding:10px 18px"><p style="width:44px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">2</p><p style="flex:1;font-size:24px;line-height:1.4"><b>전송</b> interfaces · processing-elements — O-DU와 RU 사이 VLAN · MAC</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:12px;padding:10px 18px"><p style="width:44px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">3</p><p style="flex:1;font-size:24px;line-height:1.4"><b>끝점</b> low-level-tx · rx-endpoints — static 끝점과 짝, eAxC ID 부여</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:12px;padding:10px 18px"><p style="width:44px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">4</p><p style="flex:1;font-size:24px;line-height:1.4"><b>캐리어</b> tx · rx-array-carriers — 중심 주파수 · 대역폭 · 이득 · NR/LTE</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:12px;padding:10px 18px"><p style="width:44px;font-size:28px;font-weight:700;text-align:center;color:#A84A16">5</p><p style="flex:1;font-size:24px;line-height:1.4"><b>연결</b> low-level-tx · rx-links — 끝점 · 캐리어 · 전송을 하나로 묶음</p></div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 18px">그다음 캐리어 active = ACTIVE → 송신 시작 · 규칙 위반(eAxC 중복 등)은 RU가 거부</p>
+</div>
+<div style="position:relative;width:660px;height:520px">
+<svg aria-label="가운데 low-level-tx-link에서 위의 low-level-tx-endpoint와 processing-element, 아래의 tx-array-carrier로 선이 이어지고, tx-array-carrier는 오른쪽의 읽기 전용 tx-array 위에 놓인다" style="position:absolute;left:0px;top:0px;width:660px;height:520px" width="660" height="520" viewBox="0 0 660 520"><g stroke="#A84A16" stroke-width="4"><line x1="330" y1="242" x2="150" y2="106"/><line x1="330" y1="242" x2="510" y2="106"/><line x1="330" y1="242" x2="150" y2="380"/></g><line x1="300" y1="421" x2="360" y2="421" stroke="#5E6675" stroke-width="4" stroke-dasharray="8 6"/></svg>
+<p style="position:absolute;left:0px;top:20px;width:300px;font-size:24px;line-height:1.3;text-align:center;background:#D5E3F3;border:2px solid #255E9E;border-radius:10px;padding:10px 0px"><b>low-level-tx-endpoint</b><br>eAxC ID · 압축</p>
+<p style="position:absolute;left:360px;top:20px;width:300px;font-size:24px;line-height:1.3;text-align:center;background:#D5E3F3;border:2px solid #255E9E;border-radius:10px;padding:10px 0px"><b>processing-element</b><br>VLAN · MAC 주소</p>
+<p style="position:absolute;left:180px;top:200px;width:300px;font-size:24px;line-height:1.3;text-align:center;background:#F7DDCB;border:2px solid #A84A16;border-radius:10px;padding:10px 0px"><b>low-level-tx-link</b><br>세 가지를 잇는 연결</p>
+<p style="position:absolute;left:0px;top:380px;width:300px;font-size:24px;line-height:1.3;text-align:center;background:#D5E3F3;border:2px solid #255E9E;border-radius:10px;padding:10px 0px"><b>tx-array-carrier</b><br>주파수 · 대역폭 · 이득</p>
+<p style="position:absolute;left:360px;top:380px;width:300px;font-size:24px;line-height:1.3;text-align:center;background:#FBFAF7;border:2px dashed #5E6675;border-radius:10px;padding:10px 0px"><b>tx-array</b><br>RU 고정 (읽기 전용)</p>
+<p style="position:absolute;left:0px;top:486px;width:660px;font-size:24px;color:#5E6675">실선 상자 = O-DU가 만듦 · 점선 상자 = RU가 보여 줌</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 15.2.4 · 15.3 · 송신 기준 (수신 rx도 같은 구조) · 단계는 한 요청에 묶어도 됨</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 18</p>
+<aside>(약 55초) 앞에서 본 uplane-conf 모델이 실제로 어떻게 채워지는지 가볍게 보겠습니다. 핵심은 RU가 먼저 보여 준 것 위에 O-DU가 쌓아 만든다는 것입니다. 첫째, O-DU는 RU가 가진 물리 안테나 배열인 tx-arrays와 rx-arrays, RU 안에 미리 정해진 static 끝점, 그리고 인터페이스를 읽습니다. 이것들은 읽기 전용입니다. 둘째, O-DU와 RU 사이의 전송 경로, 즉 VLAN과 MAC 주소를 processing-element로 만듭니다. 셋째, static 끝점과 이름으로 짝을 이루는 low-level 끝점을 만들고, 각각에 eAxC ID를 부여합니다. 이 ID는 RU 안에서 방향별로 유일해야 하고, 겹치면 RU가 거부합니다. 넷째, 캐리어를 만들어 중심 주파수, 대역폭, 이득을 정합니다. 다섯째, low-level link로 끝점, 캐리어, 전송 경로 세 가지를 하나로 묶습니다. 오른쪽 그림이 그 관계입니다. 이렇게 구조가 다 만들어진 뒤에 캐리어를 ACTIVE로 바꾸면 송신이 시작됩니다. 사양은 이 단계들을 한 요청에 묶어도 된다고 하므로, 최종 결과가 모델 규칙을 만족하기만 하면 됩니다.</aside>
+</section>

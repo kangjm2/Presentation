@@ -19,6 +19,6 @@
 <p style="flex:1;font-size:24px;line-height:1.35;background:#FBFAF7;border:2px solid #DCD8CE;border-radius:10px;padding:10px 14px">reset RPC → 재시작 · Call Home</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 Annex A Table A.1-1 발췌(관리자 복구 열은 참고용) · 6.3 · 9.5 · 14.1 · 경보 이름은 우리말로 줄임</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 16</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">17 / 18</p>
 <aside>(약 55초) 경보가 올라온 뒤에는 무엇이 일어날까요. 사양 부록 A의 공통 경보 표에는 경보마다 RU가 감지 즉시 할 일, 관리자 쪽 복구 조치, 해제 조건이 적혀 있습니다. 대표적인 것만 보겠습니다. 과열 위험은 RU가 하드웨어를 지키기 위해 모든 캐리어를 스스로 끕니다. 동기 오류는 주변에 간섭을 주지 않도록 RF 송신을 차단하고 캐리어를 끄며, 관리자는 필요하면 리셋합니다. 외부 동기원을 잃은 경우와 설정 실패는 RU가 따로 하는 일은 없고, 관리자 쪽에서 리셋을 검토합니다. C/U-Plane 연결 고장은 관련 캐리어를 끄거나 지우면 해제되고, 자체 시험 실패는 RU가 정해진 횟수만큼 스스로 리셋해 복구를 시도합니다. 관리자 복구 열은 사양에서도 참고용이라 실제 조치는 운영 정책에 따릅니다. 아래 세 가지는 경보가 아니라도 RU를 처음으로 돌려보내는 경우입니다. 감시 실패, Call Home을 정해진 횟수만큼 실패한 경우, 그리고 컨트롤러가 reset RPC를 보낸 경우입니다. 이때 RU는 재시작하고 다시 Call Home부터 시작합니다.</aside>
 </section>

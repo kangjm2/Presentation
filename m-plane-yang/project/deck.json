@@ -3,7 +3,7 @@
   "createdOnFiles": {"v": 1, "at": "2026-10-19T20:00:00Z"},
   "lists": "css",
   "title": "M-Plane과 YANG",
-  "order": ["cover", "why", "arch", "netconf", "yang", "message", "startup", "watchdog", "sync", "nacm", "together", "lifecycle", "capability", "alarm", "recovery", "summary"],
+  "order": ["cover", "why", "arch", "netconf", "yang", "message", "uplane", "odu", "startup", "watchdog", "sync", "nacm", "together", "lifecycle", "capability", "alarm", "recovery", "summary"],
   "sections": {
     "intro": {"description": "M-Plane이 왜 고안되었고 어떤 구조인가", "start": "cover"},
     "model": {"description": "NETCONF/YANG: 모델로 메시지를 주고받는다는 것의 의미", "start": "netconf"},
