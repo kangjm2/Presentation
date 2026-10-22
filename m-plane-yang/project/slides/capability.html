@@ -34,6 +34,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 6.6 · 9.2 · 15.1, Annex D.6.1 o-ran-module-cap · XML은 닫는 태그를 줄인 예시 값</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">16 / 19</p>
 <aside>(약 55초) Call Home으로 연결되면 컨트롤러는 설정하기 전에 먼저 이 RU가 어떤 장비인지 확인합니다. 네 가지 질문으로 보면 쉽습니다. 첫째, 어떻게 바꿀 수 있나. hello 메시지에서 candidate, confirmed-commit, 알림, XPath 같은 NETCONF 기능을 봅니다. 둘째, 어떤 기능이 있나. ietf-yang-library에 모듈과 버전, feature 목록이 있고, 목록에 없는 모듈은 지원하지 않는 선택 기능으로 판단합니다. 셋째, 얼마나 할 수 있나. 핵심이 o-ran-module-cap입니다. ru-capabilities에는 카테고리 A인지 B인지, 포트 수, 공간 스트림 수, 지원하는 압축 방식이 있고, band-capabilities에는 밴드별 주파수 범위, 최대 캐리어 수, 최대 캐리어 대역폭이 있습니다. 넷째, 누구이고 지금 어떤가. 하드웨어 모듈의 제조사, 시리얼, 제품 코드, 지원 M-Plane 버전, 마지막 재시작 원인, 동기 상태입니다. 오른쪽은 3.5 GHz 대역 n78에서 하향 포트 4개, 캐리어 최대 2개, 캐리어당 100 MHz라고 밝힌 예입니다. 컨트롤러는 이 값을 넘지 않게 캐리어와 압축, eAxC를 설정하고, 이 범위를 넘는 값은 RU가 받아들이지 않을 수 있습니다.</aside>
 </section>

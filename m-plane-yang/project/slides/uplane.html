@@ -23,6 +23,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 15.2.4 · 15.3 · 송신 기준 (수신 rx도 같은 구조) · 단계는 한 요청에 묶어도 됨</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 19</p>
 <aside>(약 55초) 앞에서 본 uplane-conf 모델이 실제로 어떻게 채워지는지 가볍게 보겠습니다. 핵심은 RU가 먼저 보여 준 것 위에 O-DU가 쌓아 만든다는 것입니다. 첫째, O-DU는 RU가 가진 물리 안테나 배열인 tx-arrays와 rx-arrays, RU 안에 미리 정해진 static 끝점, 그리고 인터페이스를 읽습니다. 이것들은 읽기 전용입니다. 둘째, O-DU와 RU 사이의 전송 경로, 즉 VLAN과 MAC 주소를 processing-element로 만듭니다. 셋째, static 끝점과 이름으로 짝을 이루는 low-level 끝점을 만들고, 각각에 eAxC ID를 부여합니다. 이 ID는 RU 안에서 방향별로 유일해야 하고, 겹치면 RU가 거부합니다. 넷째, 캐리어를 만들어 중심 주파수, 대역폭, 이득을 정합니다. 다섯째, low-level link로 끝점, 캐리어, 전송 경로 세 가지를 하나로 묶습니다. 오른쪽 그림이 그 관계입니다. 이렇게 구조가 다 만들어진 뒤에 캐리어를 ACTIVE로 바꾸면 송신이 시작됩니다. 사양은 이 단계들을 한 요청에 묶어도 된다고 하므로, 최종 결과가 모델 규칙을 만족하기만 하면 됩니다.</aside>
 </section>

@@ -23,6 +23,6 @@
 <p style="position:absolute;left:1200px;top:472px;width:300px;font-size:24px;font-weight:600;color:#14213D">운용 준비</p>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 6장 요약 · O-DU = 사양의 “O-RU 컨트롤러” (하이브리드면 SMO도 같은 절차) · 선택 단계 생략</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 19</p>
 <aside>(약 55초) 이제 타이밍, 즉 시간에 관한 규칙입니다. 먼저 시작 절차입니다. O-RU 전원을 켜면, DHCP로 IP와 VLAN, 그리고 접속할 O-DU의 주소를 받습니다. 동기는 이와 병렬로 시작합니다. 그다음 O-RU가 O-DU에 먼저 접속하는 Call Home을 하고, O-DU가 SSH나 TLS로 연결을 맺으며 인증합니다. 사양에서는 이 상대를 O-RU 컨트롤러라고 부르는데, 계층형에서는 O-DU가 그 역할을 하고 하이브리드라면 SMO도 같은 절차로 붙습니다. 연결되면 hello 메시지로 서로 지원 기능을 교환하고, O-DU가 YANG 라이브러리와 스키마를 읽어 이 장비가 어떤 모델을 쓰는지 알아봅니다. 그다음 중요한 단계가 감시 구독입니다. 이때부터 워치독 타이머가 돌기 시작합니다. 이후 소프트웨어 관리, 지연 프로파일 조회, U-Plane 설정을 하고, 경보 구독과 성능 측정을 켠 뒤 캐리어를 활성화합니다. 순서가 정해져 있기 때문에, 어느 회사 O-DU든 어느 회사 RU든 같은 흐름으로 올라옵니다. 실제 사양에는 인증서 등록 같은 선택 단계가 더 있습니다.</aside>
 </section>
