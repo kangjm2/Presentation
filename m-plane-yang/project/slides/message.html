@@ -28,6 +28,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">메시지는 개념 예 (네임스페이스 생략) · 설정 방식 3가지는 M-Plane 사양 9장 · NETCONF RFC 6241</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 19</p>
 <aside>(약 55초) 그럼 YANG 형식으로 메시지를 주고받는 것은 어떤 의미가 있을까요. 왼쪽은 송신 캐리어를 켜는 NETCONF 요청입니다. 태그 이름과 구조가 앞에서 본 YANG 모델과 그대로 일치합니다. 네 가지 의미가 있습니다. 첫째, 계약입니다. 양쪽이 같은 모델을 알기 때문에, 이름이 틀리거나 범위를 벗어난 값은 장비가 오류로 거절하고, 반쯤 적용되는 일이 없습니다. 둘째, 자기 소개입니다. 연결하자마자 hello 메시지와 YANG 라이브러리로 어떤 모듈과 기능을 지원하는지 알려 주고, 필요하면 모델 파일 자체를 받아 갈 수 있습니다. 셋째, 트랜잭션입니다. running에 바로 쓰는 1단계, candidate에 쓰고 commit하는 2단계, 확인이 없으면 자동으로 되돌리는 confirmed-commit 3단계가 있습니다. 넷째, 자동화입니다. 모델에서 코드와 검증기, 시험을 자동으로 만들 수 있어 벤더가 바뀌어도 같은 도구를 씁니다.</aside>
 </section>

@@ -20,6 +20,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">M-Plane 사양 11.1~11.6, Annex A(공통 경보), D.2.5 o-ran-fm · 이름 · 시각은 예시</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">16 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">17 / 19</p>
 <aside>(약 55초) 이제 경보가 어떻게 발생하는지 보겠습니다. 모델은 o-ran-fm입니다. 첫째, O-RU가 고장을 감지합니다. 감지 조건은 장비마다 다르고, 경보가 켜졌다 꺼졌다 깜빡이지 않도록 1분 정도의 필터링 시간을 둡니다. 둘째, active-alarm-list에 올립니다. 심각도 WARNING은 목록에 넣지 않습니다. 셋째, 경보를 구독한 모든 클라이언트와 이벤트 수집기에 alarm-notif를 보냅니다. 이때 전체 목록이 아니라 새로 생기거나 해제된 경보만 보냅니다. 넷째, 원인이 사라지면 is-cleared를 true로 해서 다시 알리고 목록에서 뺍니다. 심각도는 CRITICAL이 못 쓰는 상태, MAJOR가 성능 저하, MINOR가 아직 동작하는 상태입니다. 심각도가 바뀌면 같은 경보를 고치는 게 아니라, 새 심각도로 경보를 새로 올리고 이전 것을 해제합니다. fault-id는 사양 부록 A의 공통 번호와 1000번 이상의 벤더 번호로 나뉩니다. 오른쪽은 동기를 잃었을 때의 예로, 어디서 났는지, 무엇이 영향을 받는지, 얼마나 심각한지, 언제 났는지를 한 메시지에 담습니다. 컨트롤러는 이걸로 다음 조치를 정합니다.</aside>
 </section>
