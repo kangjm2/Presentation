@@ -15,7 +15,7 @@ O-RAN Open Fronthaul의 관리 평면(M-Plane)을 다루는 세미나 자료입�
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py m-plane-yang`로 뷰어를 다시 만듭니다.
 
-## 구성 (≈ 15분 35초)
+## 구성 (≈ 15분 45초)
 
 | # | id | 내용 | 시간 |
 |---|----|------|------|
@@ -26,7 +26,7 @@ O-RAN Open Fronthaul의 관리 평면(M-Plane)을 다루는 세미나 자료입�
 | 5 | yang | YANG 읽는 법 (o-ran-uplane-conf 발췌) | 0:50 |
 | 6 | message | YANG 형식 메시지의 의미: 계약 · 자기 소개 · 트랜잭션 · 자동화 | 0:55 |
 | 7 | uplane | uplane-conf가 만들어지는 순서: 읽기 → 전송 → 끝점(eAxC) → 캐리어 → 링크, 구조 그림 | 0:55 |
-| 8 | odu | O-DU 입장의 YANG 활용: 코드 생성 · 능력 기반 설정 · 사전 검증 · 안전한 변경 · 이벤트 자동화 · 시험 | 0:55 |
+| 8 | odu | O-DU 입장의 YANG 활용: 코드 생성 · 능력 기반 설정 · 사전 검증 · 안전한 변경 · 이벤트 자동화 · 시험, DU 안에서 YANG으로 다룰 것과 밖으로 뺄 것 | 1:05 |
 | 9 | startup | 타이밍 ①: 시작 절차 시퀀스 (DHCP · O-RU · O-DU) | 0:55 |
 | 10 | watchdog | 타이밍 ②: 감시 워치독, 타이머가 두 개인 이유(양방향 생존 확인), 감시 실패 처리, confirmed-commit 주의 | 1:00 |
 | 11 | sync | 타이밍 ③: o-ran-sync 상태 (LOCKED · HOLDOVER · FREERUN), HOLDOVER의 의미, 캐리어 | 0:55 |
@@ -49,7 +49,7 @@ O-RAN Open Fronthaul의 관리 평면(M-Plane)을 다루는 세미나 자료입�
 - 5쪽 YANG과 6쪽 메시지, 15쪽 module-cap과 16쪽 alarm-notif XML은 실제 모델을 단순화한 예입니다(값 · 이름 · 시각은 예시).
 - 17쪽 경보 표는 Annex A Table A.1-1에서 대표 경보만 골라 우리말로 줄였습니다. “관리자 복구” 열은 사양에서도 참고용(informative)이라 실제 조치는 운영 정책을 따릅니다.
 - 9쪽 시작 절차는 사양의 “O-RU 컨트롤러”를 O-DU로 표기했습니다(계층형 기준). 하이브리드에서는 SMO도 같은 절차로 붙습니다.
-- 7쪽 uplane-conf 단계는 사양 15.2.4의 일반 설정 시나리오를 다섯 단계로 줄인 것입니다. 8쪽 O-DU 활용과 도구 예시는 발표자 정리입니다.
+- 7쪽 uplane-conf 단계는 사양 15.2.4의 일반 설정 시나리오를 다섯 단계로 줄인 것입니다. 8쪽 O-DU 활용과 도구 예시, DU 내부 설계 원칙(YANG으로 다룰 것과 밖으로 뺄 것)은 발표자 정리입니다. 근거로 삼은 표준은 NMDA(RFC 8342)와 YANG-Push(RFC 8641)입니다.
 - 11쪽 HOLDOVER 설명은 ITU-T G.810의 정의(잠겨 있던 동안 저장한 데이터로 출력을 유지하는 상태)를 풀어 쓴 것입니다. 유지 시간과 정확도는 장비마다 다릅니다.
 
 ## 출처
