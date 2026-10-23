@@ -1,0 +1,60 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-23T12:00:00Z"
+  },
+  "lists": "css",
+  "title": "DU와 UE의 대화",
+  "order": [
+    "cover",
+    "map",
+    "search",
+    "rach",
+    "setup",
+    "datapath",
+    "dl",
+    "ul",
+    "loop",
+    "scheduler",
+    "idle",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "CU · DU · RU · UE의 역할과 여섯 단계 지도",
+      "start": "cover"
+    },
+    "access": {
+      "description": "셀 찾기, 랜덤 액세스, RRC · F1 연결 설정",
+      "start": "search"
+    },
+    "data": {
+      "description": "데이터 경로, 하향 HARQ, 상향 SR · BSR · 그랜트",
+      "start": "datapath"
+    },
+    "keep": {
+      "description": "폐루프, DU 스케줄러, DRX와 연결 해제",
+      "start": "loop"
+    },
+    "wrap": {
+      "description": "정리",
+      "start": "summary"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

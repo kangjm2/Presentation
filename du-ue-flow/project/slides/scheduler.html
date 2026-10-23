@@ -1,0 +1,27 @@
+<section id="scheduler" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑤ 유지 · DU 스케줄러의 0.5 ms</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">슬롯마다 누구에게, 어디를, 얼마나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="width:800px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:14px;background:#FBFAF7;border-radius:12px;padding:10px 16px"><p style="width:40px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">1</p><p style="flex:1;font-size:24px;line-height:1.4"><b>입력</b> CSI · BSR · HARQ 상태 · RLC 버퍼 · QoS(5QI)</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:14px;background:#FBFAF7;border-radius:12px;padding:10px 16px"><p style="width:40px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">2</p><p style="flex:1;font-size:24px;line-height:1.4"><b>먼저</b> 재전송과 제어 메시지 · 지연에 민감한 흐름</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:14px;background:#FBFAF7;border-radius:12px;padding:10px 16px"><p style="width:40px;font-size:28px;font-weight:700;text-align:center;color:#A84A16">3</p><p style="flex:1;font-size:24px;line-height:1.4"><b>순위</b> 비례 공정(PF) 등 지표로 UE 줄 세우기</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:14px;background:#FBFAF7;border-radius:12px;padding:10px 16px"><p style="width:40px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">4</p><p style="flex:1;font-size:24px;line-height:1.4"><b>배분</b> PRB · MCS · 레이어 · 빔, PDCCH 자리까지</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:14px;background:#FBFAF7;border-radius:12px;padding:10px 16px"><p style="width:40px;font-size:28px;font-weight:700;text-align:center;color:#255E9E">5</p><p style="flex:1;font-size:24px;line-height:1.4"><b>출력</b> DU-high → DU-low로 FAPI 메시지</p></div>
+<div style="background:#14213D;border-radius:12px;padding:12px 18px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE">DL_TTI.request · TX_Data.request<br>UL_TTI.request · UL_DCI.request<br><span style="color:#8DB8E8">← CRC · UCI · RX_Data.indication</span></p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;font-weight:700;color:#A84A16">PF 지표 = 지금 낼 수 있는 속도 ÷ 그동안 받은 평균</p>
+<div style="display:flex;flex-direction:row;gap:8px;background:#14213D;border-radius:8px;padding:8px 14px"><p style="width:220px;font-size:24px;font-weight:700;color:#F5F3EE">UE</p><p style="flex:1;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">지금 (Mbps)</p><p style="flex:1;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">평균 (Mbps)</p><p style="flex:1;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">지표</p></div>
+<div style="display:flex;flex-direction:row;gap:8px;background:#FBFAF7;border-radius:8px;padding:8px 14px"><p style="width:220px;font-size:24px;color:#14213D">A · 셀 중앙</p><p style="flex:1;font-size:24px;text-align:right;color:#14213D">300</p><p style="flex:1;font-size:24px;text-align:right;color:#14213D">150</p><p style="flex:1;font-size:24px;text-align:right;color:#14213D">2.0</p></div>
+<div style="display:flex;flex-direction:row;gap:8px;background:#F7DDCB;border-radius:8px;padding:8px 14px"><p style="width:220px;font-size:24px;font-weight:700;color:#14213D">B · 셀 가장자리</p><p style="flex:1;font-size:24px;text-align:right;font-weight:700;color:#14213D">120</p><p style="flex:1;font-size:24px;text-align:right;font-weight:700;color:#14213D">40</p><p style="flex:1;font-size:24px;text-align:right;font-weight:700;color:#14213D">3.0</p></div>
+<div style="display:flex;flex-direction:row;gap:8px;background:#FBFAF7;border-radius:8px;padding:8px 14px"><p style="width:220px;font-size:24px;color:#14213D">C · 막 받음</p><p style="flex:1;font-size:24px;text-align:right;color:#14213D">500</p><p style="flex:1;font-size:24px;text-align:right;color:#14213D">400</p><p style="flex:1;font-size:24px;text-align:right;color:#14213D">1.25</p></div>
+<p style="font-size:24px;line-height:1.45;color:#4A5262">이번 슬롯은 B가 먼저 — 채널이 나빠도 오래 못 받은 UE에 기회가 간다.<br>받고 나면 평균이 올라 순위가 내려간다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">SCF FAPI (SCF 222) · 스케줄링 정책 · PF 지표는 구현 사항 · 표의 값은 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 50초) 이 모든 루프의 중심에 DU 스케줄러가 있습니다. 30 kHz면 0.5 ms마다 한 번씩 결정을 내립니다. 입력은 CSI, 버퍼 상태 보고, HARQ 상태, RLC 버퍼, 그리고 QoS입니다. 보통 재전송과 제어 메시지, 지연에 민감한 흐름을 먼저 챙기고, 나머지는 비례 공정 같은 지표로 줄을 세웁니다. 비례 공정 지표는 지금 낼 수 있는 속도를 그동안 받은 평균으로 나눈 값입니다. 오른쪽 예에서 셀 가장자리의 B는 지금 속도가 낮지만 오랫동안 적게 받아 지표가 가장 높고, 이번 슬롯을 먼저 받습니다. 받고 나면 평균이 올라 순위가 내려갑니다. 이렇게 처리량과 공정성을 함께 맞춥니다. 순위가 정해지면 PRB, MCS, 레이어, 빔, PDCCH 자리까지 배분하고, 그 결과를 FAPI 메시지로 물리 계층에 넘깁니다. 물리 계층은 CRC, UCI, 수신 데이터를 indication으로 돌려줍니다.</aside>
+</section>

@@ -1,0 +1,29 @@
+<section id="idle" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑥ 쉬기 · DRX에서 연결 해제까지</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">할 일이 없으면 재우고, 더 없으면 놓아 준다</h2>
+</div>
+<div style="position:relative;width:1664px;height:250px">
+<svg aria-label="DRX 타임라인: 주기마다 짧은 깨어 있는 구간이 있고, 두 번째 주기에 데이터가 오자 깨어 있는 구간이 inactivity 타이머만큼 늘어난다" style="position:absolute;left:0px;top:0px;width:1664px;height:250px" width="1664" height="250" viewBox="0 0 1664 250"><line x1="0" y1="160" x2="1664" y2="160" stroke="#5E6675" stroke-width="3"/><rect x="40" y="100" width="70" height="60" rx="6" fill="#255E9E"/><rect x="440" y="100" width="70" height="60" rx="6" fill="#255E9E"/><rect x="840" y="100" width="70" height="60" rx="6" fill="#255E9E"/><rect x="1240" y="100" width="70" height="60" rx="6" fill="#255E9E"/><rect x="510" y="100" width="190" height="60" rx="6" fill="#8DB8E8"/><rect x="460" y="60" width="16" height="40" rx="3" fill="#14213D"/><rect x="590" y="60" width="16" height="40" rx="3" fill="#14213D"/><line x1="40" y1="210" x2="440" y2="210" stroke="#5E6675" stroke-width="3"/><line x1="40" y1="198" x2="40" y2="222" stroke="#5E6675" stroke-width="3"/><line x1="440" y1="198" x2="440" y2="222" stroke="#5E6675" stroke-width="3"/></svg>
+<p style="position:absolute;left:10px;top:54px;width:220px;font-size:24px;font-weight:600;color:#255E9E">onDuration</p>
+<p style="position:absolute;left:410px;top:18px;width:300px;font-size:24px;font-weight:600;color:#14213D">데이터 · PDCCH</p>
+<p style="position:absolute;left:510px;top:168px;width:300px;font-size:24px;font-weight:600;color:#255E9E">inactivity 타이머로 연장</p>
+<p style="position:absolute;left:60px;top:218px;width:360px;font-size:24px;color:#4A5262">DRX 주기 (예: 160 ms)</p>
+<p style="position:absolute;left:780px;top:60px;width:420px;font-size:24px;color:#4A5262">나머지 시간 = 수신기 끔 → 배터리</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:8px">
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">DU</p><p style="font-size:24px;line-height:1.35;color:#4A5262">데이터가 한동안<br>없음을 감지</p></div>
+<p style="font-size:30px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">F1AP</p><p style="font-size:24px;line-height:1.35;color:#4A5262">UE Inactivity Notification</p></div>
+<p style="font-size:30px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">CU</p><p style="font-size:24px;line-height:1.35;color:#4A5262">RRCRelease 결정<br>IDLE 또는 INACTIVE</p></div>
+<p style="font-size:30px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">F1AP</p><p style="font-size:24px;line-height:1.35;color:#4A5262">UE Context Release Command</p></div>
+<p style="font-size:30px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">DU</p><p style="font-size:24px;line-height:1.35;color:#4A5262">RRCRelease 전달<br>C-RNTI · 자원 회수</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">INACTIVE</b> 컨텍스트를 CU에 남겨 둔 채 재운다 — 다시 보낼 때 랜덤 액세스 뒤 RRCResumeRequest로 5쪽 연결 과정을 대부분 건너뛴다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.321 5.7 (DRX) · TS 38.473 (UE Inactivity Notification · UE Context Release) · TS 38.331 RRCRelease · 주기는 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 12</p>
+<aside>(약 45초) 마지막 단계는 쉬기입니다. 연결된 상태에서도 UE가 매 슬롯 PDCCH를 볼 필요는 없습니다. DRX를 설정하면 UE는 주기마다 짧게 깨어 PDCCH를 보고, 나머지 시간에는 수신기를 꺼 배터리를 아낍니다. 깨어 있을 때 데이터가 오면 inactivity 타이머만큼 더 깨어 있습니다. 데이터가 한동안 아예 없으면 DU가 이를 감지해 F1AP로 CU에 알립니다. CU는 연결을 놓을지 정해서, UE를 IDLE로 보내거나 컨텍스트를 남겨 둔 채 INACTIVE로 재웁니다. CU가 UE Context Release Command에 RRCRelease를 담아 보내면 DU가 UE에 전달하고, C-RNTI와 무선 자원을 회수합니다. INACTIVE였다면 다음에 보낼 것이 생겼을 때 랜덤 액세스 뒤 RRCResumeRequest를 보내, 코어와 다시 컨텍스트를 맺는 연결 과정을 대부분 건너뜁니다.</aside>
+</section>
