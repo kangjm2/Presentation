@@ -1,0 +1,30 @@
+<section id="cell" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">수신 ② · 빔에서 셀로, 그리고 보고</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">빔 여러 개를 셀 값 하나로 묶고, 시간으로 거른다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:820px;height:520px">
+<svg aria-label="SSB 0부터 7까지 빔별 RSRP 막대. -100 dBm 문턱 점선 위의 상위 세 빔 SSB 2, 3, 4가 주황으로 강조된다" style="position:absolute;left:50px;top:0px;width:760px;height:420px" width="760" height="420" viewBox="0 0 760 420"><line x1="0" y1="181.4" x2="760" y2="181.4" stroke="#14213D" stroke-width="3" stroke-dasharray="10 8"/><rect x="30" y="227.1" width="62" height="182.9" rx="6" fill="#8DB8E8"/><rect x="122" y="170.0" width="62" height="240.0" rx="6" fill="#8DB8E8"/><rect x="214" y="124.3" width="62" height="285.7" rx="6" fill="#A84A16"/><rect x="306" y="101.4" width="62" height="308.6" rx="6" fill="#A84A16"/><rect x="398" y="147.1" width="62" height="262.9" rx="6" fill="#A84A16"/><rect x="490" y="204.3" width="62" height="205.7" rx="6" fill="#8DB8E8"/><rect x="582" y="272.9" width="62" height="137.1" rx="6" fill="#8DB8E8"/><rect x="674" y="330.0" width="62" height="80.0" rx="6" fill="#8DB8E8"/><line x1="0" y1="410" x2="760" y2="410" stroke="#5E6675" stroke-width="2"/></svg>
+<p style="position:absolute;left:69px;top:233.14285714285714px;width:84px;font-size:24px;font-size:22px;text-align:center;font-weight:700;color:#14213D">−104</p>
+<p style="position:absolute;left:161px;top:176.0px;width:84px;font-size:24px;font-size:22px;text-align:center;font-weight:700;color:#14213D">−99</p>
+<p style="position:absolute;left:253px;top:130.28571428571428px;width:84px;font-size:24px;font-size:22px;text-align:center;font-weight:700;color:#F5F3EE">−95</p>
+<p style="position:absolute;left:345px;top:107.42857142857143px;width:84px;font-size:24px;font-size:22px;text-align:center;font-weight:700;color:#F5F3EE">−93</p>
+<p style="position:absolute;left:437px;top:153.14285714285714px;width:84px;font-size:24px;font-size:22px;text-align:center;font-weight:700;color:#F5F3EE">−97</p>
+<p style="position:absolute;left:529px;top:210.28571428571428px;width:84px;font-size:24px;font-size:22px;text-align:center;font-weight:700;color:#14213D">−102</p>
+<p style="position:absolute;left:621px;top:278.85714285714283px;width:84px;font-size:24px;font-size:22px;text-align:center;font-weight:700;color:#14213D">−108</p>
+<p style="position:absolute;left:713px;top:336.0px;width:84px;font-size:24px;font-size:22px;text-align:center;font-weight:700;color:#14213D">−113</p>
+<p style="position:absolute;left:50px;top:428px;width:760px;font-size:24px;text-align:center;color:#5E6675">SSB 0 · 1 · 2 · 3 · 4 · 5 · 6 · 7  (빔별 L1 결과, dBm)</p>
+<p style="position:absolute;left:560px;top:185.42857142857142px;width:260px;font-size:24px;font-weight:600;text-align:right">문턱 −100 dBm</p>
+<p style="position:absolute;left:50px;top:472px;width:770px;font-size:24px;">셀 값 = 상위 3개 선형 평균 = <b style="color:#A84A16">−94.7 dBm</b> (최고 빔 −93)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:12px 18px"><b style="color:#255E9E">셀 값 만들기</b><br>기본 = 최고 빔 하나<br>설정 시 문턱을 넘는 상위 N개(2~16)의 선형 평균<br><span style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:22px;color:#5E6675">absThreshSS-BlocksConsolidation<br>nrofSS-BlocksToAverage</span></p>
+<div style="background:#14213D;border-radius:12px;padding:12px 18px"><p style="font-size:24px;font-weight:600;color:#F0A36B">L3 필터</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.5;color:#F5F3EE;white-space:nowrap">Fₙ = (1 − a)·Fₙ₋₁ + a·Mₙ</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">a = 1/2^(k/4) · 기본 k = 4 → a = ½</p></div>
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:12px 18px"><b style="color:#255E9E">보고 범위 · 1 dB 단위</b><br>L3 SS-RSRP −156 ~ −31 dBm<br>L1-RSRP(빔 관리) −140 ~ −44 dBm</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.331 5.5.3.2 (L3 필터) · 5.5.3.3 (셀 품질 도출) · TS 38.133 10.1.6 (보고 범위) · 빔 값은 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 12</p>
+<aside>(약 50초) 이제 빔별 값을 셀 하나의 값으로 묶습니다. 막대는 SSB 0번부터 7번까지 빔별 물리 계층 결과입니다. 기본 규칙은 가장 센 빔 하나를 셀 값으로 쓰는 것입니다. 기지국이 문턱과 평균할 빔 수를 설정하면, 문턱을 넘는 상위 N개 빔을 선형 평균합니다. 이 예에서 문턱 마이너스 100, N이 3이면 마이너스 93, 95, 97을 평균해 마이너스 94.7 dBm입니다. 그다음 RRC 계층 3 필터를 거칩니다. 새 측정값에 a, 이전 필터 값에 1 빼기 a를 곱해 더하는 지수 평균이고, a는 2의 k 나누기 4제곱 분의 1이며 기본 k가 4라서 절반입니다. 이렇게 거른 값을 1 dB 단위로 보고하고, 범위는 마이너스 156에서 마이너스 31 dBm입니다. 빔 관리용 L1-RSRP는 필터 없이 SSB 인덱스와 함께 마이너스 140에서 44 dBm 범위로 보고합니다.</aside>
+</section>
