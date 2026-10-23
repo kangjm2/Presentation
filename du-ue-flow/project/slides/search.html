@@ -1,0 +1,23 @@
+<section id="search" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">① 찾기 · SSB → MIB → SIB1</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">방송 두 개로 “어떻게 들어오는지”를 알린다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:12px">
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><p style="font-size:26px;font-weight:700;color:#255E9E">SSB</p><p style="font-size:24px;line-height:1.45;color:#4A5262">PSS · SSS로 동기 · PCI<br>빔별 RSRP 측정<br>가장 센 빔 선택</p></div>
+<p style="font-size:32px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><p style="font-size:26px;font-weight:700;color:#255E9E">MIB (PBCH)</p><p style="font-size:24px;line-height:1.45;color:#4A5262">SFN · 부반송파 간격<br>CORESET#0 위치<br>= SIB1 찾는 법</p></div>
+<p style="font-size:32px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><p style="font-size:26px;font-weight:700;color:#255E9E">PDCCH</p><p style="font-size:24px;line-height:1.45;color:#4A5262">CORESET#0에서<br>SI-RNTI로 된 DCI 1_0<br>→ SIB1 자원 위치</p></div>
+<p style="font-size:32px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1;background:#F7DDCB;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><p style="font-size:26px;font-weight:700;color:#A84A16">SIB1 (PDSCH)</p><p style="font-size:24px;line-height:1.45;color:#4A5262">RACH 설정 · TDD 패턴<br>접속 허용 · SSB 전력<br>다른 SIB 일정</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<p style="flex:1;font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:14px 20px"><b style="color:#F0A36B">MIB · SIB1은 DU가 만든다</b><br>F1 Setup 때 DU가 셀 정보와 함께 CU에 알려 준다<br>나머지 SIB(SIB2~)는 CU가 만들어 DU가 방송</p>
+<p style="flex:1;font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:14px 20px"><b>주기</b> MIB 80 ms · SIB1 160 ms (안에서 반복)<br><b>UE 상태</b> 아직 아무도 아니다 — RNTI도 컨텍스트도 없음<br><b>결과</b> 어느 빔으로, 언제 · 어디로 프리앰블을 보낼지 안다</p>
+</div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 20px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">SIB1에서 UE가 꺼내 쓰는 접속 설정 (예)</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#14213D">prach-ConfigurationIndex · ssb-perRACH-OccasionAndCB-PreamblesPerSSB<br>ra-ResponseWindow · preambleReceivedTargetPower · ss-PBCH-BlockPower</p></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.213 4.1 · 13 (CORESET#0 · Type0-PDCCH) · TS 38.331 MIB · SIB1 · TS 38.473 F1 Setup (gNB-DU System Information)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 45초) 첫 단계는 셀 찾기입니다. UE는 SSB의 PSS와 SSS로 시간과 주파수를 맞추고 셀 번호를 알아내며, 빔마다 RSRP를 재서 가장 센 빔을 고릅니다. 같은 SSB의 PBCH에 실린 MIB에는 시스템 프레임 번호와 부반송파 간격, 그리고 CORESET 0번의 위치가 있습니다. 이것이 SIB1을 찾는 지도입니다. UE는 CORESET 0에서 SI-RNTI로 된 DCI를 찾아 SIB1이 실린 자원을 알아내고, SIB1을 읽습니다. SIB1에는 랜덤 액세스 설정, TDD 패턴, 접속 허용 여부, SSB 전력 같은, 들어오는 데 필요한 정보가 있습니다. 재미있는 점은 MIB와 SIB1은 DU가 만든다는 것입니다. DU는 F1 Setup 때 셀 정보와 함께 이 둘을 CU에 알려 주고, 나머지 SIB는 CU가 만들어 DU에 내려보냅니다. 이 시점의 UE는 아직 셀에 아무 흔적이 없는 익명의 단말입니다.</aside>
+</section>
