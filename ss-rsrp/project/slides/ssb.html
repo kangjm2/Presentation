@@ -1,0 +1,33 @@
+<section id="ssb" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">송신 ① · 무엇을 재나: SSB</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">SS-RSRP는 SSS 127개 자원 요소의 평균 전력이다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:720px;height:470px">
+<svg aria-label="OFDM 심볼 네 개와 부반송파 240개로 된 SSB 격자. 심볼 0 가운데에 PSS, 심볼 1과 3 전체와 심볼 2 양 끝에 PBCH, 심볼 2 가운데에 강조된 SSS가 있다" style="position:absolute;left:0px;top:0px;width:720px;height:470px" width="720" height="470" viewBox="0 0 720 470"><rect x="64" y="109.6" width="142" height="203.2" fill="#D5E3F3" stroke="none" stroke-width="3"/><rect x="214" y="20.0" width="142" height="384.0" fill="#FBFAF7" stroke="none" stroke-width="3"/><rect x="514" y="20.0" width="142" height="384.0" fill="#FBFAF7" stroke="none" stroke-width="3"/><rect x="364" y="20.0" width="142" height="76.8" fill="#FBFAF7" stroke="none" stroke-width="3"/><rect x="364" y="327.2" width="142" height="76.8" fill="#FBFAF7" stroke="none" stroke-width="3"/><rect x="364" y="109.6" width="142" height="203.2" fill="#F7DDCB" stroke="#A84A16" stroke-width="3"/><rect x="60" y="20" width="600" height="384" fill="none" stroke="#5E6675" stroke-width="2"/></svg>
+<p style="position:absolute;left:64px;top:186px;width:142px;font-size:24px;line-height:1.3;text-align:center;color:#255E9E"><b>PSS</b><br>127</p>
+<p style="position:absolute;left:214px;top:186px;width:142px;font-size:24px;text-align:center;color:#4A5262"><b>PBCH</b></p>
+<p style="position:absolute;left:364px;top:186px;width:142px;font-size:24px;line-height:1.3;text-align:center;color:#A84A16"><b>SSS</b><br>127 RE</p>
+<p style="position:absolute;left:514px;top:186px;width:142px;font-size:24px;text-align:center;color:#4A5262"><b>PBCH</b></p>
+<p style="position:absolute;left:364px;top:34px;width:142px;font-size:24px;text-align:center;color:#4A5262">PBCH</p>
+<p style="position:absolute;left:364px;top:340px;width:142px;font-size:24px;text-align:center;color:#4A5262">PBCH</p>
+<p style="position:absolute;left:60px;top:412px;width:600px;font-size:24px;text-align:center;color:#5E6675">심볼 0 · 1 · 2 · 3 → 부반송파 240개 (20 RB)</p>
+<p style="position:absolute;left:0px;top:10px;width:56px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:372px;width:56px;font-size:24px;text-align:right;color:#5E6675">239</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="position:relative;width:420px;height:400px;align-self:center">
+<svg aria-label="한 점에서 부채꼴로 퍼지는 빔 여덟 개, 그중 네 번째가 강조된다" style="position:absolute;left:0px;top:0px;width:420px;height:400px" width="420" height="400" viewBox="0 0 420 400"><path d="M 40 200 Q 110 82 194 3 Q 138 104 40 200 Z" fill="#D5E3F3" stroke="#8DB8E8" stroke-width="2"/><path d="M 40 200 Q 138 104 240 50 Q 160 132 40 200 Z" fill="#D5E3F3" stroke="#8DB8E8" stroke-width="2"/><path d="M 40 200 Q 160 132 272 106 Q 173 165 40 200 Z" fill="#D5E3F3" stroke="#8DB8E8" stroke-width="2"/><path d="M 40 200 Q 173 166 288 170 Q 177 201 40 200 Z" fill="#F7DDCB" stroke="#A84A16" stroke-width="4"/><path d="M 40 200 Q 177 201 288 235 Q 173 237 40 200 Z" fill="#D5E3F3" stroke="#8DB8E8" stroke-width="2"/><path d="M 40 200 Q 172 237 270 298 Q 159 270 40 200 Z" fill="#D5E3F3" stroke="#8DB8E8" stroke-width="2"/><path d="M 40 200 Q 158 270 237 354 Q 136 298 40 200 Z" fill="#D5E3F3" stroke="#8DB8E8" stroke-width="2"/></svg>
+<p style="position:absolute;left:205px;top:-6px;width:120px;font-size:24px;font-weight:600;color:#255E9E">SSB 0</p>
+<p style="position:absolute;left:300px;top:128px;width:120px;font-size:24px;font-weight:700;color:#A84A16">SSB 3</p>
+<p style="position:absolute;left:205px;top:372px;width:120px;font-size:24px;font-weight:600;color:#255E9E">SSB 7</p>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:12px 18px"><b>버스트 = 빔 스윕</b> SSB마다 다른 빔<br>반 프레임(5 ms) 안에 FR1 최대 4 · 8개, FR2 64개<br>주기 5~160 ms (초기 접속은 20 ms 가정)</p>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:14px 20px">정의: SSS를 실은 RE 전력 [W]의 <b style="color:#F0A36B">선형 평균</b> · PBCH DMRS(설정 시 CSI-RS)도 더해 쓸 수 있다 · SSB 인덱스마다 따로 잰다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.211 7.4.3.1 (SSB 자원 배치) · TS 38.213 4.1 (SSB 후보 수) · TS 38.215 5.1.1 · PBCH DMRS는 PBCH 안에 4칸마다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 12</p>
+<aside>(약 50초) UE가 무엇을 재는지부터 보겠습니다. SSB는 OFDM 심볼 네 개, 부반송파 240개로 된 블록입니다. 첫 심볼 가운데에 PSS, 둘째와 넷째 심볼 전체와 셋째 심볼 양 끝에 방송 채널 PBCH가 있고, 셋째 심볼 가운데 127개 부반송파에 SSS가 있습니다. SS-RSRP는 바로 이 SSS를 실은 자원 요소들의 전력을 와트 단위로 선형 평균한 값입니다. PBCH의 복조 기준 신호, 설정되면 CSI-RS까지 더해 쓸 수도 있습니다. 그리고 SSB는 한 번만 나가지 않습니다. 반 프레임, 5 ms 안에 FR1에서는 최대 4개나 8개, FR2에서는 64개까지 보내고, SSB마다 다른 빔을 씁니다. 이것이 빔 스윕입니다. 그래서 UE는 SSB 인덱스마다, 즉 빔마다 따로 RSRP를 잽니다.</aside>
+</section>

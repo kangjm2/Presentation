@@ -1,0 +1,60 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-23T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "빔에서 SS-RSRP까지",
+  "order": [
+    "cover",
+    "map",
+    "ssb",
+    "array",
+    "weight",
+    "oran",
+    "eirp",
+    "channel",
+    "measure",
+    "cell",
+    "budget",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "SS-RSRP가 만들어지는 여섯 단계 지도",
+      "start": "cover"
+    },
+    "tx": {
+      "description": "송신: SSB, 안테나 배열, 빔 가중치, O-RAN 빔 지정, 전력과 EIRP",
+      "start": "ssb"
+    },
+    "air": {
+      "description": "채널: 경로손실, 섀도잉, 다중 경로와 빔 방향",
+      "start": "channel"
+    },
+    "rx": {
+      "description": "수신: UE 측정, 빔 통합, L3 필터, 보고",
+      "start": "measure"
+    },
+    "wrap": {
+      "description": "링크 버짓 종합과 정리",
+      "start": "budget"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

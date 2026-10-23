@@ -1,0 +1,24 @@
+<section id="eirp" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">송신 ⑤ · RE 하나에 실리는 전력</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">총 출력을 RE로 나누고, 안테나 이득을 더하면 EIRP</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="width:1060px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:10px;padding:10px 18px"><p style="width:330px;font-size:24px;font-weight:600;color:#14213D">총 송신 출력</p><p style="width:190px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#14213D;text-align:right">53 dBm</p><p style="flex:1;font-size:24px;color:#4A5262">200 W · 100 MHz · 30 kHz (예시)</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:10px;padding:10px 18px"><p style="width:330px;font-size:24px;font-weight:600;color:#14213D">÷ 부반송파 3276개</p><p style="width:190px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#14213D;text-align:right">−35.2 dB</p><p style="flex:1;font-size:24px;color:#4A5262">273 RB × 12 · 같은 PSD 가정</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#D5E3F3;border-radius:10px;padding:10px 18px"><p style="width:330px;font-size:24px;font-weight:600;color:#14213D">= RE당 EPRE</p><p style="width:190px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#255E9E;text-align:right">17.8 dBm</p><p style="flex:1;font-size:24px;color:#4A5262">SIB1 ss-PBCH-BlockPower로 알림</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:10px;padding:10px 18px"><p style="width:330px;font-size:24px;font-weight:600;color:#14213D">+ 소자 이득</p><p style="width:190px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#14213D;text-align:right">+8 dBi</p><p style="flex:1;font-size:24px;color:#4A5262">소자 패턴 최대 방향</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#FBFAF7;border-radius:10px;padding:10px 18px"><p style="width:330px;font-size:24px;font-weight:600;color:#14213D">+ 배열 이득</p><p style="width:190px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#14213D;text-align:right">+18 dB</p><p style="flex:1;font-size:24px;color:#4A5262">10·log₁₀ 64 (가로 8 × 세로 8)</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px;background:#14213D;border-radius:10px;padding:10px 18px"><p style="width:330px;font-size:24px;font-weight:600;color:#F5F3EE">= 빔 최대 방향 RE당 EIRP</p><p style="width:190px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#F0A36B;text-align:right">43.8 dBm</p><p style="flex:1;font-size:24px;color:#C9D3E3">총 EIRP로는 약 79 dBm</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;line-height:1.45;background:#F7DDCB;border-radius:12px;padding:14px 20px"><b>배열 이득은 전력을 나눠도 남는다</b><br>소자 N개에 P/N씩 나눠도<br>빔 방향에서 전계가 N배로 더해져<br>전력은 N·P</p>
+<p style="font-size:24px;line-height:1.45;background:#FBFAF7;border-radius:12px;padding:14px 20px"><b>UE의 경로손실 추정</b><br>PL = ss-PBCH-BlockPower − RSRP<br>→ 빔 · 안테나 이득이 섞인 “빔 경로손실”</p>
+<p style="font-size:24px;line-height:1.45;color:#5E6675">한 편파에 전체 전력을 싣는 단순화<br>포트 수 · SSS 전력 부스팅은 장비 설정에 따름</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.331 ss-PBCH-BlockPower (SIB1, SSS EPRE, −60~50 dBm) · TS 38.213 7.1.1 (경로손실) · 수치는 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 12</p>
+<aside>(약 50초) 이제 전력입니다. RU 총 출력이 200 W, 53 dBm이고 100 MHz 대역을 30 kHz 부반송파로 쓴다고 하면, 부반송파가 3276개이므로 RE 하나에는 17.8 dBm이 실립니다. 이것이 SSS의 EPRE이고, 기지국은 이 값을 SIB1의 ss-PBCH-BlockPower로 UE에게 알려 줍니다. 여기에 소자 이득 8 dBi와 배열 이득 18 dB를 더하면, 빔 최대 방향으로 RE당 EIRP가 43.8 dBm이 됩니다. 배열 이득이 왜 공짜처럼 보이냐면, 전력을 64개 소자에 나눠도 빔 방향에서는 전계가 64배로 더해져서 전력이 64배가 되기 때문입니다. 그 대신 다른 방향으로는 덜 갑니다. 재미있는 점은 UE의 경로손실 추정입니다. UE는 알려 준 EPRE에서 자기가 잰 RSRP를 빼서 경로손실로 쓰는데, RSRP에 빔 이득이 들어 있으므로 이것은 순수한 전파 손실이 아니라 빔 이득이 섞인 값입니다.</aside>
+</section>

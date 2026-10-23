@@ -1,0 +1,28 @@
+<section id="channel" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">공간 · 채널</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">빔 이득은 경로가 떠나는 방향에서 읽는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:920px;height:520px">
+<svg aria-label="위에서 본 그림: 왼쪽 RU에서 오른쪽 UE로 가는 직선 경로는 가운데 건물에 막힌다. 주황 실선 경로 1은 위쪽 건물에 반사되어 UE로 가고, 파란 점선 경로 2는 건물 모서리를 돌아 간다. RU의 빔은 경로 1이 떠나는 방향을 향한다" style="position:absolute;left:0px;top:0px;width:920px;height:440px" width="920" height="440" viewBox="0 0 920 440"><path d="M 70 260 Q 328 147 523 134 Q 350 223 70 260 Z" fill="#F7DDCB" fill-opacity="0.7" stroke="#F0A36B" stroke-width="3"/><rect x="380" y="160" width="140" height="200" fill="#C9D3E3"/><rect x="540" y="40" width="240" height="72" fill="#C9D3E3"/><line x1="70" y1="260" x2="860" y2="270" stroke="#5E6675" stroke-width="3" stroke-dasharray="4 8"/><line x1="432" y1="248" x2="468" y2="284" stroke="#A84A16" stroke-width="5"/><line x1="432" y1="284" x2="468" y2="248" stroke="#A84A16" stroke-width="5"/><polyline points="70,260 600,112 860,270" fill="none" stroke="#A84A16" stroke-width="5"/><polyline points="70,260 520,360 860,270" fill="none" stroke="#255E9E" stroke-width="4" stroke-dasharray="12 8"/><circle cx="70" cy="260" r="14" fill="#14213D"/><circle cx="860" cy="270" r="14" fill="#255E9E"/></svg>
+<p style="position:absolute;left:20px;top:290px;width:120px;font-size:24px;font-weight:700">RU</p>
+<p style="position:absolute;left:820px;top:300px;width:100px;font-size:24px;font-weight:700;color:#255E9E">UE</p>
+<p style="position:absolute;left:390px;top:170px;width:130px;font-size:24px;text-align:center;color:#4A5262">건물</p>
+<p style="position:absolute;left:560px;top:56px;width:220px;font-size:24px;text-align:center;color:#4A5262">건물 (반사)</p>
+<p style="position:absolute;left:160px;top:120px;width:290px;font-size:24px;"><b style="color:#A84A16">경로 1</b> 반사 · 강함</p>
+<p style="position:absolute;left:160px;top:360px;width:340px;font-size:24px;"><b style="color:#255E9E">경로 2</b> 모서리 회절</p>
+<p style="position:absolute;left:580px;top:222px;width:200px;font-size:24px;color:#5E6675">직접 경로 막힘</p>
+<p style="position:absolute;left:0px;top:450px;width:920px;font-size:24px;line-height:1.4">SSB 스윕으로 UE가 고른 빔 = <b>경로 1 방향</b> (+16°)<br>직선 방향으로 쏘면 빔폭 밖이라 10 dB 넘게 손해</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#14213D;border-radius:14px;padding:14px 20px"><p style="font-size:24px;color:#C9D3E3">경로손실 (UMa NLOS)</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#F5F3EE;white-space:nowrap">13.54 + 39.08·log₁₀d<br>+ 20·log₁₀f − 0.6(h−1.5)</p><p style="font-size:24px;color:#F0A36B">d 500 m · 3.5 GHz → 약 130 dB</p></div>
+<p style="font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:10px 16px"><b>섀도잉</b> 로그 정규 σ = 6 dB<br>건물 · 지형에 따른 느린 변화</p>
+<p style="font-size:24px;line-height:1.4;background:#FBFAF7;border-radius:10px;padding:10px 16px"><b>다중 경로</b> 경로마다 세기 · 지연 · 출발각 · 도착각<br>h = Σ αₚ · G_UE(도착각) · a(출발각)ᵀ</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;font-weight:700;background:#F7DDCB;border-radius:10px;padding:10px 16px">수신 전력 ∝ | h · w |²</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TR 38.901 Table 7.4.1-1 (UMa NLOS, h = UE 높이) · Table 7.5-6 (σSF) · 7.5 (빠른 페이딩 모델) · 그림은 개념도</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 12</p>
+<aside>(약 55초) 이제 채널입니다. 그림은 위에서 본 모습입니다. RU에서 UE로 가는 직선 경로는 건물에 막혀 있고, 실제 에너지는 위쪽 건물에 반사된 경로 1과, 모서리를 돌아가는 경로 2로 갑니다. 채널은 이런 경로들의 합이고, 경로마다 세기와 지연, RU를 떠나는 출발각, UE에 닿는 도착각이 있습니다. 그래서 빔 이득은 UE가 있는 방향이 아니라 각 경로가 떠나는 방향에서 읽어야 합니다. 이 예에서 직선 방향으로 빔을 쏘면 경로 1이 빔폭 밖이라 10 dB 넘게 손해를 봅니다. SSB 빔 스윕을 하면 UE는 경로 1 방향 빔에서 가장 센 RSRP를 보게 되고, 그 빔이 선택됩니다. 크기로 보면 경로손실이 가장 큽니다. 38.901의 도심 매크로 NLOS 식으로 3.5 GHz, 500 m면 약 130 dB입니다. 여기에 표준편차 6 dB의 섀도잉이 붙습니다. 최종 수신 전력은 채널 h와 가중치 w의 곱의 크기 제곱에 비례합니다.</aside>
+</section>
