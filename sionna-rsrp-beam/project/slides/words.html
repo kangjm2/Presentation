@@ -15,6 +15,6 @@
 <div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#5E6675">“sub-array weight”가 다른 뜻이면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">부배열 <b>안쪽</b> 소자 가중치(etilt가 정함)라면<br>S_k를 만드는 재료 — 결론은 같다</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">발표자 정리 · 벤더 · 팀마다 이름이 다를 수 있으니 “숫자 64개(가중치)”인지 “3D 패턴(빔)”인지로 구분해 확인</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 18</p>
 <aside>(약 55초) 여기서 헷갈리는 이유를 먼저 풀겠습니다. common beam이라는 말 안에 서로 다른 물건 세 가지가 섞여 있습니다. 첫째, 부배열 패턴 S_k입니다. 부배열 하나가 방향마다 얼마나 세게, 어떤 위상으로 내보내는지를 담은 3D 패턴이고, 64개가 etilt마다 한 벌씩 있습니다. sub-array gain이라고 부르는 것이 이것입니다. 둘째, 부배열 가중치 w_k입니다. 부배열마다 곱하는 복소수 64개로, 이것이 곧 common beam weight입니다. SSB 빔마다 한 벌이 있습니다. 셋째, 공통 빔 F_b입니다. 앞의 둘을 곱해서 더한 결과, 즉 실제로 하늘에 그려지는 빔 모양입니다. 이것은 숫자가 아니라 3D 패턴 하나입니다. Sionna에 넣어야 하는 것은 세 번째, 공통 빔 패턴입니다. common beam weight를 만든다는 말은 원하는 빔 모양이 나오도록 S_k 위에서 w를 고르는 설계를 뜻하고, 보통 벤더가 이미 해 둡니다. 우리는 설계가 아니라 계산만 하면 됩니다. 받은 w와 S_k로 F_b를 만들어 Sionna에 넣습니다. 만약 sub-array weight가 부배열 안쪽 소자의 가중치를 뜻한다면, 그것은 S_k를 만드는 재료일 뿐이고 결론은 같습니다.</aside>
 </section>
