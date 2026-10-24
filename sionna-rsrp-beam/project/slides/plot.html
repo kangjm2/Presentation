@@ -20,12 +20,12 @@
 <p style="position:absolute;left:813px;top:14px;width:200px;font-size:24px;text-align:center;font-weight:600;color:#A84A16">사이트 근처</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:10px">
-<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">B · 실제 (w × 부배열, etilt 6°)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최대 18.7 dBi @ 6° · 부엽 낮음</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">B · 실제 (w 6° × 부배열 6°)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최대 18.7 dBi @ 6° · 부엽 낮음</p></div>
 <div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">A · 이상적 배열 (TXRU = 점)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최대 13.9 dBi (−4.8 dB)<br>위 21.5° 12.7 dBi · 아래 35° 10.5 dBi<br>= 2.1λ 간격의 그레이팅 로브</p></div>
-<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">C · etilt 12° 패턴에 6°용 w</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최대 −0.6 dB뿐이지만<br>아래 35°: −19.5 → +5.0 dBi</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">C · 짝 어긋남: 부배열 12° × w 6°</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최대 −0.6 dB뿐이지만<br>아래 35°: −19.5 → +5.0 dBi</p></div>
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">세로 한 열(12소자) 계산 예: 소자 TR 38.901(8 dBi, 65°) · 소자 간격 0.7λ · 부배열 3소자 · 디지털 틸트 6° · ‖w‖ = 1 · 실제 장비 값 아님</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 18</p>
-<aside>(약 55초) 숫자로 보겠습니다. 세로 한 열, 소자 12개로 계산한 예입니다. 주황 실선 B가 실제처럼 만든 빔으로, 디지털 가중치를 etilt 6도의 부배열 패턴에 곱했습니다. 6도 아래에서 18.7 dBi이고 부엽이 낮습니다. 파란 점선 A는 같은 가중치를 이상적 배열, 즉 TXRU 하나를 점 소자 하나로 본 모델에 곱한 것입니다. 부배열 3소자의 이득이 빠져 최대가 4.8 dB 낮고, TXRU 간격이 2.1 파장이라 위 21.5도와 아래 35도에 큰 그레이팅 로브가 생깁니다. 실제로는 부배열 패턴이 바로 그 방향에 영점을 만들어 이 로브를 지웁니다. 회색 C는 RET가 12도인데 6도용 가중치를 쓴 경우입니다. 최대는 0.6 dB밖에 안 줄지만, 사이트 근처인 아래 35도에서 이득이 마이너스 19.5에서 플러스 5 dBi로 24 dB나 올라갑니다. 그래서 etilt별 부배열 패턴이 필요하고, 오차는 사이트 근처와 높은 층에서 가장 크게 드러납니다.</aside>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 22</p>
+<aside>(약 55초) 숫자로 보겠습니다. 세로 한 열, 소자 12개로 계산한 예입니다. 주황 실선 B가 실제처럼 만든 빔으로, 6도용 디지털 가중치를, 안쪽 tilt가 6도인 부배열 패턴에 곱했습니다. 6도 아래에서 18.7 dBi이고 부엽이 낮습니다. 파란 점선 A는 같은 가중치를 이상적 배열, 즉 TXRU 하나를 점 소자 하나로 본 모델에 곱한 것입니다. 부배열 3소자의 이득이 빠져 최대가 4.8 dB 낮고, TXRU 간격이 2.1 파장이라 위 21.5도와 아래 35도에 큰 그레이팅 로브가 생깁니다. 실제로는 부배열 패턴이 바로 그 방향에 영점을 만들어 이 로브를 지웁니다. 회색 C는 부배열 패턴은 12도 기준인데 가중치는 6도용인, 짝이 어긋난 경우입니다. RET만 바뀌었거나, 부배열 고정 tilt를 잘못 가정하면 이렇게 됩니다. 최대는 0.6 dB밖에 안 줄지만, 사이트 근처인 아래 35도에서 이득이 마이너스 19.5에서 플러스 5 dBi로 24 dB나 올라갑니다. 그래서 가중치와 짝이 맞는 부배열 패턴이 필요하고, 오차는 사이트 근처와 높은 층에서 가장 크게 드러납니다.</aside>
 </section>

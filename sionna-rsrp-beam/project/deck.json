@@ -24,7 +24,11 @@
     "code",
     "power",
     "measure",
-    "summary"
+    "summary",
+    "names",
+    "factor",
+    "geometry",
+    "files"
   ],
   "sections": {
     "intro": {
@@ -42,6 +46,10 @@
     "compare": {
       "description": "실측 정렬과 오차 진단, 정리",
       "start": "measure"
+    },
+    "appendix": {
+      "description": "부록: 가중치 파일로 배열 읽기 — 용어 대응, 패턴 곱셈, 배열 기하와 포트 순서, 파일별로 채워지는 것",
+      "start": "names"
     }
   },
   "faces": {

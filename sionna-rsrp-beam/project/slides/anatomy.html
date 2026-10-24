@@ -11,14 +11,14 @@
 <div style="flex:1;display:flex;flex-direction:column;gap:6px">
 <div style="background:#FBFAF7;border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:700;color:#14213D">소자 192개</p><p style="font-size:24px;line-height:1.35;color:#4A5262">세로 12 · 가로 8 · ±45° 교차 편파</p></div>
 <p style="font-size:26px;color:#A84A16;text-align:center">↓</p>
-<div style="background:#F7DDCB;border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:700;color:#A84A16">부배열 = 세로 3소자 · 한 편파</p><p style="font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">아날로그 가중치 a(etilt)</b> — 안에서 고정, etilt가 정한다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:700;color:#A84A16">부배열 = 세로 3소자 · 한 편파</p><p style="font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">아날로그 가중치 a</b> — 안에서 고정 (공장 preset 또는 RET)<br>→ 부배열 패턴(sub-array gain) 안에 들어 있다</p></div>
 <p style="font-size:26px;color:#A84A16;text-align:center">↓</p>
 <div style="background:#FBFAF7;border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:700;color:#14213D">TXRU 64개 (4 × 8 × 2)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">포트마다 송수신기 하나 = 디지털로 다룰 수 있는 단위</p></div>
 <p style="font-size:26px;color:#A84A16;text-align:center">↓</p>
-<div style="background:#D5E3F3;border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:700;color:#255E9E">디지털 가중치 w (64개)</p><p style="font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#255E9E">common beam weight</b> — SSB 빔(인덱스)마다 한 벌</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;gap:2px"><p style="font-size:26px;font-weight:700;color:#255E9E">디지털 가중치 w (64개)</p><p style="font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#255E9E">common beam weight</b> — SSB 빔(인덱스)마다 한 벌<br>AAU에서는 etilt 설정마다 다른 벌인 경우가 많다</p></div>
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">구성은 대표 예시 (실제 소자 수 · 부배열 크기 · 간격은 장비 사양 확인) · TR 38.901 7.3의 부배열(TXRU 가상화) 모델과 같은 구조</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 18</p>
-<aside>(약 50초) 64T64R 장비를 해부해 보겠습니다. 예로 세로 12, 가로 8, 편파 2개, 모두 192개 소자를 잡았습니다. 송수신기를 소자마다 달면 비싸므로 세로로 3개씩 같은 편파 소자를 묶어 부배열 하나를 만들고, 부배열마다 송수신기, TXRU를 하나씩 답니다. 그래서 세로 4 곱하기 가로 8 곱하기 편파 2, 64개 포트가 됩니다. 여기서 가중치가 두 단계로 나옵니다. 부배열 안쪽은 아날로그 가중치로 고정되어 있고, 그 값을 etilt, 전기적 틸트가 정합니다. 부배열 바깥, 즉 64개 포트에는 디지털 가중치를 곱하는데, SSB 방송 빔용으로 준비된 것이 바로 common beam weight입니다. SSB 빔 인덱스마다 64개짜리 한 벌이 있습니다.</aside>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 22</p>
+<aside>(약 50초) 64T64R 장비를 해부해 보겠습니다. 예로 세로 12, 가로 8, 편파 2개, 모두 192개 소자를 잡았습니다. 송수신기를 소자마다 달면 비싸므로 세로로 3개씩 같은 편파 소자를 묶어 부배열 하나를 만들고, 부배열마다 송수신기, TXRU를 하나씩 답니다. 그래서 세로 4 곱하기 가로 8 곱하기 편파 2, 64개 포트가 됩니다. 여기서 가중치가 두 단계로 나옵니다. 부배열 안쪽은 아날로그 가중치로 고정되어 있습니다. 공장에서 정해 둔 고정 tilt인 경우가 많고, RET로 바꾸는 장비도 있습니다. 이 값은 부배열 패턴, 즉 sub-array gain 안에 이미 들어 있습니다. 부배열 바깥, 즉 64개 포트에는 디지털 가중치를 곱하는데, SSB 방송 빔용으로 준비된 것이 바로 common beam weight입니다. SSB 빔 인덱스마다 64개짜리 한 벌이 있습니다. 많은 AAU에서는 운용 중에 바꾸는 etilt 설정이 이 디지털 가중치를 바꾸는 방식이라, etilt 설정마다 가중치가 따로 있습니다.</aside>
 </section>

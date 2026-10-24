@@ -13,6 +13,6 @@
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">L1 · L3란?</b> 통신 소프트웨어의 층 — L1 물리 계층(전파를 직접 다룸, ms 단위) · L3 RRC(연결을 관리, 수백 ms 단위). 위층일수록 길게 보고 천천히 판단한다</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.215 5.1.1 · TS 38.331 5.5.3.2 (L3 필터: 기본 k = 4 → a = ½, dB 값에 적용) · 5.5.3.3 · TS 38.133 10.1.6</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 22</p>
 <aside>(약 55초) 이제 측정 쪽 용어입니다. SS-RSRP는 여섯 번 다듬어진 숫자라고 보면 쉽습니다. 첫째, 단말이 SSS 127칸 각각에서 받은 전력을 잽니다. 둘째, 이것을 평균하는데, dB 숫자를 그대로 평균하지 않고 와트로 바꿔 평균합니다. 이것이 선형 평균입니다. 예를 들어 마이너스 90과 마이너스 100 dBm을 와트로 평균하면 마이너스 92.6 dBm입니다. dB로 평균한 마이너스 95는 약한 칸에 끌려 낮게 나옵니다. 셋째, 물리 계층, L1이 여러 번 잰 값을 시간으로 평균합니다. 넷째, 빔별 값을 셀 값 하나로 묶습니다. 다섯째, RRC 계층, L3가 필터를 거는데, 새 값 절반과 이전 값 절반을 섞는 방식이라 갑자기 튀는 값이 눌립니다. 마이너스 90, 100, 90이 들어오면 90, 95, 92.5가 됩니다. 마지막으로 1 dB 폭의 구간 번호로 기지국에 보고합니다. L1, L3는 통신 소프트웨어의 층 번호로, 위층일수록 길게 보고 천천히 판단합니다.</aside>
 </section>

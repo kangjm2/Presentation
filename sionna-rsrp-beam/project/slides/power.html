@@ -20,6 +20,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.331 ss-PBCH-BlockPower (SSS EPRE) · Sionna RT 문서: radio map path gain = 경로 계수 크기 제곱의 합 · 수치는 예시</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">16 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">16 / 22</p>
 <aside>(약 50초) 전력입니다. 실측 SS-RSRP는 RE 하나의 전력이므로 Sionna에도 RE 하나의 전력을 넣어야 합니다. 64 포트 합계 출력이 200 W, 53 dBm이고 100 MHz를 30 kHz로 쓰면 부반송파가 3276개이므로 RE당 17.8 dBm입니다. 이 값을 송신기의 power_dbm에 넣습니다. 포트 하나로 보면 마이너스 0.3 dBm입니다. 가중치 크기를 1로 맞춰 공통 빔 패턴을 만들었으면 배열 이득은 이미 패턴 안에 있으므로 따로 더하지 않습니다. 여기에 경로 이득, UE 안테나 이득, 몸 손실을 더하면 빔 b의 시뮬레이션 RSRP입니다. 오른쪽은 흔히 틀리는 곳입니다. 네트워크의 ss-PBCH-BlockPower가 포트당 값인지 합계인지, SSB 전력 부스팅이 있는지 확인해야 합니다. 그리고 radio map의 path gain은 경로 전력을 위상 없이 더한 값이라 빠른 페이딩이 빠진 국소 평균이라는 점을 기억하세요.</aside>
 </section>

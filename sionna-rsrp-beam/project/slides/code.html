@@ -14,6 +14,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">의사 코드 · 인자 이름과 기본값은 Sionna RT 버전마다 다름 (power_dbm · orientation · rss) · 회절 옵션은 문서 확인</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 22</p>
 <aside>(약 50초) R1을 코드로 쓰면 세 덩어리입니다. 첫째, 빔 b의 공통 빔 패턴을 θ와 φ 성분을 돌려주는 함수로 만들어 이름을 붙여 등록하고, 송신 배열을 그 패턴의 소자 하나로 정합니다. 수신은 일단 등방성으로 두고 UE 이득은 나중에 더합니다. 둘째, 송신기를 실제 높이에 놓고 방위각과 기계 틸트를 orientation으로 주고, 전력은 RE 하나의 전력으로 넣습니다. 이 부분은 다음 장에서 자세히 봅니다. 셋째, radio map을 계산하고 rss를 dBm으로 바꾼 뒤 UE 이득을 더하면 빔 b의 RSRP 지도가 됩니다. 이것을 빔 개수만큼 반복합니다. 송신 배열은 장면 전체에 공통이므로, 사이트마다 e-tilt가 다르면 같은 e-tilt인 사이트끼리 묶어 따로 계산합니다. orientation 각의 순서와 틸트 부호는 버전과 좌표계에 따라 헷갈리기 쉬우니, 패턴 최대 방향을 지나는 테스트 지점 하나로 먼저 확인하는 것을 권합니다. 인자 이름은 사용하는 Sionna 버전의 문서를 확인하세요.</aside>
 </section>
