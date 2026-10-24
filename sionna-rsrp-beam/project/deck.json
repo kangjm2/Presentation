@@ -9,6 +9,8 @@
   "order": [
     "cover",
     "goal",
+    "terms1",
+    "terms2",
     "anatomy",
     "formula",
     "verdict",
@@ -23,7 +25,7 @@
   ],
   "sections": {
     "intro": {
-      "description": "무엇을 비교하는가: 실측과 시뮬레이션의 두 계산 사슬",
+      "description": "무엇을 비교하는가: 실측과 시뮬레이션의 두 계산 사슬, 용어 풀이",
       "start": "cover"
     },
     "beam": {

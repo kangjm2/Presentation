@@ -11,6 +11,7 @@ RU의 안테나 배열과 빔 가중치, 채널을 거쳐 UE가 SS-RSRP를 측�
 - 편집용 Slides 덱: https://claude.ai/artifact/HW3wDX1a2D1htpzCuPjWFC
 - 두 링크 모두 비공개 — 다른 사람에게 보여주려면 페이지의 Share 메뉴에서 공유
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
+- 용어 풀이: [`../sionna-rsrp-beam/glossary.md`](../sionna-rsrp-beam/glossary.md) — EPRE, 선형 평균, L3 필터, 빔 통합 등을 처음 보는 사람도 읽을 수 있게 정리
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py ss-rsrp`로 뷰어를 다시 만듭니다.
 - 관련 덱: [`m-plane-yang`](../m-plane-yang/) (beamId · o-ran-beamforming) · [`sionna-rt-antenna`](../sionna-rt-antenna/) (배열 · 패턴 파라미터) · [`propagation-models`](../propagation-models/) (경로손실) · [`ue-kpi`](../ue-kpi/)
 

@@ -19,6 +19,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">구성은 대표 예시 (실제 소자 수 · 부배열 크기 · 간격은 장비 사양 확인) · TR 38.901 7.3의 부배열(TXRU 가상화) 모델과 같은 구조</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 13</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 15</p>
 <aside>(약 50초) 64T64R 장비를 해부해 보겠습니다. 예로 세로 12, 가로 8, 편파 2개, 모두 192개 소자를 잡았습니다. 송수신기를 소자마다 달면 비싸므로 세로로 3개씩 같은 편파 소자를 묶어 부배열 하나를 만들고, 부배열마다 송수신기, TXRU를 하나씩 답니다. 그래서 세로 4 곱하기 가로 8 곱하기 편파 2, 64개 포트가 됩니다. 여기서 가중치가 두 단계로 나옵니다. 부배열 안쪽은 아날로그 가중치로 고정되어 있고, 그 값을 etilt, 전기적 틸트가 정합니다. 부배열 바깥, 즉 64개 포트에는 디지털 가중치를 곱하는데, SSB 방송 빔용으로 준비된 것이 바로 common beam weight입니다. SSB 빔 인덱스마다 64개짜리 한 벌이 있습니다.</aside>
 </section>
