@@ -13,6 +13,7 @@
     "terms2",
     "anatomy",
     "formula",
+    "words",
     "verdict",
     "plot",
     "data",
@@ -29,11 +30,11 @@
       "start": "cover"
     },
     "beam": {
-      "description": "64T64R 구조, 빔 식, common beam weight와 부배열 패턴의 관계, 숫자 예",
+      "description": "64T64R 구조, 빔 식, 용어 대응(부배열 패턴 · 가중치 · 공통 빔), Sionna에 넣을 것, 숫자 예",
       "start": "anatomy"
     },
     "input": {
-      "description": "벤더 데이터, 합성 패턴, Sionna 입력 경로, 코드, 전력",
+      "description": "벤더 데이터, 공통 빔 패턴, Sionna 입력 경로, 코드, 전력",
       "start": "data"
     },
     "compare": {
