@@ -1,0 +1,19 @@
+<section id="code" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">입력 ④ · R1 코드 뼈대</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">빔마다 패턴을 바꿔 지도를 그린다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="width:1060px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8"># 1. 빔 b의 합성 패턴을 (C_θ, C_φ) 함수로 등록</span><br>register_antenna_pattern(f"ssb_{b}", make_factory(F[b]))<br>scene.tx_array = PlanarArray(num_rows=1, num_cols=1,<br>&#160;&#160;&#160;&#160;pattern=f"ssb_{b}")<br>scene.rx_array = PlanarArray(1, 1, pattern="iso",<br>&#160;&#160;&#160;&#160;polarization="V")<br><span style="color:#8DB8E8"># 2. 사이트: 높이 · 방위각 · 기계 틸트 · RE당 전력</span><br>tx = Transmitter("s1", position=[x, y, h],<br>&#160;&#160;&#160;&#160;orientation=[az, tilt_m, 0], power_dbm=P_RE)<br><span style="color:#8DB8E8"># 3. 지도 (경로 전력은 비결맞음 합)</span><br>rm = RadioMapSolver()(scene, cell_size=[5, 5],<br>&#160;&#160;&#160;&#160;max_depth=5, samples_per_tx=10**7)<br>rsrp[b] = 10*log10(rm.rss) + 30 + G_ue_dB</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">make_factory</p><p style="font-size:24px;line-height:1.4;color:#4A5262">AntennaPattern을 상속해<br>patterns에 보간 함수 하나<br>(θ, φ) → (C_θ, C_φ)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">방향 부호</p><p style="font-size:24px;line-height:1.4;color:#4A5262">orientation 각의 순서 · 틸트 부호를<br>테스트 지점 하나로 먼저 확인</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">반복</p><p style="font-size:24px;line-height:1.4;color:#4A5262">b = 0 … 7 반복<br>사이트가 여럿이면 송신기를 같이 넣고 빔 번호만 바꾼다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">의사 코드 · 인자 이름과 기본값은 Sionna RT 버전마다 다름 (power_dbm · orientation · rss) · 회절 옵션은 문서 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 13</p>
+<aside>(약 50초) R1을 코드로 쓰면 세 덩어리입니다. 첫째, 빔 b의 합성 패턴을 θ와 φ 성분을 돌려주는 함수로 만들어 이름을 붙여 등록하고, 송신 배열을 그 패턴의 소자 하나로 정합니다. 수신은 일단 등방성으로 두고 UE 이득은 나중에 더합니다. 둘째, 송신기를 실제 높이에 놓고 방위각과 기계 틸트를 orientation으로 주고, 전력은 RE 하나의 전력으로 넣습니다. 이 부분은 다음 장에서 자세히 봅니다. 셋째, radio map을 계산하고 rss를 dBm으로 바꾼 뒤 UE 이득을 더하면 빔 b의 RSRP 지도가 됩니다. 이것을 빔 개수만큼 반복합니다. orientation 각의 순서와 틸트 부호는 버전과 좌표계에 따라 헷갈리기 쉬우니, 패턴 최대 방향을 지나는 테스트 지점 하나로 먼저 확인하는 것을 권합니다. 인자 이름은 사용하는 Sionna 버전의 문서를 확인하세요.</aside>
+</section>

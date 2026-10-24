@@ -1,0 +1,57 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-24T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "Sionna RSRP와 실측 SS-RSRP",
+  "order": [
+    "cover",
+    "goal",
+    "anatomy",
+    "formula",
+    "verdict",
+    "plot",
+    "data",
+    "compose",
+    "sionna",
+    "code",
+    "power",
+    "measure",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "무엇을 비교하는가: 실측과 시뮬레이션의 두 계산 사슬",
+      "start": "cover"
+    },
+    "beam": {
+      "description": "64T64R 구조, 빔 식, common beam weight와 부배열 패턴의 관계, 숫자 예",
+      "start": "anatomy"
+    },
+    "input": {
+      "description": "벤더 데이터, 합성 패턴, Sionna 입력 경로, 코드, 전력",
+      "start": "data"
+    },
+    "compare": {
+      "description": "실측 정렬과 오차 진단, 정리",
+      "start": "measure"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}
