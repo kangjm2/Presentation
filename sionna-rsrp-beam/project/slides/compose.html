@@ -5,7 +5,7 @@
 </div>
 <div style="display:flex;flex-direction:row;gap:28px">
 <div style="width:900px;display:flex;flex-direction:column;gap:12px">
-<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">S[k]  : (Nθ, Nφ, 2) 복소   <span style="color:#8DB8E8"># 부배열 k, θ/φ 성분, 현재 etilt</span><br>w[b]  : (64,) 복소         <span style="color:#8DB8E8"># SSB 빔 b의 common beam weight</span><br>F[b]  = Σₖ w[b,k] · S[k]   <span style="color:#8DB8E8"># 위치 위상이 S에 없으면 × e^(jk₀rₖ·û)</span><br>G[b]  = |F[b,θ]|² + |F[b,φ]|²  <span style="color:#8DB8E8"># 선형 이득 (‖w‖ = 1)</span></p></div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">S[k]  : (Nθ, Nφ, 2) 복소   <span style="color:#8DB8E8"># 부배열 k, θ/φ 성분 (현재 설정)</span><br>w[b]  : (64,) 복소         <span style="color:#8DB8E8"># 빔 b, 현재 etilt 설정의 weight</span><br>F[b]  = Σₖ w[b,k] · S[k]   <span style="color:#8DB8E8"># 위치 위상이 S에 없으면 × e^(jk₀rₖ·û)</span><br>G[b]  = |F[b,θ]|² + |F[b,φ]|²  <span style="color:#8DB8E8"># 선형 이득 (‖w‖ = 1)</span></p></div>
 <div style="display:flex;flex-direction:row;gap:12px">
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">검증 ①</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최대 이득 · 가로/세로 빔폭 · 틸트를<br>벤더 방송 빔 사양과 대조</p></div>
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">검증 ②</p><p style="font-size:24px;line-height:1.4;color:#4A5262">빔 8개를 겹친 포락선이<br>셀 영역을 덮는지</p></div>
@@ -18,6 +18,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Sionna RT: AntennaPattern (θ, φ) → (C_θ, C_φ) · register_antenna_pattern() · compute_gain() · 원거리장 계산은 발표자</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 18</p>
-<aside>(약 50초) 방법 B를 실제로 하는 순서입니다. Sionna 안에서 64개 패턴을 조합하기보다, 밖에서 빔을 먼저 만드는 것이 좋습니다. 현재 etilt의 부배열 패턴 S_k를 θ와 φ 성분의 복소 격자로 읽고, SSB 빔 b의 가중치를 곱해 더하면 공통 빔 패턴 F_b가 나옵니다. 패턴에 위치 위상이 없으면 그때만 TXRU 위치로 위상을 곱합니다. 가중치 크기를 1로 맞추면 두 성분의 크기 제곱 합이 곧 선형 이득입니다. 그다음 반드시 검증합니다. 최대 이득, 가로와 세로 빔폭, 틸트가 벤더의 방송 빔 사양과 맞는지, 빔 8개의 포락선이 셀 영역을 덮는지 봅니다. 마지막으로 Sionna 좌표로 옮깁니다. Sionna의 θ는 천정각이고 로컬 x축이 패널 정면입니다. 패턴 함수는 각도를 받아 두 편파 성분을 복소수로 돌려주면 되고, compute_gain으로 이득이 맞는지 확인합니다. 배열 크기가 1 m 정도면 원거리장은 약 23 m부터라, 그보다 가까운 지점은 조심해서 봅니다.</aside>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 22</p>
+<aside>(약 50초) 방법 B를 실제로 하는 순서입니다. Sionna 안에서 64개 패턴을 조합하기보다, 밖에서 빔을 먼저 만드는 것이 좋습니다. 현재 설정에 맞는 부배열 패턴 S_k를 θ와 φ 성분의 복소 격자로 읽고, SSB 빔 b의 가중치를 곱해 더하면 공통 빔 패턴 F_b가 나옵니다. 패턴에 위치 위상이 없으면 그때만 TXRU 위치로 위상을 곱합니다. 가중치 크기를 1로 맞추면 두 성분의 크기 제곱 합이 곧 선형 이득입니다. 그다음 반드시 검증합니다. 최대 이득, 가로와 세로 빔폭, 틸트가 벤더의 방송 빔 사양과 맞는지, 빔 8개의 포락선이 셀 영역을 덮는지 봅니다. 마지막으로 Sionna 좌표로 옮깁니다. Sionna의 θ는 천정각이고 로컬 x축이 패널 정면입니다. 패턴 함수는 각도를 받아 두 편파 성분을 복소수로 돌려주면 되고, compute_gain으로 이득이 맞는지 확인합니다. 배열 크기가 1 m 정도면 원거리장은 약 23 m부터라, 그보다 가까운 지점은 조심해서 봅니다.</aside>
 </section>

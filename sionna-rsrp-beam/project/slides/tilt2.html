@@ -31,7 +31,7 @@
 <div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E"><span style="color:#255E9E">- -</span> e-tilt 12° + 디지털 12°</p><p style="font-size:24px;line-height:1.4;color:#4A5262">18.4 dBi @ 12° · 위 부엽 −1.2 dBi</p></div>
 </div>
 </div>
-<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">넓은 뜻의 전기 tilt = e-tilt + 디지털 tilt · 장비의 tilt 설정이 어느 쪽인지 벤더 확인 · 그래프: 9쪽 조건</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 18</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">넓은 뜻의 전기 tilt = e-tilt + 디지털 tilt · 많은 AAU: 부배열 tilt 고정, 설정 tilt는 디지털(①) · 그래프: 9쪽 조건</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 22</p>
 <aside>(약 55초) 앞 장에서 e-tilt와 디지털 tilt를 나눴는데, 디지털 tilt도 e-tilt 아니냐는 질문이 나올 수 있습니다. 넓은 뜻으로는 맞습니다. 기계로 숙이지 않고 전기 신호의 위상으로 숙이는 것을 모두 전기 tilt라고 하면, 디지털 tilt도 그 안에 들어갑니다. 하지만 3GPP 안테나 모델에서 θ_etilt는 부배열 안쪽 위상, 즉 아날로그 쪽을 가리키고, 이 덱의 e-tilt도 그 좁은 뜻입니다. 둘을 나누는 이유는 바꾸는 대상이 다르기 때문입니다. e-tilt는 부배열 패턴 S_k, 즉 빔이 들어갈 창을 숙이고, 공장에서 고정되어 있거나 RET 모터로 천천히 바꿉니다. 디지털 tilt는 가중치 w로 그 창 안에서 빔을 옮기고, 소프트웨어로 즉시 바꿉니다. 그래프를 보면 차이가 보입니다. e-tilt는 6도로 두고 디지털로만 12도까지 숙이면 최대 이득은 1 dB 정도만 줄지만, 위 13.5도로 8.9 dBi짜리 부엽이 솟습니다. 창 밖으로 빔을 밀어서 부배열 패턴이 그레이팅 로브를 더 이상 지우지 못하기 때문입니다. 둘 다 12도로 바꾸면 이 부엽은 다시 낮아집니다. 그래서 디지털 tilt는 범위가 몇 도로 제한되는 경우가 많습니다. 실무에서는 장비의 tilt 설정이 S_k를 바꾸는지, w를 바꾸는지, 둘 다인지 벤더에게 꼭 확인하세요. 시뮬레이션 입력이 그에 따라 달라집니다.</aside>
 </section>
