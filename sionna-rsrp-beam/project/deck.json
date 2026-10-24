@@ -16,6 +16,7 @@
     "words",
     "verdict",
     "plot",
+    "tilt",
     "data",
     "compose",
     "sionna",
@@ -30,7 +31,7 @@
       "start": "cover"
     },
     "beam": {
-      "description": "64T64R 구조, 빔 식, 용어 대응(부배열 패턴 · 가중치 · 공통 빔), Sionna에 넣을 것, 숫자 예",
+      "description": "64T64R 구조, 빔 식, 용어 대응(부배열 패턴 · 가중치 · 공통 빔), Sionna에 넣을 것, 숫자 예, tilt 세 층과 e-tilt별 공통 빔",
       "start": "anatomy"
     },
     "input": {

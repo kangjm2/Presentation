@@ -1,10 +1,11 @@
 # Sionna RSRP와 실측 SS-RSRP
 
-Sionna RT로 계산한 RSRP를 실측 SS-RSRP와 비교할 때 빔을 어떻게 만들어 넣어야 하는지 정리한 세미나 자료입니다. 핵심 질문은 이것입니다. common beam weight를 그대로 쓰면 되는가, 아니면 64개 부배열 패턴과 etilt를 반영해 빔을 합성해야 하는가. 16장이고, 슬라이드마다 발표자 노트가 있습니다.
+Sionna RT로 계산한 RSRP를 실측 SS-RSRP와 비교할 때 빔을 어떻게 만들어 넣어야 하는지 정리한 세미나 자료입니다. 핵심 질문은 이것입니다. common beam weight를 그대로 쓰면 되는가, 아니면 64개 부배열 패턴과 etilt를 반영해 빔을 합성해야 하는가. 17장이고, 슬라이드마다 발표자 노트가 있습니다.
 
 - **결론:** 두 의견은 대립하지 않습니다. 빔 = Σ w × S입니다. common beam weight(w)는 *무엇을 곱할지*, etilt별 부배열 패턴(S)은 *어디에 곱할지*입니다. 실측과 비교하려면 현재 etilt의 부배열 패턴 위에 common beam weight를 곱해야 합니다(동료가 말한 방법).
 - **Sionna에 넣는 것:** 가중치(숫자 64개)가 아니라 그 결과인 *공통 빔 패턴*(3D 패턴 하나)입니다. “부배열 패턴과 가중치로 공통 빔을 만들어 Sionna 입력으로 쓴다”는 생각이 맞습니다(7 · 8쪽). 틀린 것은 가중치만 Sionna 기본 배열에 넣는 경우입니다.
 - **Sionna 입력:** 합성 빔 패턴을 Sionna 밖에서 만들어 검증한 뒤, 단일 소자 패턴으로 등록해 SSB 빔마다 radio map을 계산합니다(R1). 정밀 검증은 측정 지점에서 부배열별 경로를 합성합니다(R3).
+- **tilt:** 기계 tilt와 e-tilt는 따로 정하는 독립된 값이지만 방사되는 빔에서는 합쳐집니다. e-tilt(와 디지털 tilt)는 공통 빔 패턴 안에, 기계 tilt는 Sionna `orientation`에 한 번씩만 넣습니다. 그러면 공통 빔을 e-tilt별로 미리 계산해 표로 두고, 측정 시점의 e-tilt에 맞는 것을 골라 쓸 수 있습니다(10쪽).
 - **비교 정렬:** RE당 전력(64포트 합계)을 넣고, UE 안테나 이득 · 빔 통합 규칙 · 빈(bin) 처리를 실측과 맞춥니다.
 
 - **발표용 뷰어 (내비게이션 포함):** https://claude.ai/artifact/81gneTBaSKq81ovsUtxVpE, 또는 로컬에서 `presentation.html`을 브라우저로 열기
@@ -28,15 +29,16 @@ Sionna RT로 계산한 RSRP를 실측 SS-RSRP와 비교할 때 빔을 어떻게 
 | 7 | words | 말부터 맞추기: 부배열 패턴 S_k(sub-array gain) · 부배열 가중치 w(= common beam weight) · 공통 빔 F_b — Sionna에는 F_b | 0:55 |
 | 8 | verdict | Sionna에 무엇을 넣나: B(부배열 패턴 × 가중치 → 공통 빔 패턴 → Sionna) · C(벤더 공통 빔 패턴 파일) · A(가중치만 넣기, 피함), 재료 · 조리법 · 요리 비유 | 0:55 |
 | 9 | plot | 세로 단면 계산 예: A · B · C(etilt 불일치) 비교, 사이트 근처 오차 | 0:55 |
-| 10 | data | 벤더에게 받을 것과 확인할 것 체크리스트 | 0:50 |
-| 11 | compose | 합성 패턴 만들기(오프라인)와 검증, Sionna 좌표 · 패턴 함수 규약 | 0:50 |
-| 12 | sionna | Sionna 입력 경로 R1 · R2 · R3와 피할 방법 | 0:55 |
-| 13 | code | R1 코드 뼈대 | 0:50 |
-| 14 | power | RE당 전력(64포트 합계) → power_dbm, 단위와 정의 | 0:50 |
-| 15 | measure | 실측 쪽 정렬: 빔별 · 셀 값, UE 이득, 빈 처리 | 0:50 |
-| 16 | summary | 오차 모양별 진단과 결론 | 0:40 |
+| 10 | tilt | tilt 세 층: 기계(패널 회전 → orientation) · e-tilt(S_k가 바뀜 → F_b) · 디지털(w → F_b), 방위각별 하향각 비교, e-tilt별 공통 빔 표 | 0:55 |
+| 11 | data | 벤더에게 받을 것과 확인할 것 체크리스트 | 0:50 |
+| 12 | compose | 합성 패턴 만들기(오프라인)와 검증, Sionna 좌표 · 패턴 함수 규약 | 0:50 |
+| 13 | sionna | Sionna 입력 경로 R1 · R2 · R3와 피할 방법 | 0:55 |
+| 14 | code | R1 코드 뼈대 | 0:50 |
+| 15 | power | RE당 전력(64포트 합계) → power_dbm, 단위와 정의 | 0:50 |
+| 16 | measure | 실측 쪽 정렬: 빔별 · 셀 값, UE 이득, 빈 처리 | 0:50 |
+| 17 | summary | 오차 모양별 진단과 결론 | 0:40 |
 
-용어를 아는 청중이면 3 · 4쪽(용어 풀이)을 건너뛰세요(약 12분 15초). 여기에 13쪽(코드)과 10쪽(체크리스트)까지 백업으로 넘기면 약 10분 35초입니다. 용어가 낯선 청중이면 3 · 4쪽을 살리고 10 · 13쪽을 백업으로 돌리세요(약 12분 20초). 7 · 8쪽(말 맞추기 · Sionna에 넣을 것)은 이 덱의 핵심이므로 줄이지 않는 것을 권합니다. 발표 전에 [`glossary.md`](glossary.md)를 미리 읽게 하면 좋습니다.
+용어를 아는 청중이면 3 · 4쪽(용어 풀이)을 건너뛰세요(약 12분 20초). 여기에 14쪽(코드)과 11쪽(체크리스트)까지 백업으로 넘기면 약 10분 40초이고, 10쪽(tilt)까지 넘기면 약 9분 45초입니다. 용어가 낯선 청중이면 3 · 4쪽을 살리고 11 · 14쪽을 백업으로 돌리세요(약 12분 25초). 7 · 8쪽(말 맞추기 · Sionna에 넣을 것)은 이 덱의 핵심이므로 줄이지 않는 것을 권합니다. 10쪽은 etilt가 사이트마다 다르거나 운용 중 바뀌는 경우에 특히 중요합니다. 발표 전에 [`glossary.md`](glossary.md)를 미리 읽게 하면 좋습니다.
 
 직접 채워 넣을 부분:
 - 표지의 `[발표자] · [소속] · [날짜]`
@@ -47,13 +49,15 @@ Sionna RT로 계산한 RSRP를 실측 SS-RSRP와 비교할 때 빔을 어떻게 
 - **용어 대응(7쪽):** “sub-array gain = 부배열 패턴 S_k”, “sub-array weight = common beam weight”로 대응시켰습니다. 벤더 · 팀에 따라 sub-array weight가 부배열 *안쪽* 소자 가중치(etilt가 정함)를 뜻할 수도 있으며, 그 경우 S_k를 만드는 재료입니다. 어느 쪽이든 Sionna에 넣는 것은 공통 빔 패턴 F_b라는 결론은 같습니다.
 - **안테나 구성:** 192소자 = 12 × 8 × 2, 부배열 = 세로 3소자, TXRU 64개는 대표 예시입니다. 실제 소자 수 · 부배열 크기 · 간격은 장비 사양으로 확인해야 합니다.
 - **9쪽 계산:** 세로 한 열(12소자)을 직접 계산한 예입니다(소자 TR 38.901 8 dBi · 65°, 소자 간격 0.7λ, 부배열 3소자, 디지털 틸트 6°, ‖w‖ = 1, 상호 결합 무시). A의 그레이팅 로브는 TXRU 간격 2.1λ에서 생기고, 실제 부배열 패턴(B)은 그 방향에 영점을 만들어 이를 지웁니다. C는 RET가 12°인데 6°용 가중치를 쓴 경우입니다. 수치는 개념 설명용이며 실제 장비 값이 아닙니다.
-- **Sionna API:** Sionna RT 1.x 문서 기준입니다. `scene.tx_array`는 모든 송신기가 공유하고, 배열 안 소자는 같은 패턴을 씁니다. `RadioMapSolver`의 `precoding_vec`는 켤레 없이(전치) 곱합니다. radio map의 path gain은 경로 계수 크기 제곱의 합(비결맞음)입니다. 13쪽 코드는 의사 코드이므로 인자 이름과 기본값은 사용하는 버전의 문서로 확인하세요.
+- **tilt(10쪽):** 하향각 곡선은 패널 기준 주빔 능선(e-tilt만큼 숙인 원뿔)을 기계 tilt만큼 회전해 계산한 기하학적 예입니다. 기계 tilt의 하향각은 방위각 φ에서 대략 asin(cos φ · sin M)으로 줄어듭니다. 실제 패턴의 모양 변화(부엽 · 영점)는 반영하지 않았습니다. 벤더 패턴 파일이 e-tilt를 포함하고 기계 tilt는 빠진 패널 기준 좌표계인지 반드시 확인하세요. e-tilt를 바꿀 때 가중치 w도 함께 바뀌는지(BEAM-TILT 등)는 장비마다 다릅니다.
+- **Sionna API:** Sionna RT 1.x 문서 기준입니다. `scene.tx_array`는 모든 송신기가 공유하고, 배열 안 소자는 같은 패턴을 씁니다. `RadioMapSolver`의 `precoding_vec`는 켤레 없이(전치) 곱합니다. radio map의 path gain은 경로 계수 크기 제곱의 합(비결맞음)입니다. 14쪽 코드는 의사 코드이므로 인자 이름과 기본값은 사용하는 버전의 문서로 확인하세요.
 - **전력:** 200 W, 100 MHz, 30 kHz는 예시입니다. ss-PBCH-BlockPower가 포트당 값인지 합계인지, SSB 전력 부스팅이 있는지는 장비 · 망 설정마다 다릅니다.
-- **실측 정렬:** 빈 크기 20~50 m와 16쪽의 오차 진단 표는 경험적 출발점입니다.
+- **실측 정렬:** 빈 크기 20~50 m와 17쪽의 오차 진단 표는 경험적 출발점입니다.
 
 ## 출처
 
 - Sionna RT 문서: [RadioMapSolver (precoding_vec, 비결맞음 path gain)](https://nvlabs.github.io/sionna/rt/api/radio_map_solvers.html) · [Antenna patterns (AntennaPattern, register_antenna_pattern, PolarizedAntennaPattern, compute_gain)](https://nvlabs.github.io/sionna/rt/api/antenna_pattern.html) · [Scene (tx_array · rx_array는 모든 송신기 · 수신기 공통)](https://nvlabs.github.io/sionna/rt/api/scene.html) · [PathSolver (synthetic_array)](https://nvlabs.github.io/sionna/rt/api/paths_solvers.html) · [Radio devices (Transmitter: position · orientation · power_dbm)](https://nvlabs.github.io/sionna/rt/api/radio_devices.html)
+- O-RAN M-Plane 사양 (ETSI TS 104 023) 15.4: BEAM-TILT 기능(predefined-beam-tilt-offset, run-time-tilt-offset-supported) · MODIFY-BF-CONFIG
 - [Sionna RT: Technical Report (arXiv 2504.21719)](https://arxiv.org/abs/2504.21719) · [배열 소자가 같은 패턴을 써야 한다는 제약 언급 (arXiv 2604.14869)](https://arxiv.org/pdf/2604.14869)
 - 3GPP TR 38.901 7.3 (안테나 소자 패턴 · 패널 · TXRU 가상화) · TS 38.215 5.1.1 (SS-RSRP 정의) · TS 38.331 (ss-PBCH-BlockPower, 5.5.3 빔 통합 · L3 필터)
 - 배열 안테나 일반: 배열 인자 · 그레이팅 로브 · 부배열(서브어레이) 구조 — 안테나 교재 (예: Balanis, *Antenna Theory*; Mailloux, *Phased Array Antenna Handbook*)
