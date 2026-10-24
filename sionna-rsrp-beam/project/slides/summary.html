@@ -7,7 +7,7 @@
 <div style="width:1000px;display:flex;flex-direction:column;gap:7px">
 <div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:470px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">오차 모양</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">먼저 의심할 것</p></div>
 <div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:470px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">전체가 일정하게 어긋남</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">전력 정의(포트당/합계) · UE 이득 · 몸 손실</p></div>
-<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:470px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">사이트 근처 · 높은 층에서 큼</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">세로 패턴 · etilt · 부엽 (6쪽)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:470px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">사이트 근처 · 높은 층에서 큼</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">세로 패턴 · etilt · 부엽 (8쪽)</p></div>
 <div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:470px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">방위각에 따라 다름</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">방위각 · 가로 빔폭 · 빔 인덱스 매칭</p></div>
 <div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:470px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">멀수록 커짐</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">재질 · 반사 차수 · 회절 · 식생 · 3D 지도</p></div>
 <div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:470px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">평균은 맞고 흩어짐만 큼</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">위치 오차 · 빈 크기 · 빠른 페이딩</p></div>
@@ -20,6 +20,6 @@
 </div>
 <p style="font-size:24px;line-height:1.45;color:#4A5262">다음 단계 제안: [대상 사이트] 부배열 패턴(etilt별) · 빔 표 · SSB 전력 정의 요청 → 빔 하나로 R1과 R3 결과 대조</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">발표자 정리 · 오차 진단 표는 경험적 출발점</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 13</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 15</p>
 <aside>(약 40초) 정리하겠습니다. 첫째, common beam weight는 버리지 않습니다. 현재 etilt의 부배열 패턴 위에 곱해야 실제 방송 빔이 됩니다. 둘째, 합성 패턴은 Sionna 밖에서 만들고 벤더 사양과 대조해 검증한 다음, 단일 소자 패턴으로 넣고 빔마다 지도를 그립니다. 셋째, RE당 전력, UE 이득, 빔 통합, 빈 처리를 실측과 같은 정의로 맞춥니다. 그다음 오차를 보면 원인을 좁힐 수 있습니다. 전체가 일정하게 어긋나면 전력이나 UE 이득 정의를, 사이트 근처와 높은 층에서 크면 세로 패턴과 etilt를, 방위각에 따라 다르면 방향과 빔 매칭을, 멀수록 커지면 재질과 지도를, 흩어짐만 크면 위치와 빈 처리를 먼저 의심합니다. 다음 단계로는 빔 하나를 골라 R1과 정밀한 R3 결과를 대조해 파이프라인을 검증하는 것을 권합니다.</aside>
 </section>
