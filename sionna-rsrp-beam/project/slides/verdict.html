@@ -15,6 +15,6 @@
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">비유</b> 부배열 패턴 = 재료 · common beam weight = 조리법(재료를 얼마씩 섞을지) · 공통 빔 = 완성된 요리<br>Sionna에는 요리를 낸다 — 조리법만 건네면 Sionna가 자기 재료(기본 38.901 패턴)로 전혀 다른 요리를 만든다</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">발표자 정리 · A는 Sionna가 S_k 자리를 자기 기본 패턴으로 채우기 때문에 틀린다 · B와 C는 같은 F_b를 만드는 두 길</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 16</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 17</p>
 <aside>(약 55초) 그래서 정리하면 이렇습니다. 맨 위 B가 권장하는 길입니다. 현재 etilt의 부배열 패턴 64개에 부배열 가중치, 즉 common beam weight를 곱해서 더하면 공통 빔 패턴 F_b 하나가 나오고, 이것을 Sionna에 단일 소자 패턴으로 넣습니다. 가운데 C는 같은 F_b를 벤더가 미리 계산해 파일로 준 경우입니다. 그 파일을 그대로 넣으면 됩니다. 맨 아래 A가 피해야 할 길입니다. common beam weight만 Sionna의 기본 배열에 넣으면, Sionna는 S_k 자리를 자기의 기본 38.901 패턴으로 채웁니다. 실제 부배열 패턴이 아닌 가짜 패턴 위에 가중치를 곱하는 셈이라 다른 빔이 나옵니다. 그러니 공통 빔을 만들어 Sionna에 넣으면 된다는 생각은 B나 C로 맞습니다. 동료의 말도 B의 재료를 제대로 쓰라는 뜻이라 맞습니다. 두 의견이 엇갈려 보였던 것은, Sionna에 가중치를 넣느냐 패턴을 넣느냐를 구분하지 않았기 때문입니다. 다음 장에서 A와 B가 숫자로 얼마나 다른지 보겠습니다.</aside>
 </section>
