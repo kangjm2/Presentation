@@ -1,0 +1,19 @@
+<section id="formula" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">빔 ② · 빔을 만드는 식</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">가중치는 패턴 위에 곱할 때만 빔이 된다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;line-height:1.55;color:#F5F3EE;white-space:nowrap">E_b(θ,φ) = Σ_k <span style="color:#8DB8E8">w_b,k</span> · <span style="color:#F0A36B">S_k(θ,φ; etilt)</span>    <span style="color:#C9D3E3">k = 1 … 64</span><br><span style="color:#F0A36B">S_k(θ,φ; etilt)</span> = Σ_m∈k a_m(etilt) · g_m(θ,φ) · e^(j·k₀·r_m·û)</p></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">w_b,k — 디지털 가중치</p><p style="font-size:24px;line-height:1.4;color:#4A5262">common beam weight<br>SSB 빔 b마다 64개 복소수<br>DU/RU의 빔 표에 있다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">S_k — 부배열 패턴</p><p style="font-size:24px;line-height:1.4;color:#4A5262">부배열 k가 실제로 내는 3D 복소 패턴<br>소자 · 상호 결합 · 위치 위상 포함<br><b>etilt마다 다르다</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">a_m — 아날로그 가중치</p><p style="font-size:24px;line-height:1.4;color:#4A5262">etilt가 정하는 부배열 안쪽 값<br>보통 공개되지 않는다<br>→ 그래서 S_k를 etilt별로 받는다</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px"><div style="background:#EAE7DF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">필요한 데이터 양</p><p style="font-size:24px;line-height:1.4;color:#4A5262">S_k: 64개 × etilt 설정 수 (θ/φ 복소 격자)<br>w_b: 64개 × SSB 빔 수 (예: 8)</p></div>
+<div style="background:#EAE7DF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">편파</p><p style="font-size:24px;line-height:1.4;color:#4A5262">64 = 32 × 2 편파 · ±45° 포트의 패턴을<br>θ · φ 성분으로 더해야 교차 편파가 맞는다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:14px 20px">w는 특정 S_k를 전제로 설계된 숫자다 — <b style="color:#F0A36B">S_k가 바뀌면(etilt · 모델) 같은 w로도 다른 빔이 나온다</b></p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">û = 방향 단위 벡터 · k₀ = 2π/λ · rₘ = 소자 위치 · 원거리장 · 편파 성분(θ, φ)별로 같은 식 · 발표자 정리</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 13</p>
+<aside>(약 55초) 이 구조를 식으로 쓰면 두 줄입니다. 빔 b의 방사 패턴 E_b는 64개 부배열 패턴 S_k에 디지털 가중치 w_b,k를 곱해 더한 것입니다. 그리고 부배열 패턴 S_k는 그 안의 소자 3개 패턴에 아날로그 가중치 a_m과 위치에 따른 위상을 곱해 더한 것입니다. 각 항이 어디서 오는지가 중요합니다. w는 common beam weight로 빔 표에 있습니다. a는 etilt가 정하는 부배열 안쪽 값으로 보통 공개되지 않습니다. 그래서 벤더는 a를 반영한 결과, 즉 부배열 패턴 S_k를 etilt별로 측정하거나 계산해서 줍니다. 여기에는 소자 패턴, 소자끼리의 상호 결합, 위치에 따른 위상이 모두 들어 있습니다. 결론은 아래 한 줄입니다. w는 특정 S_k를 전제로 설계된 숫자라서, etilt나 배열 모델이 바뀌면 같은 w를 곱해도 다른 빔이 나옵니다.</aside>
+</section>
