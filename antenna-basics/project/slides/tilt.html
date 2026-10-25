@@ -1,0 +1,25 @@
+<section id="tilt" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">배열 ③ · 틸트</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">빔을 아래로 숙여 셀 크기를 정한다</h2>
+</div>
+<div style="position:relative;width:1664px;height:380px">
+<svg aria-label="옆에서 본 기지국. 높이 30 m 안테나에서 빔이 6도 아래로 숙여져 빔 중심이 271 m 지점에 닿고, 빔의 아래쪽 끝은 170 m, 위쪽 끝은 653 m에 닿는다" style="position:absolute;left:0px;top:0px;width:1664px;height:380px" width="1664" height="380" viewBox="0 0 1664 380"><line x1="0" y1="330" x2="1664" y2="330" stroke="#14213D" stroke-width="3"/><rect x="82" y="180.0" width="16" height="150.0" fill="#8A93A3"/><rect x="86" y="150.0" width="14" height="44" rx="3" fill="#A84A16"/><polygon points="96,180.0 1428.6,330 438.5,330" fill="#D5E3F3" fill-opacity="0.8"/><line x1="96" y1="180.0" x2="645.5" y2="330" stroke="#A84A16" stroke-width="5"/><line x1="96" y1="180.0" x2="1428.6" y2="330" stroke="#255E9E" stroke-width="3" stroke-dasharray="10 7"/><line x1="96" y1="180.0" x2="438.5" y2="330" stroke="#255E9E" stroke-width="3" stroke-dasharray="10 7"/><line x1="96" y1="180.0" x2="1640" y2="180.0" stroke="#5E6675" stroke-width="2" stroke-dasharray="4 6"/><line x1="438.5" y1="322" x2="438.5" y2="338" stroke="#14213D" stroke-width="3"/><line x1="645.5" y1="322" x2="645.5" y2="338" stroke="#14213D" stroke-width="3"/><line x1="1428.6" y1="322" x2="1428.6" y2="338" stroke="#14213D" stroke-width="3"/></svg>
+<p style="position:absolute;left:0px;top:110px;width:260px;font-size:24px;font-weight:700;color:#14213D">안테나 높이 30 m</p>
+<p style="position:absolute;left:358px;top:344px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">170 m</p>
+<p style="position:absolute;left:566px;top:344px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">271 m</p>
+<p style="position:absolute;left:1349px;top:344px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">653 m</p>
+<p style="position:absolute;left:676px;top:210px;width:420px;font-size:24px;font-weight:700;color:#A84A16">빔 중심: 틸트 6°</p>
+<p style="position:absolute;left:1449px;top:260px;width:380px;font-size:24px;line-height:1.3;color:#255E9E">빔 위쪽 끝 (6° − 3.5°)<br>→ 셀 가장자리</p>
+<p style="position:absolute;left:1250px;top:140px;width:300px;font-size:24px;text-align:right;color:#5E6675">수평선</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">거리 ≈ 높이 ÷ tan(틸트)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">28.5 m ÷ tan 6° ≈ 271 m<br>(안테나 30 m − 휴대폰 1.5 m)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">1° 더 숙이면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">빔 중심 271 m → 232 m<br>셀이 작아지고 가까운 곳이 세진다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">너무 덜 숙이면 / 너무 숙이면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이웃 셀까지 날아가 간섭 (오버슈팅)<br>셀 가장자리가 약해진다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">숙이는 두 방법</p><p style="font-size:24px;line-height:1.4;color:#4A5262">기계 틸트: 패널을 숙인다<br>전기 틸트: 위상으로 숙인다 (원격)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">평지 · 직선 경로로 단순화한 예 · 세로 3 dB 빔폭 7° 가정 · 그림의 세로 방향은 과장</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 13</p>
+<aside>(약 45초) 기지국은 빔을 수평으로 쏘지 않고 아래로 조금 숙입니다. 이것을 틸트라고 합니다. 높이 30 m 안테나가 6도 숙이면 빔 중심은 약 270 m 지점에 닿고, 세로 빔폭이 7도라면 빔의 아래쪽 끝은 170 m, 위쪽 끝은 650 m 정도에 닿습니다. 이 위쪽 끝이 대략 셀 가장자리가 됩니다. 계산은 높이를 탄젠트 틸트로 나누면 됩니다. 1도만 더 숙여도 빔 중심이 230 m로 당겨져 셀이 작아집니다. 너무 덜 숙이면 전파가 이웃 셀까지 날아가 간섭을 일으키고, 너무 숙이면 셀 가장자리가 약해집니다. 숙이는 방법은 두 가지로, 패널 자체를 기울이는 기계 틸트와 소자 위상으로 숙이는 전기 틸트가 있습니다. 전기 틸트는 앞 장의 빔 조향을 세로 방향으로 한 것입니다.</aside>
+</section>

@@ -1,0 +1,57 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-25T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "안테나 개론",
+  "order": [
+    "cover",
+    "what",
+    "wavelength",
+    "dipole",
+    "pattern",
+    "db",
+    "gain",
+    "polar",
+    "array",
+    "steer",
+    "tilt",
+    "bs",
+    "summary"
+  ],
+  "sections": {
+    "start": {
+      "description": "안테나가 하는 일과 파장: 전기 신호 ↔ 전파, 크기는 파장이 정한다",
+      "start": "cover"
+    },
+    "pattern": {
+      "description": "다이폴, 방사 패턴 읽기, dB, 이득(dBi · EIRP), 편파",
+      "start": "dipole"
+    },
+    "array": {
+      "description": "배열로 빔 만들기, 위상으로 빔 돌리기, 틸트로 셀 크기 정하기",
+      "start": "array"
+    },
+    "field": {
+      "description": "기지국 안테나 두 종류와 링크 버짓으로 정리",
+      "start": "bs"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}
