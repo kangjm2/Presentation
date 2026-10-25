@@ -1,0 +1,30 @@
+<section id="time" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">시간형 · 접속 시간 · 중단 시간 · 지연</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">시간 KPI: 시작과 끝을 어떤 사건으로 정했나</h2>
+</div>
+<div style="position:relative;width:1664px;height:370px">
+<svg aria-label="시간 KPI 세 가지의 시간 축. 접속 시간은 RRCSetupRequest에서 RRCSetupComplete까지, 핸드오버 중단 시간은 원래 셀의 마지막 데이터에서 대상 셀의 첫 데이터까지, 왕복 지연은 ping 요청에서 응답까지. 값은 예시" style="position:absolute;left:0px;top:0px;width:1664px;height:370px" width="1664" height="370" viewBox="0 0 1664 370"><line x1="330" y1="20" x2="330" y2="330" stroke="#DCD8CE" stroke-width="2"/><line x1="730" y1="20" x2="730" y2="330" stroke="#DCD8CE" stroke-width="2"/><line x1="1130" y1="20" x2="1130" y2="330" stroke="#DCD8CE" stroke-width="2"/><line x1="1530" y1="20" x2="1530" y2="330" stroke="#DCD8CE" stroke-width="2"/><line x1="330" y1="60" x2="1130" y2="60" stroke="#A84A16" stroke-width="8" stroke-linecap="round"/><circle cx="330" cy="60" r="11" fill="#FBFAF7" stroke="#A84A16" stroke-width="4"/><circle cx="1130" cy="60" r="11" fill="#A84A16"/><line x1="530" y1="170" x2="1130" y2="170" stroke="#255E9E" stroke-width="8" stroke-linecap="round"/><circle cx="530" cy="170" r="11" fill="#FBFAF7" stroke="#255E9E" stroke-width="4"/><circle cx="1130" cy="170" r="11" fill="#255E9E"/><line x1="430" y1="280" x2="730" y2="280" stroke="#14213D" stroke-width="8" stroke-linecap="round"/><circle cx="430" cy="280" r="11" fill="#FBFAF7" stroke="#14213D" stroke-width="4"/><circle cx="730" cy="280" r="11" fill="#14213D"/></svg>
+<p style="position:absolute;left:0px;top:42px;width:310px;font-size:24px;font-weight:700;color:#A84A16">접속 시간</p>
+<p style="position:absolute;left:318px;top:78px;width:300px;font-size:24px;font-size:22px;color:#5E6675">시작: RRCSetupRequest</p>
+<p style="position:absolute;left:1118px;top:8px;width:360px;font-size:24px;font-size:22px;font-weight:600;color:#A84A16">끝: RRCSetupComplete → 40 ms</p>
+<p style="position:absolute;left:0px;top:152px;width:310px;font-size:24px;font-weight:700;color:#255E9E">핸드오버 중단 시간</p>
+<p style="position:absolute;left:518px;top:188px;width:300px;font-size:24px;font-size:22px;color:#5E6675">시작: 원래 셀 마지막 데이터</p>
+<p style="position:absolute;left:1118px;top:118px;width:360px;font-size:24px;font-size:22px;font-weight:600;color:#255E9E">끝: 대상 셀 첫 데이터 → 30 ms</p>
+<p style="position:absolute;left:0px;top:262px;width:310px;font-size:24px;font-weight:700;color:#14213D">왕복 지연 (ping)</p>
+<p style="position:absolute;left:418px;top:298px;width:300px;font-size:24px;font-size:22px;color:#5E6675">시작: 요청 패킷 보냄</p>
+<p style="position:absolute;left:718px;top:228px;width:360px;font-size:24px;font-size:22px;font-weight:600;color:#14213D">끝: 응답 패킷 받음 → 15 ms</p>
+<p style="position:absolute;left:280px;top:334px;width:100px;font-size:24px;text-align:center;font-size:22px;color:#5E6675">0 ms</p>
+<p style="position:absolute;left:680px;top:334px;width:100px;font-size:24px;text-align:center;font-size:22px;color:#5E6675">20 ms</p>
+<p style="position:absolute;left:1080px;top:334px;width:100px;font-size:24px;text-align:center;font-size:22px;color:#5E6675">40 ms</p>
+<p style="position:absolute;left:1480px;top:334px;width:100px;font-size:24px;text-align:center;font-size:22px;color:#5E6675">60 ms</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">누구의 시계인가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칩셋 타임스탬프 · PC 시각 · GPS 시각<br>한 기준으로 맞춘 뒤 뺀다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">시작 · 끝 정의</p><p style="font-size:24px;line-height:1.4;color:#4A5262">예: 핸드오버 중단을 메시지 기준(명령 → Complete)으로 재나, 데이터 기준으로 재나</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">분포로 본다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">평균보다 중앙값 · 95% 값<br>실패한 시도는 시간 통계에서 빠진다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림의 시간 값은 설명용 예시 · 원천: RRC 메시지 · DCI / PDSCH 로그 · 앱 패킷의 타임스탬프</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 16</p>
+<aside>(약 50초) 시간형 KPI는 두 사건 사이의 시간입니다. 접속 시간은 RRCSetupRequest부터 RRCSetupComplete까지, 핸드오버 중단 시간은 원래 셀에서 받은 마지막 데이터부터 대상 셀에서 받은 첫 데이터까지, 왕복 지연은 ping 요청 패킷을 보낸 순간부터 응답을 받은 순간까지입니다. 그림의 값은 예시입니다. 여기서 세 가지를 확인해야 합니다. 첫째, 누구의 시계인지입니다. 칩셋 타임스탬프, 노트북 시각, GPS 시각이 섞이면 수 ms가 쉽게 틀어집니다. 둘째, 시작과 끝을 어떤 사건으로 정했는지입니다. 핸드오버 중단을 메시지 기준으로 재면 데이터 기준과 값이 다릅니다. 셋째, 평균보다 분포로 봐야 합니다. 그리고 실패한 시도는 시간 통계에 들어가지 않으므로 성공률과 함께 봐야 합니다.</aside>
+</section>

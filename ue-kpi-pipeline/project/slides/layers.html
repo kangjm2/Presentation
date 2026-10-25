@@ -1,0 +1,25 @@
+<section id="layers" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">전체 그림 · 프로토콜 층과 로그</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">KPI마다 꺼내는 층이 다르다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">층</p><p style="flex:1.25;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">여기서 나오는 KPI</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">DM 로그 예</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">앱 · IP</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">앱 처리량 · 지연(ping) · 웹 로딩 시간</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">IP 패킷 · 테스트 결과</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">NAS</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">등록 · PDU 세션 성공률</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">NAS 메시지 (5GMM · 5GSM)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">RRC</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">접속 · 핸드오버 성공률 · 측정 보고 · RLF</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">RRC 메시지 (ASN.1 해석)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">PDCP · RLC</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">PDCP · RLC 처리량 · RLC 재전송</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">층별 통계</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">MAC</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">MAC 처리량 · HARQ 재전송 · TA</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">MAC · HARQ 로그</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">PHY (L1)</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">RSRP · SINR · CQI · RI · MCS · RB · BLER</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">L1 측정 · DCI · PDSCH 복호 로그</p></div>
+</div>
+<div style="width:440px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">DM 로그 = 두 가지</p><p style="font-size:24px;line-height:1.4;color:#4A5262">① 칩셋 진단 기록 (측정값 · DCI · HARQ · 층별 통계)<br>② 단말이 주고받은 시그널링 메시지 원문</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">기록 주기가 다르다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">슬롯마다 (0.5 ms, 30 kHz)<br>측정 주기마다 (수십 ms)<br>사건이 생길 때만 (메시지)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">같은 순간, 여러 기록</p><p style="font-size:24px;line-height:1.4;color:#4A5262">한 슬롯의 데이터가 L1 · MAC · RLC · PDCP · IP에 각각 다른 모습으로 남는다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.300 (NR 프로토콜 구조) · 로그 형식과 주기는 칩셋 · DM 툴 · 설정마다 다름 (예: 칩셋 진단 인터페이스의 로그 패킷)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 16</p>
+<aside>(약 50초) KPI마다 꺼내는 층이 다릅니다. 가장 아래 물리 계층, L1에서는 RSRP와 SINR 같은 측정값, CQI 보고, 기지국이 보낸 DCI의 MCS와 RB, 그리고 데이터 복호 성공 여부가 나옵니다. MAC에서는 HARQ 재전송, RLC와 PDCP에서는 층별 처리량, RRC와 NAS에서는 접속과 핸드오버 같은 절차의 메시지가, 맨 위 앱과 IP에서는 사용자가 실제로 느끼는 처리량과 지연이 나옵니다. DM 로그는 크게 두 가지입니다. 칩셋이 내보내는 진단 기록과, 단말이 주고받은 시그널링 메시지 원문입니다. 그리고 기록 주기가 제각각입니다. 슬롯마다, 측정 주기마다, 또는 사건이 생길 때만 기록됩니다. 이 차이가 나중에 후처리에서 중요해집니다.</aside>
+</section>
