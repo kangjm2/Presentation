@@ -1,0 +1,64 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-25T12:00:00Z"
+  },
+  "lists": "css",
+  "title": "단말 KPI가 만들어지는 과정",
+  "order": [
+    "cover",
+    "overview",
+    "taxonomy",
+    "layers",
+    "rsrp",
+    "sinr",
+    "csi",
+    "dci",
+    "bler",
+    "tput",
+    "signal",
+    "time",
+    "post",
+    "pitfalls",
+    "vsoss",
+    "summary"
+  ],
+  "sections": {
+    "big": {
+      "description": "전체 그림: 다섯 단계, KPI 여섯 종류, 프로토콜 층과 로그",
+      "start": "cover"
+    },
+    "measure": {
+      "description": "측정형 · 보고형: RSRP, RSRQ · SINR, CQI · RI · PMI",
+      "start": "rsrp"
+    },
+    "sched": {
+      "description": "지시형 · 계산형: MCS · RB · 레이어, BLER, 처리량",
+      "start": "dci"
+    },
+    "event": {
+      "description": "이벤트형 · 시간형: 접속 · 핸드오버 · 끊김, 접속 시간 · 중단 시간 · 지연",
+      "start": "signal"
+    },
+    "read": {
+      "description": "후처리, 자주 틀리는 점, 망 KPI와의 비교, 정리",
+      "start": "post"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

@@ -6,6 +6,7 @@ UE DM 툴(Accuver XCAL5)이 수집하는 5G NR KPI의 의미를 다룹니다. �
 - 편집용 Slides 덱: https://claude.ai/artifact/KhmQgNs6zYY9qmTyPRFDfk
 - 두 링크 모두 비공개입니다. 다른 사람에게 보여주려면 페이지의 Share 메뉴에서 공유하세요.
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
+- KPI 값이 어떻게 만들어지는지(칩셋 로그 → DM 툴 → 후처리, KPI별 집계 방법)는 [`ue-kpi-pipeline`](../ue-kpi-pipeline/) 덱에 있습니다.
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py ue-kpi`로 뷰어를 다시 만듭니다.
 
 ## 구성 (≈ 10분)
