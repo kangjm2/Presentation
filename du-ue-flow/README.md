@@ -11,7 +11,7 @@ DU와 UE가 주고받는 전 과정을 따라가는 10분 세미나 자료입니
 - 두 링크 모두 비공개 — 다른 사람에게 보여주려면 페이지의 Share 메뉴에서 공유
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py du-ue-flow`로 뷰어를 다시 만듭니다.
-- 관련 덱: [`ran-architecture`](../ran-architecture/) (CU · DU · RU 분리) · [`ss-rsrp`](../ss-rsrp/) (SSB · 빔 · 측정) · [`m-plane-yang`](../m-plane-yang/) (O-DU의 RU 관리) · [`ue-kpi`](../ue-kpi/)
+- 관련 덱: [`ran-architecture`](../ran-architecture/) (CU · DU · RU 분리) · [`ss-rsrp`](../ss-rsrp/) (SSB · 빔 · 측정) · [`m-plane-yang`](../m-plane-yang/) (O-DU의 RU 관리) · [`ue-kpi`](../ue-kpi/) · [`upper-layers`](../upper-layers/) (MAC · RLC · PDCP · RRC 입문)
 
 ## 구성 (≈ 10분)
 

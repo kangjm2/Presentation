@@ -1,0 +1,64 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-26T12:00:00Z"
+  },
+  "lists": "css",
+  "title": "L1 위의 세계: L2 · L3 입문",
+  "order": [
+    "cover",
+    "map",
+    "terms",
+    "datapath",
+    "mac",
+    "rlc",
+    "pdcp",
+    "rrcstate",
+    "rrcmsg",
+    "meas",
+    "failure",
+    "nas",
+    "flow",
+    "kpi",
+    "symptoms",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "전체 지도와 용어",
+      "start": "cover"
+    },
+    "l2": {
+      "description": "L2: 패킷이 내려가는 길, MAC · RLC · PDCP · SDAP",
+      "start": "datapath"
+    },
+    "l3": {
+      "description": "L3 RRC: 상태, 메시지, 측정과 핸드오버, 실패와 복구",
+      "start": "rrcstate"
+    },
+    "nas": {
+      "description": "NAS와 전원 켜기부터 첫 패킷까지",
+      "start": "nas"
+    },
+    "kpi": {
+      "description": "상위 계층 KPI, 증상별 진단, 정리",
+      "start": "kpi"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}
