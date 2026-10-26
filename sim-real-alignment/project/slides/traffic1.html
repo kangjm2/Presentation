@@ -1,0 +1,31 @@
+<section id="traffic1" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트래픽 관점 ① · 부하가 간섭을 정한다</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RSRP는 맞는데 SINR이 틀리면 부하를 의심한다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.55;color:#F5F3EE;white-space:nowrap">SINR = S ÷ (Σj αj · Ij + N)    <span style="color:#C9D3E3">α_j = 이웃 셀 j가 실제로 보내는 비율 (부하)</span></p></div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;color:#14213D">예: 신호 −90 dBm, 이웃 2개 각 −95 dBm, 잡음 −110 dBm</p>
+<div style="position:relative;width:1000px;height:290px">
+<svg aria-label="이웃 셀 부하에 따른 SINR. 100%면 1.9 dB, 50%면 4.9 dB, 30%면 7.0 dB, 0%면 20 dB" style="position:absolute;left:180px;top:0px;width:820px;height:290px" width="820" height="290" viewBox="0 0 820 290"><rect x="0" y="10" width="65" height="48" rx="8" fill="#A84A16"/><rect x="0" y="80" width="167" height="48" rx="8" fill="#255E9E"/><rect x="0" y="150" width="238" height="48" rx="8" fill="#255E9E"/><rect x="0" y="220" width="680" height="48" rx="8" fill="#255E9E"/></svg>
+<p style="position:absolute;left:259px;top:18px;width:200px;font-size:24px;font-weight:700;color:#A84A16">1.9 dB</p>
+<p style="position:absolute;left:361px;top:88px;width:200px;font-size:24px;font-weight:700;color:#255E9E">4.9 dB</p>
+<p style="position:absolute;left:432px;top:158px;width:200px;font-size:24px;font-weight:700;color:#255E9E">7.0 dB</p>
+<p style="position:absolute;left:874px;top:228px;width:200px;font-size:24px;font-weight:700;color:#255E9E">20.0 dB</p>
+<p style="position:absolute;left:0px;top:18px;width:170px;font-size:24px;font-weight:600;color:#14213D">이웃 부하 100%</p>
+<p style="position:absolute;left:0px;top:88px;width:170px;font-size:24px;font-weight:600;color:#14213D">이웃 부하 50%</p>
+<p style="position:absolute;left:0px;top:158px;width:170px;font-size:24px;font-weight:600;color:#14213D">이웃 부하 30%</p>
+<p style="position:absolute;left:0px;top:228px;width:170px;font-size:24px;font-weight:600;color:#14213D">이웃 부하 0%</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">부하는 OSS에서</p><p style="font-size:24px;line-height:1.4;color:#4A5262">셀 · 시간대별 PRB 사용률 → α<br>측정 시각과 같은 시간대 값을 쓴다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">full buffer는 극단</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모든 셀이 늘 보내면 SINR이 가장 낮다<br>간헐 트래픽은 SINR이 높고, 부하가 오르면 full buffer에 가까워진다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> RSRP · SS 측정은 부하와 거의 무관하지만 RSRQ · SINR · 처리량은 부하에 따라 수 dB씩 움직인다 — 부하를 모르면 품질 KPI는 맞출 수 없다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시는 덱에서 직접 계산 · 간헐 vs full buffer: arXiv 1408.3942 · 3GPP 부하 예: TR 36.897</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 16</p>
+<aside>(약 55초) 트래픽 관점의 핵심은 부하가 간섭을 정한다는 것입니다. SINR의 분모에는 이웃 셀 간섭이 들어가는데, 이웃 셀이 실제로 얼마나 자주 보내는지, 즉 부하에 따라 간섭이 달라집니다. 예를 들어 신호가 마이너스 90 dBm이고 이웃 두 셀이 각각 마이너스 95 dBm일 때, 이웃이 늘 보내면 SINR은 1.9 dB, 절반만 보내면 4.9, 30퍼센트면 7, 아예 안 보내면 20 dB입니다. 같은 RSRP에서 SINR이 18 dB나 달라집니다. 그래서 RSRP는 맞는데 SINR과 처리량이 틀리면 부하를 먼저 의심합니다. 부하는 OSS의 셀별, 시간대별 PRB 사용률에서 가져와, 측정 시각과 같은 시간대 값을 씁니다. 많은 시뮬레이션이 쓰는 full buffer, 즉 모든 셀이 늘 보내는 가정은 SINR이 가장 낮은 극단입니다. 간헐적인 트래픽에서는 SINR이 높고 부하가 오를수록 full buffer에 가까워진다는 연구가 있습니다. 3GPP 평가도 자원 사용률 20, 50, 70퍼센트처럼 부하를 나눠 봅니다.</aside>
+</section>

@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>시뮬레이션을 실측에 맞추는 법</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="주황 실측 곡선 위로, 점선으로 그린 보정 전 시뮬레이션이 크게 어긋나 있고, 파란 보정 후 시뮬레이션이 실측에 겹쳐진다. 아래에는 도시 건물 실루엣" style="position:absolute;left:1000px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><polyline points="140,539 154,521 168,528 182,536 196,521 210,491 224,478 238,498 252,538 266,564 280,564 294,557 308,570 322,606 336,638 350,639 364,612 378,586 392,584 406,595 420,590 434,556 448,513 462,491 476,501 490,521 504,523 518,505 532,496 546,517 560,561 574,596 588,601 602,589 616,589 630,612 644,638 658,636 672,604 686,565 700,550 714,557 728,558 742,534 756,496 770,476" fill="none" stroke="#F0A36B" stroke-width="6"/><polyline points="140,609 154,600 168,613 182,619 196,596 210,556 224,534 238,553 252,598 266,634 280,644 294,642 308,653 322,681 336,703 350,696 364,668 378,647 392,654 406,675 420,675 434,639 448,587 462,555 476,558 490,576 504,584 518,576 532,576 546,602 560,643 574,670 588,665 602,646 616,645 630,673 644,709 658,717 672,688 686,648 700,624 714,620 728,614 742,590 756,558 770,547" fill="none" stroke="#34446A" stroke-width="4" stroke-dasharray="10 8"/><polyline points="140,539 154,525 168,534 182,538 196,518 210,485 224,473 238,498 252,542 266,570 280,567 294,554 308,564 322,602 336,639 350,644 364,618 378,589 392,581 406,589 420,585 434,557 448,518 462,497 476,504 490,518 504,517 518,501 532,496 546,522 560,567 574,598 588,598 602,583 616,585 630,613 644,643 658,642 672,606 686,562 700,544 714,552 728,559 742,539 756,502 770,478" fill="none" stroke="#8DB8E8" stroke-width="4"/><line x1="560.0" y1="650.0" x2="560.0" y2="604.0" stroke="#8DB8E8" stroke-width="4"/><polygon points="560.0,590.0 553.0,604.0 567.0,604.0" fill="#8DB8E8"/><rect x="170" y="740" width="56" height="40" rx="6" fill="#22325A" stroke="#34446A" stroke-width="2"/><rect x="260" y="722" width="56" height="58" rx="6" fill="#22325A" stroke="#34446A" stroke-width="2"/><rect x="350" y="704" width="56" height="76" rx="6" fill="#22325A" stroke="#34446A" stroke-width="2"/><rect x="440" y="686" width="56" height="94" rx="6" fill="#22325A" stroke="#34446A" stroke-width="2"/><rect x="530" y="668" width="56" height="112" rx="6" fill="#22325A" stroke="#34446A" stroke-width="2"/><rect x="620" y="650" width="56" height="130" rx="6" fill="#22325A" stroke="#34446A" stroke-width="2"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">무선망 시뮬레이션 세미나 · 리서치 정리</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">시뮬레이션을<br>실측에 맞추는 법</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">Sionna 같은 채널 시뮬레이터를 실측에 가깝게 —<br>KPI · Scene · 망 설정 · 트래픽 · 단말 관점의 노력들</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) Sionna 같은 레이 트레이싱 기반 채널 시뮬레이터로 커버리지와 품질을 예측하면, 처음에는 실측과 몇 dB에서 많게는 10 dB 넘게 어긋나는 일이 흔합니다. 학계와 업계는 이 차이를 줄이려고 여러 방향에서 노력해 왔습니다. 오늘은 최근 연구와 사례를 KPI, 장면, 망 설정, 트래픽, 단말의 다섯 관점으로 정리하고, 실무에서 쓸 수 있는 순서로 묶어 보겠습니다.</aside>
+</section>
+<section id="errmap" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">개요 · 오차는 어디서 오나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">어긋남은 여섯 군데에서 와서 dB로 더해진다</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:6px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">① · 4~5쪽</p><p style="font-size:26px;font-weight:700;color:#14213D">KPI 정의 · 집계</p><p style="font-size:24px;line-height:1.4;color:#4A5262">L1 / L3 · 빔 / 셀 · dB / 선형 평균 · 빈 크기</p><p style="font-size:24px;line-height:1.4;color:#255E9E">→ 전체가 일정하게 수 dB 어긋남</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:6px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">② · 6쪽</p><p style="font-size:26px;font-weight:700;color:#14213D">Scene 기하</p><p style="font-size:24px;line-height:1.4;color:#4A5262">건물 높이 · 위치 · 지형 · 식생 누락</p><p style="font-size:24px;line-height:1.4;color:#255E9E">→ 그림자 영역 · 특정 거리에서 큼</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:6px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">③ · 7~8쪽</p><p style="font-size:26px;font-weight:700;color:#14213D">재질 · 전파 엔진</p><p style="font-size:24px;line-height:1.4;color:#4A5262">유전율 · 전도율 · 거칠기 · 반사 횟수 · 회절</p><p style="font-size:24px;line-height:1.4;color:#255E9E">→ NLoS에서 한쪽으로 치우침</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:6px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">④ · 9쪽</p><p style="font-size:26px;font-weight:700;color:#14213D">망 설정</p><p style="font-size:24px;line-height:1.4;color:#4A5262">안테나 패턴 · 빔 · 틸트 · 방위각 · 출력 · 위치</p><p style="font-size:24px;line-height:1.4;color:#255E9E">→ 섹터 · 방향마다 다른 바이어스</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:6px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">⑤ · 10~11쪽</p><p style="font-size:26px;font-weight:700;color:#14213D">트래픽 · 부하</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이웃 셀 활동 · 사용자 분포 · 스케줄러</p><p style="font-size:24px;line-height:1.4;color:#255E9E">→ RSRP는 맞는데 SINR · 처리량이 틀림</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:6px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">⑥ · 12~13쪽</p><p style="font-size:26px;font-weight:700;color:#14213D">단말</p><p style="font-size:24px;line-height:1.4;color:#4A5262">안테나 · 몸 · 차량 손실 · 수신기 · 측정 절차</p><p style="font-size:24px;line-height:1.4;color:#255E9E">→ 전체 바이어스 · 흩어짐 증가</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">순서</b> 보정은 큰 바이어스부터 한 층씩 — 정의 · 망 설정을 먼저 맞추지 않으면 재질 보정이 엉뚱한 오차를 흡수한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">덱의 분류 · 각 층의 자세한 근거는 해당 쪽과 README 출처 참고</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 16</p>
+<aside>(약 55초) 시뮬레이션과 실측이 어긋나는 원인은 크게 여섯 군데입니다. 첫째, 애초에 비교하는 양이 다른 경우로, KPI 정의와 집계가 다릅니다. 둘째, 장면의 기하, 즉 건물 높이와 위치, 지형, 식생이 틀린 경우입니다. 셋째, 재질과 전파 엔진의 설정입니다. 넷째, 안테나 패턴, 빔, 틸트 같은 망 설정입니다. 다섯째, 이웃 셀의 부하와 사용자 분포 같은 트래픽입니다. 여섯째, 단말의 안테나, 몸, 차량, 측정 절차입니다. 각 원인은 오차의 모양이 다르고, dB로 서로 더해집니다. 그래서 순서가 중요합니다. 정의와 망 설정처럼 큰 바이어스를 먼저 맞추지 않고 재질을 보정하면, 재질이 엉뚱한 오차를 흡수해서 다른 곳에서는 더 틀리게 됩니다.</aside>
+</section>
+<section id="sota" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">개요 · 숫자로 본 현재 수준</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">보정 뒤에도 수 dB는 남는다 — 목표는 바이어스 제거</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:520px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">연구 · 사례</p><p style="flex:0.9;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무엇을 비교했나</p><p style="flex:1.25;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">결과</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:520px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">영국 도시 디지털 트윈 (Sionna RT, 2025)</p><p style="flex:0.9;font-size:24px;line-height:1.35;color:#4A5262">RSRP · 70개 구역 · 재질 보정</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">평균 오차 −5.7 → −0.3 dB<br>표준편차 5.7 → 2.6 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:520px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">Geo2SigMap (Sionna + 측정 소량, 2024)</p><p style="flex:0.9;font-size:24px;line-height:1.35;color:#4A5262">LTE 6셀 · 측정 4.5만 개 · 단말 3종</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">RSRP RMSE 6.04 dB<br>(기존 방법보다 3.59 dB 개선)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:520px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">AIRMap (AI 전파 지도, 2025)</p><p style="flex:0.9;font-size:24px;line-height:1.35;color:#4A5262">측정 20%로 보정 · 시스템 KPI</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">경로 이득 RMSE 4 dB 미만<br>스펙트럼 효율 · BLER 오차 거의 0</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:520px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">Atoll 경험 모델 보정 (3.5 GHz, 오울루 석사)</p><p style="flex:0.9;font-size:24px;line-height:1.35;color:#4A5262">자전거 드라이브 테스트</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">표준편차 6.4 dB<br>토지 피복마다 남는 오차가 다름</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:520px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">TU Wien (1.855 GHz 저층 도심, VTC 2024)</p><p style="flex:0.9;font-size:24px;line-height:1.35;color:#4A5262">여러 모델 vs RSRP 드라이브 테스트</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">모두 손실을 과소평가 · 환경 정보가 많다고 늘 정확해지지 않음</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">읽는 법</b> 실측 자체도 단말 · 위치 · 페이딩 오차를 가진다 — “0 dB”가 아니라 바이어스 ≈ 0, 흩어짐 = 측정 잡음 수준이 현실적인 목표</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처는 README (영국 도시 · Geo2SigMap · AIRMap · Oulu · TU Wien) — 조건이 달라 직접 비교는 불가</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 16</p>
+<aside>(약 55초) 최근 연구에서 어느 정도까지 맞췄는지 보겠습니다. 영국 한 도시를 Sionna로 만든 디지털 트윈은 재질을 보정하기 전 평균 오차가 마이너스 5.7 dB, 즉 시뮬레이션이 커버리지를 과소 예측했고, 보정 뒤 평균 오차가 0.3 dB, 표준편차가 5.7에서 2.6 dB로 줄었습니다. Geo2SigMap은 Sionna로 만든 데이터에 측정 소량을 섞어 RSRP RMSE 6 dB를, AIRMap은 측정의 20퍼센트만으로 보정해 시스템 KPI 수준에서 거의 오차가 없다고 보고했습니다. 상용 툴의 경험 모델 보정도 표준편차 6 dB대가 남습니다. TU Wien 연구는 모든 모델이 손실을 과소평가했고, 환경 정보를 더 넣는다고 항상 좋아지지는 않았다고 합니다. 조건이 달라 직접 비교는 못 하지만, 메시지는 같습니다. 보정 뒤에도 수 dB는 남고, 현실적인 목표는 바이어스를 없애고 흩어짐을 측정 잡음 수준으로 줄이는 것입니다.</aside>
+</section>
+<section id="kpi1" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">KPI 관점 ① · 같은 양을 비교한다</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">어느 계단의 KPI로 맞출지 먼저 정한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">KPI 계단</p><p style="flex:1.1;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">시뮬레이션에 더 필요한 것</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">실측에서 맞출 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">① 경로 이득</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">장면 · 재질 · 전파 엔진</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">스캐너 · 측정 장비 기준</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">② RSRP</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">+ 안테나 · 빔 · RE당 전력</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">L1 / L3 · 빔 / 셀 · 빈</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③ SINR · RSRQ</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">+ 이웃 셀 부하 · 잡음 지수</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">어느 SINR인가 (SS · CSI · PDSCH)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">④ CQI · MCS · BLER</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">+ 링크 추상화 · 링크 적응</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">OLLA · MCS 표 · 할당 슬롯 기준</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑤ 처리량</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">+ 스케줄러 · 트래픽 모델 · 레이어</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">층 · 창 길이 · 분모</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑥ 핸드오버 · 성공률</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">+ 이동 · 측정 · 이동성 파라미터</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">사건 정의 · 시도 단위</p></div>
+</div>
+<div style="width:460px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">위로 갈수록</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모델이 더 필요하고, 오차가 쌓이거나 서로 상쇄된다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">목적에 맞는 계단</p><p style="font-size:24px;line-height:1.4;color:#4A5262">커버리지 설계 → ②<br>용량 · 체감 → ③~⑤<br>이동성 → ⑥</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">AIRMap의 관찰</p><p style="font-size:24px;line-height:1.4;color:#4A5262">경로 이득 오차가 남아도 보정 후 스펙트럼 효율 · BLER는 측정 채널과 거의 같았다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">실측 KPI의 정의와 집계: ue-kpi-pipeline 덱 · 링크 추상화 예: Sionna SYS · AIRMap: arXiv 2511.05522</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 16</p>
+<aside>(약 50초) KPI 관점의 첫 번째 원칙은 같은 양을 비교하는 것입니다. KPI는 계단처럼 쌓여 있습니다. 경로 이득은 장면과 재질만 있으면 되지만, RSRP는 안테나와 빔, RE당 전력이 더 필요하고, SINR은 이웃 셀 부하와 잡음 지수, CQI와 MCS, BLER는 링크 추상화와 링크 적응, 처리량은 스케줄러와 트래픽 모델, 핸드오버는 이동과 이동성 파라미터까지 필요합니다. 위로 갈수록 모델이 늘고 오차가 쌓이거나 서로 상쇄됩니다. 그래서 목적에 맞는 계단을 골라 거기서 맞춥니다. 커버리지 설계라면 RSRP, 용량과 체감이라면 SINR에서 처리량까지입니다. AIRMap 연구는 경로 이득 오차가 남아 있어도 보정 뒤 스펙트럼 효율과 BLER는 측정 채널과 거의 같았다고 보고합니다. 목적 KPI에서 직접 검증하는 것이 중요하다는 뜻입니다. 실측 쪽 정의는 ue-kpi-pipeline 덱을 참고하세요.</aside>
+</section>
+<section id="kpi2" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">KPI 관점 ② · 오차를 나눠 보고, 따로 검증한다</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">평균 하나로 보지 말고, 모양으로 원인을 좁힌다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:420px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">오차 모양</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">먼저 의심할 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:420px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">전체가 일정하게 어긋남</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">전력 정의 · 단말 이득 · 케이블 손실 · KPI 정의</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:420px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">섹터 · 방향마다 다름</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">방위각 · 빔 매칭 · 안테나 패턴</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:420px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">사이트 근처 · 높은 층에서 큼</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">세로 패턴 · 틸트 · 근접장</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:420px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">NLoS · 멀수록 커짐</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">재질 · 회절 · 반사 횟수 · 지도</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:420px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">특정 구역만 큼</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">건물 · 식생 누락 · GPS 오차</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:420px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">흩어짐만 큼</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">위치 오차 · 빈 크기 · 빠른 페이딩</p></div>
+</div>
+<div style="width:560px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">구역으로 묶어 비교</p><p style="font-size:24px;line-height:1.4;color:#4A5262">예: 10 m × 10 m 구역, 표본 20개 이상만 사용<br>(영국 도시 연구) · 실측 페이딩을 줄인다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">보정 · 검증 데이터 분리</p><p style="font-size:24px;line-height:1.4;color:#4A5262">보정에 안 쓴 경로 · 구역 · 셀로 검증<br>같은 데이터로 재면 과적합이 숨는다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">지표 묶음</p><p style="font-size:24px;line-height:1.4;color:#4A5262">평균 오차 · 표준편차 · RMSE · 누적분포 · LoS / NLoS 별 · 거리별</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">오차 모양별 진단은 경험적 출발점 · 구역 집계 예: arXiv 2510.09478 (10 × 10 m², 표본 20개 이상, 이상치 제외)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 16</p>
+<aside>(약 50초) 두 번째 원칙은 오차를 평균 하나로 보지 않는 것입니다. 오차의 모양이 원인을 알려 줍니다. 전체가 일정하게 어긋나면 전력이나 단말 이득, KPI 정의를, 섹터마다 다르면 방위각과 빔을, 사이트 근처와 높은 층에서 크면 세로 패턴과 틸트를, NLoS에서 멀수록 커지면 재질과 회절을, 특정 구역만 크면 건물이나 식생 누락을, 흩어짐만 크면 위치 오차와 빈 처리를 먼저 의심합니다. 비교 방법도 중요합니다. 영국 도시 연구는 10 m 구역으로 묶고 표본 20개 이상인 구역만 썼습니다. 그리고 보정에 쓰지 않은 경로나 셀로 따로 검증해야 합니다. 같은 데이터로 맞추고 같은 데이터로 재면 과적합이 숨어 버립니다. 지표도 평균, 표준편차, RMSE, 누적분포를 함께, LoS와 NLoS, 거리별로 나눠 봅니다.</aside>
+</section>
+<section id="scene1" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">Scene 관점 ① · 기하</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">건물이 틀리면 재질 보정도 틀린다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">데이터 출처</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">장점</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">주의</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">OpenStreetMap 건물 외곽선</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">무료 · 넓은 지역 · 자동화 쉬움</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">높이 누락 · 추정 높이 · 갱신 시차</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">국가 3D 건물 모델 · LiDAR</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">높이 · 형태가 정확</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">비용 · 갱신 주기 · 메시 정리 필요</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">3D 타일 · 사진 측량 메시</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">식생 · 지형 · 세부가 들어 있다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">삼각형이 많고 재질 구분이 없다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">지형 (DEM)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">언덕 · 경사에 의한 차폐</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">해상도 · 건물과 높이 기준 맞추기</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">OpenGERT 민감도 분석 (2025)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">재질을 조금 바꾸면 채널 통계 변화가 작지만<br>건물 높이 1 m · 위치 0.4 m 오차만으로도 크게 바뀐다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">식생 · 움직이는 물체</p><p style="font-size:24px;line-height:1.4;color:#4A5262">나무 · 계절 · 차량 · 사람 가림은 대부분 장면에 없다<br>Geo2SigMap도 예측 정확도에 영향을 주는 요인으로 꼽음</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">많이 넣는다고 좋아지지 않는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">TU Wien: 환경 정보가 많아도 늘 정확해지지 않음<br>틀린 디테일은 없는 것보다 나쁠 수 있다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">순서</b> 기하가 틀린 채로 재질을 보정하면 재질이 기하 오차를 흡수한다 → 기하를 먼저 확인 · 식생은 별도 손실이나 보정 대상으로</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">OpenGERT (arXiv 2501.06945) · Geo2SigMap (arXiv 2312.14303) · TU Wien VTC 2024</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 16</p>
+<aside>(약 50초) 장면 관점에서는 재질보다 기하가 먼저입니다. 건물 데이터는 OpenStreetMap 외곽선, 국가 3D 건물 모델이나 LiDAR, 구글 3D 타일 같은 사진 측량 메시, 지형 고도 자료에서 옵니다. 각각 장단점이 있습니다. OpenStreetMap은 넓고 무료지만 높이가 비거나 추정값이고, 메시는 식생과 세부까지 있지만 재질 구분이 없습니다. OpenGERT라는 2025년 연구는 Sionna 장면에서 재질을 조금 바꾸는 것보다 건물 높이 1 m, 위치 0.4 m 정도의 오차가 채널 통계를 훨씬 크게 바꾼다고 보고했습니다. 나무와 계절, 차량과 사람의 가림은 대부분 장면에 빠져 있습니다. 그렇다고 디테일을 무작정 넣는다고 좋아지지도 않습니다. TU Wien 연구도 환경 정보가 많아도 늘 정확해지지는 않았다고 합니다. 기하가 틀린 채로 재질을 보정하면 재질이 기하 오차를 흡수하니, 기하부터 확인해야 합니다.</aside>
+</section>
+<section id="scene2" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">Scene 관점 ② · 재질 보정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">재질을 학습한다: 미분 가능한 레이 트레이싱</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="position:relative;width:1180px;height:310px">
+<svg aria-label="보정 루프. 장면과 재질 파라미터를 Sionna RT에 넣어 시뮬 RSRP를 얻고, 실측과의 차이를 손실로 계산해 기울기를 구한 뒤 Adam으로 재질을 갱신하고 다시 반복한다" style="position:absolute;left:0px;top:0px;width:1180px;height:310px" width="1180" height="310" viewBox="0 0 1180 310"><rect x="0" y="0" width="300" height="110" rx="14" fill="#14213D"/><rect x="440" y="0" width="300" height="110" rx="14" fill="#14213D"/><rect x="880" y="0" width="300" height="110" rx="14" fill="#14213D"/><rect x="880" y="190" width="300" height="110" rx="14" fill="#D5E3F3"/><rect x="440" y="190" width="300" height="110" rx="14" fill="#D5E3F3"/><rect x="0" y="190" width="300" height="110" rx="14" fill="#D5E3F3"/><line x1="304.0" y1="55.0" x2="424.0" y2="55.0" stroke="#A84A16" stroke-width="4"/><polygon points="436.0,55.0 424.0,49.0 424.0,61.0" fill="#A84A16"/><line x1="744.0" y1="55.0" x2="864.0" y2="55.0" stroke="#A84A16" stroke-width="4"/><polygon points="876.0,55.0 864.0,49.0 864.0,61.0" fill="#A84A16"/><line x1="1030.0" y1="114.0" x2="1030.0" y2="174.0" stroke="#A84A16" stroke-width="4"/><polygon points="1030.0,186.0 1036.0,174.0 1024.0,174.0" fill="#A84A16"/><line x1="876.0" y1="245.0" x2="756.0" y2="245.0" stroke="#255E9E" stroke-width="4"/><polygon points="744.0,245.0 756.0,251.0 756.0,239.0" fill="#255E9E"/><line x1="436.0" y1="245.0" x2="316.0" y2="245.0" stroke="#255E9E" stroke-width="4"/><polygon points="304.0,245.0 316.0,251.0 316.0,239.0" fill="#255E9E"/><line x1="150.0" y1="186.0" x2="150.0" y2="126.0" stroke="#255E9E" stroke-width="4"/><polygon points="150.0,114.0 144.0,126.0 156.0,126.0" fill="#255E9E"/></svg>
+<p style="position:absolute;left:0px;top:36px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#F5F3EE">장면 + 재질 θ</p>
+<p style="position:absolute;left:440px;top:22px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#F5F3EE">Sionna RT<br>(미분 가능)</p>
+<p style="position:absolute;left:880px;top:36px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#F5F3EE">시뮬 RSRP</p>
+<p style="position:absolute;left:880px;top:212px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">실측과 차이<br>L(θ)</p>
+<p style="position:absolute;left:440px;top:226px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">기울기 ∂L/∂θ</p>
+<p style="position:absolute;left:0px;top:226px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">θ 갱신 (Adam)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">학습 대상</p><p style="font-size:24px;line-height:1.4;color:#4A5262">유전율 · 전도율 · 표면 산란<br>(안테나 패턴도 가능)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">영국 도시 예</p><p style="font-size:24px;line-height:1.4;color:#4A5262">전부 콘크리트로 시작 · 구역 주변 100 m 건물 묶어 Adam 600스텝</p></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">출발점</p><p style="font-size:24px;line-height:1.4;color:#4A5262">ITU-R P.2040 재질값 (콘크리트 · 유리 · 벽돌 …)<br>Sionna RT 기본 재질도 이 값을 쓴다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">답이 하나가 아니다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">다른 유전율 · 전도율 조합이 비슷한 결과를 낸다<br>→ 물리값이 아니라 “맞추는 손잡이”로 다룬다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">미분이 안 되는 시뮬레이터</p><p style="font-size:24px;line-height:1.4;color:#4A5262">블랙박스로 보고 베이지안 최적화<br>지난 보정 결과로 시작해 호출 수를 줄인다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Hoydis et al. 2023 (arXiv 2311.18558) · 영국 도시 (arXiv 2510.09478) · Konar et al. ICC 2024 · AODT</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 16</p>
+<aside>(약 55초) 재질 보정의 대표적인 방법은 미분 가능한 레이 트레이싱입니다. Sionna RT는 결과를 재질 파라미터로 미분할 수 있어서, 장면과 재질로 RSRP를 계산하고, 실측과의 차이를 손실로 잡은 뒤, 기울기를 따라 재질을 갱신하는 과정을 신경망 학습처럼 반복할 수 있습니다. NVIDIA의 Hoydis 등은 재질, 산란, 안테나 패턴까지 이렇게 학습하는 방법을 제안하고 실내 채널 측정으로 검증했습니다. 영국 도시 연구는 모든 건물을 콘크리트로 시작해 구역 주변 건물을 묶어 Adam으로 600스텝 학습했고, 앞에서 본 바이어스 제거 결과를 얻었습니다. 출발점은 ITU-R P.2040의 재질값입니다. 주의할 점은 답이 하나가 아니라는 것입니다. 서로 다른 조합이 비슷한 결과를 내므로, 보정된 값을 물리적 재질값이 아니라 맞추는 손잡이로 봐야 합니다. 미분이 안 되는 시뮬레이터는 베이지안 최적화로 블랙박스 보정을 하고, NVIDIA AODT도 SS-RSRP로 보정하는 기능을 넣었습니다.</aside>
+</section>
+<section id="scene3" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">Scene 관점 ③ · 전파 엔진 설정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">설정이 모자라면 재질 보정이 그 몫까지 떠안는다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">설정</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">모자라거나 틀리면</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">확인 · 대처</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">최대 반사 횟수</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">깊은 NLoS가 지나치게 약함</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">횟수를 늘려 결과가 수렴하는지</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">회절</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">건물 모서리 뒤 그림자가 너무 깊음</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">켜고 / 끄고 비교 (AODT는 경로당 1회)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">확산 산란</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">먼 NLoS 과소 · 페이딩 통계 차이</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">산란 계수도 보정 대상에</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">투과 · 실내 (O2I)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">실내 · 차량 단말을 과대 예측</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">실내 / 실외 분리, 침투 손실 모델</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">광선 수 · 지도 셀</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">지도에 구멍 · 잡음 · 다른 평균</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">샘플을 늘려 수렴 · 셀 크기 = 실측 빈</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">안테나 근처 (근접장)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">원거리장 가정이 깨져 오차</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">원거리장 거리 안쪽은 비교에서 제외</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">원칙</b> 엔진 설정은 “맞추는 값”이 아니라 “수렴시키는 값” — 늘려도 결과가 그대로일 때까지 먼저 키우고, 그다음 재질을 보정한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">AODT FAQ (경로당 회절 1회) · Rauf et al. 2026 (arXiv 2605.10352) · 실내 손실: TR 38.901 7.4.3</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 16</p>
+<aside>(약 50초) 전파 엔진의 설정도 장면의 일부입니다. 반사 횟수가 모자라면 깊은 NLoS가 지나치게 약해지고, 회절을 끄면 건물 모서리 뒤 그림자가 너무 깊어집니다. 참고로 NVIDIA AODT는 경로당 회절을 한 번만 지원합니다. 확산 산란이 없으면 먼 NLoS를 과소 예측하고, 투과와 실내 손실을 잘못 다루면 실내나 차량 단말을 과대 예측합니다. 광선 수가 적으면 지도에 구멍과 잡음이 생기고, 지도 셀 크기가 실측 빈과 다르면 평균이 달라집니다. 또 2026년 연구는 Sionna와 VNA 측정을 비교해, 재질 불일치와 함께 안테나 근처의 근접장 전이 구간이 큰 오차 원인이라고 보고했습니다. 원칙은 엔진 설정을 맞추는 값이 아니라 수렴시키는 값으로 보는 것입니다. 늘려도 결과가 그대로일 때까지 키운 뒤에 재질을 보정해야, 재질이 엔진의 부족함을 떠안지 않습니다.</aside>
+</section>
+<section id="netcfg" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">망 설정 관점</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">시뮬레이터의 기지국이 실제 기지국과 같은가</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">항목</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">어디서 가져오나</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">틀리면 보이는 모양</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">위치 · 높이</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">현장 조사 · 도면 · GPS</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">거리별 바이어스 · 그림자 위치 어긋남</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">방위각 · 기계 틸트</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">현장 사진 · 측량 · 설치 기록</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">섹터 경계 · 방향마다 다른 오차</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">전기 틸트 · 빔 가중치</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">CM 설정 · 벤더 빔 표 (짝 맞추기)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">사이트 근처 · 높은 층 오차</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">송신 전력 · RE 전력</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">CM (ss-PBCH-BlockPower 등)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">전체가 일정하게 어긋남</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">안테나 패턴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">벤더 패턴 파일 (3D, 편파)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">부엽 · 뒤쪽 · 사이트 아래</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">급전 · 결합 손실</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">패시브 안테나의 케이블 · 커넥터</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">셀마다 일정한 차이</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">추정값도 오차 원인</p><p style="font-size:24px;line-height:1.4;color:#4A5262">공개 데이터셋은 기지국 위치 · 방위각 · 높이를 “추정”해 준다<br>(Vienna 드라이브 테스트 데이터셋) — 실제 CM과 대조</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">설정은 바뀐다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">틸트 · 출력 · 빔 설정은 운용 중 바뀐다<br>측정 날짜의 CM 이력과 맞춘다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">빔 · 틸트 입력: sionna-rsrp-beam 덱 · Vienna 4G/5G Drive-Test Dataset (arXiv 2603.02638)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 16</p>
+<aside>(약 50초) 망 설정은 가장 흔하고 가장 큰 바이어스 원인입니다. 시뮬레이터 속 기지국이 실제와 같은지부터 확인합니다. 위치와 높이가 틀리면 거리별 바이어스가, 방위각과 기계 틸트가 틀리면 섹터마다 다른 오차가, 전기 틸트와 빔 가중치의 짝이 틀리면 사이트 근처와 높은 층 오차가 생깁니다. 송신 전력 정의가 틀리면 전체가 일정하게 어긋나고, 패턴 파일이 틀리면 부엽과 뒤쪽이, 패시브 안테나라면 급전 손실이 셀마다 일정한 차이를 만듭니다. 공개 데이터셋 중 Vienna 드라이브 테스트 데이터셋은 기지국 위치와 방위각, 높이를 추정해서 제공하는데, 이런 추정값 자체도 오차 원인이니 실제 CM과 대조해야 합니다. 그리고 설정은 운용 중 바뀌므로 측정 날짜의 이력과 맞춥니다. 빔과 틸트 입력은 sionna-rsrp-beam 덱에서 자세히 다뤘습니다.</aside>
+</section>
+<section id="traffic1" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트래픽 관점 ① · 부하가 간섭을 정한다</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RSRP는 맞는데 SINR이 틀리면 부하를 의심한다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.55;color:#F5F3EE;white-space:nowrap">SINR = S ÷ (Σj αj · Ij + N)    <span style="color:#C9D3E3">α_j = 이웃 셀 j가 실제로 보내는 비율 (부하)</span></p></div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;color:#14213D">예: 신호 −90 dBm, 이웃 2개 각 −95 dBm, 잡음 −110 dBm</p>
+<div style="position:relative;width:1000px;height:290px">
+<svg aria-label="이웃 셀 부하에 따른 SINR. 100%면 1.9 dB, 50%면 4.9 dB, 30%면 7.0 dB, 0%면 20 dB" style="position:absolute;left:180px;top:0px;width:820px;height:290px" width="820" height="290" viewBox="0 0 820 290"><rect x="0" y="10" width="65" height="48" rx="8" fill="#A84A16"/><rect x="0" y="80" width="167" height="48" rx="8" fill="#255E9E"/><rect x="0" y="150" width="238" height="48" rx="8" fill="#255E9E"/><rect x="0" y="220" width="680" height="48" rx="8" fill="#255E9E"/></svg>
+<p style="position:absolute;left:259px;top:18px;width:200px;font-size:24px;font-weight:700;color:#A84A16">1.9 dB</p>
+<p style="position:absolute;left:361px;top:88px;width:200px;font-size:24px;font-weight:700;color:#255E9E">4.9 dB</p>
+<p style="position:absolute;left:432px;top:158px;width:200px;font-size:24px;font-weight:700;color:#255E9E">7.0 dB</p>
+<p style="position:absolute;left:874px;top:228px;width:200px;font-size:24px;font-weight:700;color:#255E9E">20.0 dB</p>
+<p style="position:absolute;left:0px;top:18px;width:170px;font-size:24px;font-weight:600;color:#14213D">이웃 부하 100%</p>
+<p style="position:absolute;left:0px;top:88px;width:170px;font-size:24px;font-weight:600;color:#14213D">이웃 부하 50%</p>
+<p style="position:absolute;left:0px;top:158px;width:170px;font-size:24px;font-weight:600;color:#14213D">이웃 부하 30%</p>
+<p style="position:absolute;left:0px;top:228px;width:170px;font-size:24px;font-weight:600;color:#14213D">이웃 부하 0%</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">부하는 OSS에서</p><p style="font-size:24px;line-height:1.4;color:#4A5262">셀 · 시간대별 PRB 사용률 → α<br>측정 시각과 같은 시간대 값을 쓴다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">full buffer는 극단</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모든 셀이 늘 보내면 SINR이 가장 낮다<br>간헐 트래픽은 SINR이 높고, 부하가 오르면 full buffer에 가까워진다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> RSRP · SS 측정은 부하와 거의 무관하지만 RSRQ · SINR · 처리량은 부하에 따라 수 dB씩 움직인다 — 부하를 모르면 품질 KPI는 맞출 수 없다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시는 덱에서 직접 계산 · 간헐 vs full buffer: arXiv 1408.3942 · 3GPP 부하 예: TR 36.897</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 16</p>
+<aside>(약 55초) 트래픽 관점의 핵심은 부하가 간섭을 정한다는 것입니다. SINR의 분모에는 이웃 셀 간섭이 들어가는데, 이웃 셀이 실제로 얼마나 자주 보내는지, 즉 부하에 따라 간섭이 달라집니다. 예를 들어 신호가 마이너스 90 dBm이고 이웃 두 셀이 각각 마이너스 95 dBm일 때, 이웃이 늘 보내면 SINR은 1.9 dB, 절반만 보내면 4.9, 30퍼센트면 7, 아예 안 보내면 20 dB입니다. 같은 RSRP에서 SINR이 18 dB나 달라집니다. 그래서 RSRP는 맞는데 SINR과 처리량이 틀리면 부하를 먼저 의심합니다. 부하는 OSS의 셀별, 시간대별 PRB 사용률에서 가져와, 측정 시각과 같은 시간대 값을 씁니다. 많은 시뮬레이션이 쓰는 full buffer, 즉 모든 셀이 늘 보내는 가정은 SINR이 가장 낮은 극단입니다. 간헐적인 트래픽에서는 SINR이 높고 부하가 오를수록 full buffer에 가까워진다는 연구가 있습니다. 3GPP 평가도 자원 사용률 20, 50, 70퍼센트처럼 부하를 나눠 봅니다.</aside>
+</section>
+<section id="traffic2" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트래픽 관점 ② · 사용자 · 시간 · 스케줄러</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">처리량을 맞추려면 누가, 언제, 어떻게 받는지까지</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">01</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">시간 맞추기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">드라이브 테스트 시각의 OSS 부하(15분 · 1시간)를 쓴다<br>출퇴근 · 주말 · 행사로 부하가 크게 달라진다</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">02</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">측정 단말 자신도 부하</p><p style="font-size:24px;line-height:1.4;color:#4A5262">테스트 단말이 full buffer로 내려받으면<br>서빙 셀 부하가 올라간다 — 시뮬레이션에도 넣는다</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">03</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">사용자 분포</p><p style="font-size:24px;line-height:1.4;color:#4A5262">MDT · 크라우드 데이터로 어디에 몇 명이 있는지<br>3GPP 평가 시나리오는 단말의 80%를 실내로 둔다</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">04</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">스케줄러 · 링크 적응</p><p style="font-size:24px;line-height:1.4;color:#4A5262">처리량 KPI는 스케줄러 · OLLA · MCS 표에 좌우<br>먼저 3GPP 기준 결과로 보정된 시뮬레이터를 쓴다 (5G-LENA 등)</p></div>
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">05</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">트래픽 모델</p><p style="font-size:24px;line-height:1.4;color:#4A5262">full buffer · FTP · 비디오 · 웹 — 측정 시나리오와 같게<br>TCP 측정은 혼잡 동작이 섞여 모델과 어긋나기 쉽다</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">06</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">자동 보정</p><p style="font-size:24px;line-height:1.4;color:#4A5262">디지털 트윈을 블랙박스로 보고 베이지안 최적화로 파라미터 탐색<br>지난 보정을 재사용해 시뮬레이터 호출을 줄인다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">5G-LENA (arXiv 2205.03278) · Aalto 석사 논문 (TCP) · Konar et al. ICC 2024 · 실내 80%: 3GPP 평가</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 16</p>
+<aside>(약 50초) 처리량까지 맞추려면 누가, 언제, 어떻게 받는지까지 맞춰야 합니다. 먼저 드라이브 테스트 시각의 OSS 부하를 씁니다. 같은 셀도 출퇴근 시간과 주말의 부하가 크게 다릅니다. 측정 단말 자신도 부하입니다. 테스트 단말이 계속 내려받으면 서빙 셀이 바빠지므로 시뮬레이션에도 넣어야 합니다. 사용자 분포는 MDT나 크라우드 데이터로 추정하고, 참고로 3GPP 평가 시나리오는 단말의 80퍼센트를 실내로 둡니다. 처리량은 스케줄러와 링크 적응에 크게 좌우되므로, 5G-LENA처럼 3GPP 기준 결과로 먼저 보정된 시뮬레이터를 쓰는 것이 출발점입니다. 트래픽 모델도 측정 시나리오와 맞추고, TCP 측정은 혼잡 동작이 섞여 모델과 어긋나기 쉽다는 점을 기억해야 합니다. 마지막으로 이런 파라미터를 사람이 다 맞추기 어렵기 때문에, 디지털 트윈을 블랙박스로 보고 베이지안 최적화로 자동 탐색하는 연구도 나와 있습니다.</aside>
+</section>
+<section id="ue1" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">단말 관점 ① · 안테나 · 몸 · 차량</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“단말 = 등방성 0 dBi 점”이라는 가정을 의심한다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">항목</p><p style="flex:0.8;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">흔한 가정</p><p style="flex:1.25;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">현실</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">맞추는 법</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">안테나 패턴</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">등방성 0 dBi</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">방향성 · 손과 머리 가림 · 기울기<br>(TR 38.901 Rel-19에 휴대폰 안테나 · 가림 모델 추가)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">단말 종류별 오프셋 측정 또는 Rel-19 모델</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">수신 안테나 수</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">1개</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">2~4개 · 결합 방식은 칩셋마다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">측정한 단말 그대로 모델링</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">높이 · 위치</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">1.5 m 실외</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">차 지붕 · 차 안 · 보행 · 실내</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">측정 조건대로 장면에 배치</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">차량 손실</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">없음</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">TR 38.901 차량 침투 손실: 평균 9 dB, 표준편차 5 dB (금속 코팅 유리 20 dB)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">차 안 측정이면 반영</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">실내 (O2I)</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">없음</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">건물 침투 손실 (저손실 · 고손실 모델)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">실내 / 실외 측정을 나눠 비교</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">측정 정확도</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">완벽</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">규격(TS 38.133)이 단말 측정 오차를 수 dB까지 허용</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">여러 단말 · 스캐너로 교차 확인</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">실무</b> 단말 종류가 바뀌면 같은 자리에서도 수 dB가 달라진다 — Geo2SigMap도 단말 3종의 측정을 섞어 썼다 · 비교는 같은 단말끼리, 아니면 단말별 오프셋을 따로 보정</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TR 38.901 7.4.3 (O2I · 차량 손실) · Rel-19 단말 안테나 모델 (arXiv 2509.10357) · TS 38.133</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 16</p>
+<aside>(약 50초) 단말 관점에서는 단말을 등방성 0 dBi 점으로 두는 가정을 의심해야 합니다. 실제 휴대폰 안테나는 방향성이 있고, 손과 머리가 가리며, 기울기에 따라 달라집니다. 3GPP는 Rel-19에서 TR 38.901에 휴대폰 안테나 패턴과 손, 머리 가림 모델을 추가했습니다. 수신 안테나도 2개에서 4개이고, 결합 방식은 칩셋마다 다릅니다. 측정 위치가 차 지붕인지 차 안인지도 중요합니다. TR 38.901의 차량 침투 손실은 평균 9 dB, 표준편차 5 dB이고, 금속 코팅 유리면 20 dB까지 봅니다. 실내라면 건물 침투 손실이 더해집니다. 그리고 규격 자체가 단말 측정 오차를 수 dB까지 허용합니다. 그래서 단말 종류가 바뀌면 같은 자리에서도 수 dB가 달라집니다. 비교는 같은 단말끼리 하거나, 단말별 오프셋을 따로 보정하는 것이 실무적인 방법입니다.</aside>
+</section>
+<section id="ue2" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">단말 관점 ② · 단말처럼 재고 움직이기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">단말의 측정 절차와 동작까지 흉내 내야 KPI가 같아진다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:170px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">시뮬레이션 쪽<br>단말 모델</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">채널<br>(경로 · 빔별)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">L1 측정<br>→ 빔 통합 → L3</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">셀 선택 · 핸드오버<br>(A3 · TTT · 히스테리시스)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">CQI · RI 결정<br>→ 링크 적응</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">단말이 볼 KPI</p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">길 ① 단말 모델을 시뮬레이션에</p><p style="font-size:24px;line-height:1.4;color:#4A5262">측정 필터 · 빔 통합 · 이동성 파라미터 · 링크 적응을<br>망 설정 그대로 넣는다 (시스템 레벨 시뮬레이터)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">길 ② 실제 단말을 시뮬레이션 채널에</p><p style="font-size:24px;line-height:1.4;color:#4A5262">시뮬레이션 채널 → 채널 에뮬레이터 → 실제 기지국 · 단말<br>(하드웨어 인 더 루프)</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">길 ②의 예 (2026)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Sionna RT 채널과 VNA로 잰 채널을 각각 에뮬레이터에 넣어<br>OAI 기지국 + 상용 모듈로 RSRP · PUCCH SNR · SINR 비교<br>→ 재질 불일치 · 근접장이 KPI 차이의 원인</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">스캐너 vs 단말</p><p style="font-size:24px;line-height:1.4;color:#4A5262">스캐너: 빔별 값 · 단말 동작이 섞이지 않음 → 채널 검증용<br>단말: 실제 체감 · 동작 포함 → KPI 검증용</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Rauf et al. 2026 (arXiv 2605.10352) · 측정 · 이동성: TS 38.331 · 실측 KPI: ue-kpi-pipeline 덱</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 16</p>
+<aside>(약 50초) 채널이 맞아도 단말이 재고 움직이는 방식을 흉내 내지 않으면 KPI는 달라집니다. 단말은 L1 측정을 빔 통합과 L3 필터로 거르고, A3 이벤트와 TTT로 핸드오버를 결정하고, CQI와 RI로 링크 적응을 이끕니다. 맞추는 길은 둘입니다. 첫째는 단말 모델을 시뮬레이션에 넣는 것입니다. 측정 필터와 이동성 파라미터를 실제 망 설정 그대로 시스템 레벨 시뮬레이터에 넣습니다. 둘째는 실제 단말을 시뮬레이션 채널에 넣는 하드웨어 인 더 루프입니다. 2026년 연구는 Sionna 채널과 VNA로 잰 채널을 각각 채널 에뮬레이터에 넣고 OAI 기지국과 상용 모듈로 RSRP, PUCCH SNR, SINR을 비교해, 재질 불일치와 근접장이 KPI 차이의 원인임을 보였습니다. 그리고 스캐너는 단말 동작이 섞이지 않은 채널 검증용으로, 단말은 실제 체감을 보는 KPI 검증용으로 나눠 쓰면 좋습니다.</aside>
+</section>
+<section id="methods" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">방법 · 물리 보정과 데이터 보정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">물리로 큰 틀을, 데이터로 남은 오차를</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">방법</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무엇을 고치나</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">장점</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">주의</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">미분 레이 트레이싱 보정</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">재질 · 산란 · 안테나 패턴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">물리 의미 유지 · 설정 변경 예측 가능</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">기하 오차 흡수 · 답이 여럿</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">블랙박스 최적화 (BO)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">시뮬레이터 파라미터 묶음</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">미분 안 되는 툴에도 적용</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">호출 비용 · 탐색 범위 설정</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">경험 모델 튜닝 (상용 툴)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">경로손실 식의 계수</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">빠르고 익숙함</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">보정 뒤 표준편차 6 dB대 · 지역 의존</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">ML 잔차 보정 · 하이브리드</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">시뮬레이션과 측정의 차이</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">측정 근처에서 정확 (Geo2SigMap · AIRMap)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">측정 없는 곳 · 바뀐 설정에 약함</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">대규모 단말 데이터 (MDT · 크라우드)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">넓은 지역의 바이어스</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">드라이브 테스트보다 많고 싸다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">위치 오차 큼 → 걸러야 함</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">왜 둘 다 필요한가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">ML 보정은 “지금 이 설정”의 지도를 잘 맞추지만<br>틸트를 바꾸면 어떻게 될지는 물리 모델이 답한다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">공개 데이터 · 도구</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Vienna 4G/5G 드라이브 테스트 데이터셋 · Sionna RT / SYS<br>NVIDIA AODT · 5G-LENA · OpenGERT</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처는 README (미분 RT · BO · 경험 모델 · Geo2SigMap · AIRMap · MDT · Vienna 데이터셋)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 16</p>
+<aside>(약 50초) 방법을 정리하면 크게 물리 보정과 데이터 보정입니다. 미분 레이 트레이싱 보정은 재질과 산란, 안테나 패턴을 고쳐 물리 의미를 유지하므로, 틸트나 출력을 바꿨을 때를 예측할 수 있습니다. 미분이 안 되는 툴은 베이지안 최적화 같은 블랙박스 탐색을 씁니다. 상용 툴의 경험 모델 튜닝은 빠르지만 보정 뒤에도 표준편차 6 dB대가 남고 지역에 따라 다릅니다. ML 잔차 보정과 하이브리드 방법은 Geo2SigMap이나 AIRMap처럼 측정이 있는 곳 근처에서는 정확하지만, 측정이 없는 곳이나 바뀐 설정에는 약합니다. MDT나 크라우드 데이터는 양이 많지만 위치 오차가 커서 걸러야 합니다. 그래서 둘 다 필요합니다. 물리 모델로 큰 틀을 잡고, 데이터로 남은 오차를 줄이는 하이브리드가 최근 흐름입니다.</aside>
+</section>
+<section id="workflow" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">정리 · 작업 순서</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">한 번에 다 맞추지 말고, 큰 바이어스부터 한 층씩</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">단계</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">할 일</p><p style="flex:0.85;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">통과 기준</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">1</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">정의 맞추기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">실측 KPI의 원천 · 정의 · 집계 확인 (L1 / L3, 빔 / 셀, 빈)</p><p style="flex:0.85;font-size:24px;line-height:1.35;color:#4A5262">같은 양을 비교한다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">2</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">망 설정</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">CM · 현장 조사로 위치 · 방위 · 틸트 · 출력 · 빔 짝</p><p style="flex:0.85;font-size:24px;line-height:1.35;color:#4A5262">섹터별 바이어스 제거</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">3</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">Scene 기하</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">건물 높이 · 위치 · 지형 · 식생 확인</p><p style="flex:0.85;font-size:24px;line-height:1.35;color:#4A5262">특정 구역 큰 오차 해소</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">4</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">엔진 수렴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">반사 횟수 · 회절 · 산란 · 광선 수 · 셀 크기</p><p style="flex:0.85;font-size:24px;line-height:1.35;color:#4A5262">늘려도 결과가 그대로</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">5</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">재질 보정</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">미분 RT · BO, 보정 / 검증 데이터 분리</p><p style="flex:0.85;font-size:24px;line-height:1.35;color:#4A5262">검증 구역 바이어스 ≈ 0</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">6</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">단말 · 트래픽</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">단말 오프셋 · 차량 손실 · 부하 α · 사용자 분포</p><p style="flex:0.85;font-size:24px;line-height:1.35;color:#4A5262">SINR · 처리량 분포 일치</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">7</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">KPI 검증 · 유지</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">목적 KPI로 검증, 설정 변경 · 새 측정 반영</p><p style="flex:0.85;font-size:24px;line-height:1.35;color:#4A5262">다음 측정에서도 유지</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">습관</b> 바꾼 것과 결과를 단계마다 기록한다 — 보정은 한 번의 이벤트가 아니라 망이 바뀔 때마다 이어지는 과정이다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">덱의 정리 · 단계 순서는 오차 크기와 의존 관계에 따른 권장안</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 16</p>
+<aside>(약 50초) 실무 순서로 정리하겠습니다. 첫째, 실측 KPI의 정의를 확인해 같은 양을 비교합니다. 둘째, 망 설정을 맞춰 섹터별 바이어스를 없앱니다. 셋째, 장면의 기하를 확인합니다. 넷째, 전파 엔진 설정을 늘려도 결과가 그대로일 때까지 수렴시킵니다. 다섯째, 그때 비로소 재질을 보정하고, 보정에 쓰지 않은 데이터로 검증합니다. 여섯째, 단말 오프셋과 차량 손실, 부하와 사용자 분포를 넣어 SINR과 처리량 분포를 맞춥니다. 일곱째, 목적 KPI로 검증하고, 설정이 바뀌거나 새 측정이 오면 다시 반영합니다. 순서를 지키는 이유는 앞 단계의 오차를 뒷 단계가 엉뚱하게 흡수하지 않게 하려는 것입니다. 그리고 단계마다 무엇을 바꿨고 결과가 어떻게 됐는지 기록하세요. 보정은 한 번으로 끝나지 않고, 망이 바뀔 때마다 이어지는 과정입니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">같은 양을, 큰 오차부터, 따로 검증하며</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px"><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">KPI</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">정의 · 집계를 맞추고<br>목적 KPI의 계단에서 검증</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">Scene</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">기하 먼저 → 엔진 수렴<br>→ 재질 보정 (미분 RT · BO)</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F5F3EE">망 설정</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">CM · 현장 조사로<br>빔 · 틸트 · 출력 · 위치</p></div></div>
+<div style="display:flex;flex-direction:row;gap:14px"><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">트래픽</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">OSS 부하로 간섭을<br>측정 시각 · 사용자 분포까지</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">단말</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">안테나 · 몸 · 차량 손실<br>측정 절차 · 이동성 동작</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F5F3EE">방법</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">물리로 큰 틀<br>데이터로 남은 오차</p></div></div>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">다음 단계 제안: [대상 클러스터]에서 스캐너 빔별 RSRP로 1~5단계 → 단말 KPI로 6~7단계 · 보정 / 검증 경로를 미리 나눈다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">함께 볼 자료: sionna-rsrp-beam (빔 입력) · ue-kpi-pipeline (실측 KPI 산출) · rf-modeling-tools (모델 보정 도구)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">16 / 16</p>
+<aside>(약 40초) 정리하겠습니다. 시뮬레이션을 실측에 맞추는 노력은 한 줄로 말하면, 같은 양을, 큰 오차부터, 따로 검증하며 맞추는 것입니다. KPI 관점에서는 정의와 집계를 맞추고 목적 KPI에서 검증합니다. 장면은 기하를 먼저, 엔진을 수렴시킨 뒤 재질을 보정합니다. 망 설정은 CM과 현장 조사로 확인하고, 트래픽은 OSS 부하로 간섭을, 단말은 안테나와 몸, 차량 손실, 측정과 이동 동작을 반영합니다. 방법은 물리로 큰 틀을, 데이터로 남은 오차를 줄이는 것입니다. 다음 단계로는 대상 클러스터에서 스캐너의 빔별 RSRP로 앞의 다섯 단계를 하고, 단말 KPI로 나머지를 검증하되, 보정용과 검증용 경로를 미리 나눠 두는 것을 권합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

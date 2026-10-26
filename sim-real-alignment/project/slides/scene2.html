@@ -1,0 +1,29 @@
+<section id="scene2" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">Scene 관점 ② · 재질 보정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">재질을 학습한다: 미분 가능한 레이 트레이싱</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="position:relative;width:1180px;height:310px">
+<svg aria-label="보정 루프. 장면과 재질 파라미터를 Sionna RT에 넣어 시뮬 RSRP를 얻고, 실측과의 차이를 손실로 계산해 기울기를 구한 뒤 Adam으로 재질을 갱신하고 다시 반복한다" style="position:absolute;left:0px;top:0px;width:1180px;height:310px" width="1180" height="310" viewBox="0 0 1180 310"><rect x="0" y="0" width="300" height="110" rx="14" fill="#14213D"/><rect x="440" y="0" width="300" height="110" rx="14" fill="#14213D"/><rect x="880" y="0" width="300" height="110" rx="14" fill="#14213D"/><rect x="880" y="190" width="300" height="110" rx="14" fill="#D5E3F3"/><rect x="440" y="190" width="300" height="110" rx="14" fill="#D5E3F3"/><rect x="0" y="190" width="300" height="110" rx="14" fill="#D5E3F3"/><line x1="304.0" y1="55.0" x2="424.0" y2="55.0" stroke="#A84A16" stroke-width="4"/><polygon points="436.0,55.0 424.0,49.0 424.0,61.0" fill="#A84A16"/><line x1="744.0" y1="55.0" x2="864.0" y2="55.0" stroke="#A84A16" stroke-width="4"/><polygon points="876.0,55.0 864.0,49.0 864.0,61.0" fill="#A84A16"/><line x1="1030.0" y1="114.0" x2="1030.0" y2="174.0" stroke="#A84A16" stroke-width="4"/><polygon points="1030.0,186.0 1036.0,174.0 1024.0,174.0" fill="#A84A16"/><line x1="876.0" y1="245.0" x2="756.0" y2="245.0" stroke="#255E9E" stroke-width="4"/><polygon points="744.0,245.0 756.0,251.0 756.0,239.0" fill="#255E9E"/><line x1="436.0" y1="245.0" x2="316.0" y2="245.0" stroke="#255E9E" stroke-width="4"/><polygon points="304.0,245.0 316.0,251.0 316.0,239.0" fill="#255E9E"/><line x1="150.0" y1="186.0" x2="150.0" y2="126.0" stroke="#255E9E" stroke-width="4"/><polygon points="150.0,114.0 144.0,126.0 156.0,126.0" fill="#255E9E"/></svg>
+<p style="position:absolute;left:0px;top:36px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#F5F3EE">장면 + 재질 θ</p>
+<p style="position:absolute;left:440px;top:22px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#F5F3EE">Sionna RT<br>(미분 가능)</p>
+<p style="position:absolute;left:880px;top:36px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#F5F3EE">시뮬 RSRP</p>
+<p style="position:absolute;left:880px;top:212px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">실측과 차이<br>L(θ)</p>
+<p style="position:absolute;left:440px;top:226px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">기울기 ∂L/∂θ</p>
+<p style="position:absolute;left:0px;top:226px;width:300px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">θ 갱신 (Adam)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">학습 대상</p><p style="font-size:24px;line-height:1.4;color:#4A5262">유전율 · 전도율 · 표면 산란<br>(안테나 패턴도 가능)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">영국 도시 예</p><p style="font-size:24px;line-height:1.4;color:#4A5262">전부 콘크리트로 시작 · 구역 주변 100 m 건물 묶어 Adam 600스텝</p></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">출발점</p><p style="font-size:24px;line-height:1.4;color:#4A5262">ITU-R P.2040 재질값 (콘크리트 · 유리 · 벽돌 …)<br>Sionna RT 기본 재질도 이 값을 쓴다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">답이 하나가 아니다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">다른 유전율 · 전도율 조합이 비슷한 결과를 낸다<br>→ 물리값이 아니라 “맞추는 손잡이”로 다룬다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">미분이 안 되는 시뮬레이터</p><p style="font-size:24px;line-height:1.4;color:#4A5262">블랙박스로 보고 베이지안 최적화<br>지난 보정 결과로 시작해 호출 수를 줄인다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Hoydis et al. 2023 (arXiv 2311.18558) · 영국 도시 (arXiv 2510.09478) · Konar et al. ICC 2024 · AODT</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 16</p>
+<aside>(약 55초) 재질 보정의 대표적인 방법은 미분 가능한 레이 트레이싱입니다. Sionna RT는 결과를 재질 파라미터로 미분할 수 있어서, 장면과 재질로 RSRP를 계산하고, 실측과의 차이를 손실로 잡은 뒤, 기울기를 따라 재질을 갱신하는 과정을 신경망 학습처럼 반복할 수 있습니다. NVIDIA의 Hoydis 등은 재질, 산란, 안테나 패턴까지 이렇게 학습하는 방법을 제안하고 실내 채널 측정으로 검증했습니다. 영국 도시 연구는 모든 건물을 콘크리트로 시작해 구역 주변 건물을 묶어 Adam으로 600스텝 학습했고, 앞에서 본 바이어스 제거 결과를 얻었습니다. 출발점은 ITU-R P.2040의 재질값입니다. 주의할 점은 답이 하나가 아니라는 것입니다. 서로 다른 조합이 비슷한 결과를 내므로, 보정된 값을 물리적 재질값이 아니라 맞추는 손잡이로 봐야 합니다. 미분이 안 되는 시뮬레이터는 베이지안 최적화로 블랙박스 보정을 하고, NVIDIA AODT도 SS-RSRP로 보정하는 기능을 넣었습니다.</aside>
+</section>

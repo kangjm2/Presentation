@@ -1,0 +1,64 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-26T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "시뮬레이션을 실측에 맞추는 법",
+  "order": [
+    "cover",
+    "errmap",
+    "sota",
+    "kpi1",
+    "kpi2",
+    "scene1",
+    "scene2",
+    "scene3",
+    "netcfg",
+    "traffic1",
+    "traffic2",
+    "ue1",
+    "ue2",
+    "methods",
+    "workflow",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "오차는 어디서 오나, 최근 연구의 수준",
+      "start": "cover"
+    },
+    "kpi": {
+      "description": "KPI 관점: 같은 양을 비교하고, 오차를 나눠 보고, 따로 검증한다",
+      "start": "kpi1"
+    },
+    "scene": {
+      "description": "Scene · 망 설정 관점: 기하, 재질 보정, 전파 엔진 설정, 기지국 설정",
+      "start": "scene1"
+    },
+    "traffic": {
+      "description": "트래픽 · 단말 관점: 부하와 간섭, 사용자 · 스케줄러, 단말 안테나 · 손실, 측정 · 이동 동작",
+      "start": "traffic1"
+    },
+    "wrap": {
+      "description": "방법 비교, 작업 순서, 정리",
+      "start": "methods"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}
