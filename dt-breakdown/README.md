@@ -22,6 +22,7 @@
   - [`debiased-rmse`](../debiased-rmse/): de-biased RMSE와 비교 조건
   - [`taylor-diagram`](../taylor-diagram/): Taylor diagram 읽기
   - [`sim-real-alignment`](../sim-real-alignment/): 보정 방법
+  - [`coord-registration`](../coord-registration/): 좌표 정합 점검 (Q-47 · 패턴 몫이 클 때)
 
 ## 구성 (≈ 12분 15초)
 

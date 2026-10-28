@@ -1,0 +1,62 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-28T23:00:00Z"
+  },
+  "lists": "css",
+  "title": "좌표 정합: 같은 자리를 비교하고 있나",
+  "order": [
+    "cover",
+    "why",
+    "axes",
+    "datum",
+    "projection",
+    "pitfalls",
+    "height",
+    "scene",
+    "sources",
+    "time",
+    "effect",
+    "detect",
+    "checklist",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 중요한가와 세 축(수평 · 높이 · 시간)",
+      "start": "cover"
+    },
+    "horizontal": {
+      "description": "측지 기준, 투영 좌표계(UTM · EPSG), 흔한 실수",
+      "start": "datum"
+    },
+    "vertical": {
+      "description": "높이 기준과 장면 좌표로 옮기기",
+      "start": "height"
+    },
+    "time": {
+      "description": "어긋남의 크기와 시간 동기",
+      "start": "sources"
+    },
+    "effect": {
+      "description": "예시 시뮬레이션, 어긋남 찾기, 점검표, 정리",
+      "start": "effect"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

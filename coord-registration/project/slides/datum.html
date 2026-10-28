@@ -1,0 +1,25 @@
+<section id="datum" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">축 1 · 수평 ① 측지 기준</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">같은 위경도라도 기준이 다르면 다른 점</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:center">
+<div style="position:relative;width:620px;height:540px">
+<svg aria-label="두 타원체가 조금 비켜 겹쳐 있고, 같은 지표면 점에서 두 중심으로 그은 선이 달라 위경도가 다르게 나온다는 그림" style="position:absolute;left:0px;top:0px;width:620px;height:540px" width="620" height="540" viewBox="0 0 620 540"><ellipse cx="300" cy="270" rx="250" ry="200" fill="#D5E3F3" stroke="#255E9E" stroke-width="4"/><ellipse cx="318" cy="258" rx="250" ry="199" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 8"/><circle cx="300" cy="270" r="6" fill="#255E9E"/><circle cx="318" cy="258" r="6" fill="#A84A16"/><line x1="300" y1="270" x2="480" y2="132" stroke="#255E9E" stroke-width="3"/><line x1="318" y1="258" x2="480" y2="132" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 6"/><circle cx="480" cy="132" r="10" fill="#14213D"/></svg>
+<p style="position:absolute;left:500px;top:100px;width:200px;font-size:24px;font-weight:700;color:#14213D">같은 땅의 점</p>
+<p style="position:absolute;left:80px;top:250px;width:230px;font-size:24px;line-height:1.35;color:#14213D">중심 · 크기 · 방향이<br>조금씩 다른 타원체</p>
+<p style="position:absolute;left:0px;top:490px;width:620px;font-size:24px;color:#14213D"><b style="color:#255E9E">━ 기준 A</b>  <b style="color:#A84A16">┅ 기준 B</b> → 같은 점의 위경도가 다르다</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">측지 기준 (EPSG)</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">주로 쓰는 곳</p><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">어긋남 (서울)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">WGS84 (4326)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">GPS · 단말 로그 · 웹 지도</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">기준</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">KGD2002 (4737)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">국내 측량 · 국가 지도 (GRS80 · ITRF2000)</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">1 m 미만</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">Korean 1985 (4162)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">옛 지적도 · 옛 수치지도 (Bessel 타원체)</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">약 360 m</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">실무 판단</p><p style="font-size:24px;line-height:1.4;color:#4A5262">WGS84 ↔ KGD2002는 20 m 칸 비교에서 같다고 봐도 된다<br>옛 기준(Bessel) 자료가 섞이면 수백 m — 칸 수십 개</p></div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">규칙</b> 숫자만 보고는 기준을 알 수 없다 — 파일을 받을 때 EPSG 코드를 함께 받는다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">어긋남: 서울시청 부근을 pyproj로 변환한 값 (Korean 1985 ↔ WGS84 약 360 m, 보도된 대표값 약 365 m)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
+<aside>(약 50초) 첫 번째 수평 축은 측지 기준입니다. 위경도는 지구를 어떤 타원체로 근사했는지에 따라 달라집니다. 그림처럼 중심과 크기가 조금 다른 타원체를 쓰면, 같은 땅의 점이라도 위경도가 다르게 나옵니다. GPS와 단말 로그, 웹 지도는 WGS84를 씁니다. 국내 측량과 국가 지도는 KGD2002, 세계측지계를 쓰는데, 둘의 차이는 1 m가 안 되어 20 m 칸 비교에서는 같다고 봐도 됩니다. 문제는 옛 기준입니다. 일제강점기부터 쓰던 Bessel 타원체 기준, 흔히 동경측지계라 부르는 자료는 서울 부근에서 약 360 m 어긋납니다. 옛 지적도나 옛 수치지도에서 건물을 가져왔다면 이것을 먼저 확인해야 합니다. 숫자만 보고는 어떤 기준인지 알 수 없으니, 파일을 받을 때 EPSG 코드를 반드시 함께 받습니다.</aside>
+</section>
