@@ -1,0 +1,22 @@
+<section id="limits" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">방법 ④ · 근접 센서와 출력 제한</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">몸에 가까우면 송신 전력을 스스로 줄인다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">6 GHz 이하</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">mmWave (FR2)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">기준</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">SAR — 몸에 흡수되는 전력</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">MPE — 몸에 닿는 전력 밀도</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">감지</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">근접 · 그립 센서, 통화 상태</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">센서 · 모듈별 감지</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">대응</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">최대 송신 전력을 낮춘다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">해당 모듈 · 빔 출력을 낮추거나 다른 모듈로</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">망이 아는가</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">대체로 모른다 → 전력 여유(PHR)가 줄어 보인다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">PHR에 P-MPR(출력 감소량)을 보고 (Rel-16 MPE 보고)</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">시간 평균 관리</p><p style="font-size:24px;line-height:1.4;color:#4A5262">규제 기준은 일정 시간 평균이라<br>순간 출력을 높였다가 줄이는<br>방식도 쓰인다 (제조사 기능)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">셀 가장자리에서 드러난다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">업링크 여유가 없는 곳에서<br>UL MCS ↓ · UL BLER ↑<br>접속 · 핸드오버 실패 ↑</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">로그에서 볼 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">단말 송신 전력 · PHR<br>(FR2) P-MPR · 근접 상태<br>통화 중 vs 데이터만</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 하향 KPI가 같아도 업링크 KPI는 손에 쥐었는지 · 통화 중인지에 따라 달라진다 — 시험 자세를 고정해야 하는 이유</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.101-1 · 38.101-2 (P-MPR) · TS 38.321 6.1.3.8 (PHR의 MPE 필드) · SAR · MPE 한도는 각국 규제</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 13</p>
+<aside>(약 50초) 넷째는 출력 제한입니다. 단말이 몸에 가까우면 전자파 흡수 기준 때문에 송신 전력을 스스로 낮춥니다. 6 GHz 이하는 몸에 흡수되는 전력인 SAR, mmWave는 몸에 닿는 전력 밀도인 MPE가 기준입니다. 근접 센서나 그립 센서, 통화 상태로 감지하고, 최대 송신 전력을 낮추거나 mmWave에서는 해당 모듈의 출력을 줄이고 다른 모듈로 바꿉니다. 6 GHz 이하에서는 망이 이 사실을 직접 알기 어렵고, 단말의 전력 여유인 PHR이 줄어든 것으로만 보입니다. mmWave는 Rel-16부터 PHR에 출력 감소량 P-MPR을 보고할 수 있습니다. 규제 기준이 시간 평균이라 순간적으로 출력을 올렸다 내리는 관리 방식도 제조사 기능으로 쓰입니다. 이 효과는 업링크 여유가 없는 셀 가장자리에서 MCS 저하, 실패 증가로 드러납니다.</aside>
+</section>

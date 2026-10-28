@@ -9,7 +9,7 @@ KPI의 *의미*와 *최적화 활용*(DU 파라미터 · RU 배치)은 [`ue-kpi`
 - 두 링크 모두 비공개 — 다른 사람에게 보여주려면 페이지의 Share 메뉴에서 공유
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py ue-kpi-pipeline`로 뷰어를 다시 만듭니다.
-- 관련 덱: [`ue-kpi`](../ue-kpi/) (KPI의 의미와 활용) · [`ss-rsrp`](../ss-rsrp/) (RSRP 측정 사슬) · [`du-ue-flow`](../du-ue-flow/) (DU와 단말의 데이터 흐름) · [`sionna-rsrp-beam`](../sionna-rsrp-beam/) (실측과 시뮬레이션 비교) · [`upper-layers`](../upper-layers/) (L2 · L3 · RRC 입문)
+- 관련 덱: [`ue-kpi`](../ue-kpi/) (KPI의 의미와 활용) · [`ss-rsrp`](../ss-rsrp/) (RSRP 측정 사슬) · [`du-ue-flow`](../du-ue-flow/) (DU와 단말의 데이터 흐름) · [`sionna-rsrp-beam`](../sionna-rsrp-beam/) (실측과 시뮬레이션 비교) · [`upper-layers`](../upper-layers/) (L2 · L3 · RRC 입문) · [`ue-antenna`](../ue-antenna/) (단말 안테나 전환과 DM 수집)
 
 ## 구성 (≈ 13분)
 

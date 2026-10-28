@@ -7,7 +7,7 @@
 - 두 링크 모두 비공개 — 다른 사람에게 보여주려면 페이지의 Share 메뉴에서 공유
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py antenna-basics`로 뷰어를 다시 만듭니다.
-- 이어서 볼 자료: [`ss-rsrp`](../ss-rsrp/) (빔에서 SS-RSRP까지) · [`sionna-rsrp-beam`](../sionna-rsrp-beam/) (빔 데이터를 시뮬레이션에 넣기, 용어 풀이 [`glossary.md`](../sionna-rsrp-beam/glossary.md)) · [`sionna-rt-antenna`](../sionna-rt-antenna/) (Sionna 안테나 파라미터) · [`propagation-models-intro`](../propagation-models-intro/) (전파 모델 입문)
+- 이어서 볼 자료: [`ss-rsrp`](../ss-rsrp/) (빔에서 SS-RSRP까지) · [`sionna-rsrp-beam`](../sionna-rsrp-beam/) (빔 데이터를 시뮬레이션에 넣기, 용어 풀이 [`glossary.md`](../sionna-rsrp-beam/glossary.md)) · [`sionna-rt-antenna`](../sionna-rt-antenna/) (Sionna 안테나 파라미터) · [`propagation-models-intro`](../propagation-models-intro/) (전파 모델 입문) · [`ue-antenna`](../ue-antenna/) (단말 다중 안테나와 DM 수집)
 
 ## 구성 (≈ 9분 45초)
 
