@@ -1,0 +1,22 @@
+<section id="fix" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">읽는 법 · 무엇부터 고칠까</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">가장 큰 몫부터 고친다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">가장 큰 몫</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무슨 뜻</p><p style="flex:1.15;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">먼저 볼 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#C9D6E8;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">거리 경향</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">거리에 따라 오차가 한쪽으로 기운다</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">경로손실 모델 · 송신 전력 · 안테나 이득</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">진폭</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">음영 · 피크의 깊이가 다르다</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">음영 모델(건물 · 지형 해상도)의 세기</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#E8F0F8;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">패턴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">음영 · 피크의 자리가 어긋난다</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">지도 · 좌표 정합, 건물 위치, 안테나 방위</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#EAE7DF;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">Bias (기록)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">지도 전체가 일정하게 높거나 낮다</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">전력 · 손실 오프셋 — 보정 한 번으로</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">이 대응은 출발점</p><p style="font-size:24px;line-height:1.4;color:#4A5262">원인과 몫이 1:1은 아니다 — 진단의 시작점으로 쓰는 일반적 해석<br>고친 뒤 다시 구워 몫이 어떻게 바뀌는지 확인</p></div>
+<div style="background:#EAE7DF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#5E6675">띠가 비는 경우</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칸 짝이 없을 때 — “No paired cells — needs T2.”<br>두 쪽 모두 변동이 없을 때</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">왜 패턴이 클까</p><p style="font-size:24px;line-height:1.4;color:#4A5262">좌표가 몇십 m만 어긋나도 음영 자리가 밀린다<br>→ 진폭 · 거리보다 패턴 몫부터 커진다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">확인</b> 고친 뒤 다시 비교하면 Taylor diagram에 ○ 전 → ● 후 화살표가 그려진다 (10쪽)</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §6-0 “읽는 법” · 좌표 어긋남과 패턴의 관계는 일반적인 경향</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 14</p>
+<aside>(약 50초) 읽는 법은 간단합니다. 가장 큰 몫부터 고칩니다. 거리 경향이 크면 거리에 따라 오차가 기우는 것이니 경로손실 모델, 송신 전력, 안테나 이득을 봅니다. 진폭이 크면 음영과 피크의 깊이가 다른 것이니 건물과 지형 해상도 같은 음영 모델의 세기를 봅니다. 패턴이 크면 음영의 자리가 어긋난 것이니 지도와 좌표 정합, 건물 위치, 안테나 방위를 봅니다. Bias는 보정 한 번으로 없앨 수 있는 오프셋입니다. 다만 이 대응은 진단의 출발점이지 원인과 일대일은 아닙니다. 고친 뒤 다시 구워서 몫이 어떻게 바뀌는지 확인하는 것이 중요합니다. 경험적으로는 좌표가 몇십 미터만 어긋나도 음영의 자리가 밀려 패턴 몫부터 커지는 경우가 많습니다. 칸 짝이 없으면 띠는 비고, 그 자리에 T2가 필요하다고 적힙니다.</aside>
+</section>

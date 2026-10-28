@@ -1,0 +1,62 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-28T21:00:00Z"
+  },
+  "lists": "css",
+  "title": "드라이브 테스트 비교 결과 읽기: Breakdown 화면",
+  "order": [
+    "cover",
+    "problem",
+    "defs",
+    "layout",
+    "tiles",
+    "detrend",
+    "neff",
+    "breakdown",
+    "fix",
+    "taylor",
+    "plots",
+    "example",
+    "limits",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "문제 제기와 정의(층 · 칸 · 부호), 화면 배치",
+      "start": "cover"
+    },
+    "numbers": {
+      "description": "숫자 타일 다섯, 거리 경향을 먼저 떼는 이유, 유효 표본 수",
+      "start": "tiles"
+    },
+    "breakdown": {
+      "description": "Error breakdown 띠와 무엇부터 고칠지",
+      "start": "breakdown"
+    },
+    "plots": {
+      "description": "Taylor diagram, 거리 잔차, 분포 모양",
+      "start": "taylor"
+    },
+    "wrap": {
+      "description": "예시 해석, 한계, 정리",
+      "start": "example"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

@@ -1,0 +1,27 @@
+<section id="detrend" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">중요 · 거리 경향을 먼저 뗀다</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">전역 σ로 재면 밋밋한 음영이 숨는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:860px;height:390px">
+<svg aria-label="가정 예의 분산 막대. 첫째는 거리 경향 192과 국소 36, 둘째는 거리 경향 212과 국소 16로 전체 높이는 같지만 국소 부분은 둘째가 작다" style="position:absolute;left:0px;top:0px;width:860px;height:390px" width="860" height="390" viewBox="0 0 860 390"><rect x="200" y="56" width="160" height="230" fill="#14365E"/><rect x="200" y="287" width="160" height="43" fill="#8DB8E8"/><rect x="500" y="57" width="160" height="254" fill="#14365E"/><rect x="500" y="311" width="160" height="19" fill="#8DB8E8"/><line x1="150" y1="330" x2="760" y2="330" stroke="#14213D" stroke-width="2"/></svg>
+<p style="position:absolute;left:200px;top:340px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#14213D">첫째 (실측)</p>
+<p style="position:absolute;left:500px;top:340px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#14213D">둘째 (시뮬)</p>
+<p style="position:absolute;left:200px;top:153px;width:160px;font-size:24px;text-align:center;line-height:1.25;font-weight:700;color:#F5F3EE">거리 경향<br>192</p>
+<p style="position:absolute;left:500px;top:153px;width:160px;font-size:24px;text-align:center;line-height:1.25;font-weight:700;color:#F5F3EE">거리 경향<br>212</p>
+<p style="position:absolute;left:370px;top:292px;width:200px;font-size:24px;font-weight:700;color:#255E9E">← 국소 36</p>
+<p style="position:absolute;left:670px;top:304px;width:200px;font-size:24px;font-weight:700;color:#255E9E">← 국소 16</p>
+<p style="position:absolute;left:0px;top:0px;width:360px;font-size:24px;font-weight:700;color:#5E6675">분산 (dB²)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#EAE7DF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">전역 α = 1.00</p><p style="font-size:24px;line-height:1.4;color:#4A5262">전체 분산 228 vs 228 — 거의 같다<br>→ “진폭은 멀쩡하다”로 잘못 읽는다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">국소 α = 0.67</p><p style="font-size:24px;line-height:1.4;color:#4A5262">거리 경향을 떼고 남은 변동 6 vs 4 dB<br>→ 시뮬이 음영을 얕게(밋밋하게) 그린다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">그래서 이렇게 잰다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">두 쪽을 각자 log₁₀(거리)에 회귀하고<br>남은 변동으로 α · r을 잰다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">근거</b> 설명서의 합성 데이터에서도 전역 α 1.0 · 국소 α 0.66 — 거리 경향이 국소 변동의 차이를 가려 버린다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">가정 예: log₁₀ 거리 분산 0.2133 (50 m ~ 2 km 고르게) · 기울기 30 / 31.5 dB/decade · 국소 σ 6 / 4 dB · 설명서 §4 합성 예</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 14</p>
+<aside>(약 55초) 진단 숫자에서 가장 중요한 설계가 이것입니다. 거리 경향을 먼저 떼고 α와 r을 잽니다. 이유를 가정 예로 보겠습니다. 막대는 각 쪽의 분산을 거리 경향 부분과 국소 변동 부분으로 나눈 것입니다. 첫째, 실측은 거리 경향 192에 국소 36, 둘째, 시뮬은 거리 경향 212에 국소 16으로, 전체는 둘 다 228 정도로 같습니다. 그래서 전역 표준편차로 비를 내면 α가 1.00으로, 진폭이 멀쩡해 보입니다. 하지만 거리 경향을 떼고 남은 국소 변동을 보면 6 dB 대 4 dB, α가 0.67로, 시뮬이 음영을 얕게 그리고 있습니다. 거리 감쇠의 차이가 국소 변동의 차이를 가려 버린 것이죠. 설명서의 합성 데이터에서도 전역 α는 1.0, 국소 α는 0.66이었습니다. 그래서 화면은 두 쪽을 각자 거리에 회귀한 뒤, 남은 변동으로 α와 r을 잽니다.</aside>
+</section>
