@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>좌표 정합: 같은 자리를 비교하고 있나</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="실선 격자와 조금 비켜 놓인 점선 격자, 십자선 표적 옆으로 비켜 찍힌 측정점과 그 사이의 작은 화살표" style="position:absolute;left:1000px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><line x1="120" y1="200" x2="120" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="200" x2="760" y2="200" stroke="#2B3C66" stroke-width="2"/><line x1="200" y1="200" x2="200" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="280" x2="760" y2="280" stroke="#2B3C66" stroke-width="2"/><line x1="280" y1="200" x2="280" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="360" x2="760" y2="360" stroke="#2B3C66" stroke-width="2"/><line x1="360" y1="200" x2="360" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="440" x2="760" y2="440" stroke="#2B3C66" stroke-width="2"/><line x1="440" y1="200" x2="440" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="520" x2="760" y2="520" stroke="#2B3C66" stroke-width="2"/><line x1="520" y1="200" x2="520" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="600" x2="760" y2="600" stroke="#2B3C66" stroke-width="2"/><line x1="600" y1="200" x2="600" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="680" x2="760" y2="680" stroke="#2B3C66" stroke-width="2"/><line x1="680" y1="200" x2="680" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="760" x2="760" y2="760" stroke="#2B3C66" stroke-width="2"/><line x1="760" y1="200" x2="760" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="120" y1="840" x2="760" y2="840" stroke="#2B3C66" stroke-width="2"/><line x1="170" y1="230" x2="170" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="230" x2="810" y2="230" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="250" y1="230" x2="250" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="310" x2="810" y2="310" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="330" y1="230" x2="330" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="390" x2="810" y2="390" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="410" y1="230" x2="410" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="470" x2="810" y2="470" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="490" y1="230" x2="490" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="550" x2="810" y2="550" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="570" y1="230" x2="570" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="630" x2="810" y2="630" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="650" y1="230" x2="650" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="710" x2="810" y2="710" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="730" y1="230" x2="730" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="790" x2="810" y2="790" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="810" y1="230" x2="810" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><line x1="170" y1="870" x2="810" y2="870" stroke="#4C7DB8" stroke-width="2" stroke-dasharray="6 6"/><circle cx="400" cy="520" r="22" fill="none" stroke="#F0A36B" stroke-width="5"/><line x1="400" y1="470" x2="400" y2="570" stroke="#F0A36B" stroke-width="4"/><line x1="350" y1="520" x2="450" y2="520" stroke="#F0A36B" stroke-width="4"/><circle cx="450" cy="550" r="14" fill="#8DB8E8"/><line x1="412.0" y1="527.0" x2="431.5" y2="538.8" stroke="#F0A36B" stroke-width="3"/><polygon points="440.0,544.0 434.0,534.5 428.9,543.1" fill="#F0A36B"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">네트워크 디지털 트윈 · 시뮬레이션-실측 비교</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">좌표 정합:<br>같은 자리를<br>비교하고 있나</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">위경도 · 투영(UTM · EPSG) · 높이 기준 · 시간 동기 —<br>어디서 몇 m 어긋나고, 그것이 오차를 얼마나 키우나</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 시뮬레이션과 실측을 비교할 때 가장 먼저 의심해야 하지만 가장 덜 확인하는 것이 좌표입니다. 실측 칸과 시뮬레이션 칸이 정말 같은 땅을 가리키는지에 관한 이야기입니다. 위경도와 평면 좌표, 높이 기준, 시간 동기를 차례로 보고, 몇 m 어긋나면 오차가 얼마나 커지는지 예시 시뮬레이션으로 확인한 뒤, 어긋남을 찾는 방법과 점검표로 마치겠습니다.</aside>
+</section>
+<section id="why" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">왜 중요한가</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">비교는 “같은 자리”를 전제로 한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px;align-items:flex-start">
+<div style="position:relative;width:700px;height:440px">
+<svg aria-label="왼쪽은 시뮬레이션 음영 지도, 오른쪽은 같은 지도를 30 m 옆으로 밀어 놓은 실측 지도. 무늬는 같지만 칸마다 값이 어긋난다" style="position:absolute;left:0px;top:0px;width:700px;height:440px" width="700" height="440" viewBox="0 0 700 440"><path d="M143 40h14v14h-14zM169 40h14v14h-14zM182 40h14v14h-14zM260 40h14v14h-14zM273 40h14v14h-14zM299 40h14v14h-14zM299 53h14v14h-14zM156 92h14v14h-14zM156 105h14v14h-14zM169 105h14v14h-14zM182 118h14v14h-14zM182 131h14v14h-14zM156 170h14v14h-14zM169 170h14v14h-14zM182 170h14v14h-14zM130 183h14v14h-14zM143 183h14v14h-14zM156 183h14v14h-14zM169 183h14v14h-14zM182 183h14v14h-14zM143 196h14v14h-14zM169 196h14v14h-14zM182 196h14v14h-14zM143 209h14v14h-14zM0 235h14v14h-14zM169 235h14v14h-14zM221 235h14v14h-14zM0 248h14v14h-14zM13 248h14v14h-14zM26 248h14v14h-14zM156 248h14v14h-14zM169 248h14v14h-14zM208 248h14v14h-14zM0 261h14v14h-14zM13 261h14v14h-14zM143 300h14v14h-14zM78 313h14v14h-14z" fill="#E1E3E0"/><path d="M156 40h14v14h-14zM234 40h14v14h-14zM286 40h14v14h-14zM260 53h14v14h-14zM273 53h14v14h-14zM117 92h14v14h-14zM182 92h14v14h-14zM299 92h14v14h-14zM195 118h14v14h-14zM0 157h14v14h-14zM143 170h14v14h-14zM169 209h14v14h-14zM182 209h14v14h-14zM0 222h14v14h-14zM143 222h14v14h-14zM169 222h14v14h-14zM143 235h14v14h-14zM156 235h14v14h-14zM208 235h14v14h-14zM26 261h14v14h-14zM39 261h14v14h-14zM52 261h14v14h-14zM13 274h14v14h-14zM39 287h14v14h-14zM143 287h14v14h-14zM78 300h14v14h-14zM156 300h14v14h-14zM143 313h14v14h-14zM299 313h14v14h-14z" fill="#D0DAE2"/><path d="M234 66h14v14h-14zM130 79h14v14h-14zM143 79h14v14h-14zM299 79h14v14h-14zM130 92h14v14h-14zM182 105h14v14h-14zM195 131h14v14h-14zM143 144h14v14h-14zM0 170h14v14h-14zM195 170h14v14h-14zM91 196h14v14h-14zM130 196h14v14h-14zM156 196h14v14h-14zM91 209h14v14h-14zM182 248h14v14h-14zM195 248h14v14h-14zM221 248h14v14h-14zM26 274h14v14h-14zM156 274h14v14h-14zM156 287h14v14h-14zM299 287h14v14h-14zM273 300h14v14h-14zM286 300h14v14h-14zM299 300h14v14h-14zM156 313h14v14h-14zM286 313h14v14h-14zM299 326h14v14h-14z" fill="#BED1E3"/><path d="M26 40h14v14h-14zM39 40h14v14h-14zM247 40h14v14h-14zM169 53h14v14h-14zM234 53h14v14h-14zM156 66h14v14h-14zM169 92h14v14h-14zM169 118h14v14h-14zM26 170h14v14h-14zM117 170h14v14h-14zM130 170h14v14h-14zM26 196h14v14h-14zM39 196h14v14h-14zM104 196h14v14h-14zM156 209h14v14h-14zM52 222h14v14h-14zM130 222h14v14h-14zM182 222h14v14h-14zM221 222h14v14h-14zM78 235h14v14h-14zM182 235h14v14h-14zM39 248h14v14h-14zM104 248h14v14h-14zM143 248h14v14h-14zM299 248h14v14h-14zM65 261h14v14h-14zM299 261h14v14h-14zM0 274h14v14h-14zM39 274h14v14h-14zM52 274h14v14h-14zM260 274h14v14h-14zM299 274h14v14h-14zM130 300h14v14h-14zM65 313h14v14h-14zM91 313h14v14h-14zM143 326h14v14h-14zM156 326h14v14h-14zM39 339h14v14h-14zM299 339h14v14h-14z" fill="#ADC8E5"/><path d="M221 40h14v14h-14zM78 53h14v14h-14zM143 53h14v14h-14zM156 53h14v14h-14zM221 53h14v14h-14zM286 53h14v14h-14zM299 66h14v14h-14zM0 79h14v14h-14zM156 79h14v14h-14zM234 79h14v14h-14zM273 79h14v14h-14zM286 79h14v14h-14zM65 92h14v14h-14zM143 92h14v14h-14zM195 92h14v14h-14zM143 105h14v14h-14zM195 105h14v14h-14zM299 131h14v14h-14zM182 144h14v14h-14zM195 144h14v14h-14zM13 157h14v14h-14zM156 157h14v14h-14zM195 157h14v14h-14zM13 170h14v14h-14zM13 183h14v14h-14zM26 183h14v14h-14zM78 183h14v14h-14zM195 183h14v14h-14zM78 196h14v14h-14zM39 209h14v14h-14zM52 209h14v14h-14zM65 209h14v14h-14zM13 222h14v14h-14zM65 222h14v14h-14zM156 222h14v14h-14zM247 222h14v14h-14zM13 235h14v14h-14zM130 235h14v14h-14zM286 248h14v14h-14zM104 261h14v14h-14zM156 261h14v14h-14zM260 261h14v14h-14zM117 287h14v14h-14zM130 287h14v14h-14zM247 287h14v14h-14zM208 300h14v14h-14zM130 313h14v14h-14zM273 313h14v14h-14zM234 326h14v14h-14z" fill="#9CBFE7"/><path d="M65 53h14v14h-14zM247 53h14v14h-14zM221 66h14v14h-14zM247 66h14v14h-14zM117 79h14v14h-14zM221 79h14v14h-14zM286 92h14v14h-14zM286 105h14v14h-14zM299 105h14v14h-14zM299 118h14v14h-14zM208 131h14v14h-14zM156 144h14v14h-14zM299 144h14v14h-14zM117 157h14v14h-14zM143 157h14v14h-14zM104 170h14v14h-14zM208 170h14v14h-14zM117 183h14v14h-14zM52 196h14v14h-14zM117 196h14v14h-14zM0 209h14v14h-14zM78 209h14v14h-14zM130 209h14v14h-14zM299 209h14v14h-14zM117 222h14v14h-14zM234 222h14v14h-14zM26 235h14v14h-14zM39 235h14v14h-14zM52 235h14v14h-14zM91 235h14v14h-14zM117 235h14v14h-14zM195 235h14v14h-14zM247 235h14v14h-14zM65 248h14v14h-14zM286 261h14v14h-14zM26 287h14v14h-14zM52 287h14v14h-14zM104 287h14v14h-14zM273 287h14v14h-14zM91 300h14v14h-14zM104 300h14v14h-14zM169 300h14v14h-14zM234 300h14v14h-14zM247 300h14v14h-14zM221 313h14v14h-14zM234 313h14v14h-14zM260 313h14v14h-14zM39 326h14v14h-14zM52 326h14v14h-14zM130 326h14v14h-14zM260 326h14v14h-14zM273 326h14v14h-14zM286 326h14v14h-14zM52 339h14v14h-14zM234 339h14v14h-14z" fill="#8AB5E6"/><path d="M143 66h14v14h-14zM260 66h14v14h-14zM286 66h14v14h-14zM52 92h14v14h-14zM104 92h14v14h-14zM117 105h14v14h-14zM156 118h14v14h-14zM26 157h14v14h-14zM182 157h14v14h-14zM208 157h14v14h-14zM0 183h14v14h-14zM91 183h14v14h-14zM104 183h14v14h-14zM104 209h14v14h-14zM78 222h14v14h-14zM208 222h14v14h-14zM299 222h14v14h-14zM65 235h14v14h-14zM234 235h14v14h-14zM52 248h14v14h-14zM91 248h14v14h-14zM130 248h14v14h-14zM260 248h14v14h-14zM273 248h14v14h-14zM91 261h14v14h-14zM143 261h14v14h-14zM104 274h14v14h-14zM247 274h14v14h-14zM273 274h14v14h-14zM169 287h14v14h-14zM234 287h14v14h-14zM286 287h14v14h-14zM39 300h14v14h-14zM65 300h14v14h-14zM117 300h14v14h-14zM182 300h14v14h-14zM52 313h14v14h-14zM247 313h14v14h-14zM65 326h14v14h-14zM91 326h14v14h-14z" fill="#76A4D8"/><path d="M52 40h14v14h-14zM208 40h14v14h-14zM52 53h14v14h-14zM169 66h14v14h-14zM195 66h14v14h-14zM208 66h14v14h-14zM52 79h14v14h-14zM65 79h14v14h-14zM195 79h14v14h-14zM208 79h14v14h-14zM91 92h14v14h-14zM273 92h14v14h-14zM65 105h14v14h-14zM130 105h14v14h-14zM13 144h14v14h-14zM208 144h14v14h-14zM104 157h14v14h-14zM130 157h14v14h-14zM65 170h14v14h-14zM78 170h14v14h-14zM39 183h14v14h-14zM65 183h14v14h-14zM0 196h14v14h-14zM13 196h14v14h-14zM195 196h14v14h-14zM26 209h14v14h-14zM247 209h14v14h-14zM26 222h14v14h-14zM39 222h14v14h-14zM91 222h14v14h-14zM195 222h14v14h-14zM299 235h14v14h-14zM117 248h14v14h-14zM234 248h14v14h-14zM169 261h14v14h-14zM182 261h14v14h-14zM247 261h14v14h-14zM65 274h14v14h-14zM143 274h14v14h-14zM182 287h14v14h-14zM195 287h14v14h-14zM208 287h14v14h-14zM260 287h14v14h-14zM52 300h14v14h-14zM221 300h14v14h-14zM260 300h14v14h-14zM208 313h14v14h-14zM221 326h14v14h-14zM247 326h14v14h-14zM286 339h14v14h-14z" fill="#6393CA"/><path d="M13 40h14v14h-14zM195 40h14v14h-14zM26 53h14v14h-14zM182 53h14v14h-14zM208 53h14v14h-14zM13 66h14v14h-14zM78 66h14v14h-14zM273 66h14v14h-14zM182 79h14v14h-14zM78 92h14v14h-14zM208 92h14v14h-14zM26 105h14v14h-14zM273 105h14v14h-14zM169 131h14v14h-14zM0 144h14v14h-14zM39 157h14v14h-14zM169 157h14v14h-14zM221 157h14v14h-14zM39 170h14v14h-14zM52 183h14v14h-14zM65 196h14v14h-14zM208 196h14v14h-14zM299 196h14v14h-14zM13 209h14v14h-14zM208 209h14v14h-14zM104 222h14v14h-14zM104 235h14v14h-14zM234 261h14v14h-14zM91 274h14v14h-14zM117 274h14v14h-14zM169 274h14v14h-14zM195 274h14v14h-14zM286 274h14v14h-14zM26 300h14v14h-14zM195 300h14v14h-14zM78 326h14v14h-14zM169 326h14v14h-14zM247 339h14v14h-14zM260 339h14v14h-14z" fill="#4F83BC"/><path d="M0 40h14v14h-14zM78 40h14v14h-14zM130 40h14v14h-14zM195 53h14v14h-14zM0 66h14v14h-14zM52 66h14v14h-14zM65 66h14v14h-14zM182 66h14v14h-14zM13 79h14v14h-14zM91 79h14v14h-14zM104 79h14v14h-14zM169 79h14v14h-14zM247 79h14v14h-14zM260 79h14v14h-14zM52 105h14v14h-14zM208 105h14v14h-14zM143 118h14v14h-14zM143 131h14v14h-14zM169 144h14v14h-14zM299 157h14v14h-14zM52 170h14v14h-14zM91 170h14v14h-14zM221 170h14v14h-14zM208 183h14v14h-14zM234 183h14v14h-14zM247 196h14v14h-14zM117 209h14v14h-14zM260 222h14v14h-14zM260 235h14v14h-14zM78 248h14v14h-14zM247 248h14v14h-14zM117 261h14v14h-14zM195 261h14v14h-14zM208 261h14v14h-14zM130 274h14v14h-14zM0 287h14v14h-14zM91 287h14v14h-14zM13 300h14v14h-14zM104 313h14v14h-14zM169 313h14v14h-14zM195 313h14v14h-14zM26 339h14v14h-14zM130 339h14v14h-14zM143 339h14v14h-14zM156 339h14v14h-14zM221 339h14v14h-14zM273 339h14v14h-14z" fill="#3C72AE"/><path d="M65 40h14v14h-14zM13 53h14v14h-14zM39 53h14v14h-14zM91 53h14v14h-14zM130 53h14v14h-14zM91 66h14v14h-14zM78 79h14v14h-14zM0 92h14v14h-14zM13 92h14v14h-14zM221 92h14v14h-14zM247 92h14v14h-14zM260 92h14v14h-14zM78 105h14v14h-14zM130 118h14v14h-14zM286 118h14v14h-14zM0 131h14v14h-14zM156 131h14v14h-14zM221 131h14v14h-14zM286 131h14v14h-14zM39 144h14v14h-14zM234 170h14v14h-14zM299 170h14v14h-14zM221 183h14v14h-14zM247 183h14v14h-14zM234 196h14v14h-14zM195 209h14v14h-14zM221 209h14v14h-14zM234 209h14v14h-14zM273 235h14v14h-14zM130 261h14v14h-14zM273 261h14v14h-14zM78 274h14v14h-14zM182 274h14v14h-14zM208 274h14v14h-14zM13 287h14v14h-14zM65 287h14v14h-14zM78 287h14v14h-14zM13 313h14v14h-14zM117 313h14v14h-14zM26 326h14v14h-14z" fill="#2861A0"/><path d="M130 66h14v14h-14zM39 79h14v14h-14zM39 92h14v14h-14zM39 105h14v14h-14zM104 105h14v14h-14zM65 118h14v14h-14zM208 118h14v14h-14zM91 144h14v14h-14zM117 144h14v14h-14zM130 144h14v14h-14zM52 157h14v14h-14zM260 183h14v14h-14zM286 235h14v14h-14zM78 261h14v14h-14zM221 261h14v14h-14zM221 287h14v14h-14zM26 313h14v14h-14zM117 326h14v14h-14z" fill="#22548F"/><path d="M117 40h14v14h-14zM0 53h14v14h-14zM26 66h14v14h-14zM104 66h14v14h-14zM26 92h14v14h-14zM234 92h14v14h-14zM26 118h14v14h-14zM78 118h14v14h-14zM13 131h14v14h-14zM78 131h14v14h-14zM26 144h14v14h-14zM52 144h14v14h-14zM91 157h14v14h-14zM247 170h14v14h-14zM299 183h14v14h-14zM0 313h14v14h-14zM182 313h14v14h-14zM0 326h14v14h-14zM13 326h14v14h-14z" fill="#1F497D"/><path d="M39 66h14v14h-14zM117 66h14v14h-14zM91 105h14v14h-14zM221 105h14v14h-14zM26 131h14v14h-14zM130 131h14v14h-14zM247 131h14v14h-14zM78 144h14v14h-14zM286 144h14v14h-14zM65 157h14v14h-14zM78 157h14v14h-14zM273 157h14v14h-14zM286 170h14v14h-14zM273 183h14v14h-14zM221 196h14v14h-14zM260 196h14v14h-14zM286 196h14v14h-14zM260 209h14v14h-14zM286 209h14v14h-14zM286 222h14v14h-14zM234 274h14v14h-14zM39 313h14v14h-14zM104 326h14v14h-14zM0 339h14v14h-14zM65 339h14v14h-14zM169 339h14v14h-14z" fill="#1C3E6A"/><path d="M117 53h14v14h-14zM26 79h14v14h-14zM0 105h14v14h-14zM247 105h14v14h-14zM260 105h14v14h-14zM0 118h14v14h-14zM13 118h14v14h-14zM52 118h14v14h-14zM117 118h14v14h-14zM221 118h14v14h-14zM234 118h14v14h-14zM247 118h14v14h-14zM39 131h14v14h-14zM52 131h14v14h-14zM65 144h14v14h-14zM221 144h14v14h-14zM286 157h14v14h-14zM273 170h14v14h-14zM273 222h14v14h-14zM0 300h14v14h-14zM195 326h14v14h-14zM208 326h14v14h-14z" fill="#193258"/><path d="M91 40h14v14h-14zM104 40h14v14h-14zM104 53h14v14h-14zM13 105h14v14h-14zM234 105h14v14h-14zM39 118h14v14h-14zM91 118h14v14h-14zM104 118h14v14h-14zM260 118h14v14h-14zM273 118h14v14h-14zM65 131h14v14h-14zM91 131h14v14h-14zM104 131h14v14h-14zM117 131h14v14h-14zM234 131h14v14h-14zM260 131h14v14h-14zM273 131h14v14h-14zM104 144h14v14h-14zM234 144h14v14h-14zM247 144h14v14h-14zM260 144h14v14h-14zM273 144h14v14h-14zM234 157h14v14h-14zM247 157h14v14h-14zM260 157h14v14h-14zM260 170h14v14h-14zM286 183h14v14h-14zM273 196h14v14h-14zM273 209h14v14h-14zM221 274h14v14h-14zM182 326h14v14h-14zM13 339h14v14h-14zM78 339h14v14h-14zM91 339h14v14h-14zM104 339h14v14h-14zM117 339h14v14h-14zM182 339h14v14h-14zM195 339h14v14h-14zM208 339h14v14h-14z" fill="#162746"/><path d="M523 40h14v14h-14zM536 40h14v14h-14zM627 40h14v14h-14zM640 40h14v14h-14zM653 40h14v14h-14zM627 53h14v14h-14zM666 53h14v14h-14zM523 92h14v14h-14zM523 105h14v14h-14zM536 118h14v14h-14zM549 118h14v14h-14zM549 131h14v14h-14zM510 170h14v14h-14zM523 170h14v14h-14zM536 170h14v14h-14zM549 170h14v14h-14zM497 183h14v14h-14zM510 183h14v14h-14zM523 183h14v14h-14zM536 183h14v14h-14zM523 196h14v14h-14zM536 196h14v14h-14zM497 209h14v14h-14zM536 209h14v14h-14zM575 235h14v14h-14zM380 248h14v14h-14zM510 248h14v14h-14zM523 248h14v14h-14zM536 248h14v14h-14zM575 248h14v14h-14zM380 261h14v14h-14zM406 261h14v14h-14zM510 300h14v14h-14zM445 313h14v14h-14zM653 313h14v14h-14z" fill="#E1E3E0"/><path d="M510 40h14v14h-14zM601 40h14v14h-14zM497 79h14v14h-14zM666 79h14v14h-14zM536 105h14v14h-14zM497 196h14v14h-14zM679 209h14v14h-14zM536 222h14v14h-14zM510 235h14v14h-14zM523 235h14v14h-14zM536 235h14v14h-14zM562 248h14v14h-14zM666 261h14v14h-14zM380 274h14v14h-14zM510 287h14v14h-14zM497 300h14v14h-14zM653 300h14v14h-14zM432 313h14v14h-14zM510 313h14v14h-14z" fill="#D0DAE2"/><path d="M393 40h14v14h-14zM588 40h14v14h-14zM666 40h14v14h-14zM653 53h14v14h-14zM679 53h14v14h-14zM588 66h14v14h-14zM484 92h14v14h-14zM536 92h14v14h-14zM666 92h14v14h-14zM510 105h14v14h-14zM510 144h14v14h-14zM484 170h14v14h-14zM679 170h14v14h-14zM484 183h14v14h-14zM549 183h14v14h-14zM458 196h14v14h-14zM484 196h14v14h-14zM510 196h14v14h-14zM523 209h14v14h-14zM497 222h14v14h-14zM510 222h14v14h-14zM588 235h14v14h-14zM393 248h14v14h-14zM393 261h14v14h-14zM419 261h14v14h-14zM666 274h14v14h-14zM393 287h14v14h-14zM406 287h14v14h-14zM497 287h14v14h-14zM445 300h14v14h-14zM640 300h14v14h-14zM666 300h14v14h-14zM510 326h14v14h-14zM666 339h14v14h-14z" fill="#BED1E3"/><path d="M497 40h14v14h-14zM614 40h14v14h-14zM523 53h14v14h-14zM588 53h14v14h-14zM640 53h14v14h-14zM523 66h14v14h-14zM601 66h14v14h-14zM484 79h14v14h-14zM510 79h14v14h-14zM471 92h14v14h-14zM510 92h14v14h-14zM549 92h14v14h-14zM653 92h14v14h-14zM549 105h14v14h-14zM536 131h14v14h-14zM497 170h14v14h-14zM562 170h14v14h-14zM393 196h14v14h-14zM406 196h14v14h-14zM445 196h14v14h-14zM549 196h14v14h-14zM679 196h14v14h-14zM510 209h14v14h-14zM419 222h14v14h-14zM523 222h14v14h-14zM445 235h14v14h-14zM497 235h14v14h-14zM562 235h14v14h-14zM406 248h14v14h-14zM458 248h14v14h-14zM549 248h14v14h-14zM653 248h14v14h-14zM510 261h14v14h-14zM393 274h14v14h-14zM406 274h14v14h-14zM510 274h14v14h-14zM653 287h14v14h-14zM666 287h14v14h-14zM497 313h14v14h-14zM640 313h14v14h-14zM497 326h14v14h-14zM666 326h14v14h-14zM679 339h14v14h-14z" fill="#ADC8E5"/><path d="M406 40h14v14h-14zM432 53h14v14h-14zM497 53h14v14h-14zM510 53h14v14h-14zM536 53h14v14h-14zM601 53h14v14h-14zM614 53h14v14h-14zM653 66h14v14h-14zM666 66h14v14h-14zM588 79h14v14h-14zM640 79h14v14h-14zM653 79h14v14h-14zM419 92h14v14h-14zM497 92h14v14h-14zM523 118h14v14h-14zM562 131h14v14h-14zM549 144h14v14h-14zM510 157h14v14h-14zM562 157h14v14h-14zM380 170h14v14h-14zM393 170h14v14h-14zM393 183h14v14h-14zM679 183h14v14h-14zM406 209h14v14h-14zM419 209h14v14h-14zM432 209h14v14h-14zM445 209h14v14h-14zM458 209h14v14h-14zM484 222h14v14h-14zM575 222h14v14h-14zM601 222h14v14h-14zM588 248h14v14h-14zM666 248h14v14h-14zM458 261h14v14h-14zM679 261h14v14h-14zM419 274h14v14h-14zM614 274h14v14h-14zM627 274h14v14h-14zM471 287h14v14h-14zM601 287h14v14h-14zM432 300h14v14h-14zM484 300h14v14h-14zM523 300h14v14h-14zM601 300h14v14h-14zM679 300h14v14h-14zM419 313h14v14h-14zM588 313h14v14h-14zM627 313h14v14h-14zM666 313h14v14h-14zM406 326h14v14h-14zM588 326h14v14h-14zM627 326h14v14h-14zM653 326h14v14h-14zM679 326h14v14h-14zM406 339h14v14h-14z" fill="#9CBFE7"/><path d="M380 40h14v14h-14zM549 40h14v14h-14zM510 66h14v14h-14zM679 66h14v14h-14zM419 79h14v14h-14zM523 79h14v14h-14zM679 79h14v14h-14zM679 92h14v14h-14zM653 105h14v14h-14zM679 105h14v14h-14zM653 131h14v14h-14zM666 131h14v14h-14zM562 144h14v14h-14zM666 144h14v14h-14zM471 157h14v14h-14zM523 157h14v14h-14zM549 157h14v14h-14zM471 170h14v14h-14zM380 183h14v14h-14zM432 183h14v14h-14zM445 183h14v14h-14zM380 196h14v14h-14zM549 209h14v14h-14zM666 209h14v14h-14zM406 222h14v14h-14zM432 222h14v14h-14zM588 222h14v14h-14zM380 235h14v14h-14zM393 235h14v14h-14zM406 235h14v14h-14zM432 235h14v14h-14zM484 235h14v14h-14zM497 248h14v14h-14zM640 248h14v14h-14zM614 261h14v14h-14zM653 261h14v14h-14zM679 274h14v14h-14zM484 287h14v14h-14zM523 287h14v14h-14zM614 287h14v14h-14zM627 287h14v14h-14zM471 300h14v14h-14zM536 300h14v14h-14zM575 300h14v14h-14zM627 300h14v14h-14zM523 313h14v14h-14zM601 313h14v14h-14zM614 313h14v14h-14zM419 326h14v14h-14zM523 326h14v14h-14zM640 326h14v14h-14zM393 339h14v14h-14zM653 339h14v14h-14z" fill="#8AB5E6"/><path d="M575 40h14v14h-14zM419 53h14v14h-14zM445 53h14v14h-14zM575 53h14v14h-14zM562 66h14v14h-14zM614 66h14v14h-14zM627 66h14v14h-14zM471 79h14v14h-14zM549 79h14v14h-14zM601 79h14v14h-14zM432 92h14v14h-14zM562 92h14v14h-14zM640 92h14v14h-14zM484 105h14v14h-14zM497 105h14v14h-14zM666 105h14v14h-14zM562 118h14v14h-14zM653 118h14v14h-14zM666 118h14v14h-14zM380 157h14v14h-14zM484 157h14v14h-14zM432 170h14v14h-14zM458 170h14v14h-14zM458 183h14v14h-14zM471 183h14v14h-14zM562 183h14v14h-14zM432 196h14v14h-14zM471 196h14v14h-14zM666 196h14v14h-14zM393 209h14v14h-14zM380 222h14v14h-14zM471 222h14v14h-14zM549 222h14v14h-14zM562 222h14v14h-14zM614 222h14v14h-14zM679 222h14v14h-14zM471 235h14v14h-14zM549 235h14v14h-14zM601 235h14v14h-14zM432 248h14v14h-14zM471 248h14v14h-14zM627 248h14v14h-14zM523 261h14v14h-14zM471 274h14v14h-14zM523 274h14v14h-14zM653 274h14v14h-14zM562 287h14v14h-14zM562 300h14v14h-14zM588 300h14v14h-14zM484 313h14v14h-14zM575 313h14v14h-14zM601 326h14v14h-14zM588 339h14v14h-14zM601 339h14v14h-14z" fill="#76A4D8"/><path d="M679 40h14v14h-14zM432 66h14v14h-14zM562 79h14v14h-14zM575 79h14v14h-14zM627 79h14v14h-14zM458 92h14v14h-14zM419 105h14v14h-14zM471 105h14v14h-14zM562 105h14v14h-14zM640 105h14v14h-14zM679 118h14v14h-14zM575 131h14v14h-14zM536 144h14v14h-14zM393 157h14v14h-14zM497 157h14v14h-14zM536 157h14v14h-14zM575 157h14v14h-14zM666 157h14v14h-14zM679 157h14v14h-14zM575 170h14v14h-14zM419 183h14v14h-14zM380 209h14v14h-14zM445 222h14v14h-14zM419 235h14v14h-14zM458 235h14v14h-14zM614 235h14v14h-14zM666 235h14v14h-14zM419 248h14v14h-14zM484 248h14v14h-14zM679 248h14v14h-14zM432 261h14v14h-14zM471 261h14v14h-14zM536 261h14v14h-14zM458 274h14v14h-14zM458 287h14v14h-14zM536 287h14v14h-14zM549 287h14v14h-14zM640 287h14v14h-14zM393 300h14v14h-14zM406 300h14v14h-14zM419 300h14v14h-14zM458 300h14v14h-14zM549 300h14v14h-14zM614 300h14v14h-14zM458 313h14v14h-14zM393 326h14v14h-14zM432 326h14v14h-14zM445 326h14v14h-14zM614 326h14v14h-14zM510 339h14v14h-14z" fill="#6393CA"/><path d="M562 40h14v14h-14zM562 53h14v14h-14zM419 66h14v14h-14zM575 66h14v14h-14zM445 92h14v14h-14zM510 118h14v14h-14zM510 131h14v14h-14zM679 131h14v14h-14zM497 144h14v14h-14zM523 144h14v14h-14zM653 144h14v14h-14zM419 170h14v14h-14zM666 170h14v14h-14zM419 196h14v14h-14zM562 196h14v14h-14zM471 209h14v14h-14zM484 209h14v14h-14zM575 209h14v14h-14zM601 209h14v14h-14zM393 222h14v14h-14zM458 222h14v14h-14zM653 222h14v14h-14zM666 222h14v14h-14zM614 248h14v14h-14zM497 261h14v14h-14zM549 261h14v14h-14zM601 261h14v14h-14zM627 261h14v14h-14zM640 261h14v14h-14zM445 274h14v14h-14zM562 274h14v14h-14zM640 274h14v14h-14zM419 287h14v14h-14zM380 300h14v14h-14zM562 313h14v14h-14zM679 313h14v14h-14zM419 339h14v14h-14zM497 339h14v14h-14zM640 339h14v14h-14z" fill="#4F83BC"/><path d="M419 40h14v14h-14zM432 40h14v14h-14zM380 53h14v14h-14zM393 53h14v14h-14zM406 53h14v14h-14zM497 66h14v14h-14zM536 66h14v14h-14zM549 66h14v14h-14zM640 66h14v14h-14zM406 79h14v14h-14zM432 79h14v14h-14zM458 79h14v14h-14zM614 79h14v14h-14zM406 92h14v14h-14zM627 92h14v14h-14zM393 105h14v14h-14zM432 105h14v14h-14zM679 144h14v14h-14zM406 157h14v14h-14zM445 170h14v14h-14zM406 183h14v14h-14zM575 183h14v14h-14zM601 183h14v14h-14zM666 183h14v14h-14zM601 196h14v14h-14zM614 209h14v14h-14zM653 209h14v14h-14zM653 235h14v14h-14zM679 235h14v14h-14zM445 248h14v14h-14zM601 248h14v14h-14zM562 261h14v14h-14zM432 274h14v14h-14zM497 274h14v14h-14zM536 274h14v14h-14zM380 287h14v14h-14zM588 287h14v14h-14zM679 287h14v14h-14zM484 326h14v14h-14zM614 339h14v14h-14zM627 339h14v14h-14z" fill="#3C72AE"/><path d="M380 66h14v14h-14zM445 66h14v14h-14zM445 79h14v14h-14zM536 79h14v14h-14zM380 92h14v14h-14zM575 92h14v14h-14zM601 92h14v14h-14zM627 105h14v14h-14zM497 118h14v14h-14zM380 144h14v14h-14zM484 144h14v14h-14zM458 157h14v14h-14zM588 170h14v14h-14zM588 183h14v14h-14zM614 183h14v14h-14zM575 196h14v14h-14zM562 209h14v14h-14zM588 209h14v14h-14zM627 235h14v14h-14zM445 261h14v14h-14zM484 261h14v14h-14zM575 261h14v14h-14zM588 261h14v14h-14zM484 274h14v14h-14zM549 274h14v14h-14zM601 274h14v14h-14zM432 287h14v14h-14zM445 287h14v14h-14zM575 287h14v14h-14zM380 313h14v14h-14zM549 313h14v14h-14zM458 326h14v14h-14z" fill="#2861A0"/><path d="M445 40h14v14h-14zM549 53h14v14h-14zM406 66h14v14h-14zM614 92h14v14h-14zM406 105h14v14h-14zM575 105h14v14h-14zM432 118h14v14h-14zM497 131h14v14h-14zM523 131h14v14h-14zM393 144h14v14h-14zM406 144h14v14h-14zM575 144h14v14h-14zM653 157h14v14h-14zM406 170h14v14h-14zM601 170h14v14h-14zM588 196h14v14h-14zM614 196h14v14h-14zM653 196h14v14h-14zM627 222h14v14h-14zM640 235h14v14h-14zM406 313h14v14h-14zM471 313h14v14h-14zM536 313h14v14h-14zM380 326h14v14h-14zM536 326h14v14h-14zM575 326h14v14h-14z" fill="#22548F"/><path d="M484 40h14v14h-14zM458 66h14v14h-14zM484 66h14v14h-14zM380 79h14v14h-14zM588 92h14v14h-14zM380 105h14v14h-14zM445 105h14v14h-14zM419 118h14v14h-14zM484 118h14v14h-14zM445 144h14v14h-14zM419 157h14v14h-14zM653 170h14v14h-14zM393 313h14v14h-14zM471 326h14v14h-14zM523 339h14v14h-14z" fill="#1F497D"/><path d="M471 40h14v14h-14zM484 53h14v14h-14zM471 66h14v14h-14zM393 92h14v14h-14zM458 105h14v14h-14zM380 118h14v14h-14zM445 118h14v14h-14zM471 118h14v14h-14zM588 118h14v14h-14zM380 131h14v14h-14zM406 131h14v14h-14zM445 131h14v14h-14zM419 144h14v14h-14zM471 144h14v14h-14zM432 157h14v14h-14zM445 157h14v14h-14zM588 157h14v14h-14zM640 170h14v14h-14zM627 183h14v14h-14zM380 339h14v14h-14zM484 339h14v14h-14zM575 339h14v14h-14z" fill="#1C3E6A"/><path d="M393 66h14v14h-14zM393 79h14v14h-14zM588 105h14v14h-14zM393 118h14v14h-14zM406 118h14v14h-14zM575 118h14v14h-14zM640 118h14v14h-14zM393 131h14v14h-14zM432 131h14v14h-14zM588 131h14v14h-14zM601 131h14v14h-14zM614 131h14v14h-14zM432 144h14v14h-14zM627 157h14v14h-14zM640 157h14v14h-14zM614 170h14v14h-14zM627 170h14v14h-14zM640 183h14v14h-14zM562 326h14v14h-14z" fill="#193258"/><path d="M458 40h14v14h-14zM458 53h14v14h-14zM471 53h14v14h-14zM601 105h14v14h-14zM614 105h14v14h-14zM458 118h14v14h-14zM601 118h14v14h-14zM614 118h14v14h-14zM627 118h14v14h-14zM419 131h14v14h-14zM458 131h14v14h-14zM471 131h14v14h-14zM484 131h14v14h-14zM627 131h14v14h-14zM640 131h14v14h-14zM458 144h14v14h-14zM588 144h14v14h-14zM601 144h14v14h-14zM614 144h14v14h-14zM627 144h14v14h-14zM640 144h14v14h-14zM601 157h14v14h-14zM614 157h14v14h-14zM653 183h14v14h-14zM627 196h14v14h-14zM640 196h14v14h-14zM627 209h14v14h-14zM640 209h14v14h-14zM640 222h14v14h-14zM575 274h14v14h-14zM588 274h14v14h-14zM549 326h14v14h-14zM432 339h14v14h-14zM445 339h14v14h-14zM458 339h14v14h-14zM471 339h14v14h-14zM536 339h14v14h-14zM549 339h14v14h-14zM562 339h14v14h-14z" fill="#162746"/><rect x="0" y="40" width="312" height="312" fill="none" stroke="#14213D" stroke-width="2"/><rect x="380" y="40" width="312" height="312" fill="none" stroke="#14213D" stroke-width="2"/></svg>
+<p style="position:absolute;left:0px;top:0px;width:312px;font-size:24px;font-weight:700;color:#14213D">시뮬 (모델이 완벽하다고 가정)</p>
+<p style="position:absolute;left:380px;top:0px;width:330px;font-size:24px;font-weight:700;color:#A84A16">실측 — 같은 칸에 30 m 옆 값</p>
+<p style="position:absolute;left:0px;top:362px;width:700px;font-size:24px;color:#5E6675">20 m 칸 24 × 24 · 진할수록 음영이 얕음 (RSRP가 높음)</p>
+<p style="position:absolute;left:0px;top:400px;width:700px;font-size:24px;color:#14213D">칸별로 짝지으면 <b style="color:#A84A16">r = 0.58 · de-biased RMSE = 4.2 dB</b></p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">비교의 전제</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칸별 오차 E = sim − meas가 모델의 오차가 되려면<br>두 칸이 같은 땅을 가리켜야 한다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">어긋나면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">음영 · 피크의 자리가 엇갈려 r이 떨어진다 →<br>패턴 몫과 de-biased RMSE가 함께 커진다 →<br>좌표 문제를 모델 탓으로 오해한다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">열린 질문 Q-47 (Breakdown)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">실물 좌표 정합 — 어디서 몇 m 어긋날 수 있는지<br>오늘 자료가 그 점검 목록이다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 모델이 완벽해도 좌표가 30 m 어긋나면 4 dB 넘는 “오차”가 생긴다 — 모델을 고치기 전에 좌표부터 본다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림: 예시 시뮬레이션 (음영 σ 6 dB · 상관 거리 50 m 가정, 11쪽과 같은 조건) — 실제 측정 자료가 아님</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
+<aside>(약 50초) 비교는 같은 자리를 전제로 합니다. 칸별 오차, 시뮬에서 실측을 뺀 값이 모델의 오차가 되려면 두 칸이 같은 땅을 가리켜야 합니다. 왼쪽 그림은 모델이 완벽하다고 가정한 시뮬레이션 음영 지도이고, 오른쪽은 같은 지도를 30 m 옆으로 밀어 실측이라고 둔 것입니다. 무늬는 똑같지만 칸별로 짝지으면 상관계수가 0.58로 떨어지고 de-biased RMSE가 4.2 dB 정도 나옵니다. 모델은 하나도 틀리지 않았는데 좌표만으로 생긴 오차입니다. Breakdown 화면에서는 이것이 패턴 몫으로 나타나고, 그대로 두면 모델 탓으로 오해하게 됩니다. Breakdown 설명서에 열린 질문 Q-47로 남아 있는 실물 좌표 정합을 오늘 하나씩 점검해 보겠습니다.</aside>
+</section>
+<section id="axes" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">전체 그림</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">정합은 세 축 — 수평 · 높이 · 시간</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">축 1 · 4~6쪽 · 8쪽</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">수평 (x, y)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">측지 기준(datum) · 투영(EPSG) · 장면 원점과 회전<br>틀리면 수 m ~ 수백 km</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">축 2 · 7~8쪽</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">높이 (z)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">타원체고 · 해발고도 · 지면 위 높이(AGL)<br>틀리면 20~30 m — 건물 몇 층</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">축 3 · 10쪽</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">시간 (t)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">시간대 · GPS 시각 · 갱신 주기 · 지연<br>1 s 틀리면 주행 속도만큼 (50 km/h면 14 m)</p></div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#F7DDCB;border-radius:14px;padding:12px 16px"><p style="width:150px;font-size:26px;font-weight:700;line-height:1.3;color:#A84A16">실측<br>(DT 로그)</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">위경도 · 타원체고<br>· 시각 (단말 GNSS)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">시각 맞추기<br>(UTC · 지연)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">평면 좌표로<br>(EPSG 변환)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">높이 기준 맞추기<br>(필요할 때)</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:150px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">시뮬<br>(장면)</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">로컬 x, y, z (m)<br>+ 원점 · 투영 정보</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">원점 더하기<br>(장면 → 평면)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">RU 위치 · 높이 ·<br>방위각 확인</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">같은 평면 좌표<br>(예: EPSG:5179)</p></div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">순서</b> 두 줄이 같은 평면 좌표에서 만난 뒤에야 20 m 칸에 짝짓는다 — 짝짓기 전에 세 축을 모두 확인</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">20 m 칸 짝짓기는 Breakdown 설명서의 T2 기준 · 칸 크기와 공통 좌표계는 프로젝트 설정에 따라 다를 수 있음</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 14</p>
+<aside>(약 45초) 정합은 세 축으로 나눠 보면 정리가 됩니다. 첫째는 수평, x와 y입니다. 측지 기준, 투영 좌표계, 장면의 원점과 회전이 여기에 들어가고, 틀리면 수 m에서 수백 km까지 어긋납니다. 둘째는 높이입니다. GPS가 주는 높이와 해발고도, 지면 위 높이가 서로 달라서 20에서 30 m가 쉽게 틀어집니다. 셋째는 시간입니다. 시간대나 지연이 1초만 틀려도 주행 속도만큼, 시속 50 km면 14 m 어긋난 값을 붙이게 됩니다. 실측 로그는 위경도와 시각에서 출발하고, 시뮬레이션 장면은 로컬 미터 좌표에서 출발합니다. 두 줄이 같은 평면 좌표에서 만난 다음에야 20 m 칸에 짝지을 수 있습니다.</aside>
+</section>
+<section id="datum" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">축 1 · 수평 ① 측지 기준</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">같은 위경도라도 기준이 다르면 다른 점</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:center">
+<div style="position:relative;width:620px;height:540px">
+<svg aria-label="두 타원체가 조금 비켜 겹쳐 있고, 같은 지표면 점에서 두 중심으로 그은 선이 달라 위경도가 다르게 나온다는 그림" style="position:absolute;left:0px;top:0px;width:620px;height:540px" width="620" height="540" viewBox="0 0 620 540"><ellipse cx="300" cy="270" rx="250" ry="200" fill="#D5E3F3" stroke="#255E9E" stroke-width="4"/><ellipse cx="318" cy="258" rx="250" ry="199" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 8"/><circle cx="300" cy="270" r="6" fill="#255E9E"/><circle cx="318" cy="258" r="6" fill="#A84A16"/><line x1="300" y1="270" x2="480" y2="132" stroke="#255E9E" stroke-width="3"/><line x1="318" y1="258" x2="480" y2="132" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 6"/><circle cx="480" cy="132" r="10" fill="#14213D"/></svg>
+<p style="position:absolute;left:500px;top:100px;width:200px;font-size:24px;font-weight:700;color:#14213D">같은 땅의 점</p>
+<p style="position:absolute;left:80px;top:250px;width:230px;font-size:24px;line-height:1.35;color:#14213D">중심 · 크기 · 방향이<br>조금씩 다른 타원체</p>
+<p style="position:absolute;left:0px;top:490px;width:620px;font-size:24px;color:#14213D"><b style="color:#255E9E">━ 기준 A</b>  <b style="color:#A84A16">┅ 기준 B</b> → 같은 점의 위경도가 다르다</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">측지 기준 (EPSG)</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">주로 쓰는 곳</p><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">어긋남 (서울)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">WGS84 (4326)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">GPS · 단말 로그 · 웹 지도</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">기준</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">KGD2002 (4737)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">국내 측량 · 국가 지도 (GRS80 · ITRF2000)</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">1 m 미만</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">Korean 1985 (4162)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">옛 지적도 · 옛 수치지도 (Bessel 타원체)</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">약 360 m</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">실무 판단</p><p style="font-size:24px;line-height:1.4;color:#4A5262">WGS84 ↔ KGD2002는 20 m 칸 비교에서 같다고 봐도 된다<br>옛 기준(Bessel) 자료가 섞이면 수백 m — 칸 수십 개</p></div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">규칙</b> 숫자만 보고는 기준을 알 수 없다 — 파일을 받을 때 EPSG 코드를 함께 받는다</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">어긋남: 서울시청 부근을 pyproj로 변환한 값 (Korean 1985 ↔ WGS84 약 360 m, 보도된 대표값 약 365 m)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
+<aside>(약 50초) 첫 번째 수평 축은 측지 기준입니다. 위경도는 지구를 어떤 타원체로 근사했는지에 따라 달라집니다. 그림처럼 중심과 크기가 조금 다른 타원체를 쓰면, 같은 땅의 점이라도 위경도가 다르게 나옵니다. GPS와 단말 로그, 웹 지도는 WGS84를 씁니다. 국내 측량과 국가 지도는 KGD2002, 세계측지계를 쓰는데, 둘의 차이는 1 m가 안 되어 20 m 칸 비교에서는 같다고 봐도 됩니다. 문제는 옛 기준입니다. 일제강점기부터 쓰던 Bessel 타원체 기준, 흔히 동경측지계라 부르는 자료는 서울 부근에서 약 360 m 어긋납니다. 옛 지적도나 옛 수치지도에서 건물을 가져왔다면 이것을 먼저 확인해야 합니다. 숫자만 보고는 어떤 기준인지 알 수 없으니, 파일을 받을 때 EPSG 코드를 반드시 함께 받습니다.</aside>
+</section>
+<section id="projection" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">축 1 · 수평 ② 투영 좌표계</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">투영: 도(°)를 미터 평면으로 편다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:640px;height:530px">
+<svg aria-label="경도 120~132도 띠 그림. 120~126도는 UTM 51N, 126~132도는 UTM 52N, 중앙 경선 123도와 129도, 한국 TM 중앙 127도와 127.5도, 서울은 127도 부근" style="position:absolute;left:0px;top:0px;width:640px;height:530px" width="640" height="530" viewBox="0 0 640 530"><rect x="20" y="60" width="300" height="330" fill="#EAE7DF"/><rect x="320" y="60" width="300" height="330" fill="#D5E3F3"/><line x1="170" y1="60" x2="170" y2="390" stroke="#5E6675" stroke-width="3" stroke-dasharray="8 6"/><line x1="470" y1="60" x2="470" y2="390" stroke="#255E9E" stroke-width="3" stroke-dasharray="8 6"/><line x1="370" y1="60" x2="370" y2="390" stroke="#A84A16" stroke-width="3"/><line x1="395.0" y1="60" x2="395.0" y2="390" stroke="#14213D" stroke-width="3"/><circle cx="368.89999999999975" cy="200" r="10" fill="#A84A16" stroke="#FBFAF7" stroke-width="3"/><line x1="20" y1="390" x2="20" y2="404" stroke="#14213D" stroke-width="2"/><line x1="320" y1="390" x2="320" y2="404" stroke="#14213D" stroke-width="2"/><line x1="620" y1="390" x2="620" y2="404" stroke="#14213D" stroke-width="2"/></svg>
+<p style="position:absolute;left:20px;top:70px;width:300px;font-size:24px;text-align:center;font-weight:700;color:#5E6675">UTM 51N</p>
+<p style="position:absolute;left:320px;top:70px;width:300px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">UTM 52N</p>
+<p style="position:absolute;left:478px;top:340px;width:150px;font-size:24px;color:#255E9E">중앙 129°</p>
+<p style="position:absolute;left:178px;top:340px;width:150px;font-size:24px;color:#5E6675">중앙 123°</p>
+<p style="position:absolute;left:219px;top:230px;width:140px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">서울</p>
+<p style="position:absolute;left:300px;top:20px;width:140px;font-size:24px;text-align:center;color:#A84A16">127°</p>
+<p style="position:absolute;left:399px;top:110px;width:140px;font-size:24px;color:#14213D">127.5°</p>
+<p style="position:absolute;left:-20px;top:410px;width:80px;font-size:24px;text-align:center;color:#5E6675">120°E</p>
+<p style="position:absolute;left:280px;top:410px;width:80px;font-size:24px;text-align:center;color:#5E6675">126°E</p>
+<p style="position:absolute;left:580px;top:410px;width:80px;font-size:24px;text-align:center;color:#5E6675">132°E</p>
+<p style="position:absolute;left:0px;top:460px;width:640px;font-size:24px;line-height:1.4;color:#4A5262">UTM: 경도 6° 띠마다 따로 편 원통 투영 (축척 0.9996)<br>한국 TM: 띠 중앙을 한국에 맞춰 놓은 같은 방식</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">EPSG</p><p style="flex:1.25;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">이름 · 원점</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">서울시청 x, y (m)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">4326</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">WGS84 위경도 (투영 아님)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">126.9780°, 37.5665°</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">32652</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">UTM 52N · 129°E</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">321,424 · 4,159,641</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">5179</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">UTM-K (통합) · 127.5°E, 38°N<br>FE 1,000 km · FN 2,000 km</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">953,901 · 1,952,032</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">5186</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">중부원점 2010 · 127°E, 38°N<br>FE 200 km · FN 600 km</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">198,056 · 551,885</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">5181</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">중부원점 · FN 500 km</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">198,056 · <b style="color:#A84A16">451,885</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">읽는 법</p><p style="font-size:24px;line-height:1.4;color:#4A5262">투영 좌표는 원점에서 동쪽 · 북쪽으로 몇 m인지 — FE · FN은 음수를 피하려 더한 값<br>원점 · 띠가 다르면 같은 점도 숫자가 전혀 다르다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">좌표: 서울시청 부근(37.5665°N, 126.9780°E)을 pyproj로 변환 · 파라미터는 EPSG 등록 정보 (5179 = KGD2002 / Unified CS)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 14</p>
+<aside>(약 55초) 두 번째는 투영입니다. 위경도는 각도라서 거리나 칸을 계산하려면 미터 평면으로 펴야 합니다. 가장 흔한 것이 UTM으로, 경도 6도 띠마다 원통을 따로 씌워 펴는 방식입니다. 한반도는 126도를 경계로 51N과 52N에 걸치고, 서울은 52N에 들어갑니다. 한국 TM 좌표계는 같은 방식으로 띠의 중앙을 한국에 맞춘 것으로, 중앙 127.5도를 쓰는 UTM-K, EPSG 5179와 127도를 쓰는 중부원점 5186이 대표적입니다. 오른쪽 표는 서울시청 부근 한 점을 각 좌표계로 바꾼 값입니다. 같은 점인데 숫자가 전혀 다릅니다. 투영 좌표는 원점에서 동쪽과 북쪽으로 몇 m인지를 뜻하고, FE와 FN은 음수를 피하려고 더한 값입니다. 특히 5181과 5186은 원점이 같고 FN만 다르게 더해 정확히 100 km 차이 납니다. 이름이 비슷해 가장 헷갈리는 쌍입니다.</aside>
+</section>
+<section id="pitfalls" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">축 1 · 수평 ③ 흔한 실수</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">실수 여섯 가지 — 크기는 수 m에서 100 km까지</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">실수</p><p style="flex:1.3;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무슨 일이 일어나나</p><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">크기</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">① 위경도 순서 뒤바뀜</p><p style="flex:1.3;font-size:24px;line-height:1.35;color:#4A5262">EPSG:4326의 공식 순서는 위도 먼저 — GeoJSON · 여러 도구는 경도 먼저</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">변환 실패(inf) 또는 엉뚱한 대륙</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">② 도(°)를 미터처럼 계산</p><p style="flex:1.3;font-size:24px;line-height:1.35;color:#4A5262">서울에서 1° 위도 ≈ 111 km, 1° 경도 ≈ 88 km — 가로 세로 축척이 다르다</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">거리 · 칸 모양이 약 20% 찌그러짐</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③ 소수점 자리 잘림</p><p style="flex:1.3;font-size:24px;line-height:1.35;color:#4A5262">0.0001° = 위도 11 m · 경도 9 m</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">소수 4자리면 최대 약 5 m</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">④ 비슷한 EPSG 혼동</p><p style="flex:1.3;font-size:24px;line-height:1.35;color:#4A5262">5181 ↔ 5186 — 원점은 같고 FN만 다르다</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">정확히 100 km</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑤ 측지 기준 혼동</p><p style="flex:1.3;font-size:24px;line-height:1.35;color:#4A5262">옛 Bessel 기준 자료를 WGS84로 읽음 (4쪽)</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">서울 약 360 m</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑥ 진북 ↔ 도북 혼동</p><p style="flex:1.3;font-size:24px;line-height:1.35;color:#4A5262">투영 평면의 “위”는 진북이 아니다 — 서울에서 UTM 52N은 −1.2°, 5179는 −0.3°</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">1 km 떨어진 곳 약 21 m · 방위각 1.2°</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">크면 오히려 쉽다 (④ ⑤)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">수백 m ~ km는 지도에 찍어 보면 바로 보인다 — 바다 · 산 위의 측정점</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">작아서 어렵다 (② ③ ⑥)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">수 m ~ 수십 m는 눈에 안 띄고 패턴 몫으로만 나타난다 — 11 · 12쪽</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">거리 · 자오선 수렴각: 서울시청 부근 pyproj 계산값 (WGS84 타원체) · 1 km × tan 1.23° ≈ 21 m</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 14</p>
+<aside>(약 55초) 수평에서 흔한 실수 여섯 가지입니다. 첫째, 위경도 순서입니다. EPSG 4326의 공식 순서는 위도가 먼저인데 GeoJSON과 많은 도구는 경도를 먼저 씁니다. 뒤바뀌면 변환이 실패하거나 엉뚱한 곳에 찍힙니다. 둘째, 도를 미터처럼 계산하는 것입니다. 서울에서는 위도 1도가 111 km, 경도 1도가 88 km라 칸이 20% 정도 찌그러집니다. 셋째, 소수점 자리 잘림입니다. 소수 넷째 자리에서 자르면 최대 5 m 정도 잃습니다. 넷째와 다섯째는 앞에서 본 100 km와 360 m입니다. 여섯째는 진북과 도북입니다. 투영 평면의 위쪽은 진북이 아니라서 서울에서 UTM 52N은 1.2도 기울어 있습니다. RU 방위각을 진북 기준으로 받아 도북 장면에 그대로 넣으면 1.2도 틀어지고, 1 km 떨어진 곳에서는 21 m 어긋납니다. 크게 틀린 것은 지도에 찍으면 바로 보이지만, 수 m에서 수십 m는 눈에 띄지 않고 패턴 몫으로만 나타나서 더 위험합니다.</aside>
+</section>
+<section id="height" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">축 2 · 높이</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">높이: 타원체고 · 해발고도 · 지면 위 높이</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:660px;height:560px">
+<svg aria-label="단면 그림. 맨 아래 곧은 타원체, 그 위 물결 모양의 지오이드, 그 위 지형. 지형 위 건물 옥상 RU 안테나와 지면의 UE. 타원체고 h, 지오이드고 N, 지면 위 높이 AGL을 화살표로 표시" style="position:absolute;left:0px;top:0px;width:660px;height:560px" width="660" height="560" viewBox="0 0 660 560"><line x1="0" y1="470" x2="660" y2="470" stroke="#5E6675" stroke-width="4"/><polyline points="0,400.0 10,399.5 20,399.0 30,398.5 40,398.0 50,397.6 60,397.1 70,396.7 80,396.3 90,395.9 100,395.6 110,395.2 120,395.0 130,394.7 140,394.5 150,394.3 160,394.2 170,394.1 180,394.0 190,394.0 200,394.0 210,394.1 220,394.2 230,394.4 240,394.5 250,394.8 260,395.0 270,395.3 280,395.7 290,396.0 300,396.4 310,396.8 320,397.3 330,397.7 340,398.2 350,398.7 360,399.2 370,399.7 380,400.2 390,400.6 400,401.1 410,401.6 420,402.1 430,402.6 440,403.0 450,403.4 460,403.8 470,404.2 480,404.5 490,404.9 500,405.1 510,405.4 520,405.6 530,405.7 540,405.9 550,406.0 560,406.0 570,406.0 580,406.0 590,405.9 600,405.8 610,405.6 620,405.4 630,405.2 640,404.9 650,404.6 660,404.2" fill="none" stroke="#255E9E" stroke-width="4" stroke-dasharray="10 7"/><polygon points="0,520 0,277.4 10,272.1 20,267.0 30,262.4 40,258.2 50,254.7 60,252.0 70,250.0 80,248.9 90,248.6 100,249.1 110,250.3 120,252.3 130,254.7 140,257.6 150,260.8 160,264.1 170,267.4 180,270.6 190,273.5 200,276.1 210,278.2 220,279.8 230,280.9 240,281.5 250,281.6 260,281.3 270,280.7 280,279.8 290,278.8 300,277.9 310,277.1 320,276.6 330,276.5 340,276.9 350,278.0 360,279.6 370,282.0 380,285.1 390,288.8 400,293.1 410,297.9 420,303.2 430,308.7 440,314.3 450,319.9 460,325.4 470,330.5 480,335.1 490,339.2 500,342.5 510,345.1 520,346.9 530,347.9 540,348.1 550,347.5 560,346.3 570,344.4 580,342.2 590,339.6 600,336.8 610,333.9 620,331.2 630,328.7 640,326.5 650,324.7 660,323.4 660,520" fill="#EAE7DF" opacity="0.9"/><polyline points="0,277.4 10,272.1 20,267.0 30,262.4 40,258.2 50,254.7 60,252.0 70,250.0 80,248.9 90,248.6 100,249.1 110,250.3 120,252.3 130,254.7 140,257.6 150,260.8 160,264.1 170,267.4 180,270.6 190,273.5 200,276.1 210,278.2 220,279.8 230,280.9 240,281.5 250,281.6 260,281.3 270,280.7 280,279.8 290,278.8 300,277.9 310,277.1 320,276.6 330,276.5 340,276.9 350,278.0 360,279.6 370,282.0 380,285.1 390,288.8 400,293.1 410,297.9 420,303.2 430,308.7 440,314.3 450,319.9 460,325.4 470,330.5 480,335.1 490,339.2 500,342.5 510,345.1 520,346.9 530,347.9 540,348.1 550,347.5 560,346.3 570,344.4 580,342.2 590,339.6 600,336.8 610,333.9 620,331.2 630,328.7 640,326.5 650,324.7 660,323.4" fill="none" stroke="#8A6F4D" stroke-width="4"/><rect x="130" y="117" width="80" height="150" fill="#14213D"/><line x1="190" y1="117" x2="190" y2="72" stroke="#14213D" stroke-width="5"/><rect x="183" y="52" width="14" height="30" fill="#A84A16"/><rect x="452" y="308" width="36" height="22" rx="5" fill="#A84A16"/><line x1="560.0" y1="470.0" x2="560.0" y2="360.3" stroke="#14213D" stroke-width="3"/><polygon points="560.0,348.3 554.0,360.3 566.0,360.3" fill="#14213D"/><line x1="560.0" y1="348.3" x2="560.0" y2="460.0" stroke="#14213D" stroke-width="3"/><polygon points="560.0,472.0 566.0,460.0 554.0,460.0" fill="#14213D"/><line x1="620.0" y1="470.0" x2="620.0" y2="417.4" stroke="#255E9E" stroke-width="3"/><polygon points="620.0,407.4 615.0,417.4 625.0,417.4" fill="#255E9E"/><line x1="250.0" y1="281.6" x2="250.0" y2="79.4" stroke="#A84A16" stroke-width="3"/><polygon points="250.0,67.4 244.0,79.4 256.0,79.4" fill="#A84A16"/><line x1="250.0" y1="67.4" x2="250.0" y2="269.6" stroke="#A84A16" stroke-width="3"/><polygon points="250.0,281.6 256.0,269.6 244.0,269.6" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:476px;width:300px;font-size:24px;font-weight:700;color:#5E6675">타원체 (h = 0)</p>
+<p style="position:absolute;left:10px;top:404px;width:300px;font-size:24px;font-weight:700;color:#255E9E">지오이드 ≈ 평균해수면</p>
+<p style="position:absolute;left:280px;top:340px;width:200px;font-size:24px;font-weight:700;color:#8A6F4D">지면 (지형)</p>
+<p style="position:absolute;left:440px;top:372px;width:110px;font-size:24px;line-height:1.25;font-weight:700;color:#14213D;text-align:right">h<br>(GNSS)</p>
+<p style="position:absolute;left:560px;top:426px;width:100px;font-size:24px;font-weight:700;color:#255E9E;text-align:right">N</p>
+<p style="position:absolute;left:262px;top:120px;width:260px;font-size:24px;line-height:1.25;font-weight:700;color:#A84A16">AGL<br>(RU 안테나 높이)</p>
+<p style="position:absolute;left:410px;top:280px;width:160px;font-size:24px;font-weight:700;color:#A84A16;text-align:center">UE 1.5 m</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">h = H + N</p><p style="font-size:24px;line-height:1.4;color:#4A5262">GNSS가 주는 것은 타원체고 h — 해발고도 H는 지오이드고 N을 뺀 값<br>한국은 GPS 높이와 해발고도가 약 20~30 m 차이 (국가 지오이드 KNGeoid)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">단말 로그의 고도</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Android Location.getAltitude()는 WGS84 타원체 기준<br>해발고도는 API 34부터 변환기(AltitudeConverter)로 따로 — 기종 · 앱마다 확인</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">AGL ↔ AMSL</p><p style="font-size:24px;line-height:1.4;color:#4A5262">“안테나 30 m”는 대개 지면 위(AGL) — 장면 z가 해발 기준이면 그 자리 지면 고도를 더한다 (8쪽)</p></div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">실무</b> UE 높이는 대개 “지면 + 1.5 m”로 두므로 로그의 고도는 거의 안 쓴다 — 틀리기 쉬운 것은 RU · 건물 · 지형의 높이 기준</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">20~30 m: 국토지리정보원 설명 (GPS 높이와 해발고도의 기준면 차이) · 그림의 높이 비율은 과장 · Android 문서 (AltitudeConverter, API 34)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 14</p>
+<aside>(약 55초) 두 번째 축은 높이입니다. 높이에는 기준면이 셋 있습니다. 맨 아래 곧은 선이 타원체, 물결 모양의 파란 점선이 평균해수면에 해당하는 지오이드, 그 위가 실제 지형입니다. GNSS가 주는 높이는 타원체에서 잰 타원체고 h이고, 우리가 아는 해발고도 H는 여기서 지오이드고 N을 뺀 값입니다. 한국은 이 차이가 약 20에서 30 m입니다. 안드로이드의 getAltitude도 타원체 기준이고, 해발고도는 API 34부터 따로 변환해 줍니다. 세 번째로 지면 위 높이, AGL이 있습니다. RU 안테나 높이 30 m라고 하면 대개 지면 위 30 m입니다. 장면의 z가 해발 기준이라면 그 자리의 지면 고도를 더해야 합니다. 실무에서는 UE를 지면 위 1.5 m로 두는 경우가 많아 로그의 고도는 거의 쓰지 않습니다. 틀리기 쉬운 것은 RU와 건물, 지형의 높이 기준입니다. 20에서 30 m면 건물 몇 층 높이라 가시선과 음영이 크게 바뀝니다.</aside>
+</section>
+<section id="scene" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">축 1 + 2 · 장면 좌표</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">장면으로 옮기기: 원점 · 회전 · z = 0</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:110px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">수평</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">위경도<br>(EPSG:4326)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">투영 평면 (m)<br>예: EPSG:5179</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">원점 빼기<br>x − x₀, y − y₀</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">장면 x, y<br>(Sionna 등, m)</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#F7DDCB;border-radius:14px;padding:12px 16px"><p style="width:110px;font-size:26px;font-weight:700;line-height:1.3;color:#A84A16">높이</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">장면 z = 0의 뜻<br>(해발 0? 원점 지면?)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">그 자리 지면 고도<br>(DEM · 장면 지형)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">+ AGL<br>(RU 30 m · UE 1.5 m)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">장면 z</p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">원점 (x₀, y₀)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">장면을 만든 도구가 정한 원점의 위경도와 EPSG를 장면과 함께 기록 — 없으면 되돌아갈 수 없다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">회전</p><p style="font-size:24px;line-height:1.4;color:#4A5262">장면 축이 도북이면 RU 방위각도 도북으로 — 서울에서 UTM 52N −1.2° · 5179 −0.3° · 5186 ≈ 0°</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">z = 0</p><p style="font-size:24px;line-height:1.4;color:#4A5262">지형이 있는 장면에서 UE를 z = 1.5 m로 고정하면 땅속 · 공중에 놓인다 — 그 자리 지면 + 1.5 m</p></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">증상</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">먼저 볼 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">경로가 0개 · Rx가 건물 안 · 땅속</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">z 기준, 원점, 단위 (m ↔ mm)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">음영 무늬가 한 방향으로 일정하게 밀림</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">원점 (x₀, y₀) · EPSG 혼동</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">RU에서 멀수록 어긋남이 커짐 (돌아간 무늬)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">회전 — 진북 ↔ 도북 · 장면 축 방향</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">수렴각: 서울시청 부근 pyproj 계산값 · 장면 원점과 z 기준은 장면을 만든 도구 · 자료마다 다르므로 장면 정보로 기록</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
+<aside>(약 55초) 시뮬레이션 장면은 보통 로컬 미터 좌표입니다. 수평은 위경도를 투영 평면으로 바꾸고 원점을 빼서 장면 x, y로 옮깁니다. 높이는 먼저 장면의 z = 0이 무엇인지, 해발 0인지 원점의 지면인지를 확인하고, 그 자리 지면 고도에 지면 위 높이를 더합니다. 세 가지를 주의합니다. 첫째, 원점의 위경도와 EPSG를 장면과 함께 기록해야 합니다. 없으면 실측 좌표를 장면으로 옮길 수 없습니다. 둘째, 회전입니다. 장면 축이 도북이면 RU 방위각도 도북으로 바꿔 넣습니다. 셋째, 지형이 있는 장면에서 UE를 z 1.5 m로 고정하면 땅속이나 공중에 놓입니다. 아래 표처럼 증상으로 원인을 좁힐 수 있습니다. 무늬가 한 방향으로 일정하게 밀리면 원점이나 EPSG를, RU에서 멀수록 어긋남이 커지면 회전을 의심합니다.</aside>
+</section>
+<section id="sources" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:50px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">어긋남의 크기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">어디서 몇 m 어긋나나 (로그 눈금)</h2>
+</div>
+<div style="position:relative;width:1664px;height:536px">
+<svg aria-label="로그 눈금 가로 그림. 스마트폰 GNSS 약 5 m, 도심 다중경로 수십 m, 20 m 칸 스냅 최대 14 m, 시간 1초 14 m, 건물 자료 수 m 이상은 파란색, 회전 무시 21 m, 옛 측지 기준 360 m, EPSG 혼동 100 km는 주황색" style="position:absolute;left:0px;top:0px;width:1664px;height:536px" width="1664" height="536" viewBox="0 0 1664 536"><line x1="330" y1="0" x2="330" y2="496" stroke="#EAE7DF" stroke-width="2"/><line x1="590" y1="0" x2="590" y2="496" stroke="#EAE7DF" stroke-width="2"/><line x1="850" y1="0" x2="850" y2="496" stroke="#EAE7DF" stroke-width="2"/><line x1="1110" y1="0" x2="1110" y2="496" stroke="#EAE7DF" stroke-width="2"/><line x1="1370" y1="0" x2="1370" y2="496" stroke="#EAE7DF" stroke-width="2"/><line x1="1630" y1="0" x2="1630" y2="496" stroke="#EAE7DF" stroke-width="2"/><rect x="330" y="-4" width="338" height="500" fill="#D5E3F3" opacity="0.45"/><line x1="454" y1="31" x2="512" y2="31" stroke="#255E9E" stroke-width="16" stroke-linecap="round"/><line x1="590" y1="93" x2="772" y2="93" stroke="#255E9E" stroke-width="16" stroke-linecap="round"/><line x1="330" y1="155" x2="628" y2="155" stroke="#255E9E" stroke-width="16" stroke-linecap="round"/><circle cx="628" cy="217" r="11" fill="#255E9E"/><line x1="330" y1="279" x2="668" y2="279" stroke="#255E9E" stroke-width="16" stroke-linecap="round"/><circle cx="674" cy="341" r="11" fill="#A84A16"/><circle cx="995" cy="403" r="11" fill="#A84A16"/><circle cx="1630" cy="465" r="11" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:15px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#14213D">스마트폰 GNSS (열린 하늘)</p>
+<p style="position:absolute;left:530px;top:15px;width:240px;font-size:24px;color:#255E9E">약 5 m</p>
+<p style="position:absolute;left:0px;top:77px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#14213D">도심 협곡 · 다중경로</p>
+<p style="position:absolute;left:790px;top:77px;width:240px;font-size:24px;color:#255E9E">수십 m까지</p>
+<p style="position:absolute;left:0px;top:139px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#14213D">20 m 칸에 스냅</p>
+<p style="position:absolute;left:646px;top:139px;width:240px;font-size:24px;color:#255E9E">최대 14 m</p>
+<p style="position:absolute;left:0px;top:201px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#14213D">시간 1 s @ 50 km/h</p>
+<p style="position:absolute;left:646px;top:201px;width:240px;font-size:24px;color:#255E9E">14 m</p>
+<p style="position:absolute;left:0px;top:263px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#14213D">건물 · 지도 자료 위치</p>
+<p style="position:absolute;left:686px;top:263px;width:240px;font-size:24px;color:#255E9E">자료마다 (수 m ~)</p>
+<p style="position:absolute;left:0px;top:325px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#14213D">회전 무시 (RU에서 1 km)</p>
+<p style="position:absolute;left:692px;top:325px;width:240px;font-size:24px;color:#A84A16">21 m</p>
+<p style="position:absolute;left:0px;top:387px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#14213D">옛 측지 기준 혼동</p>
+<p style="position:absolute;left:1013px;top:387px;width:240px;font-size:24px;color:#A84A16">약 360 m</p>
+<p style="position:absolute;left:0px;top:449px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#14213D">5181 ↔ 5186 혼동</p>
+<p style="position:absolute;left:1388px;top:449px;width:200px;font-size:24px;text-align:right;color:#A84A16">100 km</p>
+<p style="position:absolute;left:270px;top:502px;width:120px;font-size:24px;text-align:center;color:#5E6675">1 m</p>
+<p style="position:absolute;left:530px;top:502px;width:120px;font-size:24px;text-align:center;color:#5E6675">10 m</p>
+<p style="position:absolute;left:790px;top:502px;width:120px;font-size:24px;text-align:center;color:#5E6675">100 m</p>
+<p style="position:absolute;left:1050px;top:502px;width:120px;font-size:24px;text-align:center;color:#5E6675">1 km</p>
+<p style="position:absolute;left:1310px;top:502px;width:120px;font-size:24px;text-align:center;color:#5E6675">10 km</p>
+<p style="position:absolute;left:1570px;top:502px;width:120px;font-size:24px;text-align:center;color:#5E6675">100 km</p>
+<p style="position:absolute;left:336px;top:-40px;width:600px;font-size:24px;color:#255E9E">20 m 칸 한 칸 이내 (파란 띠)</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">파랑 — 자연 오차</p><p style="font-size:24px;line-height:1.4;color:#4A5262">늘 있다 · 줄일 수는 있어도 없앨 수 없다 → 칸 크기 · 평균으로 견딘다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">주황 — 실수</p><p style="font-size:24px;line-height:1.4;color:#4A5262">한 번 고치면 사라진다 → 파이프라인 점검표로 막는다 (13쪽)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">GNSS 약 4.9 m: gps.gov (열린 하늘 · 스마트폰 대표값) · 도심 · 건물 자료 범위는 일반적 경향의 예시 · 나머지는 앞쪽 계산값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 14</p>
+<aside>(약 50초) 지금까지 나온 어긋남을 한 줄에 놓아 보면 이렇습니다. 가로축이 로그 눈금이라 1 m부터 100 km까지 한 번에 보입니다. 파란색은 자연 오차입니다. 스마트폰 GNSS는 열린 하늘에서 약 5 m, 건물 사이에서는 다중경로 때문에 수십 m까지 커질 수 있습니다. 20 m 칸에 스냅하면 칸 중심까지 최대 14 m, 시간이 1초 틀리면 시속 50 km에서 14 m입니다. 건물과 지도 자료 자체의 위치 오차도 자료마다 있습니다. 주황색은 실수입니다. 회전을 무시하면 1 km 떨어진 곳에서 21 m, 옛 측지 기준은 360 m, EPSG 혼동은 100 km입니다. 파란 것은 늘 있어서 칸 크기와 평균으로 견디고, 주황 것은 한 번 고치면 사라지니 점검표로 막습니다. 파란 띠 안, 20 m 칸 한 칸 이내의 어긋남도 다음 쪽에서 보듯 오차를 꽤 키웁니다.</aside>
+</section>
+<section id="time" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">축 3 · 시간</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">시간: 1 s 어긋나면 14 m 옆의 값을 붙인다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:660px;height:460px">
+<svg aria-label="도로 위 주행 궤적. 파란 점이 실제 측정 자리, 주황 사각형이 시각이 1초 늦게 찍혀 주행 방향으로 밀려 붙은 자리" style="position:absolute;left:0px;top:0px;width:660px;height:460px" width="660" height="460" viewBox="0 0 660 460"><path d="M20 300 C 180 300, 260 120, 420 110 S 600 200, 640 60" fill="none" stroke="#EAE7DF" stroke-width="34" stroke-linecap="round"/><circle cx="40" cy="300" r="11" fill="#255E9E"/><circle cx="130" cy="296" r="11" fill="#255E9E"/><circle cx="215" cy="262" r="11" fill="#255E9E"/><circle cx="290" cy="190" r="11" fill="#255E9E"/><circle cx="370" cy="128" r="11" fill="#255E9E"/><circle cx="450" cy="112" r="11" fill="#255E9E"/><circle cx="530" cy="140" r="11" fill="#255E9E"/><circle cx="595" cy="120" r="11" fill="#255E9E"/><rect x="112" y="253" width="18" height="18" fill="#A84A16"/><line x1="40" y1="286" x2="121" y2="270" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 4"/><rect x="198" y="222" width="18" height="18" fill="#A84A16"/><line x1="130" y1="282" x2="206" y2="239" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 4"/><rect x="274" y="154" width="18" height="18" fill="#A84A16"/><line x1="215" y1="248" x2="282" y2="171" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 4"/><rect x="353" y="91" width="18" height="18" fill="#A84A16"/><line x1="290" y1="176" x2="362" y2="108" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 4"/><rect x="433" y="71" width="18" height="18" fill="#A84A16"/><line x1="370" y1="114" x2="442" y2="88" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 4"/><rect x="513" y="94" width="18" height="18" fill="#A84A16"/><line x1="450" y1="98" x2="522" y2="111" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 4"/><rect x="580" y="79" width="18" height="18" fill="#A84A16"/><line x1="530" y1="126" x2="588" y2="96" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 4"/></svg>
+<p style="position:absolute;left:0px;top:340px;width:640px;font-size:24px;color:#14213D"><b style="color:#255E9E">●</b> 실제 측정 자리  <b style="color:#A84A16">■</b> 시각이 1 s 늦게 찍혀 붙은 자리</p>
+<p style="position:absolute;left:0px;top:380px;width:640px;font-size:24px;line-height:1.4;color:#4A5262">1 s × 50 km/h = 14 m · 주행 방향으로만 밀린다 → 왕복 구간에서 무늬가 엇갈린다</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">어긋남</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">크기 · 증상</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">시간대</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">UTC · KST(UTC+9) · 장비 현지 시각이 섞인다 — 9시간이면 짝이 아예 안 맞는다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">GPS 시각</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">윤초를 넣지 않아 UTC보다 18 s 앞선다 (2017년~) — 50 km/h면 250 m</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">갱신 주기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">GNSS 위치는 보통 1 Hz, 측정은 더 잦거나 드물다 — 보간 · 가장 가까운 시각 규칙을 정한다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">처리 지연</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">측정 · 보고 · 기록 사이의 지연 — 장비 · 설정마다 다르다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">지연 찾기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">시각을 −5 ~ +5 s 옮겨 가며 r이 가장 큰 지연을 찾는다 — 왕복 · 회전 구간이 많을수록 잘 드러난다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">GPS − UTC = 18 s (2017년 1월 이후 윤초 추가 없음) · 1 Hz는 DT 장비의 흔한 GNSS 기록 주기 (장비 · 설정 확인)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 14</p>
+<aside>(약 50초) 세 번째 축은 시간입니다. 측정값에 붙는 위치는 시각으로 찾아 붙이기 때문에, 시각이 1초 늦게 찍히면 그 사이 달린 거리만큼 옆자리 값을 붙입니다. 시속 50 km에서 14 m입니다. 그림처럼 주행 방향으로만 밀리기 때문에 갈 때와 올 때 무늬가 서로 엇갈리는 것이 특징입니다. 원인은 넷입니다. 시간대가 섞이면 9시간이 어긋나 짝이 아예 맞지 않습니다. GPS 시각은 윤초를 넣지 않아 UTC보다 18초 앞서 있고, 시속 50 km면 250 m입니다. 위치는 보통 1초마다, 측정은 그보다 잦거나 드물게 기록되니 보간 규칙을 정해야 합니다. 마지막으로 장비 안의 처리 지연이 있습니다. 지연은 시각을 앞뒤로 옮겨 가며 상관이 가장 커지는 값을 찾으면 됩니다.</aside>
+</section>
+<section id="effect" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">얼마나 커지나 · 예시 시뮬레이션</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">좌표가 어긋나면 오차가 얼마나 커지나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:1000px;height:520px">
+<svg aria-label="좌표 어긋남(가로, 0~100 m)에 따른 de-biased RMSE(세로, dB) 곡선 셋. 완벽한 모델도 어긋남이 커질수록 오차가 커지며, 상관 거리가 짧을수록 빨리 커진다" style="position:absolute;left:0px;top:0px;width:1000px;height:520px" width="1000" height="520" viewBox="0 0 1000 520"><line x1="80" y1="460" x2="960" y2="460" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="313" x2="960" y2="313" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="167" x2="960" y2="167" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="20" x2="960" y2="20" stroke="#EAE7DF" stroke-width="2"/><rect x="80" y="20" width="176" height="440" fill="#D5E3F3" opacity="0.45"/><line x1="80" y1="460" x2="960" y2="460" stroke="#14213D" stroke-width="3"/><line x1="80" y1="20" x2="80" y2="460" stroke="#14213D" stroke-width="3"/><polyline points="80.0,460.0 124.0,412.1 168.0,364.7 212.0,326.5 256.0,292.3 344.0,242.0 432.0,206.8 520.0,181.3 696.0,146.6 960.0,118.3" fill="none" stroke="#255E9E" stroke-width="5"/><circle cx="80.0" cy="460.0" r="6" fill="#255E9E"/><circle cx="124.0" cy="412.1" r="6" fill="#255E9E"/><circle cx="168.0" cy="364.7" r="6" fill="#255E9E"/><circle cx="212.0" cy="326.5" r="6" fill="#255E9E"/><circle cx="256.0" cy="292.3" r="6" fill="#255E9E"/><circle cx="344.0" cy="242.0" r="6" fill="#255E9E"/><circle cx="432.0" cy="206.8" r="6" fill="#255E9E"/><circle cx="520.0" cy="181.3" r="6" fill="#255E9E"/><circle cx="696.0" cy="146.6" r="6" fill="#255E9E"/><circle cx="960.0" cy="118.3" r="6" fill="#255E9E"/><polyline points="80.0,460.0 124.0,394.0 168.0,330.9 212.0,284.0 256.0,246.4 344.0,203.3 432.0,184.3 520.0,177.4 696.0,171.6 960.0,170.1" fill="none" stroke="#A84A16" stroke-width="5"/><circle cx="80.0" cy="460.0" r="6" fill="#A84A16"/><circle cx="124.0" cy="394.0" r="6" fill="#A84A16"/><circle cx="168.0" cy="330.9" r="6" fill="#A84A16"/><circle cx="212.0" cy="284.0" r="6" fill="#A84A16"/><circle cx="256.0" cy="246.4" r="6" fill="#A84A16"/><circle cx="344.0" cy="203.3" r="6" fill="#A84A16"/><circle cx="432.0" cy="184.3" r="6" fill="#A84A16"/><circle cx="520.0" cy="177.4" r="6" fill="#A84A16"/><circle cx="696.0" cy="171.6" r="6" fill="#A84A16"/><circle cx="960.0" cy="170.1" r="6" fill="#A84A16"/><polyline points="80.0,265.4 124.0,260.0 168.0,243.9 212.0,224.4 256.0,203.3 344.0,168.6 432.0,141.2 520.0,120.7 696.0,90.9 960.0,66.9" fill="none" stroke="#14213D" stroke-width="5" stroke-dasharray="10 7"/><circle cx="80.0" cy="265.4" r="6" fill="#14213D"/><circle cx="124.0" cy="260.0" r="6" fill="#14213D"/><circle cx="168.0" cy="243.9" r="6" fill="#14213D"/><circle cx="212.0" cy="224.4" r="6" fill="#14213D"/><circle cx="256.0" cy="203.3" r="6" fill="#14213D"/><circle cx="344.0" cy="168.6" r="6" fill="#14213D"/><circle cx="432.0" cy="141.2" r="6" fill="#14213D"/><circle cx="520.0" cy="120.7" r="6" fill="#14213D"/><circle cx="696.0" cy="90.9" r="6" fill="#14213D"/><circle cx="960.0" cy="66.9" r="6" fill="#14213D"/><line x1="502" y1="333" x2="564" y2="333" stroke="#255E9E" stroke-width="5"/><line x1="502" y1="373" x2="564" y2="373" stroke="#A84A16" stroke-width="5"/><line x1="502" y1="413" x2="564" y2="413" stroke="#14213D" stroke-width="5" stroke-dasharray="10 7"/></svg>
+<p style="position:absolute;left:0px;top:444px;width:66px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:297px;width:66px;font-size:24px;text-align:right;color:#5E6675">3</p>
+<p style="position:absolute;left:0px;top:151px;width:66px;font-size:24px;text-align:right;color:#5E6675">6</p>
+<p style="position:absolute;left:0px;top:4px;width:66px;font-size:24px;text-align:right;color:#5E6675">9</p>
+<p style="position:absolute;left:40px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:216px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">20</p>
+<p style="position:absolute;left:392px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">40</p>
+<p style="position:absolute;left:568px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">60</p>
+<p style="position:absolute;left:744px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">80</p>
+<p style="position:absolute;left:920px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">100</p>
+<p style="position:absolute;left:80px;top:504px;width:880px;font-size:24px;text-align:center;color:#14213D">좌표 어긋남 (m)</p>
+<p style="position:absolute;left:90px;top:24px;width:300px;font-size:24px;color:#14213D;background:#F5F3EE">de-biased RMSE (dB)</p>
+<p style="position:absolute;left:582px;top:316px;width:380px;font-size:24px;font-weight:700;color:#255E9E">완벽한 모델 · 상관 50 m</p>
+<p style="position:absolute;left:582px;top:356px;width:380px;font-size:24px;font-weight:700;color:#A84A16">완벽한 모델 · 상관 13 m</p>
+<p style="position:absolute;left:582px;top:396px;width:380px;font-size:24px;font-weight:700;color:#14213D">모델 오차 4 dB + 어긋남 (50 m)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">모델이 완벽해도</p><p style="font-size:24px;line-height:1.4;color:#4A5262">상관 50 m: 10 m → 1.9 dB · 20 m → 3.4 dB<br>상관 13 m: 10 m → 2.6 dB · 20 m → 4.4 dB</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">모델 오차 4 dB가 있으면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">0 m 4.0 → 20 m 5.2 → 50 m 6.9 dB<br>오차는 제곱으로 더해져 늘어난다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">커지는 몫</p><p style="font-size:24px;line-height:1.4;color:#4A5262">패턴 몫 (r이 떨어진다) — 편향 · 거리 경향 · 진폭은 거의 그대로</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 음영이 빨리 바뀌는 도심일수록 같은 어긋남에도 오차가 빨리 커진다 — 파란 띠(20 m 이내)도 무시할 수 없다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">가정: 음영 σ 6 dB · 지수 상관 50 m / 13 m (3GPP TR 38.901 UMa · UMi NLOS 값을 빌림) · 20 m 칸 평균 · 무작위 방향 이동, 6회 평균</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
+<aside>(약 60초) 그러면 몇 m 어긋나면 오차가 얼마나 커질까요. 예시 시뮬레이션입니다. 표준편차 6 dB의 음영 지도를 만들고 20 m 칸으로 평균한 뒤, 실측 쪽만 좌표를 밀어 칸별로 비교했습니다. 파란 선은 모델이 완벽하고 음영의 상관 거리가 50 m인 경우로, 10 m만 어긋나도 약 2 dB, 20 m면 3.4 dB가 생깁니다. 주황 선은 상관 거리가 13 m로 짧은 도심 골목 같은 경우로, 같은 10 m에 2.6 dB, 20 m에 4.4 dB로 훨씬 빨리 커집니다. 점선은 모델 자체 오차가 4 dB 있을 때입니다. 오차는 제곱으로 더해지므로 20 m 어긋나면 5.3 dB, 50 m면 6.9 dB가 됩니다. 이렇게 커지는 몫은 거의 모두 패턴 몫입니다. 편향이나 거리 경향은 그대로입니다. 그래서 패턴 몫이 크게 나오면 모델보다 좌표를 먼저 의심해야 합니다. 숫자는 가정에 따른 예시이고, 우리 자료의 상관 거리는 실측에서 따로 재야 합니다.</aside>
+</section>
+<section id="detect" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">어긋남 찾기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">어긋남 찾기: 옮겨 보고, 겹쳐 보고, 찍어 본다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:790px;height:530px">
+<svg aria-label="이동 탐색 열지도. 실측 좌표를 동서 남북으로 −60에서 +60 m까지 옮기며 de-biased RMSE를 칠했고, 가장 작은 칸이 심어 둔 어긋남 근처에 있다" style="position:absolute;left:0px;top:0px;width:790px;height:530px" width="790" height="530" viewBox="0 0 790 530"><path d="M348 144h19v19h-19zM366 144h19v19h-19zM384 144h19v19h-19zM348 162h19v19h-19zM366 162h19v19h-19zM384 162h19v19h-19zM348 180h19v19h-19zM366 180h19v19h-19zM384 180h19v19h-19z" fill="#162746"/><path d="M348 126h19v19h-19zM366 126h19v19h-19zM384 126h19v19h-19zM330 144h19v19h-19zM402 144h19v19h-19zM330 162h19v19h-19zM402 162h19v19h-19zM330 180h19v19h-19zM402 180h19v19h-19zM348 198h19v19h-19zM366 198h19v19h-19zM384 198h19v19h-19z" fill="#193258"/><path d="M366 108h19v19h-19zM330 126h19v19h-19zM402 126h19v19h-19zM312 162h19v19h-19zM330 198h19v19h-19zM402 198h19v19h-19z" fill="#1C3E6A"/><path d="M330 108h19v19h-19zM348 108h19v19h-19zM384 108h19v19h-19zM402 108h19v19h-19zM312 126h19v19h-19zM420 126h19v19h-19zM312 144h19v19h-19zM420 144h19v19h-19zM420 162h19v19h-19zM312 180h19v19h-19zM420 180h19v19h-19zM312 198h19v19h-19zM420 198h19v19h-19zM330 216h19v19h-19zM348 216h19v19h-19zM366 216h19v19h-19zM384 216h19v19h-19zM402 216h19v19h-19z" fill="#1F497D"/><path d="M348 90h19v19h-19zM366 90h19v19h-19zM384 90h19v19h-19zM312 108h19v19h-19zM420 108h19v19h-19zM294 144h19v19h-19zM438 144h19v19h-19zM294 162h19v19h-19zM438 162h19v19h-19zM294 180h19v19h-19zM438 180h19v19h-19zM312 216h19v19h-19zM420 216h19v19h-19zM348 234h19v19h-19zM366 234h19v19h-19zM384 234h19v19h-19zM402 234h19v19h-19z" fill="#22548F"/><path d="M366 72h19v19h-19zM312 90h19v19h-19zM330 90h19v19h-19zM402 90h19v19h-19zM420 90h19v19h-19zM294 108h19v19h-19zM438 108h19v19h-19zM294 126h19v19h-19zM438 126h19v19h-19zM276 144h19v19h-19zM276 162h19v19h-19zM456 162h19v19h-19zM276 180h19v19h-19zM456 180h19v19h-19zM294 198h19v19h-19zM438 198h19v19h-19zM294 216h19v19h-19zM438 216h19v19h-19zM312 234h19v19h-19zM330 234h19v19h-19zM420 234h19v19h-19zM348 252h19v19h-19zM366 252h19v19h-19zM384 252h19v19h-19z" fill="#2861A0"/><path d="M312 72h19v19h-19zM330 72h19v19h-19zM348 72h19v19h-19zM384 72h19v19h-19zM402 72h19v19h-19zM420 72h19v19h-19zM294 90h19v19h-19zM438 90h19v19h-19zM276 108h19v19h-19zM456 108h19v19h-19zM276 126h19v19h-19zM456 126h19v19h-19zM456 144h19v19h-19zM258 162h19v19h-19zM474 162h19v19h-19zM258 180h19v19h-19zM474 180h19v19h-19zM276 198h19v19h-19zM456 198h19v19h-19zM276 216h19v19h-19zM456 216h19v19h-19zM294 234h19v19h-19zM438 234h19v19h-19zM312 252h19v19h-19zM330 252h19v19h-19zM402 252h19v19h-19zM420 252h19v19h-19zM366 270h19v19h-19z" fill="#3C72AE"/><path d="M312 54h19v19h-19zM330 54h19v19h-19zM348 54h19v19h-19zM366 54h19v19h-19zM384 54h19v19h-19zM402 54h19v19h-19zM420 54h19v19h-19zM294 72h19v19h-19zM438 72h19v19h-19zM276 90h19v19h-19zM456 90h19v19h-19zM258 108h19v19h-19zM474 108h19v19h-19zM258 126h19v19h-19zM474 126h19v19h-19zM258 144h19v19h-19zM474 144h19v19h-19zM240 162h19v19h-19zM492 162h19v19h-19zM240 180h19v19h-19zM492 180h19v19h-19zM258 198h19v19h-19zM474 198h19v19h-19zM258 216h19v19h-19zM474 216h19v19h-19zM276 234h19v19h-19zM456 234h19v19h-19zM474 234h19v19h-19zM294 252h19v19h-19zM438 252h19v19h-19zM456 252h19v19h-19zM312 270h19v19h-19zM330 270h19v19h-19zM348 270h19v19h-19zM384 270h19v19h-19zM402 270h19v19h-19zM420 270h19v19h-19zM366 288h19v19h-19z" fill="#4F83BC"/><path d="M312 36h19v19h-19zM330 36h19v19h-19zM348 36h19v19h-19zM366 36h19v19h-19zM384 36h19v19h-19zM402 36h19v19h-19zM420 36h19v19h-19zM276 54h19v19h-19zM294 54h19v19h-19zM438 54h19v19h-19zM456 54h19v19h-19zM258 72h19v19h-19zM276 72h19v19h-19zM456 72h19v19h-19zM474 72h19v19h-19zM258 90h19v19h-19zM474 90h19v19h-19zM492 90h19v19h-19zM240 108h19v19h-19zM492 108h19v19h-19zM240 126h19v19h-19zM492 126h19v19h-19zM222 144h19v19h-19zM240 144h19v19h-19zM492 144h19v19h-19zM222 162h19v19h-19zM222 180h19v19h-19zM240 198h19v19h-19zM492 198h19v19h-19zM240 216h19v19h-19zM492 216h19v19h-19zM240 234h19v19h-19zM258 234h19v19h-19zM492 234h19v19h-19zM258 252h19v19h-19zM276 252h19v19h-19zM474 252h19v19h-19zM276 270h19v19h-19zM294 270h19v19h-19zM438 270h19v19h-19zM456 270h19v19h-19zM294 288h19v19h-19zM312 288h19v19h-19zM330 288h19v19h-19zM348 288h19v19h-19zM384 288h19v19h-19zM402 288h19v19h-19zM420 288h19v19h-19zM438 288h19v19h-19zM348 306h19v19h-19zM366 306h19v19h-19z" fill="#6393CA"/><path d="M294 18h19v19h-19zM312 18h19v19h-19zM330 18h19v19h-19zM348 18h19v19h-19zM366 18h19v19h-19zM384 18h19v19h-19zM402 18h19v19h-19zM420 18h19v19h-19zM276 36h19v19h-19zM294 36h19v19h-19zM438 36h19v19h-19zM456 36h19v19h-19zM258 54h19v19h-19zM474 54h19v19h-19zM492 54h19v19h-19zM240 72h19v19h-19zM492 72h19v19h-19zM222 90h19v19h-19zM240 90h19v19h-19zM222 108h19v19h-19zM204 126h19v19h-19zM222 126h19v19h-19zM204 144h19v19h-19zM204 162h19v19h-19zM204 180h19v19h-19zM204 198h19v19h-19zM222 198h19v19h-19zM204 216h19v19h-19zM222 216h19v19h-19zM222 234h19v19h-19zM222 252h19v19h-19zM240 252h19v19h-19zM492 252h19v19h-19zM240 270h19v19h-19zM258 270h19v19h-19zM474 270h19v19h-19zM492 270h19v19h-19zM258 288h19v19h-19zM276 288h19v19h-19zM456 288h19v19h-19zM474 288h19v19h-19zM276 306h19v19h-19zM294 306h19v19h-19zM312 306h19v19h-19zM330 306h19v19h-19zM384 306h19v19h-19zM402 306h19v19h-19zM420 306h19v19h-19zM438 306h19v19h-19zM456 306h19v19h-19zM330 324h19v19h-19zM348 324h19v19h-19zM366 324h19v19h-19zM384 324h19v19h-19z" fill="#76A4D8"/><path d="M276 0h19v19h-19zM294 0h19v19h-19zM312 0h19v19h-19zM330 0h19v19h-19zM348 0h19v19h-19zM366 0h19v19h-19zM384 0h19v19h-19zM402 0h19v19h-19zM420 0h19v19h-19zM438 0h19v19h-19zM258 18h19v19h-19zM276 18h19v19h-19zM438 18h19v19h-19zM456 18h19v19h-19zM474 18h19v19h-19zM240 36h19v19h-19zM258 36h19v19h-19zM474 36h19v19h-19zM492 36h19v19h-19zM222 54h19v19h-19zM240 54h19v19h-19zM204 72h19v19h-19zM222 72h19v19h-19zM186 90h19v19h-19zM204 90h19v19h-19zM186 108h19v19h-19zM204 108h19v19h-19zM168 126h19v19h-19zM186 126h19v19h-19zM168 144h19v19h-19zM186 144h19v19h-19zM168 162h19v19h-19zM186 162h19v19h-19zM168 180h19v19h-19zM186 180h19v19h-19zM168 198h19v19h-19zM186 198h19v19h-19zM168 216h19v19h-19zM186 216h19v19h-19zM186 234h19v19h-19zM204 234h19v19h-19zM186 252h19v19h-19zM204 252h19v19h-19zM204 270h19v19h-19zM222 270h19v19h-19zM222 288h19v19h-19zM240 288h19v19h-19zM492 288h19v19h-19zM240 306h19v19h-19zM258 306h19v19h-19zM474 306h19v19h-19zM492 306h19v19h-19zM258 324h19v19h-19zM276 324h19v19h-19zM294 324h19v19h-19zM312 324h19v19h-19zM402 324h19v19h-19zM420 324h19v19h-19zM438 324h19v19h-19zM456 324h19v19h-19zM474 324h19v19h-19zM294 342h19v19h-19zM312 342h19v19h-19zM330 342h19v19h-19zM348 342h19v19h-19zM366 342h19v19h-19zM384 342h19v19h-19zM402 342h19v19h-19zM420 342h19v19h-19z" fill="#8AB5E6"/><path d="M222 0h19v19h-19zM240 0h19v19h-19zM258 0h19v19h-19zM456 0h19v19h-19zM474 0h19v19h-19zM492 0h19v19h-19zM204 18h19v19h-19zM222 18h19v19h-19zM240 18h19v19h-19zM492 18h19v19h-19zM186 36h19v19h-19zM204 36h19v19h-19zM222 36h19v19h-19zM168 54h19v19h-19zM186 54h19v19h-19zM204 54h19v19h-19zM150 72h19v19h-19zM168 72h19v19h-19zM186 72h19v19h-19zM132 90h19v19h-19zM150 90h19v19h-19zM168 90h19v19h-19zM132 108h19v19h-19zM150 108h19v19h-19zM168 108h19v19h-19zM114 126h19v19h-19zM132 126h19v19h-19zM150 126h19v19h-19zM114 144h19v19h-19zM132 144h19v19h-19zM150 144h19v19h-19zM114 162h19v19h-19zM132 162h19v19h-19zM150 162h19v19h-19zM114 180h19v19h-19zM132 180h19v19h-19zM150 180h19v19h-19zM114 198h19v19h-19zM132 198h19v19h-19zM150 198h19v19h-19zM132 216h19v19h-19zM150 216h19v19h-19zM132 234h19v19h-19zM150 234h19v19h-19zM168 234h19v19h-19zM150 252h19v19h-19zM168 252h19v19h-19zM168 270h19v19h-19zM186 270h19v19h-19zM186 288h19v19h-19zM204 288h19v19h-19zM186 306h19v19h-19zM204 306h19v19h-19zM222 306h19v19h-19zM204 324h19v19h-19zM222 324h19v19h-19zM240 324h19v19h-19zM492 324h19v19h-19zM222 342h19v19h-19zM240 342h19v19h-19zM258 342h19v19h-19zM276 342h19v19h-19zM438 342h19v19h-19zM456 342h19v19h-19zM474 342h19v19h-19zM492 342h19v19h-19zM258 360h19v19h-19zM276 360h19v19h-19zM294 360h19v19h-19zM312 360h19v19h-19zM330 360h19v19h-19zM348 360h19v19h-19zM366 360h19v19h-19zM384 360h19v19h-19zM402 360h19v19h-19zM420 360h19v19h-19zM438 360h19v19h-19zM456 360h19v19h-19zM474 360h19v19h-19zM294 378h19v19h-19zM312 378h19v19h-19zM330 378h19v19h-19z" fill="#9CBFE7"/><path d="M168 0h19v19h-19zM186 0h19v19h-19zM204 0h19v19h-19zM132 18h19v19h-19zM150 18h19v19h-19zM168 18h19v19h-19zM186 18h19v19h-19zM114 36h19v19h-19zM132 36h19v19h-19zM150 36h19v19h-19zM168 36h19v19h-19zM114 54h19v19h-19zM132 54h19v19h-19zM150 54h19v19h-19zM96 72h19v19h-19zM114 72h19v19h-19zM132 72h19v19h-19zM60 90h19v19h-19zM78 90h19v19h-19zM96 90h19v19h-19zM114 90h19v19h-19zM60 108h19v19h-19zM78 108h19v19h-19zM96 108h19v19h-19zM114 108h19v19h-19zM60 126h19v19h-19zM78 126h19v19h-19zM96 126h19v19h-19zM60 144h19v19h-19zM78 144h19v19h-19zM96 144h19v19h-19zM60 162h19v19h-19zM78 162h19v19h-19zM96 162h19v19h-19zM60 180h19v19h-19zM78 180h19v19h-19zM96 180h19v19h-19zM60 198h19v19h-19zM78 198h19v19h-19zM96 198h19v19h-19zM60 216h19v19h-19zM78 216h19v19h-19zM96 216h19v19h-19zM114 216h19v19h-19zM78 234h19v19h-19zM96 234h19v19h-19zM114 234h19v19h-19zM96 252h19v19h-19zM114 252h19v19h-19zM132 252h19v19h-19zM114 270h19v19h-19zM132 270h19v19h-19zM150 270h19v19h-19zM132 288h19v19h-19zM150 288h19v19h-19zM168 288h19v19h-19zM150 306h19v19h-19zM168 306h19v19h-19zM168 324h19v19h-19zM186 324h19v19h-19zM186 342h19v19h-19zM204 342h19v19h-19zM186 360h19v19h-19zM204 360h19v19h-19zM222 360h19v19h-19zM240 360h19v19h-19zM492 360h19v19h-19zM222 378h19v19h-19zM240 378h19v19h-19zM258 378h19v19h-19zM276 378h19v19h-19zM348 378h19v19h-19zM366 378h19v19h-19zM384 378h19v19h-19zM402 378h19v19h-19zM420 378h19v19h-19zM438 378h19v19h-19zM456 378h19v19h-19zM474 378h19v19h-19zM492 378h19v19h-19zM240 396h19v19h-19zM258 396h19v19h-19zM276 396h19v19h-19zM294 396h19v19h-19zM312 396h19v19h-19zM330 396h19v19h-19zM348 396h19v19h-19zM366 396h19v19h-19zM384 396h19v19h-19zM402 396h19v19h-19zM420 396h19v19h-19zM438 396h19v19h-19zM456 396h19v19h-19zM474 396h19v19h-19zM492 396h19v19h-19zM294 414h19v19h-19z" fill="#ADC8E5"/><path d="M78 0h19v19h-19zM96 0h19v19h-19zM114 0h19v19h-19zM132 0h19v19h-19zM150 0h19v19h-19zM60 18h19v19h-19zM78 18h19v19h-19zM96 18h19v19h-19zM114 18h19v19h-19zM60 36h19v19h-19zM78 36h19v19h-19zM96 36h19v19h-19zM60 54h19v19h-19zM78 54h19v19h-19zM96 54h19v19h-19zM60 72h19v19h-19zM78 72h19v19h-19zM60 234h19v19h-19zM60 252h19v19h-19zM78 252h19v19h-19zM60 270h19v19h-19zM78 270h19v19h-19zM96 270h19v19h-19zM78 288h19v19h-19zM96 288h19v19h-19zM114 288h19v19h-19zM96 306h19v19h-19zM114 306h19v19h-19zM132 306h19v19h-19zM114 324h19v19h-19zM132 324h19v19h-19zM150 324h19v19h-19zM132 342h19v19h-19zM150 342h19v19h-19zM168 342h19v19h-19zM132 360h19v19h-19zM150 360h19v19h-19zM168 360h19v19h-19zM150 378h19v19h-19zM168 378h19v19h-19zM186 378h19v19h-19zM204 378h19v19h-19zM168 396h19v19h-19zM186 396h19v19h-19zM204 396h19v19h-19zM222 396h19v19h-19zM186 414h19v19h-19zM204 414h19v19h-19zM222 414h19v19h-19zM240 414h19v19h-19zM258 414h19v19h-19zM276 414h19v19h-19zM312 414h19v19h-19zM330 414h19v19h-19zM348 414h19v19h-19zM366 414h19v19h-19zM384 414h19v19h-19zM402 414h19v19h-19zM420 414h19v19h-19zM438 414h19v19h-19zM456 414h19v19h-19zM474 414h19v19h-19zM492 414h19v19h-19zM222 432h19v19h-19zM240 432h19v19h-19zM258 432h19v19h-19zM276 432h19v19h-19zM294 432h19v19h-19zM312 432h19v19h-19zM330 432h19v19h-19zM348 432h19v19h-19zM366 432h19v19h-19zM384 432h19v19h-19zM402 432h19v19h-19zM420 432h19v19h-19zM438 432h19v19h-19zM456 432h19v19h-19zM474 432h19v19h-19zM492 432h19v19h-19z" fill="#BED1E3"/><path d="M60 0h19v19h-19zM60 288h19v19h-19zM60 306h19v19h-19zM78 306h19v19h-19zM60 324h19v19h-19zM78 324h19v19h-19zM96 324h19v19h-19zM78 342h19v19h-19zM96 342h19v19h-19zM114 342h19v19h-19zM96 360h19v19h-19zM114 360h19v19h-19zM96 378h19v19h-19zM114 378h19v19h-19zM132 378h19v19h-19zM114 396h19v19h-19zM132 396h19v19h-19zM150 396h19v19h-19zM114 414h19v19h-19zM132 414h19v19h-19zM150 414h19v19h-19zM168 414h19v19h-19zM114 432h19v19h-19zM132 432h19v19h-19zM150 432h19v19h-19zM168 432h19v19h-19zM186 432h19v19h-19zM204 432h19v19h-19z" fill="#D0DAE2"/><path d="M60 342h19v19h-19zM60 360h19v19h-19zM78 360h19v19h-19zM60 378h19v19h-19zM78 378h19v19h-19zM60 396h19v19h-19zM78 396h19v19h-19zM96 396h19v19h-19zM60 414h19v19h-19zM78 414h19v19h-19zM96 414h19v19h-19zM60 432h19v19h-19zM78 432h19v19h-19zM96 432h19v19h-19z" fill="#E1E3E0"/><line x1="285" y1="0" x2="285" y2="450" stroke="#F5F3EE" stroke-width="2" stroke-dasharray="6 5"/><line x1="60" y1="225" x2="510" y2="225" stroke="#F5F3EE" stroke-width="2" stroke-dasharray="6 5"/><circle cx="375" cy="171" r="16" fill="none" stroke="#F0A36B" stroke-width="5"/></svg>
+<p style="position:absolute;left:20px;top:456px;width:80px;font-size:24px;text-align:center;color:#5E6675">−60</p>
+<p style="position:absolute;left:245px;top:456px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:470px;top:456px;width:80px;font-size:24px;text-align:center;color:#5E6675">+60</p>
+<p style="position:absolute;left:60px;top:490px;width:450px;font-size:24px;text-align:center;color:#14213D">동쪽으로 옮김 dx (m)</p>
+<p style="position:absolute;left:0px;top:0px;width:54px;font-size:24px;text-align:right;color:#5E6675">+60</p>
+<p style="position:absolute;left:0px;top:420px;width:54px;font-size:24px;text-align:right;color:#5E6675">−60</p>
+<p style="position:absolute;left:0px;top:195px;width:54px;font-size:24px;text-align:right;color:#14213D">dy</p>
+<p style="position:absolute;left:530px;top:0px;width:260px;font-size:24px;line-height:1.35;color:#5E6675">진할수록 작다<br>3.9 ~ 8.4 dB</p>
+<p style="position:absolute;left:530px;top:131px;width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#A84A16">최소 (+25, +15) m<br>심어 둔 값 (+25, +15)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">①</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">이동 탐색 — 실측을 dx, dy만큼 옮겨 다시 짝짓고 de-biased RMSE 최소 · r 최대 자리를 찾는다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">②</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">Shape(T0)와 비교 — 분포 모양은 같은데 패턴 몫만 크면 자리 문제 (Breakdown)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">지도에 찍기 — 측정점이 도로 위에 있나, 건물 안 · 물 위에 찍힌 점의 비율</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">④</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">랜드마크 — RU 바로 앞 피크, 터널 · 교량 같은 뚜렷한 자리가 겹치나</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑤</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">시간 지연 탐색 — 10쪽 (주행 방향으로만 밀리면 시간)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">찾은 값으로 바로 고치지 않는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최소점은 잡음으로도 생긴다 — 여러 RU · 여러 날에 같은 방향 · 크기로 나올 때 믿고, 원인(기준 · 원점 · 시각)을 찾아 고친다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">열지도: 예시 시뮬레이션 (11쪽 조건 · 모델 오차 4 dB · 어긋남 (+25, +15) m를 심어 둠) — 5 m 간격 탐색</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 14</p>
+<aside>(약 55초) 어긋남은 어떻게 찾을까요. 가장 직접적인 방법은 이동 탐색입니다. 실측 좌표를 동서남북으로 조금씩 옮겨 다시 짝짓고, de-biased RMSE가 가장 작아지는 자리를 찾습니다. 왼쪽 열지도는 동쪽 25 m, 북쪽 15 m 어긋남을 일부러 심어 둔 예시인데, 최소점이 +25, +15 m로 심어 둔 값 근처에 나옵니다. 0이 아닌 곳에 뚜렷한 골짜기가 있으면 어긋남이 있다는 뜻입니다. 그 밖에 Breakdown의 Shape와 비교해 분포 모양은 같은데 패턴 몫만 크면 자리 문제로 봅니다. 측정점을 지도에 찍어 도로 위에 있는지, 건물 안이나 물 위에 찍힌 점이 얼마나 되는지 봅니다. RU 바로 앞의 피크나 터널, 교량처럼 뚜렷한 자리가 겹치는지도 봅니다. 주의할 점은 찾은 이동값으로 바로 고치지 않는 것입니다. 최소점은 잡음으로도 생기므로, 여러 RU와 여러 날에 같은 방향, 같은 크기로 나올 때만 믿고 원인을 찾아 고칩니다.</aside>
+</section>
+<section id="checklist" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">정리 · 점검표</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">파이프라인 점검표</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">단계</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">확인할 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">받을 때</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">모든 위치 자료에 EPSG 코드 · 높이 기준(타원체 / 해발 / AGL) · 시간대를 함께 받는다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">변환할 때</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">좌표계 하나로 통일 (예: 5179) · always_xy · 장면 원점 x₀, y₀와 회전을 기록</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">RU 입력</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">위치 · 높이(AGL + 지면) · 방위각(진북 ↔ 도북) · 틸트를 지도 위에서 한 번 더 확인</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">짝지을 때</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">시각 UTC 통일 · 지연 탐색 · 칸 크기 · 스냅 규칙 (칸당 표본 수 기준)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">보고할 때</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">이동 탐색 결과(최소 자리 · 깊이)를 Breakdown과 함께 남긴다</p></div>
+</div>
+<div style="width:760px;display:flex;flex-direction:column;gap:12px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:21px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8">from</span> pyproj <span style="color:#8DB8E8">import</span> Transformer<br>to_m = Transformer.from_crs(<span style="color:#F0A36B">"EPSG:4326"</span>, <span style="color:#F0A36B">"EPSG:5179"</span>,<br>&nbsp;&nbsp;&nbsp;&nbsp;always_xy=<span style="color:#8DB8E8">True</span>)  <span style="color:#9AA6BA"># 경도 먼저</span><br>x, y = to_m.transform(df.lon, df.lat)<br>x, y = x - X0, y - Y0           <span style="color:#9AA6BA"># 장면 원점</span><br>ix, iy = x // 20, y // 20       <span style="color:#9AA6BA"># 20 m 칸</span><br>df.t = df.t_utc + lag           <span style="color:#9AA6BA"># 찾은 지연</span></p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">작은 시험 하나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이미 아는 점(RU 위치 · 교차로)을 파이프라인에 넣어 지도 · 장면에서 같은 자리에 찍히는지 본다 — 왕복 1번이면 ④ ⑤ 같은 큰 실수는 다 걸린다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">코드는 예시 (df · X0 · Y0 · lag는 프로젝트 변수) · ④ ⑤는 6쪽 번호 · EPSG:5179는 예시이며 프로젝트 공통 좌표계를 쓴다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 14</p>
+<aside>(약 50초) 지금까지를 점검표로 묶었습니다. 받을 때는 위치 자료마다 EPSG 코드, 높이 기준, 시간대를 함께 받습니다. 변환할 때는 좌표계를 하나로 통일하고, 장면 원점과 회전을 기록합니다. RU는 위치, 높이, 방위각, 틸트를 지도 위에서 한 번 더 확인합니다. 짝지을 때는 시각을 UTC로 통일하고 지연을 찾고, 칸 크기와 스냅 규칙을 정합니다. 보고할 때는 이동 탐색 결과를 Breakdown과 함께 남기면 좋습니다. 오른쪽은 파이썬 pyproj로 쓴 예시입니다. always_xy를 켜서 경도를 먼저 넣고, 원점을 빼고, 20 m로 나눠 칸 번호를 만듭니다. 마지막으로 작은 시험 하나를 권합니다. 위치를 이미 아는 점, 예를 들어 RU나 교차로를 파이프라인에 넣어 지도와 장면에서 같은 자리에 찍히는지 보는 것입니다. 이것만 해도 큰 실수는 다 걸립니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">모델을 고치기 전에, 같은 자리인지부터</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">수평</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">EPSG를 함께 받고 하나로 통일<br>순서 · 기준 · 비슷한 코드 · 회전 — 수 m ~ 100 km</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">높이</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">GNSS는 타원체고, 한국은 해발과 20~30 m 차이<br>RU는 AGL + 지면, UE는 지면 + 1.5 m</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">시간</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">UTC 통일 · GPS 18 s · 지연 탐색<br>1 s = 50 km/h에서 14 m</p></div></div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">어긋남은 패턴 몫으로</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">완벽한 모델도 20 m 어긋나면 3~4 dB<br>도심일수록 빨리 커진다 (예시 시뮬레이션)</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">찾기 · 막기</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">이동 탐색 · Shape 비교 · 지도에 찍기<br>아는 점 하나로 왕복 시험 · 점검표</p></div></div>
+<p style="font-size:28px;line-height:1.5;color:#C9D3E3">다음 단계: 우리 DT 자료에 이동 탐색과 시간 지연 탐색을 돌려 Q-47에 답한다 — 최소 자리가 0이면 패턴 몫은 모델의 몫이다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">관련 자료: dt-breakdown (Q-47 · 패턴 몫) · debiased-rmse · sim-real-alignment · sionna-rt-inputs</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">14 / 14</p>
+<aside>(약 40초) 정리하겠습니다. 수평은 EPSG를 함께 받고 하나로 통일하는 것이 시작이고, 순서, 기준, 비슷한 코드, 회전에서 수 m부터 100 km까지 틀어집니다. 높이는 GNSS가 타원체고를 주고 한국에서는 해발고도와 20에서 30 m 차이가 나며, RU는 지면 고도에 AGL을 더해 넣습니다. 시간은 UTC로 통일하고 지연을 찾습니다. 어긋남은 패턴 몫으로 나타나고, 완벽한 모델도 20 m 어긋나면 3에서 4 dB의 오차가 생깁니다. 이동 탐색과 Shape 비교, 지도에 찍기로 찾고 점검표로 막습니다. 다음 단계로 우리 드라이브 테스트 자료에 이동 탐색과 시간 지연 탐색을 돌려 Q-47에 답하려 합니다. 최소 자리가 0으로 나오면 그때 남은 패턴 몫은 모델의 몫이라고 말할 수 있습니다. 감사합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

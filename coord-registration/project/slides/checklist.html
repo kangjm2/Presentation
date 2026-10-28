@@ -1,0 +1,23 @@
+<section id="checklist" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">정리 · 점검표</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">파이프라인 점검표</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">단계</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">확인할 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">받을 때</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">모든 위치 자료에 EPSG 코드 · 높이 기준(타원체 / 해발 / AGL) · 시간대를 함께 받는다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">변환할 때</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">좌표계 하나로 통일 (예: 5179) · always_xy · 장면 원점 x₀, y₀와 회전을 기록</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">RU 입력</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">위치 · 높이(AGL + 지면) · 방위각(진북 ↔ 도북) · 틸트를 지도 위에서 한 번 더 확인</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">짝지을 때</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">시각 UTC 통일 · 지연 탐색 · 칸 크기 · 스냅 규칙 (칸당 표본 수 기준)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">보고할 때</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">이동 탐색 결과(최소 자리 · 깊이)를 Breakdown과 함께 남긴다</p></div>
+</div>
+<div style="width:760px;display:flex;flex-direction:column;gap:12px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:21px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8">from</span> pyproj <span style="color:#8DB8E8">import</span> Transformer<br>to_m = Transformer.from_crs(<span style="color:#F0A36B">"EPSG:4326"</span>, <span style="color:#F0A36B">"EPSG:5179"</span>,<br>&nbsp;&nbsp;&nbsp;&nbsp;always_xy=<span style="color:#8DB8E8">True</span>)  <span style="color:#9AA6BA"># 경도 먼저</span><br>x, y = to_m.transform(df.lon, df.lat)<br>x, y = x - X0, y - Y0           <span style="color:#9AA6BA"># 장면 원점</span><br>ix, iy = x // 20, y // 20       <span style="color:#9AA6BA"># 20 m 칸</span><br>df.t = df.t_utc + lag           <span style="color:#9AA6BA"># 찾은 지연</span></p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">작은 시험 하나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이미 아는 점(RU 위치 · 교차로)을 파이프라인에 넣어 지도 · 장면에서 같은 자리에 찍히는지 본다 — 왕복 1번이면 ④ ⑤ 같은 큰 실수는 다 걸린다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">코드는 예시 (df · X0 · Y0 · lag는 프로젝트 변수) · ④ ⑤는 6쪽 번호 · EPSG:5179는 예시이며 프로젝트 공통 좌표계를 쓴다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 14</p>
+<aside>(약 50초) 지금까지를 점검표로 묶었습니다. 받을 때는 위치 자료마다 EPSG 코드, 높이 기준, 시간대를 함께 받습니다. 변환할 때는 좌표계를 하나로 통일하고, 장면 원점과 회전을 기록합니다. RU는 위치, 높이, 방위각, 틸트를 지도 위에서 한 번 더 확인합니다. 짝지을 때는 시각을 UTC로 통일하고 지연을 찾고, 칸 크기와 스냅 규칙을 정합니다. 보고할 때는 이동 탐색 결과를 Breakdown과 함께 남기면 좋습니다. 오른쪽은 파이썬 pyproj로 쓴 예시입니다. always_xy를 켜서 경도를 먼저 넣고, 원점을 빼고, 20 m로 나눠 칸 번호를 만듭니다. 마지막으로 작은 시험 하나를 권합니다. 위치를 이미 아는 점, 예를 들어 RU나 교차로를 파이프라인에 넣어 지도와 장면에서 같은 자리에 찍히는지 보는 것입니다. 이것만 해도 큰 실수는 다 걸립니다.</aside>
+</section>
