@@ -1,0 +1,30 @@
+<section id="aggregate" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">③ 조건이 σ를 바꾼다 · 집계 단위</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">구역으로 평균하면 σ가 작아진다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">σ²(측정 점)               ≈ σ²(구역 간) + σ²(구역 안)<br>σ²(구역 평균, 표본 n개) ≈ σ²(구역 간) + σ²(구역 안) ÷ n</p></div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;color:#14213D">가정 예: 구역 간 오차 5.0 dB, 구역 안 흩어짐 4.0 dB</p>
+<div style="position:relative;width:860px;height:290px">
+<svg aria-label="가정 예의 de-biased RMSE 막대. 측정 점 기준 6.40 dB, 표본 20개 구역 평균 5.08 dB, 구역 간 오차만 5.00 dB" style="position:absolute;left:0px;top:0px;width:860px;height:290px" width="860" height="290" viewBox="0 0 860 290"><rect x="330" y="20" width="448" height="60" rx="8" fill="#A84A16"/><rect x="330" y="110" width="356" height="60" rx="8" fill="#255E9E"/><rect x="330" y="200" width="350" height="60" rx="8" fill="#5E6675"/></svg>
+<p style="position:absolute;left:0px;top:34px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">측정 점 기준</p>
+<p style="position:absolute;left:792px;top:34px;width:140px;font-size:24px;font-weight:700;color:#A84A16">6.40 dB</p>
+<p style="position:absolute;left:0px;top:124px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">구역 평균 (표본 20개)</p>
+<p style="position:absolute;left:700px;top:124px;width:140px;font-size:24px;font-weight:700;color:#255E9E">5.08 dB</p>
+<p style="position:absolute;left:0px;top:214px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">구역 간 오차만</p>
+<p style="position:absolute;left:694px;top:214px;width:140px;font-size:24px;font-weight:700;color:#5E6675">5.00 dB</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">구역 안 흩어짐이란</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 10 m 안에서도 빠른 페이딩 · 위치 오차 ·<br>단말 측정 오차로 값이 흔들린다 — 시뮬은 못 맞춘다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">평균하면 줄어든다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">표본 n개를 평균하면 구역 안 흩어짐이 1/n로<br>(서로 독립일 때) — 남는 건 구역 간 오차</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">이상치 제외도</p><p style="font-size:24px;line-height:1.4;color:#4A5262">극단 구역을 빼면 σ는 또 작아진다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">예</b> 같은 시뮬이라도 점 기준 6.4 dB가 구역 평균으로는 5.1 dB가 될 수 있다 — 예시 값, 우리 데이터로 직접 재야 한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">가정 예시 (구역 간 5.0 dB · 구역 안 4.0 dB · 표본 독립) — 실제 구역 안 흩어짐은 측정 데이터로 추정한다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 11</p>
+<aside>(약 55초) 왜 집계 단위가 중요할까요. 측정 점 하나의 오차는 두 부분으로 나눌 수 있습니다. 구역마다 시뮬레이션이 다르게 틀리는 구역 간 오차와, 같은 10 m 구역 안에서도 빠른 페이딩, 위치 오차, 단말 측정 오차 때문에 값이 흔들리는 구역 안 흩어짐입니다. 구역 안 흩어짐은 시뮬레이션이 원래 맞출 수 없는 부분입니다. 구역마다 표본 n개를 평균하면 이 흩어짐이 n분의 1로 줄어듭니다. 예를 들어 구역 간 오차가 5 dB, 구역 안 흩어짐이 4 dB라고 가정하면, 측정 점 기준 de-biased RMSE는 6.40 dB인데, 표본 20개로 구역 평균을 내면 5.08 dB가 됩니다. 시뮬레이션은 하나도 바뀌지 않았는데 숫자만 1.3 dB 줄어든 것이죠. 이상치 구역을 빼면 더 작아집니다. 이 숫자들은 예시이고, 우리 데이터로 직접 재 봐야 합니다.</aside>
+</section>

@@ -1,0 +1,32 @@
+<section id="decompose" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">② 표준편차 = de-biased RMSE</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RMSE² = 바이어스² + σ² — 직각삼각형 하나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:640px;height:430px">
+<svg aria-label="직각삼각형 두 개. 보정 전은 밑변 바이어스 5.69, 높이 표준편차 5.71, 빗변 RMSE 8.06. 보정 후는 밑변 0.32, 높이 2.57, 빗변 2.59" style="position:absolute;left:0px;top:0px;width:640px;height:430px" width="640" height="430" viewBox="0 0 640 430"><polygon points="40,330 301.7,330 301.7,67.3" fill="#F7DDCB" stroke="none"/><line x1="40" y1="330" x2="301.7" y2="330" stroke="#A84A16" stroke-width="5"/><line x1="301.7" y1="330" x2="301.7" y2="67.3" stroke="#255E9E" stroke-width="5"/><line x1="40" y1="330" x2="301.7" y2="67.3" stroke="#14213D" stroke-width="5"/><rect x="285.7" y="314" width="16" height="16" fill="none" stroke="#5E6675" stroke-width="2"/><polygon points="440,330 454.7,330 454.7,211.8" fill="#D5E3F3" stroke="none"/><line x1="440" y1="330" x2="454.7" y2="330" stroke="#A84A16" stroke-width="5"/><line x1="454.7" y1="330" x2="454.7" y2="211.8" stroke="#255E9E" stroke-width="5"/><line x1="440" y1="330" x2="454.7" y2="211.8" stroke="#14213D" stroke-width="5"/><rect x="438.7" y="314" width="16" height="16" fill="none" stroke="#5E6675" stroke-width="2"/></svg>
+<p style="position:absolute;left:40px;top:340px;width:280px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">바이어스 5.69</p>
+<p style="position:absolute;left:312px;top:183px;width:160px;font-size:24px;font-weight:700;color:#255E9E">σ 5.71</p>
+<p style="position:absolute;left:0px;top:110px;width:150px;font-size:24px;text-align:right;line-height:1.25;font-weight:700;color:#14213D">RMSE<br>8.06</p>
+<p style="position:absolute;left:400px;top:340px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">0.32</p>
+<p style="position:absolute;left:465px;top:255px;width:160px;font-size:24px;font-weight:700;color:#255E9E">σ 2.57</p>
+<p style="position:absolute;left:465px;top:172px;width:220px;font-size:24px;font-weight:700;color:#14213D">RMSE 2.59</p>
+<p style="position:absolute;left:0px;top:390px;width:400px;font-size:24px;text-align:center;font-weight:700;color:#14213D">보정 전</p>
+<p style="position:absolute;left:380px;top:390px;width:260px;font-size:24px;text-align:center;font-weight:700;color:#14213D">보정 후</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">RMSE  = √ 평균(e²)           ← 전체 오차<br>바이어스 = 평균(e)             ← 평행 이동<br>σ     = √ 평균((e − 바이어스)²) ← 바이어스를 뺀 RMSE<br><span style="color:#F0A36B">RMSE² = 바이어스² + σ²</span></p></div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">보정 전</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">보정 후</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">바이어스</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-5.69 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-0.32 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">σ = de-biased RMSE</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">5.71 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">2.57 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">RMSE (계산)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">√(5.69² + 5.71²) ≈ 8.1 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">≈ 2.6 dB</p></div>
+</div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">참고</b> 논문은 RMSE를 보고하지 않았다 — 위 RMSE는 계산값 · N(70) vs N − 1로 나누는 차이는 1% 미만</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">σ는 평균을 빼고 잰 오차의 크기 = de-biased RMSE = 오차의 표준편차 (같은 것의 다른 이름) · Taylor diagram의 E′와도 같다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 11</p>
+<aside>(약 55초) 둘째 질문, 표준편차 5.7 dB를 de-biased RMSE로 볼 수 있느냐입니다. 볼 수 있습니다. de-biased RMSE는 오차에서 바이어스를 뺀 뒤 계산한 RMSE인데, 그 정의가 오차의 표준편차와 똑같습니다. 그리고 세 값 사이에는 RMSE 제곱이 바이어스 제곱 더하기 표준편차 제곱이라는 관계가 있습니다. 직각삼각형으로 그리면, 밑변이 바이어스, 높이가 표준편차, 빗변이 전체 RMSE입니다. 보정 전은 밑변과 높이가 모두 5.7 정도라 전체 RMSE가 약 8.1 dB였고, 보정 후는 바이어스가 거의 사라져 RMSE가 표준편차와 거의 같은 2.6 dB가 됩니다. 논문은 RMSE 자체는 보고하지 않아서 이 값들은 계산한 것입니다. 표준편차를 N으로 나누는지 N − 1로 나누는지의 차이는 구역이 70개라 1퍼센트도 안 됩니다. 이 값은 Taylor diagram의 E′와도 같은 양입니다.</aside>
+</section>
