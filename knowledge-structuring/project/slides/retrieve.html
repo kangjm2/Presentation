@@ -1,0 +1,31 @@
+<section id="retrieve" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">조각 ② · 맥락을 붙이고 섞어서 찾기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">맥락 + 키워드 + 재순위로 검색 실패 −67%</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;color:#14213D">상위 20개 조각 안에 정답 조각이 없는 비율</p>
+<div style="position:relative;width:860px;height:340px">
+<svg aria-label="검색 실패율 막대. 기본 5.7%, 맥락 임베딩 3.7%, 맥락 BM25 추가 2.9%, 재순위 추가 1.9%" style="position:absolute;left:0px;top:0px;width:860px;height:340px" width="860" height="340" viewBox="0 0 860 340"><rect x="330" y="20" width="399" height="56" rx="8" fill="#5E6675"/><rect x="330" y="102" width="259" height="56" rx="8" fill="#255E9E"/><rect x="330" y="184" width="203" height="56" rx="8" fill="#255E9E"/><rect x="330" y="266" width="133" height="56" rx="8" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:32px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">기본 임베딩 검색</p>
+<p style="position:absolute;left:743px;top:32px;width:120px;font-size:24px;font-weight:700;color:#5E6675">5.7%</p>
+<p style="position:absolute;left:0px;top:114px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">+ 맥락 덧붙인 임베딩</p>
+<p style="position:absolute;left:603px;top:114px;width:120px;font-size:24px;font-weight:700;color:#255E9E">3.7%</p>
+<p style="position:absolute;left:0px;top:196px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">+ 맥락 BM25 (키워드)</p>
+<p style="position:absolute;left:547px;top:196px;width:120px;font-size:24px;font-weight:700;color:#255E9E">2.9%</p>
+<p style="position:absolute;left:0px;top:278px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">+ 재순위 모델</p>
+<p style="position:absolute;left:477px;top:278px;width:120px;font-size:24px;font-weight:700;color:#A84A16">1.9%</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">맥락 덧붙이기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">LLM이 조각마다 “문서 어디의 무슨 내용”인지<br>보통 50~100 토큰으로 써서 앞에 붙인다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">키워드 검색 (BM25)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">“T310”, “PCI 101” 같은 정확한 용어 · 번호는<br>의미 검색보다 키워드가 잘 찾는다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">재순위 (reranking)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">후보 여러 개를 질문과 함께 다시 읽어<br>순위를 다시 매긴다 — 느리지만 정확</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">주의</b> 감소 폭은 데이터마다 다르다 (분야별 약 41~84%) — 우리 문서로 직접 재 봐야 한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Anthropic 2024 “Introducing Contextual Retrieval” (회사 내부 벤치마크) · 분야별 편차는 2차 분석 기준</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 16</p>
+<aside>(약 55초) 맥락을 덧붙이면 얼마나 좋아질까요. Anthropic의 실험에서 상위 20개 조각 안에 정답이 없는 비율, 즉 검색 실패율이 기본 임베딩 검색에서 5.7퍼센트였습니다. 조각마다 LLM이 50에서 100 토큰 정도로 “이 조각은 어떤 문서의 어떤 내용인지”를 써서 앞에 붙이자 3.7퍼센트로 줄었고, 키워드 검색인 BM25를 함께 쓰자 2.9퍼센트, 재순위 모델까지 더하자 1.9퍼센트로, 모두 합쳐 67퍼센트가 줄었습니다. 우리 분야에서는 키워드 검색이 특히 중요합니다. T310이나 PCI 번호 같은 정확한 용어와 숫자는 의미 검색보다 키워드가 잘 찾습니다. 다만 이 수치는 회사 내부 벤치마크이고, 분야에 따라 감소 폭이 40에서 80퍼센트대로 달랐다는 분석도 있으니, 우리 문서로 직접 재 봐야 합니다.</aside>
+</section>

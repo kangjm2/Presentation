@@ -25,6 +25,7 @@
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py knowledge-loop`로 뷰어를 다시 만듭니다.
 - 관련 덱:
+  - [`knowledge-structuring`](../knowledge-structuring/): 지식 축적 · 구조화 심화
   - [`network-digital-twin`](../network-digital-twin/)
   - [`sim-real-alignment`](../sim-real-alignment/): 보정 루프
   - [`taylor-diagram`](../taylor-diagram/): 보정 결과 평가 지표
