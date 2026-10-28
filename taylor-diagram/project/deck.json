@@ -1,0 +1,51 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-28T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "Taylor diagram 읽는 법",
+  "order": [
+    "cover",
+    "why",
+    "stats",
+    "anatomy",
+    "read",
+    "example",
+    "bias",
+    "rsrp",
+    "pitfalls",
+    "code",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 필요한가: RMSE가 같아도 틀린 방식은 다르다",
+      "start": "cover"
+    },
+    "read": {
+      "description": "통계량과 그림의 구조, 읽는 순서, 숫자 예",
+      "start": "stats"
+    },
+    "use": {
+      "description": "바이어스 함정, RSRP 검증에 쓰기, 해석 주의, 그리는 법, 정리",
+      "start": "bias"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

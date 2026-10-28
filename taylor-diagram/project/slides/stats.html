@@ -1,0 +1,27 @@
+<section id="stats" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">통계량 · 네 개, 그림에는 세 개</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">세 통계량은 삼각형 하나로 묶인다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.55;color:#F5F3EE;white-space:nowrap">바이어스 = mean(f) − mean(r)<br>σ_f = std(f)      σ_r = std(r)<br>R = mean[(f − f̄)(r − r̄)] ÷ (σ_f σ_r)<br>E′ = std(f − r)   ← 평균을 뺀 오차<br><span style="color:#F0A36B">E′² = σ_f² + σ_r² − 2 σ_f σ_r R</span><br><span style="color:#8DB8E8">RMSE² = 바이어스² + E′²</span></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">f · r</p><p style="font-size:24px;line-height:1.4;color:#4A5262">f = 시뮬레이션, r = 실측 (같은 구역 · 같은 순서의 짝)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">E′의 다른 이름</p><p style="font-size:24px;line-height:1.4;color:#4A5262">중심 RMS 차이 · de-biased RMSE · 오차의 표준편차</p></div>
+</div>
+<div style="position:relative;width:640px;height:420px">
+<svg aria-label="삼각형. 원점에서 실측까지의 변이 σ_r, 원점에서 시뮬까지의 변이 σ_f, 둘 사이 각이 arccos R, 시뮬과 실측 사이 변이 E′" style="position:absolute;left:0px;top:0px;width:640px;height:420px" width="640" height="420" viewBox="0 0 640 420"><line x1="40" y1="360" x2="560" y2="360" stroke="#14213D" stroke-width="4"/><line x1="40" y1="360" x2="416.0" y2="78.0" stroke="#255E9E" stroke-width="4"/><line x1="416.0" y1="78.0" x2="560" y2="360" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 6"/><path d="M130 360 A90 90 0 0 0 112.0 306.0" fill="none" stroke="#255E9E" stroke-width="3"/><circle cx="416.0" cy="78.0" r="12" fill="#255E9E"/><circle cx="40" cy="360" r="7" fill="#14213D"/><polygon points="560.0,344.0 564.1,354.3 575.2,355.1 566.7,362.2 569.4,372.9 560.0,367.0 550.6,372.9 553.3,362.2 544.8,355.1 555.9,354.3" fill="#14213D"/></svg>
+<p style="position:absolute;left:10px;top:374px;width:120px;font-size:24px;text-align:center;color:#5E6675">원점</p>
+<p style="position:absolute;left:480px;top:374px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#14213D">★ 실측</p>
+<p style="position:absolute;left:336px;top:30px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">● 시뮬</p>
+<p style="position:absolute;left:220px;top:374px;width:160px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#14213D">σ_r</p>
+<p style="position:absolute;left:150px;top:150px;width:120px;font-size:24px;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#255E9E">σ_f</p>
+<p style="position:absolute;left:470px;top:170px;width:120px;font-size:24px;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#A84A16">E′</p>
+<p style="position:absolute;left:140px;top:298px;width:260px;font-size:24px;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#255E9E">θ = arccos R</p>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">원리</b> 두 변(σ_f · σ_r)과 끼인각(arccos R)이 정해지면 셋째 변 E′가 정해진다 = 코사인 법칙 → 한 평면의 점 하나로 셋을 함께 그릴 수 있다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">K. E. Taylor, “Summarizing multiple aspects of model performance in a single diagram,” JGR 106(D7), 7183–7192, 2001</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 11</p>
+<aside>(약 55초) 쓰는 통계량은 네 개입니다. 바이어스는 평균의 차이, σ는 각자의 표준편차, R은 상관계수, E′는 평균을 뺀 뒤의 오차, 즉 오차 f − r의 표준편차입니다. E′는 de-biased RMSE라고도 부릅니다. 핵심은 E′ 제곱이 σ_f 제곱 더하기 σ_r 제곱 빼기 2 σ_f σ_r R이라는 관계입니다. 이것은 코사인 법칙과 똑같은 모양입니다. 오른쪽 삼각형처럼 원점에서 실측까지의 길이를 σ_r, 시뮬까지의 길이를 σ_f, 그 사이 각을 arccos R로 두면, 시뮬과 실측 사이의 거리가 정확히 E′가 됩니다. 그래서 세 값을 한 평면의 점 하나로 그릴 수 있습니다. 바이어스는 이 삼각형에 들어가지 않고, 전체 RMSE는 바이어스와 E′를 직각으로 합한 값입니다.</aside>
+</section>
