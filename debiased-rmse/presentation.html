@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>de-biased RMSE로 결과 비교하기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="오차 분포 두 개. 보정 전 분포는 넓고 0보다 왼쪽에 치우쳐 있고, 보정 후 분포는 좁고 0 근처에 모여 있다" style="position:absolute;left:1000px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><line x1="40" y1="760" x2="840" y2="760" stroke="#5E6F99" stroke-width="3"/><line x1="552" y1="280" x2="552" y2="780" stroke="#C9D3E3" stroke-width="2" stroke-dasharray="8 6"/><polyline points="60.0,756.8 63.2,756.6 66.3,756.3 69.5,756.1 72.7,755.8 75.8,755.5 79.0,755.2 82.2,754.8 85.3,754.5 88.5,754.1 91.7,753.7 94.8,753.3 98.0,752.8 101.2,752.4 104.3,751.9 107.5,751.4 110.7,750.8 113.8,750.2 117.0,749.6 120.2,749.0 123.3,748.3 126.5,747.6 129.7,746.9 132.8,746.1 136.0,745.3 139.2,744.5 142.3,743.6 145.5,742.7 148.7,741.7 151.8,740.7 155.0,739.7 158.2,738.6 161.3,737.5 164.5,736.3 167.7,735.1 170.8,733.8 174.0,732.5 177.2,731.1 180.3,729.7 183.5,728.2 186.7,726.7 189.8,725.2 193.0,723.6 196.2,721.9 199.3,720.2 202.5,718.4 205.7,716.6 208.8,714.7 212.0,712.8 215.2,710.8 218.3,708.8 221.5,706.7 224.7,704.6 227.8,702.4 231.0,700.2 234.2,697.9 237.3,695.6 240.5,693.2 243.7,690.8 246.8,688.3 250.0,685.8 253.2,683.3 256.3,680.7 259.5,678.1 262.7,675.5 265.8,672.8 269.0,670.1 272.2,667.4 275.3,664.6 278.5,661.8 281.7,659.0 284.8,656.2 288.0,653.4 291.2,650.5 294.3,647.7 297.5,644.9 300.7,642.0 303.8,639.2 307.0,636.4 310.2,633.5 313.3,630.7 316.5,627.9 319.7,625.2 322.8,622.4 326.0,619.7 329.2,617.1 332.3,614.4 335.5,611.9 338.7,609.3 341.8,606.8 345.0,604.4 348.2,602.0 351.3,599.7 354.5,597.4 357.7,595.3 360.8,593.2 364.0,591.1 367.2,589.2 370.3,587.3 373.5,585.5 376.7,583.9 379.8,582.3 383.0,580.8 386.2,579.4 389.3,578.1 392.5,576.9 395.7,575.8 398.8,574.8 402.0,573.9 405.2,573.2 408.3,572.5 411.5,572.0 414.7,571.6 417.8,571.3 421.0,571.1 424.2,571.0 427.3,571.0 430.5,571.2 433.7,571.5 436.8,571.9 440.0,572.4 443.2,573.0 446.3,573.7 449.5,574.6 452.7,575.5 455.8,576.6 459.0,577.8 462.2,579.0 465.3,580.4 468.5,581.9 471.7,583.4 474.8,585.1 478.0,586.9 481.2,588.7 484.3,590.6 487.5,592.6 490.7,594.7 493.8,596.9 497.0,599.1 500.2,601.4 503.3,603.8 506.5,606.2 509.7,608.7 512.8,611.2 516.0,613.8 519.2,616.4 522.3,619.0 525.5,621.7 528.7,624.5 531.8,627.2 535.0,630.0 538.2,632.8 541.3,635.6 544.5,638.4 547.7,641.3 550.8,644.1 554.0,647.0 557.2,649.8 560.3,652.7 563.5,655.5 566.7,658.3 569.8,661.1 573.0,663.9 576.2,666.6 579.3,669.4 582.5,672.1 585.7,674.8 588.8,677.4 592.0,680.0 595.2,682.6 598.3,685.2 601.5,687.7 604.7,690.2 607.8,692.6 611.0,695.0 614.2,697.3 617.3,699.6 620.5,701.8 623.7,704.0 626.8,706.2 630.0,708.2 633.2,710.3 636.3,712.3 639.5,714.2 642.7,716.1 645.8,717.9 649.0,719.7 652.2,721.4 655.3,723.1 658.5,724.8 661.7,726.3 664.8,727.9 668.0,729.3 671.2,730.8 674.3,732.1 677.5,733.5 680.7,734.7 683.8,736.0 687.0,737.2 690.2,738.3 693.3,739.4 696.5,740.5 699.7,741.5 702.8,742.4 706.0,743.4 709.2,744.3 712.3,745.1 715.5,745.9 718.7,746.7 721.8,747.4 725.0,748.2 728.2,748.8 731.3,749.5 734.5,750.1 737.7,750.7 740.8,751.2 744.0,751.8 747.2,752.2 750.3,752.7 753.5,753.2 756.7,753.6 759.8,754.0 763.0,754.4 766.2,754.7 769.3,755.1 772.5,755.4 775.7,755.7 778.8,756.0 782.0,756.3 785.2,756.5 788.3,756.7 791.5,757.0 794.7,757.2 797.8,757.4 801.0,757.6 804.2,757.7 807.3,757.9 810.5,758.0 813.7,758.2 816.8,758.3 820.0,758.4" fill="none" stroke="#F0A36B" stroke-width="6"/><polyline points="60.0,760.0 63.2,760.0 66.3,760.0 69.5,760.0 72.7,760.0 75.8,760.0 79.0,760.0 82.2,760.0 85.3,760.0 88.5,760.0 91.7,760.0 94.8,760.0 98.0,760.0 101.2,760.0 104.3,760.0 107.5,760.0 110.7,760.0 113.8,760.0 117.0,760.0 120.2,760.0 123.3,760.0 126.5,760.0 129.7,760.0 132.8,760.0 136.0,760.0 139.2,760.0 142.3,760.0 145.5,760.0 148.7,760.0 151.8,760.0 155.0,760.0 158.2,760.0 161.3,760.0 164.5,760.0 167.7,760.0 170.8,760.0 174.0,760.0 177.2,760.0 180.3,760.0 183.5,760.0 186.7,760.0 189.8,760.0 193.0,760.0 196.2,760.0 199.3,760.0 202.5,760.0 205.7,760.0 208.8,760.0 212.0,760.0 215.2,760.0 218.3,760.0 221.5,760.0 224.7,760.0 227.8,760.0 231.0,760.0 234.2,760.0 237.3,760.0 240.5,760.0 243.7,760.0 246.8,760.0 250.0,760.0 253.2,760.0 256.3,760.0 259.5,760.0 262.7,760.0 265.8,760.0 269.0,760.0 272.2,760.0 275.3,760.0 278.5,760.0 281.7,760.0 284.8,760.0 288.0,760.0 291.2,760.0 294.3,760.0 297.5,760.0 300.7,759.9 303.8,759.9 307.0,759.9 310.2,759.9 313.3,759.9 316.5,759.8 319.7,759.8 322.8,759.8 326.0,759.7 329.2,759.6 332.3,759.5 335.5,759.4 338.7,759.3 341.8,759.2 345.0,759.0 348.2,758.8 351.3,758.5 354.5,758.2 357.7,757.9 360.8,757.5 364.0,757.0 367.2,756.4 370.3,755.8 373.5,755.0 376.7,754.1 379.8,753.1 383.0,752.0 386.2,750.6 389.3,749.1 392.5,747.4 395.7,745.4 398.8,743.2 402.0,740.7 405.2,737.9 408.3,734.8 411.5,731.3 414.7,727.5 417.8,723.2 421.0,718.5 424.2,713.4 427.3,707.7 430.5,701.6 433.7,694.9 436.8,687.7 440.0,680.0 443.2,671.7 446.3,662.8 449.5,653.3 452.7,643.3 455.8,632.8 459.0,621.6 462.2,610.0 465.3,597.9 468.5,585.4 471.7,572.4 474.8,559.1 478.0,545.6 481.2,531.8 484.3,517.8 487.5,503.8 490.7,489.7 493.8,475.8 497.0,462.1 500.2,448.6 503.3,435.6 506.5,423.0 509.7,410.9 512.8,399.6 516.0,389.0 519.2,379.2 522.3,370.4 525.5,362.6 528.7,355.9 531.8,350.3 535.0,345.8 538.2,342.6 541.3,340.7 544.5,340.0 547.7,340.6 550.8,342.5 554.0,345.6 557.2,349.9 560.3,355.4 563.5,362.1 566.7,369.8 569.8,378.6 573.0,388.3 576.2,398.8 579.3,410.1 582.5,422.1 585.7,434.7 588.8,447.7 592.0,461.1 595.2,474.8 598.3,488.8 601.5,502.8 604.7,516.8 607.8,530.8 611.0,544.6 614.2,558.2 617.3,571.5 620.5,584.5 623.7,597.1 626.8,609.2 630.0,620.8 633.2,632.0 636.3,642.6 639.5,652.6 642.7,662.1 645.8,671.1 649.0,679.4 652.2,687.2 655.3,694.4 658.5,701.1 661.7,707.3 664.8,713.0 668.0,718.2 671.2,722.9 674.3,727.2 677.5,731.1 680.7,734.6 683.8,737.7 687.0,740.5 690.2,743.0 693.3,745.3 696.5,747.3 699.7,749.0 702.8,750.5 706.0,751.9 709.2,753.1 712.3,754.1 715.5,755.0 718.7,755.7 721.8,756.4 725.0,757.0 728.2,757.5 731.3,757.9 734.5,758.2 737.7,758.5 740.8,758.8 744.0,759.0 747.2,759.2 750.3,759.3 753.5,759.4 756.7,759.5 759.8,759.6 763.0,759.7 766.2,759.8 769.3,759.8 772.5,759.8 775.7,759.9 778.8,759.9 782.0,759.9 785.2,759.9 788.3,759.9 791.5,760.0 794.7,760.0 797.8,760.0 801.0,760.0 804.2,760.0 807.3,760.0 810.5,760.0 813.7,760.0 816.8,760.0 820.0,760.0" fill="none" stroke="#8DB8E8" stroke-width="6"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">시뮬레이션 검증 · 오차 지표</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">de-biased RMSE로<br>결과 비교하기</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">영국 Sionna 보정 사례(평균 오차 −5.7 dB · 표준편차 5.7 dB)와<br>우리 결과(6.41 dB)를 어떻게 견줄 것인가</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 영국 도시를 Sionna로 만든 디지털 트윈의 보정 결과와 우리 결과를 비교하면서 나왔던 질문들을 정리했습니다. 평균 오차 −5.7 dB의 단위와 부호는 무엇을 뜻하는지, 표준편차 5.7 dB를 de-biased RMSE로 볼 수 있는지, 그리고 우리의 6.41 dB와 비슷하다고 말할 수 있는지를 차례로 보겠습니다.</aside>
+</section>
+<section id="question" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">질문 · 두 숫자를 견줘도 될까</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">영국 사례의 5.7 dB와 우리의 6.41 dB</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px"><div style="flex:1;background:#D5E3F3;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px"><p style="font-size:30px;font-weight:700;color:#255E9E">영국 도시 Sionna 디지털 트윈</p><p style="font-size:24px;line-height:1.4;color:#4A5262">재질 보정 전 → 후 (대표 구역 70개)</p><p style="font-size:24px;line-height:1.4;color:#4A5262"><b>평균 오차</b> -5.69 → -0.32 dB</p><p style="font-size:24px;line-height:1.4;color:#4A5262"><b>표준편차</b> 5.71 → 2.57 dB</p><p style="font-size:24px;line-height:1.4;color:#4A5262"><span style="color:#5E6675">논문은 도시 이름을 밝히지 않는다</span></p></div><div style="flex:1;background:#F7DDCB;border-radius:14px;padding:18px 24px;display:flex;flex-direction:column;gap:8px"><p style="font-size:30px;font-weight:700;color:#A84A16">우리 결과</p><p style="font-size:24px;line-height:1.4;color:#4A5262">보정 전 (재질 · 파라미터 그대로)</p><p style="font-size:24px;line-height:1.4;color:#4A5262"><b>de-biased RMSE</b> 6.41 dB</p><p style="font-size:24px;line-height:1.4;color:#4A5262">집계 조건: [구역 크기 · 표본 기준 · 이상치 · 바이어스 단위]</p><p style="font-size:24px;line-height:1.4;color:#4A5262"><span style="color:#5E6675">6쪽 표에서 함께 확인</span></p></div></div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:90px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">#</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">질문</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">짧은 답</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:90px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">①</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">−5.7은 단위가 dB인가, 부호는 무슨 뜻인가</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">dB · 시뮬이 평균 5.7 dB 약하게 예측 (3 · 4쪽)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:90px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">②</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">표준편차 5.7 dB를 de-biased RMSE로 볼 수 있나</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">그렇다 — 오차의 표준편차가 곧 de-biased RMSE (5쪽)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:90px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">우리 6.41 dB와 비슷하다고 할 수 있나</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">“같은 6 dB 안팎”까지 — “거의 같다”는 집계를 맞춘 뒤 (6~9쪽)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">“Site-Specific RIS Deployment in Cellular Networks via Calibrated Ray Tracing,” arXiv 2510.09478 (2025)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 11</p>
+<aside>(약 50초) 비교할 두 숫자입니다. 영국 한 도시를 Sionna로 만든 디지털 트윈에서, 재질을 보정하기 전 평균 오차가 −5.69 dB, 표준편차가 5.71 dB였고, 보정 뒤에는 −0.32 dB와 2.57 dB가 되었습니다. 참고로 논문은 도시 이름을 밝히지 않고 영국 도시라고만 씁니다. 우리 결과는 보정하지 않은 상태에서 de-biased RMSE 6.41 dB입니다. 여기서 세 가지 질문이 나왔습니다. −5.7의 단위와 부호는 무슨 뜻인지, 표준편차 5.7 dB를 de-biased RMSE로 볼 수 있는지, 그리고 우리 6.41 dB와 비슷하다고 말할 수 있는지입니다. 짧게 답하면, 단위는 dB이고 시뮬레이션이 평균 5.7 dB 약하게 예측했다는 뜻이며, 표준편차는 곧 de-biased RMSE이고, 6.41 dB와는 같은 6 dB 안팎 수준이라고까지는 말할 수 있지만, 거의 같다고 하려면 집계 조건을 맞춰야 합니다.</aside>
+</section>
+<section id="sign" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">① 단위와 부호</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">−5.7 dB는 −0.3 dB보다 “작은 오차”가 아니다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">오차 e = 시뮬 RSRP − 실측 RSRP (dB)<br>바이어스(평균 오차) = 평균(e) · 얼마나 틀렸나 = |바이어스| = 0에서의 거리</p></div>
+<div style="position:relative;width:1664px;height:270px">
+<svg aria-label="수직선. 0을 기준으로 보정 전 −5.69는 0에서 5.69만큼 왼쪽, 보정 후 −0.32는 0.32만큼 왼쪽. 왼쪽은 시뮬레이션이 약하게 예측한 방향" style="position:absolute;left:0px;top:0px;width:1664px;height:270px" width="1664" height="270" viewBox="0 0 1664 270"><line x1="40" y1="120" x2="1600" y2="120" stroke="#14213D" stroke-width="4"/><line x1="60" y1="110" x2="60" y2="130" stroke="#14213D" stroke-width="2"/><line x1="210" y1="110" x2="210" y2="130" stroke="#14213D" stroke-width="2"/><line x1="360" y1="110" x2="360" y2="130" stroke="#14213D" stroke-width="2"/><line x1="510" y1="110" x2="510" y2="130" stroke="#14213D" stroke-width="2"/><line x1="660" y1="110" x2="660" y2="130" stroke="#14213D" stroke-width="2"/><line x1="810" y1="110" x2="810" y2="130" stroke="#14213D" stroke-width="2"/><line x1="960" y1="110" x2="960" y2="130" stroke="#14213D" stroke-width="2"/><line x1="1110" y1="110" x2="1110" y2="130" stroke="#14213D" stroke-width="2"/><line x1="1260" y1="110" x2="1260" y2="130" stroke="#14213D" stroke-width="2"/><line x1="1410" y1="110" x2="1410" y2="130" stroke="#14213D" stroke-width="2"/><line x1="1560" y1="110" x2="1560" y2="130" stroke="#14213D" stroke-width="2"/><line x1="1260" y1="40" x2="1260" y2="200" stroke="#14213D" stroke-width="4"/><path d="M406 160 L406 172 L1260 172 L1260 160" fill="none" stroke="#A84A16" stroke-width="4"/><path d="M1212 80 L1212 68 L1260 68 L1260 80" fill="none" stroke="#255E9E" stroke-width="4"/><circle cx="406" cy="120" r="16" fill="#A84A16"/><circle cx="1212" cy="120" r="16" fill="#255E9E"/></svg>
+<p style="position:absolute;left:30px;top:136px;width:60px;font-size:24px;text-align:center;color:#5E6675">-8</p>
+<p style="position:absolute;left:330px;top:136px;width:60px;font-size:24px;text-align:center;color:#5E6675">-6</p>
+<p style="position:absolute;left:630px;top:136px;width:60px;font-size:24px;text-align:center;color:#5E6675">-4</p>
+<p style="position:absolute;left:930px;top:136px;width:60px;font-size:24px;text-align:center;color:#5E6675">-2</p>
+<p style="position:absolute;left:1230px;top:136px;width:60px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:1530px;top:136px;width:60px;font-size:24px;text-align:center;color:#5E6675">+2</p>
+<p style="position:absolute;left:286px;top:180px;width:240px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">보정 전 −5.69</p>
+<p style="position:absolute;left:683px;top:180px;width:300px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">0에서 5.69 dB</p>
+<p style="position:absolute;left:932px;top:30px;width:260px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">보정 후 −0.32</p>
+<p style="position:absolute;left:1276px;top:30px;width:240px;font-size:24px;font-weight:700;color:#255E9E">0에서 0.32 dB</p>
+<p style="position:absolute;left:40px;top:230px;width:700px;font-size:24px;font-weight:700;color:#14213D">← 시뮬이 약하게 (과소 예측)</p>
+<p style="position:absolute;left:1280px;top:230px;width:400px;font-size:24px;font-weight:700;color:#14213D">시뮬이 강하게 →</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">숫자 크기 vs 0에서의 거리</p><p style="font-size:24px;line-height:1.4;color:#4A5262">숫자로는 −5.7 &lt; −0.3이지만<br>오차의 크기는 절댓값: 5.7 &gt; 0.3<br>→ 보정 전이 훨씬 많이 틀렸다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">부호 = 방향</p><p style="font-size:24px;line-height:1.4;color:#4A5262">음수 = 시뮬이 실측보다 약함 (커버리지 과소 예측)<br>논문도 “보정 전 커버리지를 과소 예측”이라 씀<br>중앙값도 −5.37 → −0.13 dB</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">표현 바로잡기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">✗ “−5.7 dB 차이가 난다”<br>✓ “평균 오차(시뮬 − 실측) −5.7 dB<br>= 시뮬이 평균 5.7 dB 약하다”</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">arXiv 2510.09478 — 오차는 “시뮬 − 실측 RSRP”로 정의 · 슬라이드 표기 “−5.7 → −0.3 dB”의 두 값 모두 dB</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 11</p>
+<aside>(약 55초) 첫 질문, 단위와 부호입니다. 두 값 모두 dB입니다. 슬라이드에 단위가 뒤에만 붙어 헷갈렸을 수 있습니다. 논문은 오차를 시뮬레이션 RSRP 빼기 실측 RSRP로 정의하고, 그 평균을 냅니다. 이게 바이어스입니다. 여기서 흔한 오해가 있습니다. 숫자로는 −5.7이 −0.3보다 작으니 오차가 작은 것처럼 보이지만, 얼마나 틀렸는지는 0에서 얼마나 떨어졌는지, 즉 절댓값으로 봐야 합니다. 수직선에서 보듯 보정 전은 0에서 5.69 dB, 보정 후는 0.32 dB 떨어져 있습니다. 보정 전이 훨씬 많이 틀린 것이죠. 부호는 방향입니다. 음수는 시뮬레이션이 실측보다 약하게, 즉 커버리지를 과소 예측했다는 뜻이고, 논문도 그렇게 씁니다. 그래서 “−5.7 dB 차이가 난다”보다는 “평균 오차가 −5.7 dB, 즉 시뮬이 평균 5.7 dB 약하다”라고 말하는 것이 정확합니다.</aside>
+</section>
+<section id="spread" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">① 바이어스와 흩어짐</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“어디에 있나”와 “얼마나 퍼졌나”는 다른 숫자다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:1100px;height:420px">
+<svg aria-label="구역별 오차 분포를 정규분포로 그린 개념도. 보정 전은 중심 −5.69, 폭 5.71로 넓게 왼쪽에, 보정 후는 중심 −0.32, 폭 2.57로 좁게 0 근처에 있다" style="position:absolute;left:0px;top:0px;width:1100px;height:420px" width="1100" height="420" viewBox="0 0 1100 420"><line x1="40" y1="330" x2="1080" y2="330" stroke="#5E6675" stroke-width="2"/><line x1="707" y1="20" x2="707" y2="340" stroke="#14213D" stroke-width="3" stroke-dasharray="8 6"/><polyline points="60.0,327.8 64.2,327.6 68.3,327.5 72.5,327.3 76.7,327.1 80.8,326.9 85.0,326.7 89.2,326.4 93.3,326.2 97.5,325.9 101.7,325.7 105.8,325.4 110.0,325.1 114.2,324.7 118.3,324.4 122.5,324.0 126.7,323.7 130.8,323.3 135.0,322.8 139.2,322.4 143.3,321.9 147.5,321.5 151.7,321.0 155.8,320.4 160.0,319.9 164.2,319.3 168.3,318.7 172.5,318.0 176.7,317.4 180.8,316.7 185.0,316.0 189.2,315.2 193.3,314.4 197.5,313.6 201.7,312.8 205.8,311.9 210.0,311.0 214.2,310.1 218.3,309.1 222.5,308.1 226.7,307.0 230.8,306.0 235.0,304.8 239.2,303.7 243.3,302.5 247.5,301.3 251.7,300.0 255.8,298.7 260.0,297.4 264.2,296.0 268.3,294.6 272.5,293.2 276.7,291.7 280.8,290.2 285.0,288.7 289.2,287.1 293.3,285.5 297.5,283.9 301.7,282.2 305.8,280.5 310.0,278.8 314.2,277.0 318.3,275.3 322.5,273.5 326.7,271.6 330.8,269.8 335.0,267.9 339.2,266.0 343.3,264.1 347.5,262.2 351.7,260.3 355.8,258.3 360.0,256.4 364.2,254.4 368.3,252.5 372.5,250.5 376.7,248.5 380.8,246.6 385.0,244.6 389.2,242.7 393.3,240.7 397.5,238.8 401.7,236.9 405.8,235.0 410.0,233.2 414.2,231.3 418.3,229.5 422.5,227.7 426.7,226.0 430.8,224.2 435.0,222.6 439.2,220.9 443.3,219.3 447.5,217.8 451.7,216.3 455.8,214.8 460.0,213.4 464.2,212.1 468.3,210.8 472.5,209.5 476.7,208.4 480.8,207.3 485.0,206.2 489.2,205.3 493.3,204.4 497.5,203.6 501.7,202.8 505.8,202.1 510.0,201.5 514.2,201.0 518.3,200.6 522.5,200.2 526.7,199.9 530.8,199.7 535.0,199.6 539.2,199.5 543.3,199.5 547.5,199.6 551.7,199.8 555.8,200.1 560.0,200.4 564.2,200.9 568.3,201.4 572.5,202.0 576.7,202.6 580.8,203.4 585.0,204.2 589.2,205.0 593.3,206.0 597.5,207.0 601.7,208.1 605.8,209.2 610.0,210.4 614.2,211.7 618.3,213.0 622.5,214.4 626.7,215.9 630.8,217.4 635.0,218.9 639.2,220.5 643.3,222.1 647.5,223.8 651.7,225.5 655.8,227.2 660.0,229.0 664.2,230.8 668.3,232.7 672.5,234.5 676.7,236.4 680.8,238.3 685.0,240.2 689.2,242.2 693.3,244.1 697.5,246.1 701.7,248.0 705.8,250.0 710.0,252.0 714.2,253.9 718.3,255.9 722.5,257.8 726.7,259.8 730.8,261.7 735.0,263.6 739.2,265.5 743.3,267.4 747.5,269.3 751.7,271.2 755.8,273.0 760.0,274.8 764.2,276.6 768.3,278.3 772.5,280.1 776.7,281.8 780.8,283.4 785.0,285.1 789.2,286.7 793.3,288.3 797.5,289.8 801.7,291.3 805.8,292.8 810.0,294.3 814.2,295.7 818.3,297.0 822.5,298.4 826.7,299.7 830.8,301.0 835.0,302.2 839.2,303.4 843.3,304.5 847.5,305.7 851.7,306.8 855.8,307.8 860.0,308.8 864.2,309.8 868.3,310.8 872.5,311.7 876.7,312.6 880.8,313.4 885.0,314.2 889.2,315.0 893.3,315.8 897.5,316.5 901.7,317.2 905.8,317.9 910.0,318.5 914.2,319.1 918.3,319.7 922.5,320.3 926.7,320.8 930.8,321.3 935.0,321.8 939.2,322.3 943.3,322.7 947.5,323.2 951.7,323.6 955.8,323.9 960.0,324.3 964.2,324.6 968.3,325.0 972.5,325.3 976.7,325.6 980.8,325.9 985.0,326.1 989.2,326.4 993.3,326.6 997.5,326.8 1001.7,327.0 1005.8,327.2 1010.0,327.4 1014.2,327.6 1018.3,327.8 1022.5,327.9 1026.7,328.1 1030.8,328.2 1035.0,328.3 1039.2,328.4 1043.3,328.5 1047.5,328.6 1051.7,328.7 1055.8,328.8 1060.0,328.9" fill="none" stroke="#A84A16" stroke-width="5"/><polyline points="60.0,330.0 64.2,330.0 68.3,330.0 72.5,330.0 76.7,330.0 80.8,330.0 85.0,330.0 89.2,330.0 93.3,330.0 97.5,330.0 101.7,330.0 105.8,330.0 110.0,330.0 114.2,330.0 118.3,330.0 122.5,330.0 126.7,330.0 130.8,330.0 135.0,330.0 139.2,330.0 143.3,330.0 147.5,330.0 151.7,330.0 155.8,330.0 160.0,330.0 164.2,330.0 168.3,330.0 172.5,330.0 176.7,330.0 180.8,330.0 185.0,330.0 189.2,330.0 193.3,330.0 197.5,330.0 201.7,330.0 205.8,330.0 210.0,330.0 214.2,330.0 218.3,330.0 222.5,330.0 226.7,330.0 230.8,330.0 235.0,330.0 239.2,330.0 243.3,330.0 247.5,330.0 251.7,330.0 255.8,330.0 260.0,330.0 264.2,330.0 268.3,330.0 272.5,330.0 276.7,330.0 280.8,330.0 285.0,330.0 289.2,330.0 293.3,330.0 297.5,330.0 301.7,330.0 305.8,330.0 310.0,330.0 314.2,330.0 318.3,330.0 322.5,330.0 326.7,330.0 330.8,330.0 335.0,330.0 339.2,330.0 343.3,330.0 347.5,330.0 351.7,330.0 355.8,330.0 360.0,330.0 364.2,330.0 368.3,330.0 372.5,330.0 376.7,330.0 380.8,330.0 385.0,329.9 389.2,329.9 393.3,329.9 397.5,329.9 401.7,329.9 405.8,329.8 410.0,329.8 414.2,329.7 418.3,329.7 422.5,329.6 426.7,329.5 430.8,329.4 435.0,329.3 439.2,329.2 443.3,329.0 447.5,328.8 451.7,328.5 455.8,328.3 460.0,327.9 464.2,327.5 468.3,327.1 472.5,326.6 476.7,326.0 480.8,325.3 485.0,324.5 489.2,323.5 493.3,322.5 497.5,321.3 501.7,319.9 505.8,318.4 510.0,316.7 514.2,314.8 518.3,312.6 522.5,310.2 526.7,307.5 530.8,304.6 535.0,301.4 539.2,297.8 543.3,293.9 547.5,289.7 551.7,285.1 555.8,280.1 560.0,274.8 564.2,269.0 568.3,262.9 572.5,256.4 576.7,249.4 580.8,242.1 585.0,234.5 589.2,226.5 593.3,218.1 597.5,209.4 601.7,200.5 605.8,191.3 610.0,181.9 614.2,172.4 618.3,162.8 622.5,153.1 626.7,143.4 630.8,133.8 635.0,124.3 639.2,115.0 643.3,106.0 647.5,97.3 651.7,89.0 655.8,81.1 660.0,73.8 664.2,67.1 668.3,61.0 672.5,55.6 676.7,51.0 680.8,47.1 685.0,44.0 689.2,41.8 693.3,40.5 697.5,40.0 701.7,40.4 705.8,41.7 710.0,43.8 714.2,46.8 718.3,50.7 722.5,55.3 726.7,60.6 730.8,66.6 735.0,73.3 739.2,80.6 743.3,88.4 747.5,96.7 751.7,105.4 755.8,114.4 760.0,123.6 764.2,133.1 768.3,142.7 772.5,152.4 776.7,162.1 780.8,171.7 785.0,181.3 789.2,190.7 793.3,199.9 797.5,208.8 801.7,217.5 805.8,225.9 810.0,233.9 814.2,241.6 818.3,248.9 822.5,255.9 826.7,262.4 830.8,268.6 835.0,274.4 839.2,279.7 843.3,284.7 847.5,289.4 851.7,293.6 855.8,297.5 860.0,301.1 864.2,304.4 868.3,307.3 872.5,310.0 876.7,312.4 880.8,314.6 885.0,316.6 889.2,318.3 893.3,319.8 897.5,321.2 901.7,322.4 905.8,323.5 910.0,324.4 914.2,325.2 918.3,325.9 922.5,326.5 926.7,327.1 930.8,327.5 935.0,327.9 939.2,328.2 943.3,328.5 947.5,328.8 951.7,329.0 955.8,329.2 960.0,329.3 964.2,329.4 968.3,329.5 972.5,329.6 976.7,329.7 980.8,329.7 985.0,329.8 989.2,329.8 993.3,329.9 997.5,329.9 1001.7,329.9 1005.8,329.9 1010.0,329.9 1014.2,330.0 1018.3,330.0 1022.5,330.0 1026.7,330.0 1030.8,330.0 1035.0,330.0 1039.2,330.0 1043.3,330.0 1047.5,330.0 1051.7,330.0 1055.8,330.0 1060.0,330.0" fill="none" stroke="#255E9E" stroke-width="5"/><line x1="372" y1="251" x2="708" y2="251" stroke="#A84A16" stroke-width="3"/><line x1="622" y1="154" x2="773" y2="154" stroke="#255E9E" stroke-width="3"/></svg>
+<p style="position:absolute;left:79px;top:340px;width:80px;font-size:24px;text-align:center;color:#5E6675">-20</p>
+<p style="position:absolute;left:226px;top:340px;width:80px;font-size:24px;text-align:center;color:#5E6675">-15</p>
+<p style="position:absolute;left:373px;top:340px;width:80px;font-size:24px;text-align:center;color:#5E6675">-10</p>
+<p style="position:absolute;left:520px;top:340px;width:80px;font-size:24px;text-align:center;color:#5E6675">-5</p>
+<p style="position:absolute;left:667px;top:340px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:814px;top:340px;width:80px;font-size:24px;text-align:center;color:#5E6675">+5</p>
+<p style="position:absolute;left:961px;top:340px;width:80px;font-size:24px;text-align:center;color:#5E6675">+10</p>
+<p style="position:absolute;left:240px;top:130px;width:300px;font-size:24px;text-align:right;line-height:1.3;font-weight:700;color:#A84A16">보정 전<br>중심 −5.69 · 폭 σ 5.71</p>
+<p style="position:absolute;left:758px;top:34px;width:320px;font-size:24px;line-height:1.3;font-weight:700;color:#255E9E">보정 후<br>중심 −0.32 · 폭 σ 2.57</p>
+<p style="position:absolute;left:717px;top:380px;width:300px;font-size:24px;color:#5E6675">오차 (시뮬 − 실측, dB)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">바이어스 = 중심</p><p style="font-size:24px;line-height:1.4;color:#4A5262">전체가 한쪽으로 쏠린 정도<br>→ 출력 · 손실 오프셋처럼 한꺼번에 고쳐진다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">표준편차 = 폭</p><p style="font-size:24px;line-height:1.4;color:#4A5262">구역마다 다르게 틀린 정도<br>→ 기하 · 재질 · 산란처럼 구역별로 고쳐야 한다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">5.7과 5.7</p><p style="font-size:24px;line-height:1.4;color:#4A5262">보정 전 두 값이 우연히 비슷할 뿐<br>서로 다른 지표다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">결과</b> 보정은 두 가지를 다 줄였다 — 중심을 0 근처로 (−5.69 → −0.32), 폭을 절반 이하로 (5.71 → 2.57)</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">분포 모양은 정규분포로 가정해 그린 개념도 · 중심과 폭은 논문 수치</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 11</p>
+<aside>(약 50초) 오차는 숫자 하나가 아니라 분포입니다. 구역 70개의 오차를 늘어놓으면 하나의 분포가 되고, 바이어스는 그 분포의 중심, 표준편차는 폭입니다. 그림은 정규분포로 가정해 그린 개념도입니다. 보정 전은 중심이 −5.69로 왼쪽에 치우치고 폭도 5.71로 넓습니다. 보정 후는 중심이 거의 0으로 오고 폭도 2.57로 절반 이하가 되었습니다. 두 숫자는 고치는 방법도 다릅니다. 중심이 쏠린 것은 송신 출력이나 손실 오프셋처럼 한꺼번에 고쳐지는 경우가 많고, 폭이 넓은 것은 구역마다 다르게 틀린 것이라 기하나 재질, 산란처럼 구역별로 고쳐야 합니다. 보정 전에 두 값이 모두 5.7 근처인 것은 우연일 뿐, 서로 다른 지표라는 점을 기억해 주세요.</aside>
+</section>
+<section id="decompose" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">② 표준편차 = de-biased RMSE</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RMSE² = 바이어스² + σ² — 직각삼각형 하나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:640px;height:430px">
+<svg aria-label="직각삼각형 두 개. 보정 전은 밑변 바이어스 5.69, 높이 표준편차 5.71, 빗변 RMSE 8.06. 보정 후는 밑변 0.32, 높이 2.57, 빗변 2.59" style="position:absolute;left:0px;top:0px;width:640px;height:430px" width="640" height="430" viewBox="0 0 640 430"><polygon points="40,330 301.7,330 301.7,67.3" fill="#F7DDCB" stroke="none"/><line x1="40" y1="330" x2="301.7" y2="330" stroke="#A84A16" stroke-width="5"/><line x1="301.7" y1="330" x2="301.7" y2="67.3" stroke="#255E9E" stroke-width="5"/><line x1="40" y1="330" x2="301.7" y2="67.3" stroke="#14213D" stroke-width="5"/><rect x="285.7" y="314" width="16" height="16" fill="none" stroke="#5E6675" stroke-width="2"/><polygon points="440,330 454.7,330 454.7,211.8" fill="#D5E3F3" stroke="none"/><line x1="440" y1="330" x2="454.7" y2="330" stroke="#A84A16" stroke-width="5"/><line x1="454.7" y1="330" x2="454.7" y2="211.8" stroke="#255E9E" stroke-width="5"/><line x1="440" y1="330" x2="454.7" y2="211.8" stroke="#14213D" stroke-width="5"/><rect x="438.7" y="314" width="16" height="16" fill="none" stroke="#5E6675" stroke-width="2"/></svg>
+<p style="position:absolute;left:40px;top:340px;width:280px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">바이어스 5.69</p>
+<p style="position:absolute;left:312px;top:183px;width:160px;font-size:24px;font-weight:700;color:#255E9E">σ 5.71</p>
+<p style="position:absolute;left:0px;top:110px;width:150px;font-size:24px;text-align:right;line-height:1.25;font-weight:700;color:#14213D">RMSE<br>8.06</p>
+<p style="position:absolute;left:400px;top:340px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">0.32</p>
+<p style="position:absolute;left:465px;top:255px;width:160px;font-size:24px;font-weight:700;color:#255E9E">σ 2.57</p>
+<p style="position:absolute;left:465px;top:172px;width:220px;font-size:24px;font-weight:700;color:#14213D">RMSE 2.59</p>
+<p style="position:absolute;left:0px;top:390px;width:400px;font-size:24px;text-align:center;font-weight:700;color:#14213D">보정 전</p>
+<p style="position:absolute;left:380px;top:390px;width:260px;font-size:24px;text-align:center;font-weight:700;color:#14213D">보정 후</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">RMSE  = √ 평균(e²)           ← 전체 오차<br>바이어스 = 평균(e)             ← 평행 이동<br>σ     = √ 평균((e − 바이어스)²) ← 바이어스를 뺀 RMSE<br><span style="color:#F0A36B">RMSE² = 바이어스² + σ²</span></p></div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">보정 전</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">보정 후</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">바이어스</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-5.69 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-0.32 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">σ = de-biased RMSE</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">5.71 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">2.57 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">RMSE (계산)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">√(5.69² + 5.71²) ≈ 8.1 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">≈ 2.6 dB</p></div>
+</div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">참고</b> 논문은 RMSE를 보고하지 않았다 — 위 RMSE는 계산값 · N(70) vs N − 1로 나누는 차이는 1% 미만</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">σ는 평균을 빼고 잰 오차의 크기 = de-biased RMSE = 오차의 표준편차 (같은 것의 다른 이름) · Taylor diagram의 E′와도 같다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 11</p>
+<aside>(약 55초) 둘째 질문, 표준편차 5.7 dB를 de-biased RMSE로 볼 수 있느냐입니다. 볼 수 있습니다. de-biased RMSE는 오차에서 바이어스를 뺀 뒤 계산한 RMSE인데, 그 정의가 오차의 표준편차와 똑같습니다. 그리고 세 값 사이에는 RMSE 제곱이 바이어스 제곱 더하기 표준편차 제곱이라는 관계가 있습니다. 직각삼각형으로 그리면, 밑변이 바이어스, 높이가 표준편차, 빗변이 전체 RMSE입니다. 보정 전은 밑변과 높이가 모두 5.7 정도라 전체 RMSE가 약 8.1 dB였고, 보정 후는 바이어스가 거의 사라져 RMSE가 표준편차와 거의 같은 2.6 dB가 됩니다. 논문은 RMSE 자체는 보고하지 않아서 이 값들은 계산한 것입니다. 표준편차를 N으로 나누는지 N − 1로 나누는지의 차이는 구역이 70개라 1퍼센트도 안 됩니다. 이 값은 Taylor diagram의 E′와도 같은 양입니다.</aside>
+</section>
+<section id="conditions" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">③ 영국 수치가 나온 조건</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">같은 이름의 숫자도 조건이 다르면 다른 숫자다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">항목</p><p style="flex:1.25;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">영국 사례 (논문)</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">우리 결과 — 채울 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">측정 데이터</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">단말(UE)이 잰 RSRP</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">[스캐너 / 단말 · 기종]</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">대상</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">12사이트 · 36셀 · 약 1.3 × 1.4 km (보정은 1.1 × 0.7 km)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">[사이트 · 셀 수 · 면적]</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">집계 단위</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">10 m × 10 m 구역, 표본 20개 이상</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">[점 단위 / 구역 크기 · 최소 표본]</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">비교 개수</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">대표 구역 70개</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">[구역 · 점 개수]</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">이상치</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">극단 오차 구역 제외 (기준 수치는 미공개)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">[제외 기준]</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">평균 방식</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">dB · 선형 중 무엇인지 미기재</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">[dB 평균 / 선형 평균]</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">바이어스 제거</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">전체에서 하나 (평균 −5.69 dB)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">[전체 / 셀별]</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">대역 · 환경</p><p style="flex:1.25;font-size:24px;line-height:1.35;color:#4A5262">4G 2 GHz · 5G 3.5 GHz, 영국 도심</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">[대역 · 환경]</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 주황 줄(집계 단위 · 이상치 · 바이어스 제거)이 σ를 가장 크게 바꾼다 — 7 · 8쪽</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">arXiv 2510.09478 본문 기준 · 오른쪽 열의 대괄호는 우리 계산 조건으로 채워 넣을 자리</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 11</p>
+<aside>(약 55초) 이제 셋째 질문, 우리 6.41 dB와 비슷하냐입니다. 먼저 영국 수치가 어떤 조건에서 나왔는지 봐야 합니다. 논문 기준으로, 측정은 단말이 잰 RSRP이고, 12개 사이트 36개 셀 영역입니다. 가장 중요한 것은 집계 방식입니다. 측정 점 하나하나가 아니라 10 m × 10 m 구역마다 표본이 20개 이상인 곳만 골라 평균을 냈고, 그중 대표 구역 70개로 오차를 계산했습니다. 오차가 극단적인 구역은 제외했는데 기준 수치는 밝히지 않았고, dB로 평균했는지 선형으로 평균했는지도 적혀 있지 않습니다. 바이어스는 전체에서 하나를 뺀 것으로 보입니다. 오른쪽 열은 우리 결과에서 채워야 할 칸입니다. 이 중 주황색 줄, 즉 집계 단위, 이상치, 바이어스를 뺀 단위가 표준편차를 가장 크게 바꿉니다. 다음 두 장에서 그 이유를 보겠습니다.</aside>
+</section>
+<section id="aggregate" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">③ 조건이 σ를 바꾼다 · 집계 단위</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">구역으로 평균하면 σ가 작아진다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">σ²(측정 점)               ≈ σ²(구역 간) + σ²(구역 안)<br>σ²(구역 평균, 표본 n개) ≈ σ²(구역 간) + σ²(구역 안) ÷ n</p></div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;color:#14213D">가정 예: 구역 간 오차 5.0 dB, 구역 안 흩어짐 4.0 dB</p>
+<div style="position:relative;width:860px;height:290px">
+<svg aria-label="가정 예의 de-biased RMSE 막대. 측정 점 기준 6.40 dB, 표본 20개 구역 평균 5.08 dB, 구역 간 오차만 5.00 dB" style="position:absolute;left:0px;top:0px;width:860px;height:290px" width="860" height="290" viewBox="0 0 860 290"><rect x="330" y="20" width="448" height="60" rx="8" fill="#A84A16"/><rect x="330" y="110" width="356" height="60" rx="8" fill="#255E9E"/><rect x="330" y="200" width="350" height="60" rx="8" fill="#5E6675"/></svg>
+<p style="position:absolute;left:0px;top:34px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">측정 점 기준</p>
+<p style="position:absolute;left:792px;top:34px;width:140px;font-size:24px;font-weight:700;color:#A84A16">6.40 dB</p>
+<p style="position:absolute;left:0px;top:124px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">구역 평균 (표본 20개)</p>
+<p style="position:absolute;left:700px;top:124px;width:140px;font-size:24px;font-weight:700;color:#255E9E">5.08 dB</p>
+<p style="position:absolute;left:0px;top:214px;width:320px;font-size:24px;text-align:right;font-weight:600;color:#14213D">구역 간 오차만</p>
+<p style="position:absolute;left:694px;top:214px;width:140px;font-size:24px;font-weight:700;color:#5E6675">5.00 dB</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">구역 안 흩어짐이란</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 10 m 안에서도 빠른 페이딩 · 위치 오차 ·<br>단말 측정 오차로 값이 흔들린다 — 시뮬은 못 맞춘다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">평균하면 줄어든다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">표본 n개를 평균하면 구역 안 흩어짐이 1/n로<br>(서로 독립일 때) — 남는 건 구역 간 오차</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">이상치 제외도</p><p style="font-size:24px;line-height:1.4;color:#4A5262">극단 구역을 빼면 σ는 또 작아진다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">예</b> 같은 시뮬이라도 점 기준 6.4 dB가 구역 평균으로는 5.1 dB가 될 수 있다 — 예시 값, 우리 데이터로 직접 재야 한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">가정 예시 (구역 간 5.0 dB · 구역 안 4.0 dB · 표본 독립) — 실제 구역 안 흩어짐은 측정 데이터로 추정한다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 11</p>
+<aside>(약 55초) 왜 집계 단위가 중요할까요. 측정 점 하나의 오차는 두 부분으로 나눌 수 있습니다. 구역마다 시뮬레이션이 다르게 틀리는 구역 간 오차와, 같은 10 m 구역 안에서도 빠른 페이딩, 위치 오차, 단말 측정 오차 때문에 값이 흔들리는 구역 안 흩어짐입니다. 구역 안 흩어짐은 시뮬레이션이 원래 맞출 수 없는 부분입니다. 구역마다 표본 n개를 평균하면 이 흩어짐이 n분의 1로 줄어듭니다. 예를 들어 구역 간 오차가 5 dB, 구역 안 흩어짐이 4 dB라고 가정하면, 측정 점 기준 de-biased RMSE는 6.40 dB인데, 표본 20개로 구역 평균을 내면 5.08 dB가 됩니다. 시뮬레이션은 하나도 바뀌지 않았는데 숫자만 1.3 dB 줄어든 것이죠. 이상치 구역을 빼면 더 작아집니다. 이 숫자들은 예시이고, 우리 데이터로 직접 재 봐야 합니다.</aside>
+</section>
+<section id="percell" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">③ 조건이 σ를 바꾼다 · 바이어스를 빼는 단위</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">셀마다 다른 치우침을 어디서 빼느냐</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="position:relative;width:820px;height:310px">
+<svg aria-label="셀 A, B, C의 오차 분포가 각각 −9, −3, −6 dB에 중심을 두고 흩어져 있는 그림" style="position:absolute;left:0px;top:0px;width:820px;height:310px" width="820" height="310" viewBox="0 0 820 310"><line x1="20" y1="250" x2="820" y2="250" stroke="#5E6675" stroke-width="2"/><line x1="597" y1="20" x2="597" y2="260" stroke="#14213D" stroke-width="3" stroke-dasharray="8 6"/><polyline points="40.0,249.0 43.2,248.9 46.3,248.8 49.5,248.6 52.7,248.5 55.8,248.3 59.0,248.2 62.2,248.0 65.3,247.8 68.5,247.6 71.7,247.3 74.8,247.1 78.0,246.8 81.2,246.5 84.3,246.2 87.5,245.8 90.7,245.4 93.8,245.0 97.0,244.6 100.2,244.1 103.3,243.6 106.5,243.1 109.7,242.5 112.8,241.9 116.0,241.2 119.2,240.5 122.3,239.7 125.5,238.9 128.7,238.1 131.8,237.2 135.0,236.2 138.2,235.2 141.3,234.1 144.5,232.9 147.7,231.7 150.8,230.4 154.0,229.1 157.2,227.7 160.3,226.2 163.5,224.6 166.7,222.9 169.8,221.2 173.0,219.4 176.2,217.5 179.3,215.5 182.5,213.5 185.7,211.3 188.8,209.1 192.0,206.7 195.2,204.3 198.3,201.8 201.5,199.3 204.7,196.6 207.8,193.8 211.0,191.0 214.2,188.1 217.3,185.1 220.5,182.0 223.7,178.8 226.8,175.6 230.0,172.3 233.2,168.9 236.3,165.5 239.5,162.0 242.7,158.4 245.8,154.8 249.0,151.2 252.2,147.5 255.3,143.8 258.5,140.0 261.7,136.3 264.8,132.5 268.0,128.7 271.2,124.9 274.3,121.1 277.5,117.4 280.7,113.6 283.8,109.9 287.0,106.2 290.2,102.6 293.3,99.0 296.5,95.5 299.7,92.1 302.8,88.7 306.0,85.5 309.2,82.3 312.3,79.3 315.5,76.3 318.7,73.5 321.8,70.8 325.0,68.3 328.2,65.8 331.3,63.6 334.5,61.5 337.7,59.5 340.8,57.8 344.0,56.2 347.2,54.7 350.3,53.5 353.5,52.4 356.7,51.6 359.8,50.9 363.0,50.4 366.2,50.1 369.3,50.0 372.5,50.1 375.7,50.4 378.8,50.9 382.0,51.6 385.2,52.4 388.3,53.5 391.5,54.7 394.7,56.2 397.8,57.8 401.0,59.5 404.2,61.5 407.3,63.6 410.5,65.8 413.7,68.3 416.8,70.8 420.0,73.5 423.2,76.3 426.3,79.3 429.5,82.3 432.7,85.5 435.8,88.7 439.0,92.1 442.2,95.5 445.3,99.0 448.5,102.6 451.7,106.2 454.8,109.9 458.0,113.6 461.2,117.4 464.3,121.1 467.5,124.9 470.7,128.7 473.8,132.5 477.0,136.3 480.2,140.0 483.3,143.8 486.5,147.5 489.7,151.2 492.8,154.8 496.0,158.4 499.2,162.0 502.3,165.5 505.5,168.9 508.7,172.3 511.8,175.6 515.0,178.8 518.2,182.0 521.3,185.1 524.5,188.1 527.7,191.0 530.8,193.8 534.0,196.6 537.2,199.3 540.3,201.8 543.5,204.3 546.7,206.7 549.8,209.1 553.0,211.3 556.2,213.5 559.3,215.5 562.5,217.5 565.7,219.4 568.8,221.2 572.0,222.9 575.2,224.6 578.3,226.2 581.5,227.7 584.7,229.1 587.8,230.4 591.0,231.7 594.2,232.9 597.3,234.1 600.5,235.2 603.7,236.2 606.8,237.2 610.0,238.1 613.2,238.9 616.3,239.7 619.5,240.5 622.7,241.2 625.8,241.9 629.0,242.5 632.2,243.1 635.3,243.6 638.5,244.1 641.7,244.6 644.8,245.0 648.0,245.4 651.2,245.8 654.3,246.2 657.5,246.5 660.7,246.8 663.8,247.1 667.0,247.3 670.2,247.6 673.3,247.8 676.5,248.0 679.7,248.2 682.8,248.3 686.0,248.5 689.2,248.6 692.3,248.8 695.5,248.9 698.7,249.0 701.8,249.1 705.0,249.2 708.2,249.3 711.3,249.3 714.5,249.4 717.7,249.5 720.8,249.5 724.0,249.6 727.2,249.6 730.3,249.6 733.5,249.7 736.7,249.7 739.8,249.7 743.0,249.8 746.2,249.8 749.3,249.8 752.5,249.8 755.7,249.9 758.8,249.9 762.0,249.9 765.2,249.9 768.3,249.9 771.5,249.9 774.7,249.9 777.8,249.9 781.0,249.9 784.2,250.0 787.3,250.0 790.5,250.0 793.7,250.0 796.8,250.0 800.0,250.0" fill="none" stroke="#A84A16" stroke-width="4"/><polyline points="40.0,250.0 43.2,250.0 46.3,250.0 49.5,250.0 52.7,250.0 55.8,250.0 59.0,250.0 62.2,250.0 65.3,250.0 68.5,250.0 71.7,250.0 74.8,250.0 78.0,250.0 81.2,250.0 84.3,250.0 87.5,250.0 90.7,250.0 93.8,250.0 97.0,250.0 100.2,250.0 103.3,250.0 106.5,250.0 109.7,249.9 112.8,249.9 116.0,249.9 119.2,249.9 122.3,249.9 125.5,249.9 128.7,249.9 131.8,249.9 135.0,249.9 138.2,249.8 141.3,249.8 144.5,249.8 147.7,249.8 150.8,249.7 154.0,249.7 157.2,249.7 160.3,249.6 163.5,249.6 166.7,249.6 169.8,249.5 173.0,249.5 176.2,249.4 179.3,249.3 182.5,249.3 185.7,249.2 188.8,249.1 192.0,249.0 195.2,248.9 198.3,248.8 201.5,248.6 204.7,248.5 207.8,248.3 211.0,248.2 214.2,248.0 217.3,247.8 220.5,247.6 223.7,247.3 226.8,247.1 230.0,246.8 233.2,246.5 236.3,246.2 239.5,245.8 242.7,245.4 245.8,245.0 249.0,244.6 252.2,244.1 255.3,243.6 258.5,243.1 261.7,242.5 264.8,241.9 268.0,241.2 271.2,240.5 274.3,239.7 277.5,238.9 280.7,238.1 283.8,237.2 287.0,236.2 290.2,235.2 293.3,234.1 296.5,232.9 299.7,231.7 302.8,230.4 306.0,229.1 309.2,227.7 312.3,226.2 315.5,224.6 318.7,222.9 321.8,221.2 325.0,219.4 328.2,217.5 331.3,215.5 334.5,213.5 337.7,211.3 340.8,209.1 344.0,206.7 347.2,204.3 350.3,201.8 353.5,199.3 356.7,196.6 359.8,193.8 363.0,191.0 366.2,188.1 369.3,185.1 372.5,182.0 375.7,178.8 378.8,175.6 382.0,172.3 385.2,168.9 388.3,165.5 391.5,162.0 394.7,158.4 397.8,154.8 401.0,151.2 404.2,147.5 407.3,143.8 410.5,140.0 413.7,136.3 416.8,132.5 420.0,128.7 423.2,124.9 426.3,121.1 429.5,117.4 432.7,113.6 435.8,109.9 439.0,106.2 442.2,102.6 445.3,99.0 448.5,95.5 451.7,92.1 454.8,88.7 458.0,85.5 461.2,82.3 464.3,79.3 467.5,76.3 470.7,73.5 473.8,70.8 477.0,68.3 480.2,65.8 483.3,63.6 486.5,61.5 489.7,59.5 492.8,57.8 496.0,56.2 499.2,54.7 502.3,53.5 505.5,52.4 508.7,51.6 511.8,50.9 515.0,50.4 518.2,50.1 521.3,50.0 524.5,50.1 527.7,50.4 530.8,50.9 534.0,51.6 537.2,52.4 540.3,53.5 543.5,54.7 546.7,56.2 549.8,57.8 553.0,59.5 556.2,61.5 559.3,63.6 562.5,65.8 565.7,68.3 568.8,70.8 572.0,73.5 575.2,76.3 578.3,79.3 581.5,82.3 584.7,85.5 587.8,88.7 591.0,92.1 594.2,95.5 597.3,99.0 600.5,102.6 603.7,106.2 606.8,109.9 610.0,113.6 613.2,117.4 616.3,121.1 619.5,124.9 622.7,128.7 625.8,132.5 629.0,136.3 632.2,140.0 635.3,143.8 638.5,147.5 641.7,151.2 644.8,154.8 648.0,158.4 651.2,162.0 654.3,165.5 657.5,168.9 660.7,172.3 663.8,175.6 667.0,178.8 670.2,182.0 673.3,185.1 676.5,188.1 679.7,191.0 682.8,193.8 686.0,196.6 689.2,199.3 692.3,201.8 695.5,204.3 698.7,206.7 701.8,209.1 705.0,211.3 708.2,213.5 711.3,215.5 714.5,217.5 717.7,219.4 720.8,221.2 724.0,222.9 727.2,224.6 730.3,226.2 733.5,227.7 736.7,229.1 739.8,230.4 743.0,231.7 746.2,232.9 749.3,234.1 752.5,235.2 755.7,236.2 758.8,237.2 762.0,238.1 765.2,238.9 768.3,239.7 771.5,240.5 774.7,241.2 777.8,241.9 781.0,242.5 784.2,243.1 787.3,243.6 790.5,244.1 793.7,244.6 796.8,245.0 800.0,245.4" fill="none" stroke="#255E9E" stroke-width="4"/><polyline points="40.0,249.9 43.2,249.9 46.3,249.9 49.5,249.9 52.7,249.9 55.8,249.9 59.0,249.9 62.2,249.8 65.3,249.8 68.5,249.8 71.7,249.8 74.8,249.7 78.0,249.7 81.2,249.7 84.3,249.6 87.5,249.6 90.7,249.6 93.8,249.5 97.0,249.5 100.2,249.4 103.3,249.3 106.5,249.3 109.7,249.2 112.8,249.1 116.0,249.0 119.2,248.9 122.3,248.8 125.5,248.6 128.7,248.5 131.8,248.3 135.0,248.2 138.2,248.0 141.3,247.8 144.5,247.6 147.7,247.3 150.8,247.1 154.0,246.8 157.2,246.5 160.3,246.2 163.5,245.8 166.7,245.4 169.8,245.0 173.0,244.6 176.2,244.1 179.3,243.6 182.5,243.1 185.7,242.5 188.8,241.9 192.0,241.2 195.2,240.5 198.3,239.7 201.5,238.9 204.7,238.1 207.8,237.2 211.0,236.2 214.2,235.2 217.3,234.1 220.5,232.9 223.7,231.7 226.8,230.4 230.0,229.1 233.2,227.7 236.3,226.2 239.5,224.6 242.7,222.9 245.8,221.2 249.0,219.4 252.2,217.5 255.3,215.5 258.5,213.5 261.7,211.3 264.8,209.1 268.0,206.7 271.2,204.3 274.3,201.8 277.5,199.3 280.7,196.6 283.8,193.8 287.0,191.0 290.2,188.1 293.3,185.1 296.5,182.0 299.7,178.8 302.8,175.6 306.0,172.3 309.2,168.9 312.3,165.5 315.5,162.0 318.7,158.4 321.8,154.8 325.0,151.2 328.2,147.5 331.3,143.8 334.5,140.0 337.7,136.3 340.8,132.5 344.0,128.7 347.2,124.9 350.3,121.1 353.5,117.4 356.7,113.6 359.8,109.9 363.0,106.2 366.2,102.6 369.3,99.0 372.5,95.5 375.7,92.1 378.8,88.7 382.0,85.5 385.2,82.3 388.3,79.3 391.5,76.3 394.7,73.5 397.8,70.8 401.0,68.3 404.2,65.8 407.3,63.6 410.5,61.5 413.7,59.5 416.8,57.8 420.0,56.2 423.2,54.7 426.3,53.5 429.5,52.4 432.7,51.6 435.8,50.9 439.0,50.4 442.2,50.1 445.3,50.0 448.5,50.1 451.7,50.4 454.8,50.9 458.0,51.6 461.2,52.4 464.3,53.5 467.5,54.7 470.7,56.2 473.8,57.8 477.0,59.5 480.2,61.5 483.3,63.6 486.5,65.8 489.7,68.3 492.8,70.8 496.0,73.5 499.2,76.3 502.3,79.3 505.5,82.3 508.7,85.5 511.8,88.7 515.0,92.1 518.2,95.5 521.3,99.0 524.5,102.6 527.7,106.2 530.8,109.9 534.0,113.6 537.2,117.4 540.3,121.1 543.5,124.9 546.7,128.7 549.8,132.5 553.0,136.3 556.2,140.0 559.3,143.8 562.5,147.5 565.7,151.2 568.8,154.8 572.0,158.4 575.2,162.0 578.3,165.5 581.5,168.9 584.7,172.3 587.8,175.6 591.0,178.8 594.2,182.0 597.3,185.1 600.5,188.1 603.7,191.0 606.8,193.8 610.0,196.6 613.2,199.3 616.3,201.8 619.5,204.3 622.7,206.7 625.8,209.1 629.0,211.3 632.2,213.5 635.3,215.5 638.5,217.5 641.7,219.4 644.8,221.2 648.0,222.9 651.2,224.6 654.3,226.2 657.5,227.7 660.7,229.1 663.8,230.4 667.0,231.7 670.2,232.9 673.3,234.1 676.5,235.2 679.7,236.2 682.8,237.2 686.0,238.1 689.2,238.9 692.3,239.7 695.5,240.5 698.7,241.2 701.8,241.9 705.0,242.5 708.2,243.1 711.3,243.6 714.5,244.1 717.7,244.6 720.8,245.0 724.0,245.4 727.2,245.8 730.3,246.2 733.5,246.5 736.7,246.8 739.8,247.1 743.0,247.3 746.2,247.6 749.3,247.8 752.5,248.0 755.7,248.2 758.8,248.3 762.0,248.5 765.2,248.6 768.3,248.8 771.5,248.9 774.7,249.0 777.8,249.1 781.0,249.2 784.2,249.3 787.3,249.3 790.5,249.4 793.7,249.5 796.8,249.5 800.0,249.6" fill="none" stroke="#2F7D5B" stroke-width="4"/></svg>
+<p style="position:absolute;left:309px;top:10px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">셀 A</p>
+<p style="position:absolute;left:461px;top:10px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">셀 B</p>
+<p style="position:absolute;left:385px;top:10px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#2F7D5B">셀 C</p>
+<p style="position:absolute;left:0px;top:262px;width:820px;font-size:24px;text-align:center;color:#5E6675">전체에서 하나 빼면: 셀별 치우침이 그대로 σ에 들어간다</p>
+</div>
+<div style="position:relative;width:820px;height:310px">
+<svg aria-label="셀별 바이어스를 빼면 세 분포가 모두 0에 겹치는 그림" style="position:absolute;left:0px;top:0px;width:820px;height:310px" width="820" height="310" viewBox="0 0 820 310"><line x1="20" y1="250" x2="820" y2="250" stroke="#5E6675" stroke-width="2"/><line x1="597" y1="20" x2="597" y2="260" stroke="#14213D" stroke-width="3" stroke-dasharray="8 6"/><polyline points="40.0,250.0 43.2,250.0 46.3,250.0 49.5,250.0 52.7,250.0 55.8,250.0 59.0,250.0 62.2,250.0 65.3,250.0 68.5,250.0 71.7,250.0 74.8,250.0 78.0,250.0 81.2,250.0 84.3,250.0 87.5,250.0 90.7,250.0 93.8,250.0 97.0,250.0 100.2,250.0 103.3,250.0 106.5,250.0 109.7,250.0 112.8,250.0 116.0,250.0 119.2,250.0 122.3,250.0 125.5,250.0 128.7,250.0 131.8,250.0 135.0,250.0 138.2,250.0 141.3,250.0 144.5,250.0 147.7,250.0 150.8,250.0 154.0,250.0 157.2,250.0 160.3,250.0 163.5,250.0 166.7,250.0 169.8,250.0 173.0,250.0 176.2,250.0 179.3,250.0 182.5,250.0 185.7,249.9 188.8,249.9 192.0,249.9 195.2,249.9 198.3,249.9 201.5,249.9 204.7,249.9 207.8,249.9 211.0,249.9 214.2,249.8 217.3,249.8 220.5,249.8 223.7,249.8 226.8,249.7 230.0,249.7 233.2,249.7 236.3,249.6 239.5,249.6 242.7,249.6 245.8,249.5 249.0,249.5 252.2,249.4 255.3,249.3 258.5,249.3 261.7,249.2 264.8,249.1 268.0,249.0 271.2,248.9 274.3,248.8 277.5,248.6 280.7,248.5 283.8,248.3 287.0,248.2 290.2,248.0 293.3,247.8 296.5,247.6 299.7,247.3 302.8,247.1 306.0,246.8 309.2,246.5 312.3,246.2 315.5,245.8 318.7,245.4 321.8,245.0 325.0,244.6 328.2,244.1 331.3,243.6 334.5,243.1 337.7,242.5 340.8,241.9 344.0,241.2 347.2,240.5 350.3,239.7 353.5,238.9 356.7,238.1 359.8,237.2 363.0,236.2 366.2,235.2 369.3,234.1 372.5,232.9 375.7,231.7 378.8,230.4 382.0,229.1 385.2,227.7 388.3,226.2 391.5,224.6 394.7,222.9 397.8,221.2 401.0,219.4 404.2,217.5 407.3,215.5 410.5,213.5 413.7,211.3 416.8,209.1 420.0,206.7 423.2,204.3 426.3,201.8 429.5,199.3 432.7,196.6 435.8,193.8 439.0,191.0 442.2,188.1 445.3,185.1 448.5,182.0 451.7,178.8 454.8,175.6 458.0,172.3 461.2,168.9 464.3,165.5 467.5,162.0 470.7,158.4 473.8,154.8 477.0,151.2 480.2,147.5 483.3,143.8 486.5,140.0 489.7,136.3 492.8,132.5 496.0,128.7 499.2,124.9 502.3,121.1 505.5,117.4 508.7,113.6 511.8,109.9 515.0,106.2 518.2,102.6 521.3,99.0 524.5,95.5 527.7,92.1 530.8,88.7 534.0,85.5 537.2,82.3 540.3,79.3 543.5,76.3 546.7,73.5 549.8,70.8 553.0,68.3 556.2,65.8 559.3,63.6 562.5,61.5 565.7,59.5 568.8,57.8 572.0,56.2 575.2,54.7 578.3,53.5 581.5,52.4 584.7,51.6 587.8,50.9 591.0,50.4 594.2,50.1 597.3,50.0 600.5,50.1 603.7,50.4 606.8,50.9 610.0,51.6 613.2,52.4 616.3,53.5 619.5,54.7 622.7,56.2 625.8,57.8 629.0,59.5 632.2,61.5 635.3,63.6 638.5,65.8 641.7,68.3 644.8,70.8 648.0,73.5 651.2,76.3 654.3,79.3 657.5,82.3 660.7,85.5 663.8,88.7 667.0,92.1 670.2,95.5 673.3,99.0 676.5,102.6 679.7,106.2 682.8,109.9 686.0,113.6 689.2,117.4 692.3,121.1 695.5,124.9 698.7,128.7 701.8,132.5 705.0,136.3 708.2,140.0 711.3,143.8 714.5,147.5 717.7,151.2 720.8,154.8 724.0,158.4 727.2,162.0 730.3,165.5 733.5,168.9 736.7,172.3 739.8,175.6 743.0,178.8 746.2,182.0 749.3,185.1 752.5,188.1 755.7,191.0 758.8,193.8 762.0,196.6 765.2,199.3 768.3,201.8 771.5,204.3 774.7,206.7 777.8,209.1 781.0,211.3 784.2,213.5 787.3,215.5 790.5,217.5 793.7,219.4 796.8,221.2 800.0,222.9" fill="none" stroke="#A84A16" stroke-width="4"/><polyline points="40.0,250.0 43.2,250.0 46.3,250.0 49.5,250.0 52.7,250.0 55.8,250.0 59.0,250.0 62.2,250.0 65.3,250.0 68.5,250.0 71.7,250.0 74.8,250.0 78.0,250.0 81.2,250.0 84.3,250.0 87.5,250.0 90.7,250.0 93.8,250.0 97.0,250.0 100.2,250.0 103.3,250.0 106.5,250.0 109.7,250.0 112.8,250.0 116.0,250.0 119.2,250.0 122.3,250.0 125.5,250.0 128.7,250.0 131.8,250.0 135.0,250.0 138.2,250.0 141.3,250.0 144.5,250.0 147.7,250.0 150.8,250.0 154.0,250.0 157.2,250.0 160.3,250.0 163.5,250.0 166.7,250.0 169.8,250.0 173.0,250.0 176.2,250.0 179.3,250.0 182.5,250.0 185.7,249.9 188.8,249.9 192.0,249.9 195.2,249.9 198.3,249.9 201.5,249.9 204.7,249.9 207.8,249.9 211.0,249.9 214.2,249.8 217.3,249.8 220.5,249.8 223.7,249.8 226.8,249.8 230.0,249.7 233.2,249.7 236.3,249.7 239.5,249.6 242.7,249.6 245.8,249.5 249.0,249.5 252.2,249.4 255.3,249.3 258.5,249.3 261.7,249.2 264.8,249.1 268.0,249.0 271.2,248.9 274.3,248.8 277.5,248.7 280.7,248.5 283.8,248.4 287.0,248.2 290.2,248.0 293.3,247.8 296.5,247.6 299.7,247.4 302.8,247.1 306.0,246.9 309.2,246.6 312.3,246.2 315.5,245.9 318.7,245.5 321.8,245.1 325.0,244.7 328.2,244.2 331.3,243.7 334.5,243.2 337.7,242.6 340.8,242.0 344.0,241.4 347.2,240.7 350.3,240.0 353.5,239.2 356.7,238.3 359.8,237.4 363.0,236.5 366.2,235.5 369.3,234.4 372.5,233.3 375.7,232.1 378.8,230.8 382.0,229.5 385.2,228.1 388.3,226.6 391.5,225.1 394.7,223.5 397.8,221.8 401.0,220.0 404.2,218.1 407.3,216.2 410.5,214.2 413.7,212.1 416.8,209.9 420.0,207.6 423.2,205.3 426.3,202.8 429.5,200.3 432.7,197.7 435.8,195.0 439.0,192.2 442.2,189.3 445.3,186.4 448.5,183.3 451.7,180.3 454.8,177.1 458.0,173.8 461.2,170.5 464.3,167.2 467.5,163.7 470.7,160.3 473.8,156.7 477.0,153.2 480.2,149.6 483.3,145.9 486.5,142.2 489.7,138.5 492.8,134.8 496.0,131.1 499.2,127.4 502.3,123.7 505.5,120.0 508.7,116.3 511.8,112.7 515.0,109.1 518.2,105.5 521.3,102.1 524.5,98.6 527.7,95.3 530.8,92.0 534.0,88.8 537.2,85.7 540.3,82.7 543.5,79.8 546.7,77.0 549.8,74.4 553.0,71.9 556.2,69.5 559.3,67.3 562.5,65.2 565.7,63.3 568.8,61.6 572.0,60.0 575.2,58.6 578.3,57.4 581.5,56.4 584.7,55.5 587.8,54.9 591.0,54.4 594.2,54.1 597.3,54.0 600.5,54.1 603.7,54.4 606.8,54.9 610.0,55.5 613.2,56.4 616.3,57.4 619.5,58.6 622.7,60.0 625.8,61.6 629.0,63.3 632.2,65.2 635.3,67.3 638.5,69.5 641.7,71.9 644.8,74.4 648.0,77.0 651.2,79.8 654.3,82.7 657.5,85.7 660.7,88.8 663.8,92.0 667.0,95.3 670.2,98.6 673.3,102.1 676.5,105.5 679.7,109.1 682.8,112.7 686.0,116.3 689.2,120.0 692.3,123.7 695.5,127.4 698.7,131.1 701.8,134.8 705.0,138.5 708.2,142.2 711.3,145.9 714.5,149.6 717.7,153.2 720.8,156.7 724.0,160.3 727.2,163.7 730.3,167.2 733.5,170.5 736.7,173.8 739.8,177.1 743.0,180.3 746.2,183.3 749.3,186.4 752.5,189.3 755.7,192.2 758.8,195.0 762.0,197.7 765.2,200.3 768.3,202.8 771.5,205.3 774.7,207.6 777.8,209.9 781.0,212.1 784.2,214.2 787.3,216.2 790.5,218.1 793.7,220.0 796.8,221.8 800.0,223.5" fill="none" stroke="#255E9E" stroke-width="4"/><polyline points="40.0,250.0 43.2,250.0 46.3,250.0 49.5,250.0 52.7,250.0 55.8,250.0 59.0,250.0 62.2,250.0 65.3,250.0 68.5,250.0 71.7,250.0 74.8,250.0 78.0,250.0 81.2,250.0 84.3,250.0 87.5,250.0 90.7,250.0 93.8,250.0 97.0,250.0 100.2,250.0 103.3,250.0 106.5,250.0 109.7,250.0 112.8,250.0 116.0,250.0 119.2,250.0 122.3,250.0 125.5,250.0 128.7,250.0 131.8,250.0 135.0,250.0 138.2,250.0 141.3,250.0 144.5,250.0 147.7,250.0 150.8,250.0 154.0,250.0 157.2,250.0 160.3,250.0 163.5,250.0 166.7,250.0 169.8,250.0 173.0,250.0 176.2,250.0 179.3,250.0 182.5,250.0 185.7,249.9 188.8,249.9 192.0,249.9 195.2,249.9 198.3,249.9 201.5,249.9 204.7,249.9 207.8,249.9 211.0,249.9 214.2,249.8 217.3,249.8 220.5,249.8 223.7,249.8 226.8,249.8 230.0,249.7 233.2,249.7 236.3,249.7 239.5,249.6 242.7,249.6 245.8,249.5 249.0,249.5 252.2,249.4 255.3,249.4 258.5,249.3 261.7,249.2 264.8,249.1 268.0,249.0 271.2,248.9 274.3,248.8 277.5,248.7 280.7,248.5 283.8,248.4 287.0,248.2 290.2,248.1 293.3,247.9 296.5,247.7 299.7,247.4 302.8,247.2 306.0,246.9 309.2,246.6 312.3,246.3 315.5,246.0 318.7,245.6 321.8,245.2 325.0,244.8 328.2,244.4 331.3,243.9 334.5,243.4 337.7,242.8 340.8,242.2 344.0,241.6 347.2,240.9 350.3,240.2 353.5,239.4 356.7,238.6 359.8,237.7 363.0,236.8 366.2,235.8 369.3,234.7 372.5,233.6 375.7,232.5 378.8,231.2 382.0,229.9 385.2,228.6 388.3,227.1 391.5,225.6 394.7,224.0 397.8,222.4 401.0,220.6 404.2,218.8 407.3,216.9 410.5,214.9 413.7,212.9 416.8,210.7 420.0,208.5 423.2,206.2 426.3,203.8 429.5,201.3 432.7,198.7 435.8,196.1 439.0,193.4 442.2,190.6 445.3,187.7 448.5,184.7 451.7,181.7 454.8,178.6 458.0,175.4 461.2,172.2 464.3,168.9 467.5,165.5 470.7,162.1 473.8,158.6 477.0,155.1 480.2,151.6 483.3,148.0 486.5,144.4 489.7,140.8 492.8,137.2 496.0,133.5 499.2,129.9 502.3,126.3 505.5,122.7 508.7,119.1 511.8,115.5 515.0,112.0 518.2,108.5 521.3,105.1 524.5,101.7 527.7,98.4 530.8,95.2 534.0,92.1 537.2,89.0 540.3,86.1 543.5,83.3 546.7,80.6 549.8,78.0 553.0,75.5 556.2,73.2 559.3,71.0 562.5,69.0 565.7,67.1 568.8,65.4 572.0,63.9 575.2,62.5 578.3,61.3 581.5,60.3 584.7,59.5 587.8,58.8 591.0,58.4 594.2,58.1 597.3,58.0 600.5,58.1 603.7,58.4 606.8,58.8 610.0,59.5 613.2,60.3 616.3,61.3 619.5,62.5 622.7,63.9 625.8,65.4 629.0,67.1 632.2,69.0 635.3,71.0 638.5,73.2 641.7,75.5 644.8,78.0 648.0,80.6 651.2,83.3 654.3,86.1 657.5,89.0 660.7,92.1 663.8,95.2 667.0,98.4 670.2,101.7 673.3,105.1 676.5,108.5 679.7,112.0 682.8,115.5 686.0,119.1 689.2,122.7 692.3,126.3 695.5,129.9 698.7,133.5 701.8,137.2 705.0,140.8 708.2,144.4 711.3,148.0 714.5,151.6 717.7,155.1 720.8,158.6 724.0,162.1 727.2,165.5 730.3,168.9 733.5,172.2 736.7,175.4 739.8,178.6 743.0,181.7 746.2,184.7 749.3,187.7 752.5,190.6 755.7,193.4 758.8,196.1 762.0,198.7 765.2,201.3 768.3,203.8 771.5,206.2 774.7,208.5 777.8,210.7 781.0,212.9 784.2,214.9 787.3,216.9 790.5,218.8 793.7,220.6 796.8,222.4 800.0,224.0" fill="none" stroke="#2F7D5B" stroke-width="4"/></svg>
+<p style="position:absolute;left:397px;top:10px;width:400px;font-size:24px;text-align:center;font-weight:700;color:#14213D">셀별로 빼면 모두 0에 겹친다</p>
+<p style="position:absolute;left:0px;top:262px;width:820px;font-size:24px;text-align:center;color:#5E6675">셀별로 빼면: 셀 안의 흩어짐만 남는다</p>
+</div>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">σ²(전체에서 하나 뺌) = σ²(셀 안) + 분산(셀별 바이어스)<br>예: 셀 안 4.0 · 셀별 바이어스 흩어짐 2.4 → √(16 + 5.8) ≈ 4.7 dB  vs  셀별로 빼면 4.0 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">셀별 치우침의 원인</p><p style="font-size:24px;line-height:1.4;color:#4A5262">방위각 · 틸트 · 송신 전력 · 안테나 패턴 등 망 설정 차이<br>→ 전체 바이어스 하나로는 지워지지 않는다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">비교할 때</p><p style="font-size:24px;line-height:1.4;color:#4A5262">영국 사례는 전체에서 하나를 뺀 값으로 보인다<br>우리 6.41이 셀별로 뺀 값이면 그 자체로 더 유리한 조건</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">셀 A · B · C와 숫자는 가정 예시 · 망 설정 오차의 진단은 sim-real-alignment 덱 9쪽 참고</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 11</p>
+<aside>(약 50초) 두 번째로 σ를 바꾸는 조건은 바이어스를 어느 단위로 빼느냐입니다. 셀마다 시뮬레이션이 다르게 치우치는 경우가 많습니다. 예를 들어 셀 A는 평균 −9 dB, 셀 B는 −3 dB, 셀 C는 −6 dB만큼 약하게 나온다면, 전체에서 바이어스 하나만 빼도 셀 사이의 치우침이 그대로 남아 σ에 들어갑니다. 반면 셀마다 따로 바이어스를 빼면 셀 안의 흩어짐만 남아 σ가 작아집니다. 식으로는 전체 기준 σ 제곱이 셀 안 σ 제곱과 셀별 바이어스의 분산의 합입니다. 셀 안 4 dB, 셀별 치우침의 흩어짐이 2.4 dB라면 전체 기준 4.7, 셀별 기준 4.0 dB입니다. 셀별 치우침은 보통 방위각, 틸트, 송신 전력 같은 망 설정 차이에서 옵니다. 영국 사례는 전체에서 하나를 뺀 값으로 보이므로, 우리 값이 셀별로 뺀 것이라면 그 자체로 더 유리한 조건에서 나온 숫자입니다.</aside>
+</section>
+<section id="verdict" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">③ 그래서 6.41 dB는</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“같은 6 dB 안팎”까지는 말할 수 있다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">우리 6.41 dB의 계산 방식</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">영국 5.71 dB와 견주면</p><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">판단</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">측정 점 하나하나 기준</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">구역 평균보다 원래 크게 나오는 방식 (7쪽)<br>→ 같은 조건이면 5 dB대일 수도</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">같거나 더 나은 수준 가능</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">비슷한 구역 평균 기준</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">집계가 비슷하니 숫자를 그대로 견줄 만하다</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">비슷한 수준</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">셀별 바이어스를 뺀 값</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">영국은 전체 기준 — 같은 기준으로 바꾸면 커진다 (8쪽)</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">약간 불리한 쪽</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">일반적인 범위</p><p style="font-size:24px;line-height:1.4;color:#4A5262">보정 안 한 전파 모델 · 레이 트레이싱의 오차 σ는<br>6~8 dB대가 흔하다 (TR 38.901 섀도잉 σ: UMa NLOS 6,<br>UMi NLOS 7.82 dB) → 6.41은 평범한 범위</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">직접 비교의 한계</p><p style="font-size:24px;line-height:1.4;color:#4A5262">대역 · 도시 구조 · 셀 수 · 단말 · 장면 품질이 다르다<br>→ 숫자가 같아도 “같은 품질”이라 단정할 수 없다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">그래도 쓸모 있는 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">영국 사례에서 재질 보정으로 σ가 5.7 → 2.6 dB<br>→ 우리도 보정하면 2~3 dB대까지<br>내려갈 여지가 있다는 근거</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">결론</b> “비슷하다” → 6 dB 안팎의 같은 수준 · “거의 같다” → 같은 집계 조건으로 다시 계산한 뒤에만</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">3GPP TR 38.901 표 7.4.1-1 (섀도잉 표준편차) · 영국 사례 arXiv 2510.09478</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 11</p>
+<aside>(약 55초) 그래서 우리 6.41 dB는 어떻게 봐야 할까요. 우리 값을 어떻게 계산했느냐에 따라 해석이 갈립니다. 측정 점 하나하나 기준이라면, 구역 평균보다 원래 크게 나오는 방식이니 같은 조건으로 바꾸면 5 dB대일 수도 있어 영국 사례와 같거나 더 나은 수준일 수 있습니다. 비슷한 구역 평균 기준이라면 숫자를 그대로 견줄 만하고 비슷한 수준입니다. 셀별로 바이어스를 뺀 값이라면 영국과 같은 전체 기준으로 바꿀 때 커지므로 약간 불리한 쪽입니다. 참고로 보정하지 않은 전파 모델이나 레이 트레이싱의 오차 표준편차는 6에서 8 dB대가 흔합니다. 3GPP 채널 모델의 섀도잉 표준편차도 도심 NLOS에서 6에서 7.8 dB입니다. 다만 대역, 도시 구조, 단말, 장면 품질이 달라 직접 단정할 수는 없습니다. 그래도 영국 사례는, 재질 보정으로 2에서 3 dB대까지 내려갈 여지가 있다는 근거로 쓸 수 있습니다.</aside>
+</section>
+<section id="recipe" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">같은 조건으로 다시 재는 법</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">영국 사례의 방식대로 우리 숫자를 한 번 더 낸다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:12px">
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">1</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">구역 만들기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">10 m × 10 m 구역,<br>표본 20개 이상인 곳만</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">2</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">구역 평균</p><p style="font-size:24px;line-height:1.4;color:#4A5262">실측 · 시뮬 RSRP 평균<br>(dB / 선형 명시)</p></div>
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">3</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">세 숫자 함께</p><p style="font-size:24px;line-height:1.4;color:#4A5262">바이어스 · σ · RMSE<br>+ 이상치 기준 명시</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">4</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">두 기준 모두</p><p style="font-size:24px;line-height:1.4;color:#4A5262">바이어스를 전체 기준 ·<br>셀별 기준으로 각각</p></div>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">z = df[df.n &gt;= 20]                          <span style="color:#8DB8E8"># 표본 20개 이상 구역</span><br>e = z.sim_db - z.meas_db                     <span style="color:#8DB8E8"># 시뮬 − 실측</span><br>bias, sd = e.mean(), e.std(ddof=0)          <span style="color:#8DB8E8"># 바이어스 · de-biased RMSE</span><br>rmse = np.sqrt((e**2).mean())               <span style="color:#8DB8E8"># = √(bias² + sd²)</span><br>sd_cell = (e - e.groupby(z.cell).transform("mean")).std(ddof=0)  <span style="color:#8DB8E8"># 셀별 기준</span></p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">리포트에 함께 적을 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">구역 수 · 구역 크기 · 최소 표본 · 이상치 기준 · 평균 방식<br>바이어스 · σ(전체 / 셀별) · RMSE · 측정 장비</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">Taylor diagram으로 보면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">σ = E′ = ★(실측)까지의 거리<br>영국 사례는 σ_f · R을 보고하지 않아 점으로는 못 찍는다<br>→ 우리 보정 전 · 후를 같은 그림에 찍어 비교</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">코드는 pandas · numpy 예시 (df: 구역별 n · sim_db · meas_db · cell 열) · taylor-diagram 덱 8쪽</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 11</p>
+<aside>(약 55초) 그래서 권하는 것은 영국 사례의 방식대로 우리 숫자를 한 번 더 내는 것입니다. 네 단계입니다. 10 m × 10 m 구역을 만들어 표본 20개 이상인 곳만 남기고, 구역별로 실측과 시뮬레이션 RSRP를 평균하되 dB 평균인지 선형 평균인지 적고, 바이어스, 표준편차, RMSE를 함께 내면서 이상치 기준도 적고, 바이어스는 전체 기준과 셀별 기준으로 각각 빼서 둘 다 계산합니다. 코드로는 다섯 줄 정도입니다. 그리고 리포트에는 이 조건들을 숫자와 함께 꼭 적습니다. Taylor diagram으로 보면 이 σ가 곧 실측 별까지의 거리 E′입니다. 다만 영국 논문은 시뮬레이션의 표준편차와 상관계수를 보고하지 않아 같은 그림에 점으로는 찍을 수 없으니, 우리 보정 전과 후를 같은 그림에 찍어 비교하는 데 쓰면 됩니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">숫자보다 먼저 “어떻게 셌나”를 맞춘다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px"><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">① 단위 · 부호</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">dB · 시뮬 − 실측<br>−5.7 = 평균 5.7 dB 약하게<br>크기는 |바이어스|</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">② de-biased RMSE</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">= 오차의 표준편차<br>RMSE² = 바이어스² + σ²<br>영국: 8.1 → 2.6 dB (RMSE 계산)</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F5F3EE">③ 6.41 dB와 비교</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">같은 6 dB 안팎 수준<br>집계 단위 · 이상치 · 바이어스 단위가<br>σ를 바꾼다</p></div></div>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">다음 단계: [대상 지역] 데이터로 10 m 구역 · 표본 20개 기준의 바이어스 · σ(전체 / 셀별) · RMSE를 다시 내고, 보정 전 · 후를 같은 조건으로 비교한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">함께 볼 자료: taylor-diagram (σ · R · E′) · sim-real-alignment (보정 방법)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">11 / 11</p>
+<aside>(약 40초) 정리하겠습니다. 첫째, −5.7은 dB이고, 시뮬레이션 빼기 실측의 평균이라 시뮬이 평균 5.7 dB 약하게 예측했다는 뜻입니다. 얼마나 틀렸는지는 부호가 아니라 절댓값으로 봅니다. 둘째, 표준편차 5.7 dB는 곧 de-biased RMSE이고, 전체 RMSE는 바이어스와 직각으로 합한 값이라 영국 사례는 약 8.1에서 2.6 dB로 줄었습니다. 셋째, 우리 6.41 dB와는 같은 6 dB 안팎 수준이라고 말할 수 있지만, 집계 단위, 이상치 처리, 바이어스를 빼는 단위가 σ를 크게 바꾸므로, 거의 같다고 하려면 같은 조건으로 다시 계산해야 합니다. 다음 단계로 영국 사례와 같은 10 m 구역, 표본 20개 기준으로 숫자를 다시 내 보시길 권합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>
