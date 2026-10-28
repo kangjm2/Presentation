@@ -13,6 +13,7 @@
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py debiased-rmse`로 뷰어를 다시 만듭니다.
 - 관련 덱:
+  - [`dt-breakdown`](../dt-breakdown/): 비교 결과를 거리 경향 · 진폭 · 패턴으로 나누는 Breakdown 화면
   - [`sim-real-alignment`](../sim-real-alignment/): 3쪽에 영국 사례 수록
   - [`taylor-diagram`](../taylor-diagram/): σ · R · E′
 

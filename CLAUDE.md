@@ -1,6 +1,6 @@
 # Presentation
 
-최대 10분 발표용 시각 자료를 만드는 리포지토리. 발표 자료(덱)마다 폴더 하나 (예: `propagation-models/`, 신입 사원용 입문판 `propagation-models-intro/`, `sionna-channel/`, `ran-architecture/`, `network-digital-twin/`, `ue-kpi/`, 단말 KPI 산출 과정 `ue-kpi-pipeline/`, `traffic-model/`, `ray-tracing/`, `lls-sls/`, `m-plane-yang/`, `sionna-rt-inputs/`, `sionna-rt-antenna/`, `rf-modeling-tools/`, `ss-rsrp/`, `du-ue-flow/`, `sionna-rsrp-beam/`, 안테나 입문 `antenna-basics/`, 시뮬레이션-실측 정합 `sim-real-alignment/`, 상위 계층(L2 · L3) 입문 `upper-layers/`, 단말 다중 안테나 · DM 수집 `ue-antenna/`, 검증 지표 `taylor-diagram/`, 지식 기반 · 자율 개선 루프 `knowledge-loop/`, 지식 축적 · 구조화 `knowledge-structuring/`, 오차 지표 비교 `debiased-rmse/`).
+최대 10분 발표용 시각 자료를 만드는 리포지토리. 발표 자료(덱)마다 폴더 하나 (예: `propagation-models/`, 신입 사원용 입문판 `propagation-models-intro/`, `sionna-channel/`, `ran-architecture/`, `network-digital-twin/`, `ue-kpi/`, 단말 KPI 산출 과정 `ue-kpi-pipeline/`, `traffic-model/`, `ray-tracing/`, `lls-sls/`, `m-plane-yang/`, `sionna-rt-inputs/`, `sionna-rt-antenna/`, `rf-modeling-tools/`, `ss-rsrp/`, `du-ue-flow/`, `sionna-rsrp-beam/`, 안테나 입문 `antenna-basics/`, 시뮬레이션-실측 정합 `sim-real-alignment/`, 상위 계층(L2 · L3) 입문 `upper-layers/`, 단말 다중 안테나 · DM 수집 `ue-antenna/`, 검증 지표 `taylor-diagram/`, 지식 기반 · 자율 개선 루프 `knowledge-loop/`, 지식 축적 · 구조화 `knowledge-structuring/`, 오차 지표 비교 `debiased-rmse/`, 드라이브 테스트 비교 Breakdown 화면 `dt-breakdown/`).
 
 ## Git 기본 룰
 
