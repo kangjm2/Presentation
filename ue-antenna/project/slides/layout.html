@@ -1,0 +1,27 @@
+<section id="layout" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">구성 · 휴대폰 속 안테나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">안테나는 여럿, 송신 체인은 적다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:48px">
+<div style="position:relative;width:560px;height:600px">
+<svg aria-label="휴대폰 테두리의 안테나 배치 예. 위쪽에 ANT2와 ANT3, 아래쪽에 ANT0과 ANT1. 주황 ANT0과 ANT2는 송신도 하는 안테나, 파랑은 수신. 옆면과 위에 mmWave 모듈 세 개" style="position:absolute;left:0px;top:0px;width:560px;height:600px" width="560" height="600" viewBox="0 0 560 600"><rect x="130" y="50" width="300" height="500" rx="45" fill="#FBFAF7" stroke="#14213D" stroke-width="4"/><rect x="146" y="76" width="268" height="448" rx="12" fill="#EAE7DF"/><line x1="160" y1="50" x2="265" y2="50" stroke="#A84A16" stroke-width="10" stroke-linecap="round"/><line x1="295" y1="50" x2="400" y2="50" stroke="#255E9E" stroke-width="10" stroke-linecap="round"/><line x1="160" y1="550" x2="265" y2="550" stroke="#A84A16" stroke-width="10" stroke-linecap="round"/><line x1="295" y1="550" x2="400" y2="550" stroke="#255E9E" stroke-width="10" stroke-linecap="round"/><rect x="122" y="220" width="16" height="80" rx="4" fill="#14213D"/><rect x="422" y="300" width="16" height="80" rx="4" fill="#14213D"/><rect x="422" y="120" width="16" height="80" rx="4" fill="#14213D"/></svg>
+<p style="position:absolute;left:130px;top:4px;width:150px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#A84A16">ANT2</p>
+<p style="position:absolute;left:280px;top:4px;width:150px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#255E9E">ANT3</p>
+<p style="position:absolute;left:130px;top:562px;width:150px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#A84A16">ANT0</p>
+<p style="position:absolute;left:280px;top:562px;width:150px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#255E9E">ANT1</p>
+<p style="position:absolute;left:0px;top:244px;width:112px;font-size:24px;text-align:right;font-weight:600;color:#14213D">mmWave</p>
+<p style="position:absolute;left:448px;top:144px;width:112px;font-size:24px;font-weight:600;color:#14213D">mmWave</p>
+<p style="position:absolute;left:448px;top:324px;width:112px;font-size:24px;font-weight:600;color:#14213D">mmWave</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">안테나가 체인보다 많다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">6 GHz 이하 NR은 보통 수신 4개 · 송신 1~2개<br>→ 어느 안테나로 보내고 받을지 단말이 고른다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">안테나를 나눠 쓴다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">LTE · NR · Wi-Fi · GPS가 금속 테두리와 내부 안테나를 함께 쓴다<br>mmWave는 따로 모듈 2~3개 (모서리 · 옆면)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">환경이 계속 바뀐다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">손 · 머리 · 케이스 · 차량이 안테나 특성을 바꾼다<br>→ 단말이 스스로 전환 · 조정한다</p></div>
+<div style="background:#EAE7DF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">그림 읽기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">주황 = 송신도 하는 안테나 · 파랑 = 수신 · 네이비 = mmWave 모듈<br>배치는 예시이며 단말마다 다르다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.101-1 (단말 RF 요구, 대역별 수신 안테나 수) · TS 38.306 (단말 능력) · 배치는 개념 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 13</p>
+<aside>(약 50초) 휴대폰 속 안테나 배치 예시입니다. 금속 테두리의 위아래가 안테나 역할을 하고, 6 GHz 이하 NR에서는 보통 수신 안테나 4개, 송신 체인 1~2개를 씁니다. 안테나가 체인보다 많으니, 어느 안테나로 보내고 받을지를 단말이 고를 수 있습니다. 이 안테나들은 LTE, NR, Wi-Fi, GPS가 나눠 쓰고, mmWave는 모서리와 옆면에 별도 모듈을 둡니다. 문제는 환경이 계속 바뀐다는 점입니다. 손으로 쥐거나 머리에 대거나, 케이스를 끼우거나 차에 두면 안테나 특성이 달라집니다. 그래서 단말은 상황에 따라 안테나를 바꾸고 조정합니다. 이 그림의 배치는 예시이고 실제 위치와 역할은 단말마다 다릅니다.</aside>
+</section>

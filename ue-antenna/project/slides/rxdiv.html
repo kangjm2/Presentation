@@ -1,0 +1,31 @@
+<section id="rxdiv" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">방법 ① · 수신 다이버시티</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">네 안테나로 받아, 좋은 쪽이 보고 값을 끌어올린다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:860px;height:370px">
+<svg aria-label="수신 안테나 네 개의 RSRP 예시 막대. Rx0 −92, Rx1 −97, Rx2 −101, Rx3 −95 dBm. 최대 브랜치 −92와 선형 평균 −95.1을 점선으로 표시" style="position:absolute;left:0px;top:0px;width:860px;height:370px" width="860" height="370" viewBox="0 0 860 370"><line x1="40" y1="320" x2="800" y2="320" stroke="#5E6675" stroke-width="2"/><rect x="80" y="104.0" width="100" height="216.0" rx="8" fill="#A84A16"/><rect x="230" y="164.0" width="100" height="156.0" rx="8" fill="#255E9E"/><rect x="380" y="212.0" width="100" height="108.0" rx="8" fill="#255E9E"/><rect x="530" y="140.0" width="100" height="180.0" rx="8" fill="#255E9E"/><line x1="40" y1="104.0" x2="800" y2="104.0" stroke="#A84A16" stroke-width="3" stroke-dasharray="10 6"/><line x1="40" y1="141.6" x2="800" y2="141.6" stroke="#14213D" stroke-width="3" stroke-dasharray="4 6"/></svg>
+<p style="position:absolute;left:80px;top:330px;width:100px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#14213D">Rx0</p>
+<p style="position:absolute;left:70px;top:112px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">-92</p>
+<p style="position:absolute;left:230px;top:330px;width:100px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#14213D">Rx1</p>
+<p style="position:absolute;left:220px;top:172px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">-97</p>
+<p style="position:absolute;left:380px;top:330px;width:100px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#14213D">Rx2</p>
+<p style="position:absolute;left:370px;top:220px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">-101</p>
+<p style="position:absolute;left:530px;top:330px;width:100px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#14213D">Rx3</p>
+<p style="position:absolute;left:520px;top:148px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">-95</p>
+<p style="position:absolute;left:640px;top:68px;width:220px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">최대 브랜치 −92</p>
+<p style="position:absolute;left:640px;top:148px;width:220px;font-size:24px;text-align:right;font-weight:700;color:#14213D">선형 평균 -95.1</p>
+<p style="position:absolute;left:0px;top:0px;width:200px;font-size:24px;font-weight:700;color:#5E6675">RSRP (dBm)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">합치기 (MRC · IRC)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">브랜치 신호를 위상을 맞춰 더해 SINR을 높인다<br>IRC는 간섭 방향을 함께 줄인다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">규격이 정한 하한</p><p style="font-size:24px;line-height:1.4;color:#4A5262">TS 38.215: 다이버시티를 쓰면 보고 RSRP는<br>어느 브랜치 값보다도 낮을 수 없다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">4Rx가 기본인 대역</p><p style="font-size:24px;line-height:1.4;color:#4A5262">3.5 GHz(n78) 등 일부 대역은 수신 4개 요구<br>→ 하향 레이어 최대 4</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">숫자</b> 예시에서 단말 보고는 −92 dBm 이상, 브랜치 평균은 -95.1 dBm — 안테나 하나짜리와 비교하면 약 3 dB 차이가 날 수 있다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.215 5.1.1 (SS-RSRP, 수신 다이버시티) · TS 38.101-1 (4Rx 요구 대역) · 브랜치 값은 설명용 예</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 13</p>
+<aside>(약 55초) 첫째 방법은 수신 다이버시티입니다. 네 안테나로 동시에 받아 위상을 맞춰 더하면 SINR이 올라가고, IRC는 간섭이 오는 방향까지 줄입니다. 3.5 GHz 같은 대역은 규격상 수신 안테나 4개가 기본이라 하향 레이어도 4개까지 받을 수 있습니다. KPI에서 중요한 것은 RSRP 보고 규칙입니다. TS 38.215는 다이버시티를 쓰면 보고 RSRP가 어느 개별 브랜치 값보다도 낮으면 안 된다고 정합니다. 예를 들어 네 브랜치가 −92, −97, −101, −95 dBm이면 보고 값은 −92 이상입니다. 그런데 네 값을 선형 평균하면 -95.1 dBm이니, 안테나 하나만 있다고 보고 계산한 값과는 약 3 dB 차이가 날 수 있습니다. 한 안테나가 손에 가려 약해져도 다른 안테나가 받쳐 주는 것도 이 덕분입니다.</aside>
+</section>

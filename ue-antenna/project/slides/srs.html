@@ -1,0 +1,42 @@
+<section id="srs" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">방법 ③ · SRS 안테나 스위칭</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">송신 체인이 적어 SRS를 돌아가며 보낸다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px">
+<div style="position:relative;width:990px;height:320px">
+<svg aria-label="SRS 안테나 스위칭 비교. 1T4R은 SRS 자원 네 번에 ANT0부터 ANT3까지 하나씩, 2T4R은 두 번에 두 개씩, 1T2R은 ANT0과 ANT1만 번갈아 보낸다" style="position:absolute;left:0px;top:0px;width:990px;height:320px" width="990" height="320" viewBox="0 0 990 320"><rect x="190" y="60" width="180" height="64" rx="10" fill="#F7DDCB"/><rect x="390" y="60" width="180" height="64" rx="10" fill="#F7DDCB"/><rect x="590" y="60" width="180" height="64" rx="10" fill="#F7DDCB"/><rect x="790" y="60" width="180" height="64" rx="10" fill="#F7DDCB"/><rect x="190" y="150" width="180" height="64" rx="10" fill="#D5E3F3"/><rect x="390" y="150" width="180" height="64" rx="10" fill="#D5E3F3"/><rect x="590" y="150" width="180" height="64" rx="10" fill="#D5E3F3" opacity="0.55"/><rect x="790" y="150" width="180" height="64" rx="10" fill="#D5E3F3" opacity="0.55"/><rect x="190" y="240" width="180" height="64" rx="10" fill="#EAE7DF"/><rect x="390" y="240" width="180" height="64" rx="10" fill="#EAE7DF"/><rect x="590" y="240" width="180" height="64" rx="10" fill="#EAE7DF"/><rect x="790" y="240" width="180" height="64" rx="10" fill="#EAE7DF"/></svg>
+<p style="position:absolute;left:190px;top:14px;width:180px;font-size:24px;text-align:center;color:#5E6675">SRS 자원 1</p>
+<p style="position:absolute;left:390px;top:14px;width:180px;font-size:24px;text-align:center;color:#5E6675">SRS 자원 2</p>
+<p style="position:absolute;left:590px;top:14px;width:180px;font-size:24px;text-align:center;color:#5E6675">SRS 자원 3</p>
+<p style="position:absolute;left:790px;top:14px;width:180px;font-size:24px;text-align:center;color:#5E6675">SRS 자원 4</p>
+<p style="position:absolute;left:0px;top:76px;width:170px;font-size:24px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#14213D">1T4R</p>
+<p style="position:absolute;left:0px;top:166px;width:170px;font-size:24px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#14213D">2T4R</p>
+<p style="position:absolute;left:0px;top:256px;width:170px;font-size:24px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:700;color:#14213D">1T2R</p>
+<p style="position:absolute;left:190px;top:76px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT0</p>
+<p style="position:absolute;left:390px;top:76px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT1</p>
+<p style="position:absolute;left:590px;top:76px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT2</p>
+<p style="position:absolute;left:790px;top:76px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT3</p>
+<p style="position:absolute;left:190px;top:166px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT0 + ANT1</p>
+<p style="position:absolute;left:390px;top:166px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT2 + ANT3</p>
+<p style="position:absolute;left:590px;top:166px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT0 + ANT1</p>
+<p style="position:absolute;left:790px;top:166px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT2 + ANT3</p>
+<p style="position:absolute;left:190px;top:256px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT0</p>
+<p style="position:absolute;left:390px;top:256px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT1</p>
+<p style="position:absolute;left:590px;top:256px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT0</p>
+<p style="position:absolute;left:790px;top:256px;width:180px;font-size:24px;text-align:center;font-weight:600;color:#14213D">ANT1</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">xTyR</p><p style="font-size:24px;line-height:1.4;color:#4A5262">송신 x개로 수신 안테나 y개의<br>채널을 기지국에 알려 준다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">왜 필요한가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">TDD에서 기지국은 업링크 SRS로<br>하향 채널을 추정한다 (상호성)<br>→ 빔포밍 · 레이어 수 결정</p></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">능력 확인</p><p style="font-size:24px;line-height:1.4;color:#4A5262">UECapabilityInformation의<br>supportedSRS-TxPortSwitch (t1r2 · t1r4 · t2r4 …)<br>Rel-17부터 최대 8안테나</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">속도 차이</p><p style="font-size:24px;line-height:1.4;color:#4A5262">네 안테나를 다 알리는 데<br>1T4R은 SRS 4번, 2T4R은 2번<br>→ 빨리 움직일수록 차이</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">KPI 영향</p><p style="font-size:24px;line-height:1.4;color:#4A5262">일부 안테나만 알리는 단말은 기지국이<br>채널 일부만 안다 → 빔포밍 · 랭크 손해<br>→ 같은 자리 모델별 처리량 차이</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TS 38.214 6.2.1 (SRS, 안테나 스위칭) · TS 38.306 (supportedSRS-TxPortSwitch) · Rel-17 MIMO 개선 (최대 8 Rx)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 13</p>
+<aside>(약 55초) 셋째는 표준에 정해진 SRS 안테나 스위칭입니다. TDD에서는 위아래 채널이 같다는 상호성을 이용해, 기지국이 단말의 업링크 SRS를 듣고 하향 채널을 추정합니다. 이걸로 빔포밍 방향과 레이어 수를 정합니다. 그런데 단말의 송신 체인은 수신 안테나보다 적으니, SRS를 안테나마다 돌아가며 보냅니다. 1T4R은 송신 체인 하나로 네 번에 걸쳐, 2T4R은 두 개씩 두 번에 네 안테나를 다 알립니다. 1T2R처럼 일부 안테나만 알리는 단말은 기지국이 채널의 일부만 알게 되어 빔포밍과 랭크에서 손해를 봅니다. 그래서 같은 자리에서도 단말 모델마다 처리량이 다를 수 있습니다. 어떤 방식을 지원하는지는 단말 능력 메시지의 supportedSRS-TxPortSwitch로 확인할 수 있고, Rel-17부터는 8개 안테나까지 확장되었습니다.</aside>
+</section>
