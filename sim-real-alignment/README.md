@@ -7,7 +7,7 @@ Sionna 같은 채널 시뮬레이터(레이 트레이싱 · 시스템 레벨 시
 - 두 링크 모두 비공개 — 다른 사람에게 보여주려면 페이지의 Share 메뉴에서 공유
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py sim-real-alignment`로 뷰어를 다시 만듭니다.
-- 관련 덱: [`sionna-rsrp-beam`](../sionna-rsrp-beam/) (빔 · 틸트를 Sionna에 넣는 법) · [`ue-kpi-pipeline`](../ue-kpi-pipeline/) (실측 KPI가 만들어지는 과정) · [`rf-modeling-tools`](../rf-modeling-tools/) (모델 보정 도구) · [`network-digital-twin`](../network-digital-twin/) · [`ray-tracing`](../ray-tracing/) · [`ue-antenna`](../ue-antenna/) (단말 다중 안테나와 DM 수집) · [`taylor-diagram`](../taylor-diagram/) (보정 결과를 σ · R · E′로 비교하는 그림)
+- 관련 덱: [`sionna-rsrp-beam`](../sionna-rsrp-beam/) (빔 · 틸트를 Sionna에 넣는 법) · [`ue-kpi-pipeline`](../ue-kpi-pipeline/) (실측 KPI가 만들어지는 과정) · [`rf-modeling-tools`](../rf-modeling-tools/) (모델 보정 도구) · [`network-digital-twin`](../network-digital-twin/) · [`ray-tracing`](../ray-tracing/) · [`ue-antenna`](../ue-antenna/) (단말 다중 안테나와 DM 수집) · [`taylor-diagram`](../taylor-diagram/) (보정 결과를 σ · R · E′로 비교하는 그림) · [`knowledge-loop`](../knowledge-loop/) (지식 기반 · 자율 개선 루프)
 
 ## 구성 (≈ 13분)
 

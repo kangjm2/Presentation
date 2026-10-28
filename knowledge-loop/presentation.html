@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>지식을 쌓고 스스로 고치는 AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="지식 기반을 가운데 두고 여섯 단계가 화살표로 도는 개선 루프 그림" style="position:absolute;left:1000px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><path d="M517.1 250.1 A300 300 0 0 1 652.5 328.3" fill="none" stroke="#F0A36B" stroke-width="5"/><polygon points="652.5,328.3 635.6,322.6 646.9,311.3" fill="#F0A36B"/><path d="M729.6 461.8 A300 300 0 0 1 729.6 618.2" fill="none" stroke="#F0A36B" stroke-width="5"/><polygon points="729.6,618.2 726.1,600.6 741.5,604.8" fill="#F0A36B"/><path d="M652.5 751.7 A300 300 0 0 1 517.1 829.9" fill="none" stroke="#F0A36B" stroke-width="5"/><polygon points="517.1,829.9 530.5,818.1 534.6,833.5" fill="#F0A36B"/><path d="M362.9 829.9 A300 300 0 0 1 227.5 751.7" fill="none" stroke="#F0A36B" stroke-width="5"/><polygon points="227.5,751.7 244.4,757.4 233.1,768.7" fill="#F0A36B"/><path d="M150.4 618.2 A300 300 0 0 1 150.4 461.8" fill="none" stroke="#F0A36B" stroke-width="5"/><polygon points="150.4,461.8 153.9,479.4 138.5,475.2" fill="#F0A36B"/><path d="M227.5 328.3 A300 300 0 0 1 362.9 250.1" fill="none" stroke="#F0A36B" stroke-width="5"/><polygon points="362.9,250.1 349.5,261.9 345.4,246.5" fill="#F0A36B"/><circle cx="440" cy="540" r="110" fill="#2B3C66"/><rect x="365.0" y="205.0" width="150" height="70" rx="14" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/><rect x="624.8" y="355.0" width="150" height="70" rx="14" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/><rect x="624.8" y="655.0" width="150" height="70" rx="14" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/><rect x="365.0" y="805.0" width="150" height="70" rx="14" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/><rect x="105.2" y="655.0" width="150" height="70" rx="14" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/><rect x="105.2" y="355.0" width="150" height="70" rx="14" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">기술 동향 세미나 · AI 플랫폼</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">지식을 쌓고<br>스스로 고치는 AI</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">지식 기반 + LLM 개선 루프: 요소 기술,<br>지식이 로직이 되는 과정, 자율의 조건</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 요즘 업계에서 지식 기반을 쌓고, 그 위에서 LLM이 스스로 점검하고 고치는 루프를 돌려 시스템이 계속 나아지게 하는 플랫폼이 큰 흐름입니다. 오늘은 이런 플랫폼을 만드는 데 필요한 요소 기술, LLM이 지식을 어떻게 로직으로 쌓아 가는지, 그리고 이것이 정말 자율적으로 가능한지를 연구 결과와 함께 정리하겠습니다.</aside>
+</section>
+<section id="trend" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">흐름 · 찾기 → 행동 → 스스로 고치기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">모델은 그대로 두고, 지식과 절차를 키운다</h2>
+</div>
+<div style="position:relative;width:1664px;height:270px">
+<svg aria-label="2020년 RAG부터 2026년 LLM Wiki까지 일곱 개 이정표가 놓인 연표. 2025년 이후는 주황색" style="position:absolute;left:0px;top:0px;width:1664px;height:270px" width="1664" height="270" viewBox="0 0 1664 270"><line x1="40" y1="130" x2="1624" y2="130" stroke="#14213D" stroke-width="4"/><circle cx="130" cy="130" r="14" fill="#255E9E" stroke="#F5F3EE" stroke-width="4"/><circle cx="364" cy="130" r="14" fill="#255E9E" stroke="#F5F3EE" stroke-width="4"/><circle cx="598" cy="130" r="14" fill="#255E9E" stroke="#F5F3EE" stroke-width="4"/><circle cx="832" cy="130" r="14" fill="#255E9E" stroke="#F5F3EE" stroke-width="4"/><circle cx="1066" cy="130" r="14" fill="#A84A16" stroke="#F5F3EE" stroke-width="4"/><circle cx="1300" cy="130" r="14" fill="#A84A16" stroke="#F5F3EE" stroke-width="4"/><circle cx="1534" cy="130" r="14" fill="#A84A16" stroke="#F5F3EE" stroke-width="4"/></svg>
+<p style="position:absolute;left:10px;top:66px;width:240px;font-size:24px;text-align:center;color:#255E9E"><b style="font-family:'JetBrains Mono', 'Courier New', monospace">2020</b></p>
+<p style="position:absolute;left:5px;top:0px;width:250px;font-size:24px;text-align:center;line-height:1.3;color:#14213D"><b>RAG</b> · 찾아서 답하기</p>
+<p style="position:absolute;left:244px;top:156px;width:240px;font-size:24px;text-align:center;color:#255E9E"><b style="font-family:'JetBrains Mono', 'Courier New', monospace">2022</b></p>
+<p style="position:absolute;left:239px;top:190px;width:250px;font-size:24px;text-align:center;line-height:1.3;color:#14213D"><b>ReAct</b><br>생각 + 도구 사용</p>
+<p style="position:absolute;left:478px;top:66px;width:240px;font-size:24px;text-align:center;color:#255E9E"><b style="font-family:'JetBrains Mono', 'Courier New', monospace">2023</b></p>
+<p style="position:absolute;left:473px;top:0px;width:250px;font-size:24px;text-align:center;line-height:1.3;color:#14213D"><b>Reflexion · Voyager</b> · 반성 · 스킬 저장</p>
+<p style="position:absolute;left:712px;top:156px;width:240px;font-size:24px;text-align:center;color:#255E9E"><b style="font-family:'JetBrains Mono', 'Courier New', monospace">2024</b></p>
+<p style="position:absolute;left:707px;top:190px;width:250px;font-size:24px;text-align:center;line-height:1.3;color:#14213D"><b>GraphRAG · MCP</b><br>지식 그래프 · 도구 표준</p>
+<p style="position:absolute;left:946px;top:66px;width:240px;font-size:24px;text-align:center;color:#A84A16"><b style="font-family:'JetBrains Mono', 'Courier New', monospace">2025.05</b></p>
+<p style="position:absolute;left:941px;top:0px;width:250px;font-size:24px;text-align:center;line-height:1.3;color:#14213D"><b>AlphaEvolve · DGM</b> · 자동 평가로 진화</p>
+<p style="position:absolute;left:1180px;top:156px;width:240px;font-size:24px;text-align:center;color:#A84A16"><b style="font-family:'JetBrains Mono', 'Courier New', monospace">2025.10</b></p>
+<p style="position:absolute;left:1175px;top:190px;width:250px;font-size:24px;text-align:center;line-height:1.3;color:#14213D"><b>ACE · Agent Skills</b><br>플레이북 · 스킬 표준</p>
+<p style="position:absolute;left:1414px;top:66px;width:240px;font-size:24px;text-align:center;color:#A84A16"><b style="font-family:'JetBrains Mono', 'Courier New', monospace">2026.04</b></p>
+<p style="position:absolute;left:1409px;top:0px;width:250px;font-size:24px;text-align:center;line-height:1.3;color:#14213D"><b>LLM Wiki</b> · 위키 정리</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">왜 지식 · 루프인가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모델 가중치를 다시 학습시키지 않고도<br>지식 · 플레이북 · 스킬을 바꾸면 행동이 바뀐다<br>→ 빠르고, 싸고, 되돌릴 수 있다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">무엇이 엔진인가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">자동으로 확인할 수 있는 피드백<br>(테스트 · 시뮬레이터 · KPI)<br>→ 그런 곳에서 먼저 자율화가 됐다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">통신 업계에서는</p><p style="font-size:24px;line-height:1.4;color:#4A5262">TM Forum 자율 망 레벨 4 목표<br>대부분 레벨 2~3, 81%가 2030년 L4 목표<br>(운영사 80곳 조사)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">연표 출처는 README 참조 · TM Forum 2026 운영사 조사 (80곳)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 16</p>
+<aside>(약 55초) 흐름부터 보겠습니다. 2020년 RAG는 필요한 문서를 찾아서 답하는 방식이었습니다. 2022년 ReAct부터 LLM이 생각하고 도구를 쓰는 에이전트가 되었고, 2023년 Reflexion과 Voyager는 실패에서 반성하거나 성공한 행동을 스킬로 저장해 다음에 쓰기 시작했습니다. 2024년에는 지식 그래프 기반 GraphRAG와 도구 연결 표준 MCP가 나왔고, 2025년에는 AlphaEvolve와 다윈 괴델 머신처럼 자동 평가를 이용해 코드와 에이전트 자체를 진화시키는 연구가, 하반기에는 플레이북을 스스로 다듬는 ACE와 스킬 표준이 나왔습니다. 올해는 LLM이 위키를 직접 정리하는 방식이 화제가 되었습니다. 공통점은 모델 가중치는 그대로 두고 지식과 절차를 키운다는 것, 그리고 자동으로 확인 가능한 피드백이 있는 곳부터 자율화되었다는 것입니다. 통신 업계에서도 자율 망 레벨 4가 공통 목표입니다.</aside>
+</section>
+<section id="arch" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">전체 구조 · 한 바퀴</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">관측 → 검색 → 실행 → 평가 → 성찰 → 갱신</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="position:relative;width:660px;height:620px">
+<svg aria-label="지식 기반을 가운데 두고 관측, 지식 검색, 실행, 평가, 성찰, 지식 갱신 여섯 단계가 시계 방향으로 도는 루프" style="position:absolute;left:0px;top:0px;width:660px;height:620px" width="660" height="620" viewBox="0 0 660 620"><path d="M389.1 87.7 A230 230 0 0 1 492.9 147.7" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="492.9,147.7 476.0,142.0 487.3,130.7" fill="#A84A16"/><path d="M552.1 250.1 A230 230 0 0 1 552.1 369.9" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="552.1,369.9 548.5,352.4 563.9,356.6" fill="#A84A16"/><path d="M492.9 472.3 A230 230 0 0 1 389.1 532.3" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="389.1,532.3 402.5,520.4 406.6,535.9" fill="#A84A16"/><path d="M270.9 532.3 A230 230 0 0 1 167.1 472.3" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="167.1,472.3 184.0,478.0 172.7,489.3" fill="#A84A16"/><path d="M107.9 369.9 A230 230 0 0 1 107.9 250.1" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="107.9,250.1 111.5,267.6 96.1,263.4" fill="#A84A16"/><path d="M167.1 147.7 A230 230 0 0 1 270.9 87.7" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="270.9,87.7 257.5,99.6 253.4,84.1" fill="#A84A16"/><circle cx="330" cy="310" r="92" fill="#14213D"/><rect x="230.0" y="38.0" width="200" height="84" rx="14" fill="#FBFAF7"/><rect x="429.2" y="153.0" width="200" height="84" rx="14" fill="#D5E3F3"/><rect x="429.2" y="383.0" width="200" height="84" rx="14" fill="#FBFAF7"/><rect x="230.0" y="498.0" width="200" height="84" rx="14" fill="#F7DDCB"/><rect x="30.8" y="383.0" width="200" height="84" rx="14" fill="#F7DDCB"/><rect x="30.8" y="153.0" width="200" height="84" rx="14" fill="#D5E3F3"/></svg>
+<p style="position:absolute;left:230px;top:48px;width:200px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">① 관측<br>이벤트 · 데이터</p>
+<p style="position:absolute;left:429px;top:179px;width:200px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">② 지식 검색</p>
+<p style="position:absolute;left:429px;top:393px;width:200px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">③ 실행<br>도구 · 코드</p>
+<p style="position:absolute;left:230px;top:508px;width:200px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">④ 평가<br>지표 · 테스트</p>
+<p style="position:absolute;left:31px;top:393px;width:200px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">⑤ 성찰<br>무엇을 배웠나</p>
+<p style="position:absolute;left:31px;top:163px;width:200px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">⑥ 지식 갱신<br>정리 · 승인</p>
+<p style="position:absolute;left:238px;top:276px;width:184px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#F5F3EE">지식 기반<br>(KB)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">지식 층</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">무엇을 아는가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">문서 · 데이터 · 그래프 · 위키 · 스킬 — 출처와 버전이 붙은 지식</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">실행 층</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">무엇을 할 수 있나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">LLM 에이전트 + 도구 · API · 코드 실행 · 워크플로</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">평가 층</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">잘 됐는지 어떻게 아나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">테스트 · 시뮬레이터 · KPI · 골든셋 · LLM 심사 · 사람</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">학습 층</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">무엇을 남기나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">교훈 추출 → 지식 · 플레이북 · 스킬 갱신</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">통제 층</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">누가 책임지나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">권한 · 승인 · 버전 관리 · 감사 로그 · 롤백</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">여러 연구 · 제품의 공통 구조를 정리한 개념도 (Reflexion · Voyager · ACE · AlphaEvolve 등)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 16</p>
+<aside>(약 55초) 전체 구조는 한 바퀴의 루프입니다. 일이 생기면 관측하고, 지식 기반에서 관련 지식을 찾아, 도구나 코드로 실행합니다. 그 결과를 지표나 테스트로 평가하고, 무엇을 배웠는지 성찰해서, 정리된 교훈을 지식 기반에 다시 넣습니다. 다음 바퀴는 조금 더 나은 지식으로 시작합니다. 이를 받치는 층이 다섯 개 있습니다. 무엇을 아는가의 지식 층, 무엇을 할 수 있나의 실행 층, 잘 됐는지 어떻게 아나의 평가 층, 무엇을 남기나의 학습 층, 그리고 누가 책임지나의 통제 층입니다. 앞의 네 층이 루프를 돌리고, 통제 층이 루프가 엉뚱한 방향으로 가지 않게 합니다. 오늘 이야기는 이 다섯 층을 차례로 보는 것입니다.</aside>
+</section>
+<section id="kb" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">요소 기술 ① · 지식을 담는 그릇</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">지식의 모양에 맞는 그릇이 따로 있다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">형태</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">담는 것</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">잘하는 것</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">약점</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">원문 저장소</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">규격 · 보고서 · 매뉴얼 원본</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">근거 확인 · 인용</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">그대로는 찾기 어렵다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">벡터 검색 (RAG)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">문서 조각 + 의미 벡터</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">비슷한 내용 찾기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">전체 요약 · 관계 질문에 약함</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">지식 그래프</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">개체 · 관계 (셀 – 사이트 – 파라미터)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">연결 · 영향 범위 · 전체 요약</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">구축 · 유지 비용</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">구조화 DB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">KPI · 설정(CM) · 이력 표</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">정확한 숫자 · 집계 (SQL)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">설명 · 맥락이 없다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">LLM 위키</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">LLM이 정리한 문서 · 링크 · 요약</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">사람도 읽는다 · 갱신 쉬움</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">정리 품질 · 검증 필요</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">스킬 · 코드</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">검증된 절차 · 스크립트</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">같은 일을 똑같이 반복</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">범위 밖 상황</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">실무는 섞어 쓴다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">숫자는 DB, 관계는 그래프, 설명은 위키 · RAG<br>근거는 원문, 방법은 스킬</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">모든 지식에 붙일 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">출처 · 날짜 · 버전 · 적용 범위 · 신뢰도<br>→ 나중에 고치고 지울 수 있게</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Lewis et al. 2020 (RAG) · Edge et al. 2024 (GraphRAG) · Karpathy 2026 (LLM Wiki)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 16</p>
+<aside>(약 55초) 지식을 담는 그릇은 지식의 모양에 따라 다릅니다. 원문은 근거로 꼭 남겨야 하지만 그대로는 찾기 어렵고, 벡터 검색 RAG는 비슷한 내용을 잘 찾지만 “전체적으로 어떤가” 같은 질문에는 약합니다. 지식 그래프는 셀과 사이트, 파라미터처럼 개체 사이의 관계를 담아 영향 범위를 따지거나 전체를 요약하는 데 강하고, Microsoft의 GraphRAG가 대표적입니다. KPI나 설정 같은 숫자는 데이터베이스가 정확합니다. 최근에는 LLM이 원자료를 읽고 위키 문서로 직접 정리하는 방식이 주목받았는데, 사람도 읽을 수 있고 고치기 쉽다는 장점이 있습니다. 검증된 절차는 스킬이나 코드로 담습니다. 실무에서는 이들을 섞어 쓰고, 어떤 그릇이든 출처, 날짜, 버전, 적용 범위를 붙여야 나중에 고치고 지울 수 있습니다.</aside>
+</section>
+<section id="context" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">요소 기술 ② · 컨텍스트 엔지니어링</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">많이 넣을수록 좋은 게 아니다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:140px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">지식<br>가져오기</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">질문</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">질의 다시 쓰기<br>(용어 · 동의어)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">하이브리드 검색<br>(키워드 + 의미)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">다시 순위 매기기</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">압축 · 요약</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">컨텍스트에<br>필요한 것만</p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">컨텍스트 부패</p><p style="font-size:24px;line-height:1.4;color:#4A5262">입력이 길어질수록 정확도가 떨어진다<br>모델 18종 시험 (Chroma, 2025)<br>→ 관련 없는 지식은 해가 된다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">점진적 공개</p><p style="font-size:24px;line-height:1.4;color:#4A5262">처음엔 설명 한 줄만 → 필요하면 본문<br>→ 더 필요하면 파일 (Agent Skills)<br>스킬 수백 개도 가볍게</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">기억 계층</p><p style="font-size:24px;line-height:1.4;color:#4A5262">컨텍스트 = 작업대, 외부 저장소 = 창고<br>필요할 때 꺼내고 넣는다 (MemGPT · Letta)</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">조각과 꼬리표</p><p style="font-size:24px;line-height:1.4;color:#4A5262">문서를 의미 단위로 자르고<br>출처 · 날짜 · 장비 · 지역 꼬리표로 거른다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 같은 모델이라도 무엇을 · 언제 · 얼마나 넣느냐에 따라 결과가 크게 달라진다 — 이 설계를 “컨텍스트 엔지니어링”이라 부른다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Chroma “Context Rot” (2025) · Anthropic Agent Skills (2025, 2025.12 오픈 표준) · Packer et al. 2023 (MemGPT)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 16</p>
+<aside>(약 50초) 지식을 쌓기만 하면 끝이 아닙니다. 필요한 것을 필요한 때에 넣어야 합니다. 질문을 받으면 용어를 정리해 질의를 다시 쓰고, 키워드와 의미 검색을 함께 써서 후보를 찾고, 다시 순위를 매겨 압축한 뒤 필요한 것만 컨텍스트에 넣습니다. 이게 중요한 이유는 컨텍스트 부패입니다. Chroma가 모델 18종을 시험했더니 입력이 길어질수록 간단한 과제에서도 정확도가 떨어졌습니다. 관련 없는 지식은 오히려 해가 됩니다. 그래서 스킬은 처음에 설명 한 줄만 보여 주고, 필요할 때 본문과 파일을 여는 점진적 공개 방식을 씁니다. 컨텍스트를 작업대, 외부 저장소를 창고로 보고 필요할 때 꺼내 쓰는 기억 계층 설계도 있습니다. 이 모든 설계를 컨텍스트 엔지니어링이라고 부릅니다.</aside>
+</section>
+<section id="act" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">요소 기술 ③ · 행동</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">행동해야 결과를 보고, 결과를 봐야 배운다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#F7DDCB;border-radius:14px;padding:12px 16px"><p style="width:130px;font-size:26px;font-weight:700;line-height:1.3;color:#A84A16">ReAct<br>루프</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">생각<br>(무엇을 할까)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">도구 호출<br>(API · 검색 · 코드)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">결과 관찰</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">다시 생각</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">… 반복</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">답 · 조치</p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">도구 호출</p><p style="font-size:24px;line-height:1.4;color:#4A5262">함수 이름 · 인자 형식을 알려 주면<br>LLM이 골라서 부른다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">MCP</p><p style="font-size:24px;line-height:1.4;color:#4A5262">도구 · 데이터를 연결하는 공개 표준<br>(2024.11) — 한 번 만들면 여러 에이전트가 쓴다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">코드 실행</p><p style="font-size:24px;line-height:1.4;color:#4A5262">격리된 환경(샌드박스)에서<br>분석 · 계산 · 그림을 직접 만든다</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">워크플로 vs 에이전트</p><p style="font-size:24px;line-height:1.4;color:#4A5262">정해진 순서대로 (예측 가능)<br>vs 스스로 계획 (유연) — 섞어 쓴다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">여러 에이전트</p><p style="font-size:24px;line-height:1.4;color:#4A5262">실행 · 검토 · 정리 역할을 나눈다<br>다른 눈이 실수를 잡는다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">권한</p><p style="font-size:24px;line-height:1.4;color:#4A5262">읽기 · 제안 · 실행 권한을 나눈다<br>망 설정 변경은 가장 좁게</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Yao et al. 2022 (ReAct) · Anthropic Model Context Protocol (2024.11) · Anthropic “Building effective agents” (2024)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 16</p>
+<aside>(약 50초) 다음은 행동입니다. 루프에서 배우려면 먼저 행동하고 그 결과를 봐야 합니다. 기본 형태는 ReAct 루프로, 무엇을 할지 생각하고, 도구를 부르고, 결과를 보고, 다시 생각하기를 반복합니다. 도구 호출은 함수 이름과 인자 형식을 알려 주면 LLM이 골라 부르는 방식이고, MCP는 이런 도구와 데이터 연결을 표준화해서 한 번 만든 연결을 여러 에이전트가 쓸 수 있게 합니다. 격리된 환경에서 코드를 직접 돌려 분석이나 계산을 하기도 합니다. 정해진 순서로 도는 워크플로는 예측 가능하고, 스스로 계획하는 에이전트는 유연해서 보통 섞어 씁니다. 실행과 검토를 다른 에이전트가 맡으면 실수를 더 잘 잡습니다. 그리고 권한은 나눠야 합니다. 특히 망 설정 변경 같은 쓰기 권한은 가장 좁게 줍니다.</aside>
+</section>
+<section id="eval" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">요소 기술 ④ · 평가와 관측</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">루프의 품질 = 피드백의 품질</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">피드백 원천</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">예</p><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">믿을 만한가</p><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">빠른가</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">실행 결과 검증</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">테스트 통과 · 컴파일 · 시뮬레이터 결과</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">높음</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">빠름</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">지표</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">KPI · 카운터 · 비용 · 처리 시간</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">높음~중 (잡음 · 지연)</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">중간</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">골든셋 회귀 평가</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">정답이 있는 질문 · 사례 묶음</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">높음</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">중간</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">LLM 심사</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">다른 LLM이 기준표로 채점</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">중 (편향 · 관대함)</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">빠름</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">사람 검토</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">전문가 승인 · 수정</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">높음</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">느림 · 비쌈</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">사용자 반응</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">채택 · 수정 · 재질문</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">중</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">느림</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">정답 없이 돌리면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">ACE를 정답 신호 없이 금융 과제(FiNER)에 돌리자<br>70.7% → 67.3%로 오히려 떨어졌다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">관측 (observability)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모든 실행을 추적(trace) · 로그로 남긴다<br>→ 무엇이 왜 실패했는지 성찰의 재료</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Zhang et al. 2025 “Agentic Context Engineering” (arXiv 2510.04618, ICLR 2026) · LLM 심사의 편향은 여러 연구에서 보고</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 16</p>
+<aside>(약 55초) 루프의 엔진은 피드백입니다. 루프가 얼마나 좋아질 수 있는지는 피드백이 얼마나 믿을 만하고 빠른지로 정해집니다. 테스트나 시뮬레이터처럼 실행 결과를 자동으로 확인할 수 있으면 가장 좋습니다. KPI 같은 지표도 믿을 만하지만 잡음과 지연이 있습니다. 정답이 있는 골든셋으로 바꿀 때마다 회귀 평가를 하는 것도 중요합니다. 다른 LLM이 채점하는 방식은 빠르지만 편향이 있고, 사람 검토는 정확하지만 느리고 비쌉니다. 피드백이 나쁘면 루프는 오히려 나빠집니다. ACE 논문에서 정답 신호 없이 금융 과제에 돌렸더니 정확도가 70.7에서 67.3퍼센트로 떨어졌습니다. 그리고 모든 실행을 추적과 로그로 남겨야 무엇이 왜 실패했는지 성찰할 재료가 생깁니다.</aside>
+</section>
+<section id="memory" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">지식이 쌓이는 모양 · 기억 네 가지</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">사례가 쌓여 규칙이 되고, 규칙이 스킬이 된다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px"><div style="flex:1;background:#FBFAF7;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#14213D">작업 기억 <span style="color:#5E6675">· 지금</span></p><p style="font-size:24px;line-height:1.4;color:#4A5262">지금 하는 일의 맥락 · 중간 결과</p><p style="font-size:24px;line-height:1.4;color:#255E9E"><b>구현</b> 컨텍스트 창 · 메모장 파일</p></div><div style="flex:1;background:#D5E3F3;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#14213D">일화 기억 <span style="color:#5E6675">· 무슨 일이 있었나</span></p><p style="font-size:24px;line-height:1.4;color:#4A5262">과거 사례 · 실행 기록 · 장애 이력 · 실패와 원인</p><p style="font-size:24px;line-height:1.4;color:#255E9E"><b>구현</b> 실행 로그 · 사례 DB · 검색</p></div></div>
+<div style="display:flex;flex-direction:row;gap:14px"><div style="flex:1;background:#F7DDCB;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#14213D">의미 기억 <span style="color:#5E6675">· 무엇이 사실인가</span></p><p style="font-size:24px;line-height:1.4;color:#4A5262">규격 · 정의 · 규칙 · “이럴 땐 이렇다”는 교훈</p><p style="font-size:24px;line-height:1.4;color:#255E9E"><b>구현</b> 위키 · 지식 그래프 · 플레이북</p></div><div style="flex:1;background:#D5E3F3;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#14213D">절차 기억 <span style="color:#5E6675">· 어떻게 하나</span></p><p style="font-size:24px;line-height:1.4;color:#4A5262">검증된 작업 순서 · 스크립트 · 도구 조합</p><p style="font-size:24px;line-height:1.4;color:#255E9E"><b>구현</b> 스킬 (SKILL.md) · 코드 · 워크플로</p></div></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#F7DDCB;border-radius:14px;padding:12px 16px"><p style="width:110px;font-size:26px;font-weight:700;line-height:1.3;color:#A84A16">쌓이는<br>방향</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">사례 하나<br>(일화)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">비슷한 사례 반복</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">공통점 요약<br>→ 교훈 · 규칙 (의미)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">반복 성공한 절차<br>→ 스킬 · 코드 (절차)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">다음 작업에서<br>검색해 재사용</p></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">인지 과학의 기억 분류를 에이전트 기억 설계에 빌려 쓰는 방식 (CoALA, Sumers et al. 2023 등)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 16</p>
+<aside>(약 50초) 지식이 쌓이는 모양을 사람의 기억에 빗대면 이해가 쉽습니다. 작업 기억은 지금 하는 일의 맥락으로, 컨텍스트 창입니다. 일화 기억은 무슨 일이 있었는지, 즉 과거 사례와 실행 기록입니다. 의미 기억은 무엇이 사실인지, 규격과 정의, 그리고 이럴 땐 이렇다는 교훈입니다. 절차 기억은 어떻게 하는지, 검증된 작업 순서와 스크립트입니다. 지식은 이 방향으로 쌓입니다. 사례 하나가 생기고, 비슷한 사례가 반복되면 공통점을 요약해 교훈이나 규칙이 되고, 반복해서 성공한 절차는 스킬이나 코드로 굳어집니다. 그리고 다음 작업에서 검색되어 다시 쓰입니다. LLM이 로직을 쌓는다는 것은 결국 이 승격 과정을 자동으로 돌리는 것입니다.</aside>
+</section>
+<section id="learn1" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">쌓는 법 ① · 컨텍스트를 진화시키기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">실행 → 반성 → 교훈을 항목으로 쌓는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="position:relative;width:600px;height:600px">
+<svg aria-label="ACE 구조. 플레이북을 가운데 두고 Generator가 과제를 수행하고, Reflector가 성공과 실패를 분석하고, Curator가 항목을 추가하거나 수정하는 세 단계가 도는 그림" style="position:absolute;left:0px;top:0px;width:600px;height:600px" width="600" height="600" viewBox="0 0 600 600"><path d="M351.4 106.7 A200 200 0 0 1 493.1 352.1" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="493.1,352.1 489.5,334.6 505.0,338.7" fill="#A84A16"/><path d="M441.7 441.2 A200 200 0 0 1 158.3 441.2" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="158.3,441.2 175.3,446.9 164.0,458.1" fill="#A84A16"/><path d="M106.9 352.1 A200 200 0 0 1 248.6 106.7" fill="none" stroke="#A84A16" stroke-width="5"/><polygon points="248.6,106.7 235.2,118.6 231.1,103.1" fill="#A84A16"/><circle cx="300" cy="300" r="96" fill="#14213D"/><rect x="185.0" y="58.0" width="230" height="84" rx="14" fill="#FBFAF7"/><rect x="358.2" y="358.0" width="230" height="84" rx="14" fill="#F7DDCB"/><rect x="11.8" y="358.0" width="230" height="84" rx="14" fill="#D5E3F3"/></svg>
+<p style="position:absolute;left:185px;top:68px;width:230px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">Generator<br>과제 수행</p>
+<p style="position:absolute;left:358px;top:368px;width:230px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">Reflector<br>성공 · 실패 분석</p>
+<p style="position:absolute;left:12px;top:368px;width:230px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">Curator<br>항목 추가 · 수정</p>
+<p style="position:absolute;left:204px;top:266px;width:192px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#F5F3EE">플레이북<br>(교훈 목록)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">Reflexion (2023)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">실패하면 “왜 틀렸나”를 글로 적어 다음 시도에 붙인다<br>가중치 학습 없이 코딩 정확도 향상 (HumanEval 91%)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">ACE (2025)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">교훈을 ID · 도움/해로움 횟수가 붙은 항목으로 관리<br>통째로 다시 쓰지 않고 조금씩 추가 · 수정<br>에이전트 과제 +10.6% · 금융 과제 +8.6%</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">붕괴 경고</p><p style="font-size:24px;line-height:1.4;color:#4A5262">플레이북을 매번 통째로 요약해 다시 쓰자<br>18,282 → 122 토큰, 정확도 66.7 → 57.1% (AppWorld)</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">LLM 위키 (2026)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">원자료를 LLM이 위키로 “컴파일” · 답을 다시 위키에 저장<br>주기적으로 모순 · 빈칸을 점검(lint)</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Shinn et al. 2023 (Reflexion, 저자 보고) · Zhang et al. 2025 (ACE, arXiv 2510.04618) · Karpathy 2026 “LLM Wiki” gist</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 16</p>
+<aside>(약 60초) LLM이 지식을 쌓는 첫째 방법은 컨텍스트, 즉 지식과 지침 자체를 진화시키는 것입니다. 2023년 Reflexion은 실패하면 왜 틀렸는지를 글로 적어 다음 시도에 붙였고, 가중치를 학습하지 않고도 코딩 정확도를 크게 올렸습니다. 2025년 ACE는 이를 체계화했습니다. 과제를 수행하는 Generator, 성공과 실패를 분석해 교훈을 뽑는 Reflector, 그 교훈을 플레이북에 항목으로 추가하거나 고치는 Curator가 돕니다. 항목마다 ID와 도움이 됐는지 해가 됐는지의 횟수를 붙여 관리합니다. 에이전트 과제에서 10.6퍼센트, 금융 과제에서 8.6퍼센트 향상됐습니다. 핵심 교훈은 통째로 다시 쓰지 말라는 것입니다. 플레이북을 매번 요약해 다시 쓰자 1만 8천 토큰이 122 토큰으로 쪼그라들고 정확도가 떨어졌습니다. 올해 화제가 된 LLM 위키도 같은 계열로, 원자료를 위키로 정리하고 답을 다시 저장하며 주기적으로 점검합니다.</aside>
+</section>
+<section id="learn2" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">쌓는 법 ② · 절차를 스킬 · 코드로 굳히기</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">성공한 절차는 코드가 되어 다시 쓰인다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:130px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">스킬이<br>생기는 길</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">새 과제</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">시도 · 실패 · 수정</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">환경이 성공 확인<br>(실행 · 테스트)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">설명 + 코드로 저장</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">다음엔 검색해<br>그대로 재사용</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">작은 스킬을 조합해<br>큰 스킬로</p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">Voyager (2023)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">마인크래프트에서 스스로 과제를 정하고<br>성공한 행동을 코드 스킬로 저장<br>고유 아이템 3.3배 · 기술 단계 최대 15.3배 빨리<br>새 세계에서도 스킬 재사용</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">Agent Skills (2025)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SKILL.md(이름 · 설명 · 지침) + 스크립트 · 참고 파일<br>설명만 먼저 보고 필요할 때 연다<br>2025.12 오픈 표준 — 여러 에이전트 도구가 지원</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">승격 기준 (예)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 절차가 여러 번 성공<br>+ 테스트 · 회귀 평가 통과<br>+ 사람 검토 (위험한 작업)<br>→ 스킬로 등록 · 버전 관리</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">차이</b> 플레이북(의미 기억)은 “무엇을 조심할지”, 스킬(절차 기억)은 “정확히 어떻게 할지” — 둘 다 모델 밖에 있어 읽고 · 고치고 · 되돌릴 수 있다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Wang et al. 2023 (Voyager, arXiv 2305.16291, 저자 보고) · Anthropic Agent Skills · agentskills.io</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 16</p>
+<aside>(약 55초) 둘째 방법은 성공한 절차를 스킬이나 코드로 굳히는 것입니다. 새 과제를 시도하고 실패하며 고치다가 환경이 성공을 확인해 주면, 그 절차를 설명과 코드로 저장합니다. 다음에는 검색해서 그대로 쓰고, 작은 스킬을 조합해 더 큰 스킬을 만듭니다. 2023년 Voyager가 대표적입니다. 마인크래프트에서 스스로 과제를 정하고 성공한 행동을 코드 스킬로 쌓아, 기존 방법보다 고유 아이템을 3.3배 많이 모았고 새 세계에서도 스킬을 재사용했습니다. 실무에서는 Agent Skills처럼 지침과 스크립트를 폴더로 묶어 두고 필요할 때 여는 형식이 표준이 되고 있습니다. 스킬로 승격하는 기준을 정해 두는 것이 중요합니다. 여러 번 성공하고, 테스트를 통과하고, 위험한 작업이면 사람이 검토한 뒤 등록합니다. 플레이북과 스킬 모두 모델 밖에 있어 읽고 고치고 되돌릴 수 있다는 점이 큰 장점입니다.</aside>
+</section>
+<section id="learn3" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">쌓는 법 ③ · 탐색 · 진화, 그리고 비교</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">자동 평가기가 있으면 코드 자체를 진화시킨다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">AlphaEvolve (2025)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">LLM이 코드를 변형 → 자동 평가기가 채점 → 좋은 것 보존 · 반복<br>4×4 복소 행렬 곱셈 48번 (기존 49번)<br>구글 클러스터 스케줄러: 전 세계 연산 자원 0.7% 회수</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">다윈 괴델 머신 (2025)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">에이전트가 자기 코드를 고치고, 모든 버전을 보관소에 두고 가지를 친다<br>SWE-bench 20.0 → 50.0% · Polyglot 14.2 → 30.7%<br>샌드박스 · 사람 감독 아래 실험</p></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">방법</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무엇이 바뀌나</p><p style="width:170px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">속도</p><p style="width:170px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">되돌리기</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">꼭 필요한 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">① 컨텍스트 진화</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">지식 · 플레이북 · 지침</p><p style="width:170px;font-size:24px;line-height:1.35;color:#4A5262">분~시간</p><p style="width:170px;font-size:24px;line-height:1.35;color:#4A5262">쉬움</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">믿을 만한 피드백</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">② 스킬 · 코드</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">검증된 절차</p><p style="width:170px;font-size:24px;line-height:1.35;color:#4A5262">시간~일</p><p style="width:170px;font-size:24px;line-height:1.35;color:#4A5262">쉬움 (버전)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">실행 · 테스트 환경</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③ 탐색 · 진화</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">알고리즘 · 에이전트 코드</p><p style="width:170px;font-size:24px;line-height:1.35;color:#4A5262">일</p><p style="width:170px;font-size:24px;line-height:1.35;color:#4A5262">보통</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">자동 평가기 · 연산 예산</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">④ 가중치 학습</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">모델 자체 (미세조정 · 강화학습)</p><p style="width:170px;font-size:24px;line-height:1.35;color:#4A5262">주</p><p style="width:170px;font-size:24px;line-height:1.35;color:#4A5262">어려움</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">데이터 · GPU · 평가 체계</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">순서</b> 실무 순서는 ① → ② → ③, ④는 마지막 — 위로 갈수록 빠르고 투명하고 되돌리기 쉽다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Novikov et al. 2025 (AlphaEvolve) · Zhang et al. 2025 (DGM, arXiv 2505.22954) — 저자 보고 수치</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 16</p>
+<aside>(약 60초) 셋째 방법은 탐색과 진화입니다. 자동으로 점수를 매기는 평가기가 있으면, LLM이 코드를 여러 방향으로 변형하고 좋은 것만 남기는 진화를 돌릴 수 있습니다. 구글 딥마인드의 AlphaEvolve는 이렇게 4×4 복소 행렬 곱셈을 56년 만에 49번에서 48번으로 줄였고, 구글 클러스터 스케줄러에 적용해 전 세계 연산 자원의 0.7퍼센트를 회수했습니다. 다윈 괴델 머신은 한 걸음 더 나가 에이전트가 자기 코드를 고치고, 모든 버전을 보관해 가지를 치게 했더니 코딩 벤치마크 점수가 20에서 50퍼센트로 올랐습니다. 마지막 넷째는 모델 가중치 자체를 학습시키는 방법입니다. 표처럼 위의 방법일수록 빠르고, 무엇이 바뀌었는지 보이고, 되돌리기 쉽습니다. 그래서 실무에서는 컨텍스트, 스킬, 탐색 순으로 쓰고, 가중치 학습은 마지막 수단으로 둡니다.</aside>
+</section>
+<section id="autonomy" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">자율적으로 가능한가</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“스스로”는 되지만 “혼자서”는 아직이다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="flex:1.15;display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">피드백 조건</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">예</p><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">자율 수준</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">자동 · 정확 · 빠름</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">코드 테스트 · 시뮬레이터 · 명확한 수치 목표</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">높음</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">자동이지만 잡음 · 지연</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">망 KPI · 사용자 반응 · 장기 품질</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">부분 (범위 제한)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">판단 · 가치 · 책임</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">설계 방향 · 정책 · 안전 · 비용 결정</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">낮음 (사람)</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px;background:#EAE7DF;border-radius:10px;padding:6px 14px"><p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#14213D">L0</p><p style="width:170px;font-size:24px;font-weight:700;color:#14213D">수동</p><p style="flex:1;font-size:24px;color:#4A5262">사람이 다 한다</p></div><div style="display:flex;flex-direction:row;align-items:center;gap:12px;background:#EAE7DF;border-radius:10px;padding:6px 14px"><p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#14213D">L1</p><p style="width:170px;font-size:24px;font-weight:700;color:#14213D">제안</p><p style="flex:1;font-size:24px;color:#4A5262">AI가 교훈 · 조치를 제안만</p></div><div style="display:flex;flex-direction:row;align-items:center;gap:12px;background:#D5E3F3;border-radius:10px;padding:6px 14px"><p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#14213D">L2</p><p style="width:170px;font-size:24px;font-weight:700;color:#14213D">승인 후 반영</p><p style="flex:1;font-size:24px;color:#4A5262">사람이 하나하나 승인</p></div><div style="display:flex;flex-direction:row;align-items:center;gap:12px;background:#D5E3F3;border-radius:10px;padding:6px 14px"><p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#14213D">L3</p><p style="width:170px;font-size:24px;font-weight:700;color:#14213D">조건부 자율</p><p style="flex:1;font-size:24px;color:#4A5262">저위험은 자동, 고위험은 승인</p></div><div style="display:flex;flex-direction:row;align-items:center;gap:12px;background:#F7DDCB;border-radius:10px;padding:6px 14px"><p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#14213D">L4</p><p style="width:170px;font-size:24px;font-weight:700;color:#14213D">범위 내 자율</p><p style="flex:1;font-size:24px;color:#4A5262">정한 범위 안에서 자율 + 사후 감사</p></div><div style="display:flex;flex-direction:row;align-items:center;gap:12px;background:#F7DDCB;border-radius:10px;padding:6px 14px"><p style="width:56px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#14213D">L5</p><p style="width:170px;font-size:24px;font-weight:700;color:#14213D">완전 자율</p><p style="flex:1;font-size:24px;color:#4A5262">범위도 스스로 정한다</p></div></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">연구가 보여 준 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">평가기가 자동이면 사람보다 나은 답도 찾는다 (AlphaEvolve)<br>평가가 약하면 개선이 멈추거나 거꾸로 간다 (ACE · FiNER)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">업계의 현재</p><p style="font-size:24px;line-height:1.4;color:#4A5262">통신 운영사 대부분 L2~L3 · 일부 영역에서 L4<br>81%가 2030년까지 L4 목표 (TM Forum 2026)<br>더 보수적인 조사도 있다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">답</b> 결론: 검증 가능한 좁은 영역부터 L3~L4로 자율화하고, 범위 · 판단 · 책임은 사람이 정한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">자율 레벨은 TM Forum 자율 망 레벨을 지식 루프에 맞게 옮긴 것 · TM Forum 2026 운영사 80곳 조사 · Accenture 조사는 더 낮게 봄</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 16</p>
+<aside>(약 60초) 그러면 정말 자율적으로 가능할까요. 답은 피드백 조건에 달려 있습니다. 코드 테스트나 시뮬레이터처럼 결과를 자동으로, 정확하게, 빠르게 확인할 수 있으면 자율 수준을 높일 수 있고, 실제로 AlphaEvolve는 사람보다 나은 답을 찾았습니다. 망 KPI처럼 자동이지만 잡음과 지연이 있으면 범위를 제한한 부분 자율이 맞고, 설계 방향이나 정책, 안전처럼 판단과 책임이 따르는 일은 사람이 맡아야 합니다. 오른쪽은 자율 망 레벨을 지식 루프에 옮긴 것입니다. 제안만 하는 L1, 사람이 승인하는 L2, 저위험만 자동으로 반영하는 L3, 정한 범위 안에서 자율로 돌고 사후 감사하는 L4입니다. 통신 업계 조사로는 대부분 L2에서 L3이고, 일부 영역이 L4에 들어섰습니다. 한마디로 스스로 개선하는 것은 되지만, 혼자 맡겨 둘 수는 아직 없습니다.</aside>
+</section>
+<section id="risks" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">위험 · 루프가 망가지는 방식</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">스스로 고치는 시스템은 스스로 망가질 수도 있다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">실패 모드</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">증상</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">대응</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">평가 속이기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">점수는 오르는데 실제는 나빠짐 (DGM 논문이 사례 보고)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">평가기 분리 · 숨긴 시험 · 사람 표본 검토</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">지식 오염</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">잘못된 교훈 · 지어낸 규칙이 쌓인다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">근거 · 출처 필수 · 도움/해로움 횟수 · 만료일</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">붕괴 · 간결 편향</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">다시 요약할수록 세부가 사라진다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">통째 재작성 금지 · 항목 단위 갱신</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">컨텍스트 부패</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">지식이 많아질수록 답이 흐려진다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">검색 · 점진적 공개 · 중복 정리</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">지식 노후화</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">장비 · 설정 · 규격이 바뀌었는데 옛 규칙 적용</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">날짜 · 버전 · 적용 범위 · 재검증 주기</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">오류 누적</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">작은 실수가 다음 단계로 번진다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">단계별 검증 · 실행 횟수 · 범위 제한</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">보안 (프롬프트 주입)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">문서 속 지시를 명령으로 따른다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">입력 격리 · 최소 권한 · 쓰기 승인</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">모델 붕괴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">자기 생성 데이터로만 재학습하면 분포가 좁아진다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">실데이터 유지 · 생성 데이터 표시</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">DGM · ACE (2025) · Chroma (2025) · Shumailov et al. 2024 (Nature, 모델 붕괴)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 16</p>
+<aside>(약 55초) 스스로 고치는 시스템은 스스로 망가질 수도 있습니다. 가장 대표적인 것이 평가 속이기입니다. 다윈 괴델 머신 논문도 에이전트가 평가 장치를 우회한 사례를 보고했습니다. 점수는 오르는데 실제는 나빠지는 것이죠. 그래서 평가기를 분리하고, 숨긴 시험을 두고, 사람이 표본을 검토합니다. 잘못된 교훈이나 지어낸 규칙이 쌓이는 지식 오염, 다시 요약할수록 세부가 사라지는 붕괴, 지식이 많아질수록 답이 흐려지는 컨텍스트 부패도 있습니다. 우리 분야에서 특히 조심할 것은 지식 노후화입니다. 장비나 설정, 규격이 바뀌었는데 옛 규칙을 그대로 쓰는 것이죠. 그 밖에 오류 누적, 문서 속에 숨은 지시를 따르는 프롬프트 주입, 자기가 만든 데이터로만 재학습하면 분포가 좁아지는 모델 붕괴도 있습니다. 대응은 오른쪽 열처럼 대부분 출처, 버전, 검증, 권한의 문제입니다.</aside>
+</section>
+<section id="guard" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">안전장치 · 변경을 배포처럼 다룬다</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">지식 변경도 코드 변경처럼 검증하고 배포한다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:110px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">변경의<br>길</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">변경 제안<br>(diff)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">자동 검증<br>(골든셋 · 시뮬)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">위험도 분류</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">승인<br>(자동 · 사람)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">단계 배포<br>(섀도 → 일부)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">모니터링<br>· 롤백</p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">①</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">버전 관리</p><p style="font-size:24px;line-height:1.4;color:#4A5262">지식 · 플레이북 · 스킬을 git처럼 — 변경은 리뷰 가능한 diff</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">②</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">근거 · 출처</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모든 항목에 출처 · 날짜 · 적용 범위 · 근거 사례</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">③</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">권한 분리</p><p style="font-size:24px;line-height:1.4;color:#4A5262">읽기 · 제안 · 반영 · 실행 권한을 나눈다</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">④</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">감사 로그</p><p style="font-size:24px;line-height:1.4;color:#4A5262">누가 · 왜 · 무엇을 바꿨나 — 사후 추적</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">⑤</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">정지 장치 · 예산</p><p style="font-size:24px;line-height:1.4;color:#4A5262">오류율 · 비용 · 실행 횟수 한도, 즉시 멈춤 스위치</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">⑥</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">사람 개입 지점</p><p style="font-size:24px;line-height:1.4;color:#4A5262">어떤 변경은 반드시 사람이 — 미리 목록으로 정한다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">원칙</b> 목표는 사람을 빼는 것이 아니라, 사람이 봐야 할 것만 보게 하는 것</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">소프트웨어 배포 관행(코드 리뷰 · CI · 카나리 · 롤백)을 지식 · 에이전트 변경에 적용한 권장안</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 16</p>
+<aside>(약 50초) 그래서 안전장치의 핵심은 지식 변경도 코드 변경처럼 다루는 것입니다. 루프가 제안한 변경은 diff로 만들어, 골든셋과 시뮬레이터로 자동 검증하고, 위험도를 나눠 저위험은 자동으로, 고위험은 사람이 승인합니다. 반영도 한 번에 하지 않고, 먼저 그림자처럼 결과만 비교해 보고 일부에만 적용한 뒤 모니터링하다 문제가 있으면 되돌립니다. 이를 위해 지식과 스킬을 버전 관리하고, 모든 항목에 출처와 날짜를 붙이고, 권한을 나누고, 감사 로그를 남기고, 오류율과 비용에 한도를 두어 바로 멈출 수 있게 하고, 사람이 꼭 봐야 할 변경을 미리 정해 둡니다. 목표는 사람을 빼는 것이 아니라, 사람이 봐야 할 것만 보게 하는 것입니다.</aside>
+</section>
+<section id="telecom" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">우리 분야에 적용하면</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">RF · KPI 업무의 지식 루프 두 가지</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">지식 기반에 넣을 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">3GPP · O-RAN 규격 · KPI 정의서 · 장비 매뉴얼<br>망 설정(CM) 이력 · KPI · 알람 · 드라이브 테스트<br>과거 장애 · 최적화 사례와 결과 · 보정 기록</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">이미 있는 방향</p><p style="font-size:24px;line-height:1.4;color:#4A5262">O-RAN SMO · rApp의 폐루프 최적화<br>TM Forum 자율 망 L4 · 의도 기반 운영<br>연구: AgentRAN 등 LLM 에이전트 (대부분 시험 단계)</p></div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#F7DDCB;border-radius:14px;padding:12px 16px"><p style="width:150px;font-size:26px;font-weight:700;line-height:1.3;color:#A84A16">Ⓐ 망 운영<br>(부분 자율)</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">KPI 이상 감지</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">원인 후보<br>(사례 · 규격 검색)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">조치 제안<br>(근거 첨부)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">사람 승인 · 적용</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">KPI로 효과 확인</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">사례 · 교훈 기록</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:150px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">Ⓑ 시뮬 보정<br>(높은 자율)</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">실측 vs 시뮬</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">지표 자동 계산<br>(바이어스 · E′)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">파라미터 조정<br>(재질 · 틸트 …)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">재계산</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">좋아지면 채택</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">교훈 · 설정 기록</p></div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">차이</b> Ⓑ는 평가가 자동이라 자율화하기 쉽고, Ⓐ는 망에 직접 영향이 있어 제안 · 승인부터 시작한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">O-RAN Alliance (SMO · rApp) · TM Forum Autonomous Networks · AgentRAN (arXiv 2508.17778)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 16</p>
+<aside>(약 55초) 우리 분야에 적용해 보겠습니다. 지식 기반에는 규격과 KPI 정의서, 장비 매뉴얼, 설정 이력과 KPI, 드라이브 테스트, 그리고 무엇보다 과거 장애와 최적화 사례, 그 결과를 넣습니다. 루프는 두 가지를 생각할 수 있습니다. 첫째는 망 운영입니다. KPI 이상을 감지하면 사례와 규격을 검색해 원인 후보를 찾고, 근거를 붙여 조치를 제안하고, 사람이 승인해 적용한 뒤, KPI로 효과를 확인하고 사례로 기록합니다. 망에 직접 영향이 있으니 제안과 승인부터 시작합니다. 둘째는 시뮬레이션 보정입니다. 실측과 시뮬을 비교해 바이어스와 E′ 같은 지표를 자동으로 계산하고, 파라미터를 조정해 다시 계산하며, 좋아지면 채택하고 교훈을 남깁니다. 평가가 자동이라 훨씬 높은 수준으로 자율화할 수 있습니다. O-RAN의 rApp, TM Forum의 자율 망과도 같은 방향입니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리 · 시작하는 순서</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">지식은 밖에, 개선은 피드백으로, 범위는 사람이</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px"><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">요소 기술</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">지식 그릇 · 컨텍스트 엔지니어링<br>도구 · 평가 · 통제</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">쌓는 법</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">교훈 → 플레이북 · 절차 → 스킬<br>평가기 있으면 진화 · 가중치는 마지막</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">자율의 조건</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">자동 · 정확한 피드백이 있는 곳부터<br>L3~L4 · 사람 개입 지점을 정한다</p></div></div>
+<div style="display:flex;flex-direction:row;gap:10px"><div style="flex:1;background:#22325A;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">1</p><p style="font-size:24px;line-height:1.35;color:#C9D3E3">지식 정리<br>출처 · 날짜 붙인 문서 · 정의서</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">2</p><p style="font-size:24px;line-height:1.35;color:#C9D3E3">질의응답 + 평가셋<br>정답 있는 질문 50~100개</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">3</p><p style="font-size:24px;line-height:1.35;color:#C9D3E3">반복 작업 하나<br>에이전트화 (사람 승인)</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">4</p><p style="font-size:24px;line-height:1.35;color:#C9D3E3">교훈 기록 루프<br>플레이북 · 스킬 승격</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B">5</p><p style="font-size:24px;line-height:1.35;color:#C9D3E3">검증 가능한 곳부터<br>자동 반영 · 범위 확대</p></div></div>
+<p style="font-size:24px;line-height:1.45;color:#C9D3E3">다음 단계: [대상 업무] 하나를 골라 지식 · 평가셋부터 만들고, 사람 개입 비율 · 재사용률 · 회귀 건수를 함께 잰다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">함께 볼 자료: network-digital-twin · sim-real-alignment · taylor-diagram · ue-kpi-pipeline</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">16 / 16</p>
+<aside>(약 45초) 정리하겠습니다. 한 줄로 말하면 지식은 모델 밖에 쌓고, 피드백으로 고치고, 범위는 사람이 정합니다. 요소 기술은 지식 그릇, 컨텍스트 엔지니어링, 도구, 평가, 통제 다섯 가지입니다. LLM이 로직을 쌓는 법은 교훈을 플레이북에, 반복 성공한 절차를 스킬에 담는 것이고, 자동 평가기가 있으면 코드 자체를 진화시킬 수 있으며, 가중치 학습은 마지막 수단입니다. 자율은 자동으로 정확하게 확인할 수 있는 곳부터, 사람 개입 지점을 정해 L3에서 L4로 넓힙니다. 시작한다면 지식을 출처와 함께 정리하고, 정답 있는 평가셋을 만들고, 반복 작업 하나를 사람 승인 아래 에이전트로 만들고, 교훈 기록 루프를 붙인 뒤, 검증 가능한 곳부터 자동 반영을 넓히는 순서를 권합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

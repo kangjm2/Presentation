@@ -1,0 +1,64 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-28T12:00:00Z"
+  },
+  "lists": "css",
+  "title": "지식을 쌓고 스스로 고치는 AI",
+  "order": [
+    "cover",
+    "trend",
+    "arch",
+    "kb",
+    "context",
+    "act",
+    "eval",
+    "memory",
+    "learn1",
+    "learn2",
+    "learn3",
+    "autonomy",
+    "risks",
+    "guard",
+    "telecom",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "흐름과 전체 구조",
+      "start": "cover"
+    },
+    "tech": {
+      "description": "요소 기술: 지식 그릇, 컨텍스트 엔지니어링, 행동, 평가",
+      "start": "kb"
+    },
+    "learn": {
+      "description": "LLM이 지식을 로직으로 쌓는 법: 기억, 컨텍스트 진화, 스킬, 탐색 · 진화",
+      "start": "memory"
+    },
+    "auto": {
+      "description": "자율의 조건, 위험, 안전장치",
+      "start": "autonomy"
+    },
+    "apply": {
+      "description": "우리 분야 적용과 시작하는 순서",
+      "start": "telecom"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}
