@@ -1,0 +1,62 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-29T06:30:00Z"
+  },
+  "lists": "css",
+  "title": "트윈으로 최적화하기: CCO · MLB · MRO와 what-if",
+  "order": [
+    "cover",
+    "why",
+    "son",
+    "cco",
+    "mobility",
+    "loop",
+    "objective",
+    "grid",
+    "bo",
+    "pareto",
+    "trust",
+    "commonmode",
+    "rollout",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 트윈에서 먼저 하나와 SON 세 사용 사례(CCO · MLB · MRO)",
+      "start": "cover"
+    },
+    "usecases": {
+      "description": "CCO 예시 지도, MLB(CIO) · MRO(실패 유형)",
+      "start": "cco"
+    },
+    "loop": {
+      "description": "what-if 루프와 목적 함수",
+      "start": "loop"
+    },
+    "search": {
+      "description": "격자 · 탐욕, 베이즈 최적화, Pareto 앞선",
+      "start": "grid"
+    },
+    "trust": {
+      "description": "절대 vs 상대 정확도, 예시 계산, 실망 적용 · 검증, 정리",
+      "start": "trust"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

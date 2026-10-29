@@ -25,6 +25,7 @@
   - [`coord-registration`](../coord-registration/): 좌표 정합 — 같은 지수 상관 가정을 씀
   - [`sim-real-alignment`](../sim-real-alignment/): 보정 방법
   - [`propagation-models`](../propagation-models/): 음영(shadow fading)과 경로손실 모델
+  - [`twin-vv`](../twin-vv/): 공간으로 떼어 놓은 검증 · 합격선
 
 ## 구성 (≈ 10분 45초)
 

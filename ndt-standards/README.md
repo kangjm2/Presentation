@@ -24,8 +24,8 @@
 - 관련 덱:
   - [`network-digital-twin`](../network-digital-twin/): 업계 동향 · 트윈의 네 층 · AODT
   - [`knowledge-loop`](../knowledge-loop/): 보정 루프 · 운영 루프, 자율 레벨
-  - `twin-vv`: 트윈 검증 · 정확도 합격선 (같은 시리즈, 12쪽에서 연결)
-  - `twin-data-sync`: 트윈 데이터 동기화 · 갱신 주기 (같은 시리즈, 12쪽에서 연결)
+  - [`twin-vv`](../twin-vv/): 트윈 검증 · 정확도 합격선 (12쪽에서 연결)
+  - [`twin-data-sync`](../twin-data-sync/): 트윈 데이터 동기화 · 갱신 주기 (12쪽에서 연결)
   - [`dt-breakdown`](../dt-breakdown/) · [`debiased-rmse`](../debiased-rmse/): 충실도를 재는 지표
   - [`coord-registration`](../coord-registration/): 매핑의 기초인 좌표 정합
 

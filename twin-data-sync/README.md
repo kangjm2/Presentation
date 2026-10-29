@@ -30,6 +30,7 @@
   - [`dt-breakdown`](../dt-breakdown/): 거리 경향 몫 · Shape(T0) · 패턴 몫
   - [`network-digital-twin`](../network-digital-twin/): 트윈의 네 층과 실망 동기화
   - [`sionna-rt-inputs`](../sionna-rt-inputs/): 시뮬레이터 입력
+  - [`ndt-standards`](../ndt-standards/): 3GPP TS 28.561 NDT 관리 · 동기화 입력
 
 ## 구성 (≈ 11분)
 

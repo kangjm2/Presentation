@@ -1,0 +1,24 @@
+<section id="why" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">왜 트윈에서 먼저</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">실망에서 바로 바꾸기엔 느리고, 위험하다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">실망에서 시험하면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">설정 하나 바꾸고 → PM · 드라이브 테스트를 모아 본다 → 한 번에 후보 하나<br>고객이 실험 대상 · 요일 · 행사 · 계절 효과와 섞인다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">트윈에서 먼저 하면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">후보 수백 ~ 수천 개를 계산으로 비교 → 좋은 몇 개만 실망에<br>오늘의 예시: 틸트 3개 조합 2,197개를 전부 계산</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">단, 조건 하나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">트윈이 “바꾼 뒤의 차이”를 맞힐 만큼 정확해야 한다<br>절대값이 틀려도 되는 경우와 안 되는 경우가 있다 → 11 · 12쪽</p></div>
+</div>
+<div style="width:600px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;font-weight:700;color:#14213D">이 시리즈에서의 자리</p>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">①</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">보정 — 트윈을 실측에 맞춘다 (sim-real-alignment)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">②</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">오차 재기 — de-biased RMSE · Breakdown (debiased-rmse · dt-breakdown)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">같은 자리 비교 — 좌표 정합 (coord-registration)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:44px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">④</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">오늘 — 트윈으로 설정을 고르고 실망에 적용</b></p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 트윈은 실망 시험을 없애지 않는다 — 후보를 줄이고, 나쁜 후보를 미리 걸러 실망 시험을 한두 번으로 만든다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">관련 덱: sim-real-alignment · debiased-rmse · dt-breakdown · coord-registration · network-digital-twin</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
+<aside>(약 45초) 왜 트윈에서 먼저 해 볼까요. 실망에서 시험하면 설정 하나를 바꾸고 PM과 드라이브 테스트를 모아 보는 데 시간이 걸리고, 한 번에 후보 하나밖에 볼 수 없습니다. 고객이 실험 대상이 되고, 요일이나 행사 효과와 섞여 판단도 흐려집니다. 트윈에서는 후보 수백, 수천 개를 계산으로 비교할 수 있습니다. 오늘 예시에서는 셀 세 개의 틸트 조합 2,197개를 전부 계산합니다. 다만 조건이 하나 있습니다. 트윈이 바꾼 뒤의 차이를 맞힐 만큼 정확해야 합니다. 오른쪽처럼 이 시리즈는 보정, 오차 재기, 좌표 정합을 거쳐 왔고, 오늘이 그 트윈을 쓰는 단계입니다. 트윈은 실망 시험을 없애는 것이 아니라 후보를 줄여 실망 시험을 한두 번으로 만드는 도구입니다.</aside>
+</section>

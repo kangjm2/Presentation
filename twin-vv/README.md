@@ -29,6 +29,7 @@
   - [`coord-registration`](../coord-registration/): 좌표 정합 (검증의 입력 대조)
   - [`sim-real-alignment`](../sim-real-alignment/): 보정 방법과 보정 / 검증 자료 분리
   - [`spatial-statistics`](../spatial-statistics/): 공간 상관 · 블록 크기 (9쪽에서 넘김)
+  - [`ndt-standards`](../ndt-standards/): 표준이 정하지 않는 정확도 기준
 
 ## 구성 (≈ 11분 40초)
 

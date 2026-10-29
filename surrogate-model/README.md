@@ -23,8 +23,8 @@
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py surrogate-model`로 뷰어를 다시 만듭니다.
 - 관련 덱:
   - [`ray-tracing`](../ray-tracing/): 10쪽 학계 ②(미분 RT · 신경 대리 모델 · 신경 전파장)
-  - `twin-optimization`: 최적화 루프 (같은 시리즈에서 함께 만드는 덱)
-  - `sensitivity-analysis`: 민감도 분석 · Sobol 지수 (같은 시리즈에서 함께 만드는 덱)
+  - [`twin-optimization`](../twin-optimization/): 최적화 루프
+  - [`sensitivity-analysis`](../sensitivity-analysis/): 민감도 분석 · Sobol 지수
   - [`sim-real-alignment`](../sim-real-alignment/): 보정 방법
   - [`dt-breakdown`](../dt-breakdown/): Breakdown 화면, σ_sim(시뮬 잡음) 미측정
   - [`debiased-rmse`](../debiased-rmse/): 우리 보정 전 de-biased RMSE 6.41 dB
