@@ -1,0 +1,28 @@
+<section id="why" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">왜 중요한가</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">트윈은 “언제의 망”을 그리고 있나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px;align-items:flex-start">
+<div style="position:relative;width:690px;height:420px">
+<svg aria-label="두 줄 시간선. 위 실망 줄에서 틸트 변경과 셀 장애가 일어나고, 아래 트윈 줄에는 셀 장애가 곧바로, 틸트 변경은 한참 뒤에 반영되어 그 사이가 어긋난 구간으로 칠해져 있다" style="position:absolute;left:0px;top:0px;width:690px;height:420px" width="690" height="420" viewBox="0 0 690 420"><line x1="150" y1="90" x2="690" y2="90" stroke="#14213D" stroke-width="5"/><line x1="150" y1="250" x2="690" y2="250" stroke="#255E9E" stroke-width="5"/><rect x="200" y="222" width="360" height="56" fill="#F7DDCB"/><rect x="420" y="222" width="20" height="56" fill="#E9B7A8"/><circle cx="200" cy="90" r="13" fill="#A84A16"/><circle cx="420" cy="90" r="13" fill="#B23A2A"/><circle cx="560" cy="250" r="13" fill="#A84A16"/><circle cx="440" cy="250" r="13" fill="#B23A2A"/><line x1="200.0" y1="106.0" x2="540.7" y2="231.8" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 6"/><polygon points="552.0,236.0 542.8,226.2 538.7,237.5" fill="#A84A16"/><line x1="420.0" y1="106.0" x2="434.5" y2="222.1" stroke="#B23A2A" stroke-width="3" stroke-dasharray="8 6"/><polygon points="436.0,234.0 440.5,221.3 428.6,222.8" fill="#B23A2A"/></svg>
+<p style="position:absolute;left:0px;top:74px;width:140px;font-size:24px;font-weight:700;color:#14213D">실망</p>
+<p style="position:absolute;left:0px;top:234px;width:140px;font-size:24px;font-weight:700;color:#255E9E">트윈</p>
+<p style="position:absolute;left:120px;top:20px;width:240px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">틸트 6° → 4°</p>
+<p style="position:absolute;left:330px;top:20px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#B23A2A">셀 장애</p>
+<p style="position:absolute;left:470px;top:290px;width:220px;font-size:24px;text-align:center;line-height:1.3;color:#A84A16">다음 덤프에<br>반영</p>
+<p style="position:absolute;left:330px;top:290px;width:160px;font-size:24px;text-align:center;line-height:1.3;color:#B23A2A">경보로<br>바로 반영</p>
+<p style="position:absolute;left:200px;top:160px;width:300px;font-size:24px;font-weight:700;color:#A84A16">어긋난 구간</p>
+<p style="position:absolute;left:0px;top:380px;width:690px;font-size:24px;color:#5E6675">예시 — 위는 실제 망, 아래는 트윈이 아는 상태</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">시뮬 결과 = 입력 상태의 함수</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 코드 · 같은 장면이라도 어제의 설정을 넣으면 다른 답<br>“모델이 틀렸다”와 “입력이 낡았다”를 구분해야 한다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">낡은 입력은 모델 오차처럼 보인다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">틸트 2° 차이 → 거리에 따라 부호가 바뀌는 오차 (9쪽)<br>Breakdown에서는 거리 경향 몫으로 나타난다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">재현</p><p style="font-size:24px;line-height:1.4;color:#4A5262">석 달 뒤 “그때 무엇을 넣었나”에 답할 수 있어야<br>결과를 다시 만들고, 고친 효과를 비교할 수 있다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 트윈 상태 = 데이터 + 시각 — 시각이 없는 트윈은 비교도 재현도 할 수 없다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림은 예시 (변경 · 장애 시점과 반영 지연은 가정) · 9쪽 틸트 효과도 가정에 따른 계산</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
+<aside>(약 45초) 트윈이 실제 망을 따라가는 데에는 늘 시차가 있습니다. 그림의 위 줄은 실제 망이고 아래 줄은 트윈이 알고 있는 상태입니다. 셀 장애는 경보로 바로 들어오지만, 틸트 변경은 다음 설정 덤프 때에야 반영되어 그 사이 트윈은 옛 틸트로 계산합니다. 시뮬레이션 결과는 입력 상태의 함수라서, 같은 코드라도 어제의 설정을 넣으면 다른 답이 나옵니다. 문제는 이것이 모델 오차처럼 보인다는 점입니다. 틸트가 2도 다르면 거리에 따라 부호가 바뀌는 오차가 생기고, Breakdown 화면에서는 거리 경향 몫으로 나타납니다. 그래서 트윈의 상태는 데이터와 시각을 함께 가져야 합니다.</aside>
+</section>

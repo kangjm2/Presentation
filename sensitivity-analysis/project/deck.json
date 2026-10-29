@@ -1,0 +1,62 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-29T07:00:00Z"
+  },
+  "lists": "css",
+  "title": "민감도 분석과 불확실성: 어떤 입력이 결과를 가장 흔드나",
+  "order": [
+    "cover",
+    "why",
+    "inputs",
+    "toy",
+    "oat",
+    "morris",
+    "variance",
+    "sobol",
+    "cost",
+    "propagate",
+    "bydist",
+    "reach",
+    "calibrate",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 묻나, 입력과 범위, 장난감 모형",
+      "start": "cover"
+    },
+    "local": {
+      "description": "하나씩 바꿔 보기(OAT)와 그 함정, Morris 거르기",
+      "start": "oat"
+    },
+    "sobol": {
+      "description": "Sobol 지수의 뜻, 계산 결과, 추정과 비용",
+      "start": "variance"
+    },
+    "uncertainty": {
+      "description": "몬테카를로 전파, 거리별 지수, Breakdown 도달점과의 연결",
+      "start": "propagate"
+    },
+    "use": {
+      "description": "보정할 것과 고정할 것, 동등 결과성, 정리",
+      "start": "calibrate"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}
