@@ -1,0 +1,38 @@
+<section id="cv" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">검증 ① 무작위 vs 블록</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">무작위로 나누면 오차가 낙관적으로 나온다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:1040px;height:512px">
+<svg aria-label="가로 막대 그림. 무작위 교차 검증은 오차를 약 4 dB로, 블록 교차 검증은 5 dB 남짓으로 추정한다. 실제 도로 밖 칸은 4.6, 도로에서 60 m 이상은 5.1, 새 지역은 6.2 dB" style="position:absolute;left:0px;top:0px;width:1040px;height:512px" width="1040" height="512" viewBox="0 0 1040 512"><line x1="400" y1="0" x2="400" y2="396" stroke="#EAE7DF" stroke-width="2"/><line x1="480" y1="0" x2="480" y2="396" stroke="#EAE7DF" stroke-width="2"/><line x1="560" y1="0" x2="560" y2="396" stroke="#EAE7DF" stroke-width="2"/><line x1="640" y1="0" x2="640" y2="396" stroke="#EAE7DF" stroke-width="2"/><line x1="720" y1="0" x2="720" y2="396" stroke="#EAE7DF" stroke-width="2"/><line x1="800" y1="0" x2="800" y2="396" stroke="#EAE7DF" stroke-width="2"/><line x1="880" y1="0" x2="880" y2="396" stroke="#EAE7DF" stroke-width="2"/><line x1="960" y1="0" x2="960" y2="396" stroke="#EAE7DF" stroke-width="2"/><line x1="0" y1="198" x2="960" y2="198" stroke="#5E6675" stroke-width="2" stroke-dasharray="6 6"/><rect x="400" y="12" width="317.2" height="42" rx="6" fill="#A84A16"/><rect x="400" y="78" width="409.4" height="42" rx="6" fill="#255E9E"/><rect x="400" y="144" width="431.7" height="42" rx="6" fill="#255E9E"/><rect x="400" y="210" width="369.4" height="42" rx="6" fill="#14213D"/><rect x="400" y="276" width="410.8" height="42" rx="6" fill="#14213D"/><rect x="400" y="342" width="495.1" height="42" rx="6" fill="#14213D"/><line x1="840.9" y1="0" x2="840.9" y2="396" stroke="#14213D" stroke-width="3" stroke-dasharray="10 6"/></svg>
+<p style="position:absolute;left:0px;top:16px;width:384px;font-size:24px;text-align:right;font-weight:700;color:#14213D">무작위 5겹 CV</p>
+<p style="position:absolute;left:627px;top:16px;width:80px;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">4.0</p>
+<p style="position:absolute;left:0px;top:82px;width:384px;font-size:24px;text-align:right;font-weight:700;color:#14213D">블록 CV · 100 m</p>
+<p style="position:absolute;left:719px;top:82px;width:80px;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">5.1</p>
+<p style="position:absolute;left:0px;top:148px;width:384px;font-size:24px;text-align:right;font-weight:700;color:#14213D">블록 CV · 200 m</p>
+<p style="position:absolute;left:742px;top:148px;width:80px;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">5.4</p>
+<p style="position:absolute;left:0px;top:214px;width:384px;font-size:24px;text-align:right;font-weight:700;color:#14213D">실제 · 도로 밖 칸 전체</p>
+<p style="position:absolute;left:679px;top:214px;width:80px;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">4.6</p>
+<p style="position:absolute;left:0px;top:280px;width:384px;font-size:24px;text-align:right;font-weight:700;color:#14213D">실제 · 도로에서 60 m 이상</p>
+<p style="position:absolute;left:721px;top:280px;width:80px;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">5.1</p>
+<p style="position:absolute;left:0px;top:346px;width:384px;font-size:24px;text-align:right;font-weight:700;color:#14213D">실제 · 새 지역에 그대로</p>
+<p style="position:absolute;left:805px;top:346px;width:80px;font-size:24px;text-align:right;font-weight:700;color:#F5F3EE">6.2</p>
+<p style="position:absolute;left:360px;top:402px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:520px;top:402px;width:80px;font-size:24px;text-align:center;color:#5E6675">2</p>
+<p style="position:absolute;left:680px;top:402px;width:80px;font-size:24px;text-align:center;color:#5E6675">4</p>
+<p style="position:absolute;left:840px;top:402px;width:80px;font-size:24px;text-align:center;color:#5E6675">6</p>
+<p style="position:absolute;left:400px;top:436px;width:560px;font-size:24px;text-align:center;color:#14213D">RMSE (dB) · 모델 + 크리깅 보정</p>
+<p style="position:absolute;left:611px;top:472px;width:460px;font-size:24px;text-align:center;color:#14213D">┆ 보정 없음 5.5 dB (도로 밖)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">왜 새나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">검증 칸 바로 옆 20 m에 학습 칸 → 크리깅이 이웃 값을 거의 베껴 맞힌다 = 답을 미리 본 셈</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">자유도에 따라 다르다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">변수 하나(전역 편향)만 보정하면 무작위 5.39 · 블록 5.48 dB로 거의 같다<br>칸별 보정 · ML · 크리깅처럼 자유도가 클수록 크게 샌다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">Roberts 외 (2017)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">구조가 있는 자료에서 무작위 CV는 예측 오차를 크게 과소평가 — 블록 CV가 거의 언제나 더 알맞다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 무작위 CV 4.0 dB를 믿으면 “보정으로 1.5 dB 줄었다”고 보고하게 된다 — 측정 없는 곳의 실제 이득은 그보다 작다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시 시뮬레이션 (2쪽 장 · 도로 516칸 · 5겹 · 블록은 무작위로 겹에 배정) · 새 지역 = 독립으로 뽑은 다른 장</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
+<aside>(약 50초) 이제 검증입니다. 같은 크리깅 보정을 두고 오차를 여러 방식으로 재 보았습니다. 도로 칸을 무작위로 다섯 겹에 나누면 오차가 4.0 dB로 나옵니다. 100 m, 200 m 블록으로 나누면 5.1, 5.4 dB입니다. 실제로 측정이 없는 도로 밖 칸 전체에서는 4.6, 도로에서 60 m 넘게 떨어진 칸에서는 5.1, 이 보정을 다른 지역에 그대로 옮기면 6.2 dB로 보정하지 않은 것보다 나쁩니다. 무작위 나누기는 검증 칸 바로 옆에 학습 칸이 있어서 크리깅이 답을 거의 베껴 맞히기 때문에 낙관적입니다. 다만 새는 정도는 보정의 자유도에 달려 있습니다. 전역 편향 하나만 보정하면 무작위와 블록이 거의 같습니다. 칸별 보정이나 머신러닝, 크리깅처럼 자유도가 클수록 크게 샙니다. Roberts 등 2017년 논문도 구조가 있는 자료에서는 블록 교차 검증이 거의 언제나 더 알맞다고 결론지었습니다.</aside>
+</section>
