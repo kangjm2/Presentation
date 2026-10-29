@@ -1,0 +1,29 @@
+<section id="versioning" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">버전 · 시간 여행</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“as of t”로 묻는다: 스냅숏 + 변경 기록</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:900px;height:390px">
+<svg aria-label="시간선 위에 S1과 S2 덤프 막대, 변경 점 e1 · e2 · e3, 10:17의 as-of 점선. S1부터 as-of까지 칠해져 있고, 놓친 변경 e2에서 S2로 휘어진 점선 화살표" style="position:absolute;left:0px;top:0px;width:900px;height:390px" width="900" height="390" viewBox="0 0 900 390"><line x1="30" y1="150" x2="880" y2="150" stroke="#14213D" stroke-width="4"/><rect x="60" y="150" width="280" height="60" fill="#D5E3F3"/><rect x="40" y="110" width="40" height="80" rx="6" fill="#14213D"/><rect x="800" y="110" width="40" height="80" rx="6" fill="#14213D"/><circle cx="260" cy="150" r="13" fill="#255E9E"/><circle cx="430" cy="150" r="13" fill="#FBFAF7" stroke="#A84A16" stroke-width="5"/><circle cx="600" cy="150" r="13" fill="#255E9E"/><line x1="340" y1="56" x2="340" y2="215" stroke="#A84A16" stroke-width="5" stroke-dasharray="12 7"/><path d="M436 132 C 540 50, 700 50, 806 106" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="9 7"/><line x1="790.0" y1="96.0" x2="796.4" y2="100.2" stroke="#A84A16" stroke-width="4"/><polygon points="808.0,108.0 800.2,94.4 792.5,106.1" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:222px;width:170px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">S1 덤프<br>10-27 02:00</p>
+<p style="position:absolute;left:740px;top:222px;width:160px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">S2 덤프<br>10-28 02:00</p>
+<p style="position:absolute;left:200px;top:94px;width:120px;font-size:24px;text-align:center;color:#255E9E">e1 10:08</p>
+<p style="position:absolute;left:380px;top:172px;width:110px;font-size:24px;text-align:center;color:#A84A16">e2 10:41</p>
+<p style="position:absolute;left:550px;top:172px;width:110px;font-size:24px;text-align:center;color:#255E9E">e3 15:20</p>
+<p style="position:absolute;left:260px;top:14px;width:180px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">as-of 10:17</p>
+<p style="position:absolute;left:480px;top:0px;width:420px;font-size:24px;color:#A84A16">e2: 알림을 놓쳐 S2 비교로 기록</p>
+<p style="position:absolute;left:60px;top:300px;width:600px;font-size:24px;color:#14213D"><b style="color:#255E9E">상태(10:17) = S1 + e1</b> — e2는 아직 없다</p>
+<p style="position:absolute;left:60px;top:344px;width:820px;font-size:24px;color:#4A5262"><b style="color:#255E9E">●</b> 알림으로 들어온 변경  <b style="color:#A84A16">○</b> 놓쳐서 나중에 안 변경</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">두 시각을 함께 저장 (bitemporal)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">적용 시각 — 망에서 실제로 바뀐 때<br>기록 시각 — 트윈이 그것을 안 때</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">as-of 질문은 두 가지</p><p style="font-size:24px;line-height:1.4;color:#4A5262">그때 망은 어땠나 → 적용 시각 기준<br>그때 우리는 무엇을 알았나 → 기록 시각 기준</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">스냅숏 ID</p><p style="font-size:24px;line-height:1.4;color:#4A5262">내용 해시로 붙이면 같은 상태 = 같은 ID<br>시뮬 실행 기록에 남긴다 (13쪽)</p></div>
+</div>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#9AA6BA">applied&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recorded&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;object&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;old → new&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source</span><br>10-27 10:08&nbsp;&nbsp;10-27 10:08&nbsp;&nbsp;AntennaFunction=A2&nbsp;&nbsp;&nbsp;retTiltValue&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;60 → 40&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;O1 알림<br>10-27 10:41&nbsp;&nbsp;<span style="color:#F0A36B">10-28 02:05</span>&nbsp;&nbsp;NRSectorCarrier=C3&nbsp;&nbsp;&nbsp;configuredMaxTxPower&nbsp;&nbsp;40000 → 20000&nbsp;&nbsp;덤프 diff</p></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림 · 변경 기록은 예시 (객체 이름은 3GPP NRM 클래스, 값 단위: 틸트 0.1° · 전력 mW)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 14</p>
+<aside>(약 50초) 트윈 저장소는 덮어쓰지 않고 쌓습니다. 하루 한 번 받는 전체 덤프를 스냅숏으로 두고, 그 사이의 변경을 기록으로 붙입니다. 그러면 10시 17분의 상태는 S1에 그때까지의 변경 e1을 더한 것입니다. 여기서 시각이 두 개 필요합니다. 망에서 실제로 바뀐 적용 시각과 트윈이 그것을 안 기록 시각입니다. 아래 표의 두 번째 줄은 10시 41분에 출력이 바뀌었지만 알림을 놓쳐 다음 날 덤프 비교로야 기록된 경우입니다. 그래서 질문도 둘입니다. 그때 망이 어땠는지는 적용 시각으로, 그때 우리가 무엇을 알고 시뮬레이션을 돌렸는지는 기록 시각으로 답합니다. 스냅숏에는 내용 해시 같은 ID를 붙여 실행 기록에 남깁니다.</aside>
+</section>

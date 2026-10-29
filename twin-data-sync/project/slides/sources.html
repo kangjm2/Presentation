@@ -1,0 +1,30 @@
+<section id="sources" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">어디서 받나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">받는 길: O1 · M-Plane · 업체 OSS 내보내기</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:700px;height:580px">
+<svg aria-label="SMO 상자에서 O1 선이 Near-RT RIC, O-CU, O-DU로 내려가고, O-DU에서 O-RU로 Open FH M-Plane 선이 이어진다. 오른쪽 점선은 SMO가 O-RU에 직접 닿는 하이브리드 경로" style="position:absolute;left:0px;top:0px;width:700px;height:580px" width="700" height="580" viewBox="0 0 700 580"><rect x="0" y="0" width="700" height="80" rx="14" fill="#14213D"/><line x1="100" y1="80" x2="100" y2="250" stroke="#255E9E" stroke-width="5"/><rect x="0" y="250" width="200" height="72" rx="12" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="330" y1="80" x2="330" y2="250" stroke="#255E9E" stroke-width="5"/><rect x="230" y="250" width="200" height="72" rx="12" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="560" y1="80" x2="560" y2="250" stroke="#255E9E" stroke-width="5"/><rect x="460" y="250" width="200" height="72" rx="12" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="250" y="146" width="160" height="40" rx="8" fill="#F5F3EE"/><line x1="560" y1="322" x2="560" y2="440" stroke="#A84A16" stroke-width="5"/><rect x="460" y="440" width="200" height="72" rx="12" fill="#F7DDCB" stroke="#A84A16" stroke-width="3"/><path d="M700 40 L 684 40 L 684 476 L 664 476" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 7"/></svg>
+<p style="position:absolute;left:0px;top:22px;width:700px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">SMO · OSS (관리 시스템)</p>
+<p style="position:absolute;left:0px;top:270px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">Near-RT RIC</p>
+<p style="position:absolute;left:230px;top:270px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">O-CU</p>
+<p style="position:absolute;left:460px;top:270px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">O-DU</p>
+<p style="position:absolute;left:250px;top:150px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">O1</p>
+<p style="position:absolute;left:460px;top:460px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">O-RU</p>
+<p style="position:absolute;left:230px;top:362px;width:320px;font-size:24px;text-align:right;line-height:1.3;color:#A84A16">Open FH M-Plane<br>(계층형: O-DU가 관리)</p>
+<p style="position:absolute;left:0px;top:540px;width:700px;font-size:24px;color:#14213D"><b style="color:#A84A16">┅</b> 하이브리드: SMO가 O-RU에 직접 — M-Plane은 <b>m-plane-yang</b> 덱</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">갈래</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">O1에서 받는 법</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">CM</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">NETCONF get-config로 읽기 · edit-config로 쓰기<br>바뀌면 notifyMOIChanges 알림 (HTTPS)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">PM</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">파일: notifyFileReady 알림 → SFTP · FTPES · HTTPS로 가져감<br>스트리밍: WebSocket으로 계속 받음</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">FM</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">경보 알림 (새로 · 변경 · 해제) · 경보 목록 읽기<br>목록 재구성(alarm list rebuilt) 알림</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">공통</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">알림은 3GPP 형식 그대로 또는 VES로 감싼 것 (stndDefined)<br>heartbeat 알림으로 살아 있음 확인</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">업체 EMS · OSS 북향(northbound) 내보내기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">실무에서는 업체 관리 시스템이 모은 것을 CSV · XML 덤프로 주기적으로 받는 경우가 많다 (일반적 경향) — 형식 · 주기는 계약마다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">ETSI TS 104 043 (O-RAN O1 R003 v11) 6.1~6.6절 · VES 7.2.1 · M-Plane 5.1.2절</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
+<aside>(약 50초) 받는 길은 크게 셋입니다. 첫째는 O-RAN의 O1입니다. 관리 시스템인 SMO가 Near-RT RIC, O-CU, O-DU를 관리하는 인터페이스입니다. 설정은 NETCONF로 읽고 쓰며, 값이 바뀌면 장비가 notifyMOIChanges 알림을 HTTPS로 보냅니다. 성능은 두 가지입니다. 파일 방식은 파일이 준비됐다는 notifyFileReady 알림을 받고 SFTP나 HTTPS로 가져가는 것이고, 스트리밍은 WebSocket으로 계속 받습니다. 경보는 발생, 변경, 해제 알림과 경보 목록 읽기입니다. 알림은 3GPP 형식 그대로 오거나 VES라는 공통 머리로 감싸서 옵니다. 둘째, O-RU는 O1이 아니라 Open Fronthaul M-Plane으로 관리되며, 이것은 m-plane-yang 덱에서 다뤘습니다. 셋째, 실무에서는 업체 관리 시스템이 모은 것을 CSV나 XML 덤프로 주기적으로 받는 경우가 많습니다.</aside>
+</section>

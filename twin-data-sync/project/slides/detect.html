@@ -1,0 +1,25 @@
+<section id="detect" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">변경 감지 · 계보</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">알림으로 빠르게, 비교로 빠짐없이, 값마다 출처를</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="width:800px;display:flex;flex-direction:column;gap:11px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">① 알림 (사건)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">notifyMOIChanges · 경보 알림 — 빠르다<br>연결이 끊기거나 구독이 비면 놓친다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">② 전체 읽기 + 비교 (diff)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">주기적 덤프 · get-config 결과를 앞 스냅숏과 비교<br>느리지만 빠짐없다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">③ 맞추기 (reconcile)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">diff에만 있는 변경 = 놓친 알림 → 기록 시각은 diff 시각<br>놓친 건수는 그 자체로 수집 품질 지표</p></div>
+<div style="background:#F3D9D2;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#B23A2A">조용함 ≠ 정상</p><p style="font-size:24px;line-height:1.4;color:#4A5262">heartbeat가 끊긴 출처는 “변경 없음”이 아니라 “모름”<br>다시 붙으면 경보 목록부터 다시 읽는다</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<p style="font-size:26px;font-weight:700;color:#14213D">계보(lineage) — 값 하나의 내력 (예시)</p>
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:150px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">트윈 값</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">총 틸트 10.0° (as-of 10-27 09:00) · 확인됨</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:150px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">← 계산</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">mechanicalOffset + retTiltValue<br>변환 코드 v1.4</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:150px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">← CM</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">retTiltValue 60 (= 6.0°)<br>스냅숏 cm-7f3a21 · 10-27 02:00 덤프</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:150px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">← 점검</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">mechanicalOffset 4.0°<br>현장 점검 2026-09-14 · 사진 3장</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">W3C PROV의 세 요소로 적으면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">값(Entity) ← 만든 작업(Activity) ← 한 주체(Agent)<br>“이 숫자 누가 · 언제 · 무엇으로?”에 답한다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">알림 · 경보 목록 · heartbeat: O1 6.1.6 · 6.2 · 6.6절 · 계보 값 · 이름 · 날짜는 예시 · W3C PROV-DM (2013)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
+<aside>(약 50초) 변경을 아는 길은 둘입니다. 첫째는 알림입니다. 빠르지만 연결이 끊기거나 구독이 비어 있으면 놓칩니다. 둘째는 전체를 주기적으로 읽어 앞 스냅숏과 비교하는 것입니다. 느리지만 빠짐이 없습니다. 둘을 함께 쓰고, 비교에서만 나온 변경은 놓친 알림으로 보고 기록 시각을 비교 시각으로 둡니다. 놓친 건수는 그 자체로 수집 품질 지표가 됩니다. 또 heartbeat가 끊긴 출처는 변경이 없는 것이 아니라 모르는 것이니, 다시 붙으면 경보 목록부터 다시 읽습니다. 오른쪽은 계보의 예입니다. 트윈의 총 틸트 10도는 CM의 전기 틸트 6도와 현장 점검의 기계 틸트 4도를 더한 값이고, 각각 어느 스냅숏, 어느 점검에서 왔는지가 붙어 있습니다. W3C PROV 모델의 값, 작업, 주체 세 요소로 적으면 이 숫자를 누가 언제 무엇으로 만들었는지 답할 수 있습니다.</aside>
+</section>

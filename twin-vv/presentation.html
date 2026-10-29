@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>트윈 검증 · 인증 (V&amp;V): 언제 믿어도 되나</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="시뮬레이션 대 실측 산점도와 허용 범위 점선, 그 위에 체크 표시가 있는 둥근 승인 도장" style="position:absolute;left:1000px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><circle cx="630" cy="323" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="648" cy="337" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="456" cy="504" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="557" cy="409" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="593" cy="376" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="609" cy="411" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="364" cy="616" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="652" cy="394" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="644" cy="358" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="232" cy="694" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="507" cy="428" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="486" cy="470" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="399" cy="492" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="400" cy="526" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="322" cy="558" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="411" cy="557" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="628" cy="369" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="279" cy="719" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="396" cy="527" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="388" cy="565" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="239" cy="753" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="328" cy="609" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="255" cy="683" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="600" cy="355" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="525" cy="416" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="616" cy="362" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="567" cy="379" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="336" cy="654" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="646" cy="366" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="400" cy="605" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="610" cy="357" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="300" cy="685" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="196" cy="771" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="596" cy="376" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="261" cy="745" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="550" cy="362" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="264" cy="691" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="177" cy="853" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="414" cy="586" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="186" cy="765" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="333" cy="555" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="314" cy="643" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="435" cy="617" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="173" cy="825" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="177" cy="777" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="390" cy="514" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="487" cy="428" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="400" cy="533" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="626" cy="340" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="216" cy="787" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="308" cy="651" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="406" cy="550" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="525" cy="465" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="288" cy="702" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="356" cy="623" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="563" cy="449" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="468" cy="499" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="289" cy="671" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="607" cy="398" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="426" cy="499" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="318" cy="578" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="449" cy="504" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="467" cy="578" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="199" cy="766" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="644" cy="357" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="324" cy="631" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="541" cy="466" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="551" cy="438" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="629" cy="288" r="7" fill="#4C7DB8" opacity="0.8"/><circle cx="641" cy="219" r="7" fill="#4C7DB8" opacity="0.8"/><line x1="120" y1="840" x2="700" y2="260" stroke="#F0A36B" stroke-width="5"/><line x1="120" y1="760" x2="620" y2="260" stroke="#F0A36B" stroke-width="3" stroke-dasharray="8 7"/><line x1="200" y1="840" x2="700" y2="340" stroke="#F0A36B" stroke-width="3" stroke-dasharray="8 7"/><line x1="120" y1="200" x2="120" y2="860" stroke="#2B3C66" stroke-width="3"/><line x1="100" y1="840" x2="760" y2="840" stroke="#2B3C66" stroke-width="3"/><circle cx="690" cy="300" r="120" fill="none" stroke="#8DB8E8" stroke-width="6"/><circle cx="690" cy="300" r="98" fill="none" stroke="#8DB8E8" stroke-width="2" stroke-dasharray="6 6"/><polyline points="635,300 675,342 750,250" fill="none" stroke="#F0A36B" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">네트워크 디지털 트윈 · 시뮬레이션-실측 비교</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">트윈 검증 · 인증<br>(V&amp;V):<br>언제 믿어도 되나</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">검증 · 타당성 확인 · 인증 — 용도마다 다른 합격선,<br>σ가 판정 오류로 바뀌는 계산, 보고서와 재확인 조건</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 디지털 트윈이 내놓는 숫자를 언제 믿어도 되는지에 관한 이야기입니다. 시뮬레이션 분야에서 오래 써 온 검증, 타당성 확인, 인증, 줄여서 V&amp;V 또는 VV&amp;A의 틀을 우리 트윈에 맞춰 보겠습니다. 오차 지표 자체는 앞선 자료에서 다뤘으니, 오늘은 그 숫자로 무엇을 결정할지, 즉 판정 규칙에 집중합니다.</aside>
+</section>
+<section id="question" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">질문</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">6.41 dB — 좋은 숫자인가?</h2>
+</div>
+<div style="position:relative;width:1664px;height:344px">
+<svg aria-label="0에서 16 dB 가로 눈금 위의 숫자 다섯. 영국 사례 보정 후 2.57, 보정 전 5.71, 우리 보정 전 6.41, 튜닝한 모델 RMSE 8~9, 튜닝 전 최선 12~15" style="position:absolute;left:0px;top:0px;width:1664px;height:344px" width="1664" height="344" viewBox="0 0 1664 344"><line x1="560" y1="0" x2="560" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="805" y1="0" x2="805" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="1050" y1="0" x2="1050" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="1295" y1="0" x2="1295" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="1540" y1="0" x2="1540" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="560" y1="300" x2="1540" y2="300" stroke="#14213D" stroke-width="3"/><circle cx="717" cy="30" r="13" fill="#255E9E"/><circle cx="910" cy="90" r="13" fill="#5E6675"/><circle cx="953" cy="150" r="13" fill="#A84A16"/><line x1="1050" y1="210" x2="1111" y2="210" stroke="#14213D" stroke-width="18" stroke-linecap="round"/><line x1="1295" y1="270" x2="1479" y2="270" stroke="#5E6675" stroke-width="18" stroke-linecap="round"/></svg>
+<p style="position:absolute;left:0px;top:13px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">영국 사례 · 보정 후 (σ)</p>
+<p style="position:absolute;left:739px;top:13px;width:200px;font-size:24px;color:#255E9E">2.57 dB</p>
+<p style="position:absolute;left:0px;top:73px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">영국 사례 · 보정 전 (σ)</p>
+<p style="position:absolute;left:932px;top:73px;width:200px;font-size:24px;color:#5E6675">5.71 dB</p>
+<p style="position:absolute;left:0px;top:133px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">우리 · 보정 전 (σ)</p>
+<p style="position:absolute;left:975px;top:133px;width:200px;font-size:24px;color:#A84A16"><b>6.41 dB</b></p>
+<p style="position:absolute;left:0px;top:193px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">측정으로 튜닝한 모델 (RMSE)</p>
+<p style="position:absolute;left:1133px;top:193px;width:200px;font-size:24px;color:#14213D">8~9 dB</p>
+<p style="position:absolute;left:0px;top:253px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">튜닝 전 모델의 최선 (RMSE)</p>
+<p style="position:absolute;left:1501px;top:253px;width:200px;font-size:24px;color:#5E6675">12~15 dB</p>
+<p style="position:absolute;left:520px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:765px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">4</p>
+<p style="position:absolute;left:1010px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">8</p>
+<p style="position:absolute;left:1255px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">12</p>
+<p style="position:absolute;left:1500px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">16</p>
+<p style="position:absolute;left:1584px;top:306px;width:80px;font-size:24px;color:#5E6675">dB</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">줄 세우면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">영국 보정 후보다 나쁘고<br>문헌의 튜닝 모델보다 낫다 → 판정 불가</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">Sargent의 답</p><p style="font-size:24px;line-height:1.4;color:#4A5262">“모델은 특정 목적을 위해 만들고,<br>타당성은 그 목적에 대해 판단한다”</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">오늘의 질문</p><p style="font-size:24px;line-height:1.4;color:#4A5262">“좋은가” → “무엇에 · 어느 지역에 ·<br>어느 버전까지 써도 되나”</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">영국: arXiv 2510.09478 (구역 70개) · RMSE: Phillips 외 2012 (ISM 대역 · 30개 모델) — 지표 · 조건이 달라 직접 비교 불가</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
+<aside>(약 50초) 우리 트윈의 보정 전 de-biased RMSE는 6.41 dB였습니다. 이것은 좋은 숫자일까요. 알려진 숫자와 줄을 세워 보면, 영국 Sionna 트윈 사례의 보정 후 2.57 dB보다는 나쁘고 보정 전 5.71 dB와는 비슷합니다. 경로 손실 모델 30개를 비교한 Phillips 등의 연구는 측정으로 튜닝한 모델의 RMSE를 8에서 9 dB, 튜닝 전 최선을 12에서 15 dB로 보고했습니다. 지표와 조건이 다 달라서 직접 비교할 수는 없지만, 어쨌든 줄을 세워도 좋다, 나쁘다가 정해지지 않습니다. 시뮬레이션 검증의 고전인 Sargent의 답은 이렇습니다. 모델은 특정 목적을 위해 만들고, 타당성은 그 목적에 대해 판단한다. 그래서 오늘은 질문을 바꿉니다. 좋은가가 아니라, 무엇에, 어느 지역에, 어느 버전까지 써도 되는가입니다.</aside>
+</section>
+<section id="terms" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">용어 · VV&amp;A</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">세 질문: 제대로 만들었나 · 맞는 모델인가 · 써도 되나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">V · Verification · 검증</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">제대로 만들었나 (built right)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모델 구현이 개발자의 개념 설명 · 명세를 정확히 나타내는지 정하는 과정<br><b style="color:#255E9E">트윈:</b> 솔버 · 코드 · 입력 변환 (4쪽)</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">V · Validation · 타당성 확인</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">맞는 모델인가 (right model)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">의도한 용도의 관점에서 모델이 실제 세계를 얼마나 정확히 나타내는지 정하는 과정<br><b style="color:#255E9E">트윈:</b> DT 실측과 비교 (5~11쪽)</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">A · Accreditation · 인증</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">이 용도에 써도 되나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모델이 특정 목적에 쓰기에 받아들일 만하다는 공식 확인<br><b style="color:#255E9E">트윈:</b> 용도별 합격선 · 승인자 · 유효 기간 (13쪽)</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">보정(calibration) ≠ 확인</p><p style="font-size:24px;line-height:1.4;color:#4A5262">NASA-STD-7009A: 보정은 참조값에 더 맞도록 파라미터를 조정하는 것 (= tuning)<br>→ 보정에 쓴 자료로 확인하면 맞춘 것을 다시 재는 셈 (9쪽)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">확인은 합격 · 불합격이 아니다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">ASME V&amp;V 20: 확인 = 모델 오차의 평가 (E = S − D와 그 구간)<br>→ 합격선은 용도가 정하고, 그 판단이 인증이다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">나눔</b> 검증은 만든 쪽이, 확인은 자료가, 인증은 쓰는 쪽(결정하는 사람)이 책임진다 — 셋을 한 숫자로 섞지 않는다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">정의: DoD M&amp;S 지시 (Youngblood · Pace 1995 인용) · 현행 DoDI 5000.61 (2024) · NASA-STD-7009A (2016) · Eça 외 2020</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 14</p>
+<aside>(약 55초) 시뮬레이션 분야에서는 세 질문을 나눠 묻습니다. 첫째 검증, verification은 제대로 만들었는가입니다. 미 국방부 정의로는 모델 구현이 개발자의 개념 설명과 명세를 정확히 나타내는지 정하는 과정입니다. 우리 트윈에서는 솔버와 코드, 입력 변환이 여기에 해당합니다. 둘째 타당성 확인, validation은 맞는 모델인가입니다. 의도한 용도의 관점에서 실제 세계를 얼마나 정확히 나타내는지 정하는 과정이고, 드라이브 테스트 비교가 여기입니다. 셋째 인증, accreditation은 이 용도에 써도 되는가에 대한 공식 확인입니다. 두 가지를 덧붙입니다. NASA 표준은 보정을 참조값에 더 맞도록 파라미터를 조정하는 것으로 정의합니다. 그래서 보정에 쓴 자료로 확인하면 맞춘 것을 다시 재는 셈이 됩니다. 또 ASME V&amp;V 20은 확인을 합격, 불합격이 아니라 모델 오차의 평가로 봅니다. 합격선은 용도가 정하고, 그 판단이 인증입니다. 검증은 만든 쪽이, 확인은 자료가, 인증은 쓰는 쪽이 책임진다고 나눠 두면 정리가 됩니다.</aside>
+</section>
+<section id="verify" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">검증 (Verification)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">검증: 해석해 · 수렴 · 회귀로 “제대로 만들었나”</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">시험</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무엇을 보나</p><p style="width:400px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">통과 예 (예시)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">①</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">자유 공간</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">장애물 없는 장면 → Friis 식 20 log₁₀(4πd/λ)와 비교</p><p style="width:400px;font-size:24px;line-height:1.35;color:#4A5262">차이 ≤ 0.1 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">②</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">반사 · 회절 해석해</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">평면 지면 2-ray · 단일 칼날 회절(ITU-R P.526)과 비교</p><p style="width:400px;font-size:24px;line-height:1.35;color:#4A5262">해석해 곡선과 겹침</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">상반성</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">Tx ↔ Rx를 맞바꿔도 경로 이득이 같은가</p><p style="width:400px;font-size:24px;line-height:1.35;color:#4A5262">같은 안테나일 때 일치</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">④</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">회귀 시험</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">기준 장면 · 기준 입력을 버전마다 다시 돌려 비교</p><p style="width:400px;font-size:24px;line-height:1.35;color:#4A5262">차이와 이유를 기록</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑤</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">수렴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">광선 수 · 최대 반사 차수를 늘려도 칸 값이 안정한가</p><p style="width:400px;font-size:24px;line-height:1.35;color:#4A5262">늘려도 σ 변화 &lt; 0.2 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑥</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">시뮬 잡음 σ_sim</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">시드만 바꿔 여러 번 → 칸별 흩어짐 (Breakdown 미측정 칸)</p><p style="width:400px;font-size:24px;line-height:1.35;color:#4A5262">확인 오차보다 충분히 작음</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑦</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">입력 대조</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">CM(방위 · 틸트 · 전력) ↔ 장면 입력 · 좌표 정합</p><p style="width:400px;font-size:24px;line-height:1.35;color:#4A5262">불일치 0건</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">코드 검증 (① ~ ④)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">코드가 식을 맞게 푸는가 — 단위 시험 · 회귀 시험</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">해 검증 (⑤ ~ ⑦)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이 장면 · 이 설정의 수치 오차와 입력이 충분히 작은가</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">순서</b> 검증을 건너뛰면 버그 · 미수렴 · 입력 실수가 확인 단계에서 “모델 오차”로 보인다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">구분: NASA-STD-7009A 부록 E (code · solution verification) · 통과 기준 숫자는 예시 제안 · 좌표 정합은 coord-registration</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
+<aside>(약 50초) 먼저 검증입니다. 코드가 식을 맞게 푸는지 보는 코드 검증과, 이 장면과 이 설정에서 수치 오차가 충분히 작은지 보는 해 검증으로 나눕니다. NASA 표준의 구분입니다. 코드 검증은 답을 아는 문제로 합니다. 장애물 없는 장면은 Friis 식, 평면 지면은 2-ray 해석해, 단일 칼날 회절은 ITU-R P.526과 비교합니다. 송수신을 맞바꿔도 경로 이득이 같은지 보는 상반성 시험, 버전마다 기준 장면을 다시 돌리는 회귀 시험도 있습니다. 해 검증은 광선 수와 반사 차수를 늘려도 값이 안정한지, 시드만 바꿨을 때 칸 값이 얼마나 흔들리는지 봅니다. 이 시뮬 잡음은 Breakdown 화면에서 아직 측정하지 않은 칸입니다. 망 설정과 좌표 같은 입력 대조도 여기에 넣었습니다. 오른쪽 통과 기준은 예시입니다. 검증을 건너뛰면 버그와 입력 실수가 확인 단계에서 모델 오차로 보이게 됩니다.</aside>
+</section>
+<section id="purpose" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">용도에 맞는 정확도 (fit for purpose)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">용도가 다르면 맞아야 하는 것도 다르다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">용도</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무엇이 맞아야 하나</p><p style="flex:1.15;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">볼 지표</p><p style="width:360px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">덜 중요한 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">커버리지 구멍 찾기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">문턱 근처 칸의 절대 레벨</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">bias · σ → 판정 일치율 · 구멍 재현율 (6 · 7쪽)</p><p style="width:360px;font-size:24px;line-height:1.35;color:#4A5262">문턱에서 먼 칸의 오차</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">간섭 · SINR 분석</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">셀 사이 상대 레벨 (서빙 − 이웃)</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">셀별 bias의 흩어짐 · r · 서빙 셀 일치율</p><p style="width:360px;font-size:24px;line-height:1.35;color:#4A5262">모든 셀에 공통인 bias (간섭 제한일 때)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">처리량 · 용량 예측</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">SINR + 부하 + 스케줄러 + 단말</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">RSRP 지표로는 부족 → 처리량 분포 (중앙값 · 하위 5%)를 따로</p><p style="width:360px;font-size:24px;line-height:1.35;color:#4A5262">—</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">상대 비교 (what-if)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">바꾸기 전후의 변화량 Δ</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">Δ의 오차 σ_Δ · 후보 순위 일치</p><p style="width:360px;font-size:24px;line-height:1.35;color:#4A5262">두 실행에 공통인 오차 (상쇄)</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">what-if가 너그러운 이유</p><p style="font-size:24px;line-height:1.4;color:#4A5262">σ_Δ = σ √(2(1 − ρ)) — 두 실행의 오차 상관 ρ = 0.9이면<br>σ 6.41 → σ_Δ 2.87 dB (ρ는 가정 · 따로 재야 함)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">커버리지에는 bias가 돌아온다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">판정 숫자 de-biased RMSE는 bias를 뺀 값 (Breakdown은 bias를 기록만)<br>→ 문턱 판정에서는 bias가 직접 오판을 만든다 (6쪽)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">용도 · 지표 대응은 일반적 경향을 정리한 것 · ρ = 0.9는 가정 (같은 장면 · 작은 변경일수록 큼) · 처리량은 별도 검증</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 14</p>
+<aside>(약 55초) 용도에 맞는 정확도, fit for purpose라는 말을 구체적으로 보겠습니다. 커버리지 구멍을 찾을 때는 문턱 근처 칸의 절대 레벨이 맞아야 하고, 문턱에서 먼 칸의 오차는 판정을 바꾸지 않습니다. 간섭과 SINR 분석은 셀 사이의 상대 레벨이 중요합니다. 모든 셀에 공통인 bias는 간섭 제한 영역에서 SINR을 거의 바꾸지 않지만, 셀마다 bias가 다르면 서빙 셀이 바뀝니다. 처리량과 용량은 부하, 스케줄러, 단말까지 이어지므로 RSRP 지표만으로는 판단할 수 없고 처리량 분포를 따로 확인해야 합니다. what-if 상대 비교는 가장 너그럽습니다. 두 실행에 공통인 오차가 빼기에서 상쇄되기 때문입니다. 오차 상관이 0.9라고 가정하면 6.41 dB가 변화량에서는 2.87 dB가 됩니다. 반대로 커버리지 판정에서는 bias가 돌아옵니다. 판정 숫자 de-biased RMSE는 bias를 뺀 값이라, 문턱 판정에 쓸 때는 bias를 따로 봐야 합니다.</aside>
+</section>
+<section id="onebin" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">σ → 판정 오류 ① 칸 하나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">σ는 문턱 근처에서 판정을 뒤집는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:540px">
+<svg aria-label="참 여유(가로, 0~15 dB)에 따른 칸 판정 오류 확률(세로, 0~50%) 곡선 셋. σ가 클수록, 여유가 작을수록 오류가 크고, 여유 0에서는 모두 50%" style="position:absolute;left:0px;top:0px;width:860px;height:540px" width="860" height="540" viewBox="0 0 860 540"><line x1="90" y1="460" x2="830" y2="460" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="372" x2="830" y2="372" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="284" x2="830" y2="284" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="196" x2="830" y2="196" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="108" x2="830" y2="108" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="20" x2="830" y2="20" stroke="#EAE7DF" stroke-width="2"/><rect x="90" y="20" width="148" height="440" fill="#F7DDCB" opacity="0.55"/><line x1="90" y1="460" x2="830" y2="460" stroke="#14213D" stroke-width="3"/><line x1="90" y1="20" x2="90" y2="460" stroke="#14213D" stroke-width="3"/><polyline points="90.5,21.4 100.4,48.6 110.2,75.7 120.1,102.5 129.9,128.8 139.8,154.4 149.7,179.3 159.5,203.3 169.4,226.2 179.2,248.1 189.1,268.8 199.0,288.3 208.8,306.6 218.7,323.5 228.5,339.2 238.4,353.6 248.3,366.7 258.1,378.7 268.0,389.4 277.8,399.1 287.7,407.7 297.6,415.3 307.4,422.0 317.3,427.9 327.1,433.0 337.0,437.4 346.9,441.2 356.7,444.4 366.6,447.2 376.4,449.5 386.3,451.4 396.2,453.1 406.0,454.4 415.9,455.5 425.7,456.4 435.6,457.2 445.5,457.8 455.3,458.3 465.2,458.6 475.0,458.9 484.9,459.2 494.8,459.4 504.6,459.5 514.5,459.6 524.3,459.7 534.2,459.8 544.1,459.8 553.9,459.9 563.8,459.9 573.6,459.9 583.5,460.0 593.4,460.0 603.2,460.0 613.1,460.0 622.9,460.0 632.8,460.0 642.7,460.0 652.5,460.0 662.4,460.0 672.2,460.0 682.1,460.0 692.0,460.0 701.8,460.0 711.7,460.0 721.5,460.0 731.4,460.0 741.3,460.0 751.1,460.0 761.0,460.0 770.8,460.0 780.7,460.0 790.6,460.0 800.4,460.0 810.3,460.0 820.1,460.0 830.0,460.0" fill="none" stroke="#255E9E" stroke-width="5"/><polyline points="90.5,20.5 100.4,31.5 110.2,42.4 120.1,53.3 129.9,64.2 139.8,75.1 149.7,85.8 159.5,96.6 169.4,107.2 179.2,117.8 189.1,128.2 199.0,138.6 208.8,148.9 218.7,159.0 228.5,169.0 238.4,178.9 248.3,188.6 258.1,198.2 268.0,207.6 277.8,216.9 287.7,226.0 297.6,234.9 307.4,243.6 317.3,252.2 327.1,260.5 337.0,268.7 346.9,276.7 356.7,284.4 366.6,292.0 376.4,299.4 386.3,306.5 396.2,313.5 406.0,320.2 415.9,326.8 425.7,333.1 435.6,339.2 445.5,345.2 455.3,350.9 465.2,356.4 475.0,361.7 484.9,366.8 494.8,371.8 504.6,376.5 514.5,381.0 524.3,385.4 534.2,389.5 544.1,393.5 553.9,397.4 563.8,401.0 573.6,404.5 583.5,407.8 593.4,411.0 603.2,414.0 613.1,416.8 622.9,419.6 632.8,422.1 642.7,424.6 652.5,426.9 662.4,429.1 672.2,431.1 682.1,433.1 692.0,434.9 701.8,436.7 711.7,438.3 721.5,439.8 731.4,441.3 741.3,442.6 751.1,443.9 761.0,445.1 770.8,446.2 780.7,447.3 790.6,448.2 800.4,449.1 810.3,450.0 820.1,450.8 830.0,451.5" fill="none" stroke="#A84A16" stroke-width="5"/><polyline points="90.5,20.4 100.4,29.2 110.2,38.0 120.1,46.7 129.9,55.5 139.8,64.2 149.7,72.9 159.5,81.5 169.4,90.1 179.2,98.7 189.1,107.2 199.0,115.7 208.8,124.1 218.7,132.5 228.5,140.7 238.4,149.0 248.3,157.1 258.1,165.1 268.0,173.1 277.8,181.0 287.7,188.8 297.6,196.5 307.4,204.0 317.3,211.5 327.1,218.9 337.0,226.2 346.9,233.3 356.7,240.4 366.6,247.3 376.4,254.1 386.3,260.8 396.2,267.3 406.0,273.7 415.9,280.1 425.7,286.2 435.6,292.3 445.5,298.2 455.3,304.0 465.2,309.6 475.0,315.1 484.9,320.5 494.8,325.8 504.6,330.9 514.5,335.9 524.3,340.7 534.2,345.4 544.1,350.0 553.9,354.5 563.8,358.8 573.6,363.0 583.5,367.1 593.4,371.0 603.2,374.9 613.1,378.6 622.9,382.2 632.8,385.6 642.7,389.0 652.5,392.2 662.4,395.3 672.2,398.3 682.1,401.2 692.0,404.0 701.8,406.7 711.7,409.3 721.5,411.8 731.4,414.2 741.3,416.5 751.1,418.7 761.0,420.8 770.8,422.8 780.7,424.8 790.6,426.6 800.4,428.4 810.3,430.1 820.1,431.7 830.0,433.3" fill="none" stroke="#14213D" stroke-width="5" stroke-dasharray="10 7"/><line x1="485" y1="73" x2="534" y2="73" stroke="#255E9E" stroke-width="5"/><line x1="485" y1="111" x2="534" y2="111" stroke="#A84A16" stroke-width="5"/><line x1="485" y1="149" x2="534" y2="149" stroke="#14213D" stroke-width="5" stroke-dasharray="10 7"/></svg>
+<p style="position:absolute;left:0px;top:444px;width:76px;font-size:24px;text-align:right;color:#5E6675">0%</p>
+<p style="position:absolute;left:0px;top:356px;width:76px;font-size:24px;text-align:right;color:#5E6675">10%</p>
+<p style="position:absolute;left:0px;top:268px;width:76px;font-size:24px;text-align:right;color:#5E6675">20%</p>
+<p style="position:absolute;left:0px;top:180px;width:76px;font-size:24px;text-align:right;color:#5E6675">30%</p>
+<p style="position:absolute;left:0px;top:92px;width:76px;font-size:24px;text-align:right;color:#5E6675">40%</p>
+<p style="position:absolute;left:0px;top:4px;width:76px;font-size:24px;text-align:right;color:#5E6675">50%</p>
+<p style="position:absolute;left:50px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:198px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">3</p>
+<p style="position:absolute;left:346px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">6</p>
+<p style="position:absolute;left:494px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">9</p>
+<p style="position:absolute;left:642px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">12</p>
+<p style="position:absolute;left:790px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">15</p>
+<p style="position:absolute;left:90px;top:504px;width:740px;font-size:24px;text-align:center;color:#14213D">참 여유 |m| = |실측 − 문턱| (dB)</p>
+<p style="position:absolute;left:94px;top:400px;width:150px;font-size:24px;color:#A84A16;font-weight:700">|m| &lt; 3 dB</p>
+<p style="position:absolute;left:544px;top:56px;width:330px;font-size:24px;font-weight:700;color:#255E9E">σ = 2.57 dB (영국 보정 후)</p>
+<p style="position:absolute;left:544px;top:94px;width:330px;font-size:24px;font-weight:700;color:#A84A16">σ = 6.41 dB (우리)</p>
+<p style="position:absolute;left:544px;top:132px;width:330px;font-size:24px;font-weight:700;color:#14213D">σ = 8.00 dB</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">P(오판) = Φ(−|m| / σ)        (bias 0)<br>덮인 칸: Φ((−m − b) / σ)<br>구멍 칸: Φ((b − |m|) / σ)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">여유 |m|</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">σ 2.57</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">σ 6.41</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">σ 8</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">3 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">12.2%</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">32.0%</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">35.4%</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">6 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">1.0%</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">17.5%</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">22.7%</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">10 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">0.0%</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">5.9%</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">10.6%</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">bias가 있으면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">시뮬이 +3 dB 낙관적(b = +3)이면 3 dB 깊이의 구멍은 σ와 상관없이 <b style="color:#A84A16">50%</b> 놓친다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">계산: 정규 오차 e ~ N(b, σ) 가정 · m = 실측 − 문턱 (실측을 참값으로 둠) · 오차 부호 = 시뮬 − 실측</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 14</p>
+<aside>(약 55초) 이제 σ를 판정 오류로 바꿔 보겠습니다. 칸 하나의 참 여유를 m, 실측 RSRP에서 문턱을 뺀 값이라고 하고, 시뮬 오차가 평균 b, 표준편차 σ인 정규분포라고 가정합니다. 오차가 여유보다 크게 반대 방향으로 나오면 판정이 뒤집히므로, bias가 0일 때 오판 확률은 Φ(−|m|/σ)입니다. 그림의 가로축이 여유, 세로축이 오판 확률입니다. 여유 3 dB인 칸은 영국 보정 후 수준 σ 2.57 dB에서 12%, 우리 6.41 dB에서 32% 뒤집힙니다. 여유 6 dB이면 1%와 17%, 10 dB이면 거의 0과 6%입니다. bias는 더 직접적입니다. 시뮬이 3 dB 낙관적이면 깊이 3 dB의 구멍은 σ와 상관없이 절반을 놓칩니다. 그래서 커버리지 용도에서는 bias를 따로 합격선에 넣어야 합니다.</aside>
+</section>
+<section id="rate" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">σ → 판정 오류 ② 칸 전체 · 예시</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">σ 하나를 오판율과 구멍 재현율로 바꾸면</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:540px">
+<svg aria-label="σ(가로, 0~10 dB)에 따른 칸 판정 오판율(세로, 0~25%) 곡선 셋: bias 0, +3, −3 dB. σ 2.57과 6.41 자리에 점" style="position:absolute;left:0px;top:0px;width:860px;height:540px" width="860" height="540" viewBox="0 0 860 540"><line x1="90" y1="460" x2="830" y2="460" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="372" x2="830" y2="372" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="284" x2="830" y2="284" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="196" x2="830" y2="196" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="108" x2="830" y2="108" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="20" x2="830" y2="20" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="284" x2="830" y2="284" stroke="#2F7D5B" stroke-width="3" stroke-dasharray="8 6"/><line x1="90" y1="460" x2="830" y2="460" stroke="#14213D" stroke-width="3"/><line x1="90" y1="20" x2="90" y2="460" stroke="#14213D" stroke-width="3"/><polyline points="90.0,460.0 108.5,451.6 127.0,443.5 145.5,435.0 164.0,426.2 182.5,418.1 201.0,409.5 219.5,401.3 238.0,392.8 256.5,383.9 275.0,375.3 293.5,367.0 312.0,358.8 330.5,350.0 349.0,342.0 367.5,332.9 386.0,324.5 404.5,316.7 423.0,308.3 441.5,300.3 460.0,291.9 478.5,284.0 497.0,275.9 515.5,268.2 534.0,260.3 552.5,252.5 571.0,244.6 589.5,236.4 608.0,228.3 626.5,221.0 645.0,213.2 663.5,205.2 682.0,197.7 700.5,190.3 719.0,182.9 737.5,175.8 756.0,168.7 774.5,161.6 793.0,155.1 811.5,148.7 830.0,141.8" fill="none" stroke="#14213D" stroke-width="5"/><polyline points="108.5,350.6 127.0,350.9 145.5,351.7 164.0,352.5 182.5,353.6 201.0,354.1 219.5,353.9 238.0,353.2 256.5,352.2 275.0,350.0 293.5,347.3 312.0,344.4 330.5,341.0 349.0,336.9 367.5,332.9 386.0,328.5 404.5,323.6 423.0,318.5 441.5,313.2 460.0,307.9 478.5,302.3 497.0,297.0 515.5,291.3 534.0,285.2 552.5,278.7 571.0,272.9 589.5,267.2 608.0,261.7 626.5,256.0 645.0,250.3 663.5,244.5 682.0,238.3 700.5,232.2 719.0,226.1 737.5,219.8 756.0,213.7 774.5,207.4 793.0,201.4 811.5,195.3 830.0,189.4" fill="none" stroke="#A84A16" stroke-width="5"/><polyline points="108.5,313.4 127.0,313.1 145.5,312.9 164.0,312.4 182.5,311.2 201.0,308.9 219.5,306.1 238.0,302.0 256.5,297.3 275.0,291.5 293.5,285.4 312.0,279.2 330.5,271.8 349.0,264.6 367.5,256.8 386.0,249.4 404.5,241.3 423.0,233.2 441.5,225.2 460.0,217.0 478.5,209.0 497.0,200.4 515.5,192.5 534.0,184.6 552.5,176.6 571.0,169.1 589.5,161.6 608.0,153.8 626.5,146.0 645.0,138.2 663.5,130.6 682.0,123.0 700.5,116.0 719.0,108.4 737.5,101.3 756.0,94.4 774.5,87.4 793.0,80.9 811.5,74.0 830.0,67.3" fill="none" stroke="#255E9E" stroke-width="5" stroke-dasharray="10 7"/><line x1="280" y1="20" x2="280" y2="460" stroke="#255E9E" stroke-width="2" stroke-dasharray="4 5"/><circle cx="280" cy="373" r="9" fill="#255E9E" stroke="#FBFAF7" stroke-width="3"/><line x1="564" y1="20" x2="564" y2="460" stroke="#A84A16" stroke-width="2" stroke-dasharray="4 5"/><circle cx="564" cy="247" r="9" fill="#A84A16" stroke="#FBFAF7" stroke-width="3"/></svg>
+<p style="position:absolute;left:0px;top:444px;width:76px;font-size:24px;text-align:right;color:#5E6675">0%</p>
+<p style="position:absolute;left:0px;top:356px;width:76px;font-size:24px;text-align:right;color:#5E6675">5%</p>
+<p style="position:absolute;left:0px;top:268px;width:76px;font-size:24px;text-align:right;color:#5E6675">10%</p>
+<p style="position:absolute;left:0px;top:180px;width:76px;font-size:24px;text-align:right;color:#5E6675">15%</p>
+<p style="position:absolute;left:0px;top:92px;width:76px;font-size:24px;text-align:right;color:#5E6675">20%</p>
+<p style="position:absolute;left:0px;top:4px;width:76px;font-size:24px;text-align:right;color:#5E6675">25%</p>
+<p style="position:absolute;left:50px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:198px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">2</p>
+<p style="position:absolute;left:346px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">4</p>
+<p style="position:absolute;left:494px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">6</p>
+<p style="position:absolute;left:642px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">8</p>
+<p style="position:absolute;left:790px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">10</p>
+<p style="position:absolute;left:90px;top:504px;width:740px;font-size:24px;text-align:center;color:#14213D">σ (de-biased RMSE, dB)</p>
+<p style="position:absolute;left:100px;top:246px;width:300px;font-size:24px;color:#2F7D5B;font-weight:700">일치율 90% 선</p>
+<p style="position:absolute;left:110px;top:28px;width:320px;font-size:24px;font-weight:700;color:#14213D;background:#F5F3EE">bias 0</p>
+<p style="position:absolute;left:110px;top:64px;width:320px;font-size:24px;font-weight:700;color:#A84A16;background:#F5F3EE">bias +3 dB (낙관)</p>
+<p style="position:absolute;left:110px;top:100px;width:320px;font-size:24px;font-weight:700;color:#255E9E;background:#F5F3EE">bias −3 dB (비관)</p>
+<p style="position:absolute;left:210px;top:387px;width:140px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">5.0%</p>
+<p style="position:absolute;left:590px;top:294px;width:120px;font-size:24px;font-weight:700;color:#A84A16">12.1%</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:200px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">칸 1,000개당</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">σ 2.57</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">σ 6.41</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:200px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">구멍 → 구멍</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">138</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">119</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:200px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">구멍 → 놓침</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">21</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">40</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:200px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">덮임 → 가짜 구멍</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">28</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">81</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:200px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">덮임 → 덮임</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">813</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">760</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:200px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">구멍 재현율</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">87%</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">75%</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">거꾸로 읽기 (bias 0)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">일치율 90% → σ ≤ 5.2 dB · 95% → σ ≤ 2.6 dB<br>구멍 재현율 80% → σ ≤ 4.4 dB</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">bias +3 dB이면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">σ 6.41에서 구멍 재현율 75% → 60%</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">가정: 실측 칸 RSRP ~ N(−100, 10) dBm · 문턱 -110 dBm (구멍 16%) · 정규 오차 · 칸 독립 · 20만 칸 몬테카를로 (시드 3)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 14</p>
+<aside>(약 55초) 칸 하나가 아니라 지역 전체로 넓혀 보겠습니다. 예시로 실측 칸 RSRP가 평균 −100 dBm, 표준편차 10 dB로 퍼져 있고, 문턱을 -110 dBm으로 두면 칸의 약 16%가 구멍입니다. 20만 칸으로 계산한 오판율이 그림입니다. bias가 0일 때 σ 2.57 dB면 5.0%, 우리 6.41 dB면 12.1%가 틀립니다. 오른쪽 표처럼 칸 1,000개당 구멍 159개 가운데 40개를 놓치고, 가짜 구멍이 81개 생깁니다. 구멍 재현율은 75%입니다. 이 곡선을 거꾸로 읽으면 요구 조건이 나옵니다. 일치율 90%가 필요하면 σ는 5.2 dB 이하, 95%면 2.6 dB 이하여야 합니다. bias가 +3 dB면 대부분인 덮인 칸 쪽 오판이 줄어 전체 오판율은 비슷하거나 조금 낮게 나오지만, 구멍 재현율은 60%로 떨어집니다. 오판율 하나만 보면 안 되는 이유입니다. 숫자는 가정한 분포에 따른 예시이고, 우리 지역의 실측 분포로 다시 계산하면 됩니다.</aside>
+</section>
+<section id="criteria" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">합격선 (acceptability criteria) · 예시 제안</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">합격선은 용도별로, 결정 요구에서 거꾸로</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">용도</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">판정 지표</p><p style="flex:1.1;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">예시 합격선 (제안 · 표준 아님)</p><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">근거</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">커버리지 구멍 찾기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">판정 일치율 · 구멍 재현율 · |bias|</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">일치 ≥ 90% · 재현 ≥ 80% · |b| ≤ 1 dB<br>→ σ ≲ 4.4 dB (7쪽 가정 분포)</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">7쪽 계산</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">간섭 · SINR 분석</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">셀별 bias의 흩어짐 · 서빙 셀 일치율</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">셀별 bias 흩어짐 ≤ 2 dB · 서빙 셀 일치 ≥ 80%</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">팀 합의로 정할 값</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">처리량 · 용량 예측</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">처리량 중앙값 · 하위 5% 값</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">실측 대비 ±20% 이내</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">팀 합의로 정할 값</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">상대 비교 (what-if)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">Δ 오차 σ_Δ · 후보 순위 일치</p><p style="flex:1.1;font-size:24px;line-height:1.35;color:#4A5262">σ_Δ ≤ 3 dB · 순위 일치 ≥ 80%</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">5쪽 식</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">문헌의 보정 후 수준 (표준 아님)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Phillips 외 2012: 측정으로 튜닝한 경로 손실 모델 RMSE 8~9 dB<br>ISM 대역 · RMSE(bias 포함) — 우리 σ와 직접 비교 불가<br>“이만큼은 흔하다”는 감각일 뿐, 합격선이 아니다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">정하는 순서</p><p style="font-size:24px;line-height:1.4;color:#4A5262">① 결정을 적는다 (구멍 목록 → 투자)<br>② 허용 오판율을 정한다 → ③ σ · bias로 바꾼다<br>④ 개발 · 보정 전에 고정한다 (Sargent)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">합격선 숫자는 모두 예시 제안 · 무선 트윈용 공인 합격선은 찾지 못함 · 문헌 값: Phillips 외 2012 (IJAP)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
+<aside>(약 55초) 합격선은 용도별로 따로 정하고, 결정 요구에서 거꾸로 끌어냅니다. 표의 숫자는 모두 제안하는 예시이고 표준이 아닙니다. 무선 트윈에 쓰는 공인 합격선은 찾지 못했습니다. 커버리지 구멍 찾기에서 일치율 90%, 재현율 80%를 요구하면 앞쪽 계산으로 σ는 약 4.4 dB 이하, bias는 1 dB 이내가 됩니다. 간섭 분석은 셀별 bias의 흩어짐과 서빙 셀 일치율, 처리량은 중앙값과 하위 5% 값, what-if는 변화량 오차와 순위 일치로 봅니다. 이 값들은 팀이 합의해서 정할 몫입니다. 참고로 문헌에서는 측정으로 튜닝한 경로 손실 모델의 RMSE가 8에서 9 dB 정도로 보고됩니다. 다만 대역과 지표가 달라 합격선으로 쓸 수는 없고, 이 정도는 흔하다는 감각으로만 봅니다. 그리고 Sargent는 허용 정확도를 개발 전에, 늦어도 초기에 정하라고 합니다. 결과를 보고 합격선을 정하면 늘 합격하기 때문입니다.</aside>
+</section>
+<section id="split" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">자료 나누기 · 예시 시뮬레이션</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">보정 자료와 확인 자료는 공간으로 떼어 놓는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:526px">
+<svg aria-label="왼쪽은 칸마다 무작위로 보정용과 확인용을 섞은 지도, 오른쪽은 큰 블록 단위로 바둑판처럼 나눈 지도. 무작위 분할은 보정 후 오차를 낙관적으로 작게 잰다" style="position:absolute;left:0px;top:0px;width:860px;height:526px" width="860" height="526" viewBox="0 0 860 526"><path d="M66 40h11v11h-11zM99 40h11v11h-11zM121 40h44v11h-44zM176 40h33v11h-33zM220 40h11v11h-11zM242 40h33v11h-33zM308 40h22v11h-22zM341 40h11v11h-11zM385 40h11v11h-11zM11 51h11v11h-11zM44 51h11v11h-11zM66 51h22v11h-22zM99 51h33v11h-33zM143 51h33v11h-33zM187 51h11v11h-11zM209 51h11v11h-11zM242 51h11v11h-11zM275 51h55v11h-55zM352 51h33v11h-33zM0 62h33v11h-33zM55 62h44v11h-44zM110 62h33v11h-33zM154 62h55v11h-55zM220 62h22v11h-22zM275 62h33v11h-33zM319 62h11v11h-11zM341 62h11v11h-11zM363 62h11v11h-11zM385 62h11v11h-11zM11 73h44v11h-44zM77 73h11v11h-11zM110 73h22v11h-22zM154 73h22v11h-22zM198 73h11v11h-11zM253 73h22v11h-22zM308 73h11v11h-11zM352 73h11v11h-11zM374 73h22v11h-22zM22 84h11v11h-11zM44 84h22v11h-22zM88 84h11v11h-11zM110 84h11v11h-11zM132 84h22v11h-22zM176 84h11v11h-11zM198 84h44v11h-44zM253 84h22v11h-22zM297 84h11v11h-11zM341 84h22v11h-22zM385 84h11v11h-11zM11 95h11v11h-11zM33 95h11v11h-11zM55 95h11v11h-11zM77 95h11v11h-11zM121 95h44v11h-44zM187 95h11v11h-11zM209 95h55v11h-55zM275 95h11v11h-11zM330 95h11v11h-11zM352 95h11v11h-11zM385 95h11v11h-11zM0 106h22v11h-22zM77 106h22v11h-22zM143 106h11v11h-11zM176 106h44v11h-44zM275 106h11v11h-11zM297 106h66v11h-66zM385 106h11v11h-11zM0 117h11v11h-11zM88 117h44v11h-44zM154 117h11v11h-11zM187 117h11v11h-11zM209 117h11v11h-11zM253 117h33v11h-33zM297 117h11v11h-11zM319 117h11v11h-11zM363 117h33v11h-33zM0 128h11v11h-11zM33 128h11v11h-11zM66 128h22v11h-22zM99 128h11v11h-11zM143 128h22v11h-22zM198 128h11v11h-11zM220 128h11v11h-11zM286 128h11v11h-11zM308 128h11v11h-11zM330 128h33v11h-33zM374 128h11v11h-11zM0 139h11v11h-11zM44 139h11v11h-11zM66 139h11v11h-11zM88 139h11v11h-11zM121 139h44v11h-44zM176 139h11v11h-11zM209 139h11v11h-11zM242 139h11v11h-11zM264 139h22v11h-22zM319 139h11v11h-11zM341 139h22v11h-22zM0 150h22v11h-22zM44 150h11v11h-11zM66 150h11v11h-11zM88 150h11v11h-11zM121 150h11v11h-11zM143 150h11v11h-11zM187 150h11v11h-11zM220 150h33v11h-33zM264 150h22v11h-22zM297 150h22v11h-22zM330 150h11v11h-11zM352 150h11v11h-11zM385 150h11v11h-11zM22 161h11v11h-11zM55 161h11v11h-11zM88 161h11v11h-11zM121 161h11v11h-11zM154 161h77v11h-77zM242 161h22v11h-22zM286 161h33v11h-33zM352 161h11v11h-11zM374 161h22v11h-22zM0 172h55v11h-55zM88 172h33v11h-33zM132 172h11v11h-11zM176 172h22v11h-22zM253 172h44v11h-44zM308 172h11v11h-11zM330 172h11v11h-11zM352 172h22v11h-22zM22 183h11v11h-11zM77 183h11v11h-11zM121 183h11v11h-11zM176 183h11v11h-11zM209 183h11v11h-11zM242 183h11v11h-11zM286 183h11v11h-11zM330 183h22v11h-22zM0 194h11v11h-11zM22 194h11v11h-11zM55 194h55v11h-55zM121 194h22v11h-22zM209 194h22v11h-22zM242 194h77v11h-77zM330 194h22v11h-22zM374 194h11v11h-11zM11 205h11v11h-11zM77 205h22v11h-22zM132 205h33v11h-33zM198 205h22v11h-22zM231 205h11v11h-11zM264 205h11v11h-11zM308 205h22v11h-22zM341 205h55v11h-55zM0 216h11v11h-11zM99 216h11v11h-11zM220 216h22v11h-22zM253 216h11v11h-11zM352 216h11v11h-11zM374 216h22v11h-22zM0 227h11v11h-11zM22 227h44v11h-44zM110 227h11v11h-11zM143 227h11v11h-11zM165 227h11v11h-11zM187 227h33v11h-33zM231 227h11v11h-11zM264 227h33v11h-33zM352 227h11v11h-11zM374 227h11v11h-11zM11 238h22v11h-22zM55 238h11v11h-11zM77 238h88v11h-88zM187 238h22v11h-22zM242 238h66v11h-66zM319 238h11v11h-11zM341 238h11v11h-11zM385 238h11v11h-11zM11 249h22v11h-22zM44 249h11v11h-11zM66 249h11v11h-11zM88 249h11v11h-11zM132 249h11v11h-11zM165 249h11v11h-11zM187 249h11v11h-11zM209 249h33v11h-33zM253 249h11v11h-11zM308 249h44v11h-44zM385 249h11v11h-11zM0 260h11v11h-11zM33 260h11v11h-11zM55 260h11v11h-11zM110 260h22v11h-22zM143 260h66v11h-66zM286 260h11v11h-11zM308 260h33v11h-33zM374 260h22v11h-22zM11 271h22v11h-22zM44 271h11v11h-11zM88 271h11v11h-11zM121 271h33v11h-33zM176 271h33v11h-33zM231 271h33v11h-33zM286 271h11v11h-11zM308 271h11v11h-11zM330 271h11v11h-11zM363 271h33v11h-33zM0 282h22v11h-22zM33 282h22v11h-22zM66 282h11v11h-11zM88 282h33v11h-33zM132 282h22v11h-22zM187 282h11v11h-11zM286 282h33v11h-33zM330 282h11v11h-11zM352 282h22v11h-22zM385 282h11v11h-11zM0 293h11v11h-11zM33 293h33v11h-33zM77 293h22v11h-22zM121 293h33v11h-33zM165 293h22v11h-22zM209 293h11v11h-11zM242 293h22v11h-22zM275 293h11v11h-11zM308 293h22v11h-22zM341 293h33v11h-33zM0 304h11v11h-11zM22 304h11v11h-11zM55 304h11v11h-11zM77 304h11v11h-11zM110 304h22v11h-22zM143 304h11v11h-11zM165 304h11v11h-11zM187 304h11v11h-11zM209 304h11v11h-11zM231 304h22v11h-22zM297 304h22v11h-22zM363 304h11v11h-11zM385 304h11v11h-11zM0 315h55v11h-55zM66 315h11v11h-11zM88 315h11v11h-11zM110 315h22v11h-22zM143 315h22v11h-22zM187 315h11v11h-11zM209 315h11v11h-11zM242 315h11v11h-11zM286 315h11v11h-11zM330 315h33v11h-33zM374 315h11v11h-11zM0 326h11v11h-11zM33 326h22v11h-22zM77 326h11v11h-11zM99 326h11v11h-11zM121 326h44v11h-44zM198 326h11v11h-11zM231 326h11v11h-11zM264 326h11v11h-11zM286 326h33v11h-33zM330 326h22v11h-22zM363 326h11v11h-11zM385 326h11v11h-11zM11 337h11v11h-11zM33 337h11v11h-11zM55 337h11v11h-11zM88 337h33v11h-33zM143 337h11v11h-11zM198 337h11v11h-11zM220 337h66v11h-66zM297 337h11v11h-11zM363 337h11v11h-11zM11 348h11v11h-11zM33 348h11v11h-11zM55 348h11v11h-11zM88 348h11v11h-11zM110 348h11v11h-11zM143 348h22v11h-22zM220 348h22v11h-22zM264 348h55v11h-55zM330 348h22v11h-22zM374 348h22v11h-22zM11 359h11v11h-11zM33 359h44v11h-44zM88 359h22v11h-22zM132 359h11v11h-11zM176 359h11v11h-11zM198 359h11v11h-11zM264 359h11v11h-11zM308 359h11v11h-11zM330 359h22v11h-22zM363 359h11v11h-11zM385 359h11v11h-11zM0 370h11v11h-11zM44 370h22v11h-22zM132 370h22v11h-22zM165 370h11v11h-11zM209 370h33v11h-33zM253 370h11v11h-11zM275 370h22v11h-22zM319 370h11v11h-11zM352 370h11v11h-11zM374 370h22v11h-22zM22 381h11v11h-11zM55 381h44v11h-44zM132 381h11v11h-11zM165 381h22v11h-22zM198 381h11v11h-11zM220 381h11v11h-11zM275 381h44v11h-44zM363 381h11v11h-11zM0 392h55v11h-55zM88 392h22v11h-22zM121 392h33v11h-33zM187 392h11v11h-11zM231 392h22v11h-22zM286 392h11v11h-11zM308 392h44v11h-44zM363 392h11v11h-11zM0 403h22v11h-22zM33 403h11v11h-11zM77 403h11v11h-11zM143 403h11v11h-11zM176 403h33v11h-33zM220 403h11v11h-11zM275 403h11v11h-11zM297 403h11v11h-11zM319 403h11v11h-11zM341 403h33v11h-33zM385 403h11v11h-11zM0 414h11v11h-11zM33 414h11v11h-11zM55 414h22v11h-22zM99 414h44v11h-44zM165 414h22v11h-22zM198 414h11v11h-11zM220 414h33v11h-33zM297 414h11v11h-11zM319 414h22v11h-22zM374 414h22v11h-22zM11 425h22v11h-22zM55 425h22v11h-22zM88 425h22v11h-22zM121 425h22v11h-22zM154 425h33v11h-33zM198 425h11v11h-11zM242 425h22v11h-22zM308 425h22v11h-22zM352 425h44v11h-44z" fill="#255E9E"/><path d="M0 40h66v11h-66zM77 40h22v11h-22zM110 40h11v11h-11zM165 40h11v11h-11zM209 40h11v11h-11zM231 40h11v11h-11zM275 40h33v11h-33zM330 40h11v11h-11zM352 40h33v11h-33zM0 51h11v11h-11zM22 51h22v11h-22zM55 51h11v11h-11zM88 51h11v11h-11zM132 51h11v11h-11zM176 51h11v11h-11zM198 51h11v11h-11zM220 51h22v11h-22zM253 51h22v11h-22zM330 51h22v11h-22zM385 51h11v11h-11zM33 62h22v11h-22zM99 62h11v11h-11zM143 62h11v11h-11zM209 62h11v11h-11zM242 62h33v11h-33zM308 62h11v11h-11zM330 62h11v11h-11zM352 62h11v11h-11zM374 62h11v11h-11zM0 73h11v11h-11zM55 73h22v11h-22zM88 73h22v11h-22zM132 73h22v11h-22zM176 73h22v11h-22zM209 73h44v11h-44zM275 73h33v11h-33zM319 73h33v11h-33zM363 73h11v11h-11zM0 84h22v11h-22zM33 84h11v11h-11zM66 84h22v11h-22zM99 84h11v11h-11zM121 84h11v11h-11zM154 84h22v11h-22zM187 84h11v11h-11zM242 84h11v11h-11zM275 84h22v11h-22zM308 84h33v11h-33zM363 84h22v11h-22zM0 95h11v11h-11zM22 95h11v11h-11zM44 95h11v11h-11zM66 95h11v11h-11zM88 95h33v11h-33zM165 95h22v11h-22zM198 95h11v11h-11zM264 95h11v11h-11zM286 95h44v11h-44zM341 95h11v11h-11zM363 95h22v11h-22zM22 106h55v11h-55zM99 106h44v11h-44zM154 106h22v11h-22zM220 106h55v11h-55zM286 106h11v11h-11zM363 106h22v11h-22zM11 117h77v11h-77zM132 117h22v11h-22zM165 117h22v11h-22zM198 117h11v11h-11zM220 117h33v11h-33zM286 117h11v11h-11zM308 117h11v11h-11zM330 117h33v11h-33zM11 128h22v11h-22zM44 128h22v11h-22zM88 128h11v11h-11zM110 128h33v11h-33zM165 128h33v11h-33zM209 128h11v11h-11zM231 128h55v11h-55zM297 128h11v11h-11zM319 128h11v11h-11zM363 128h11v11h-11zM385 128h11v11h-11zM11 139h33v11h-33zM55 139h11v11h-11zM77 139h11v11h-11zM99 139h22v11h-22zM165 139h11v11h-11zM187 139h22v11h-22zM220 139h22v11h-22zM253 139h11v11h-11zM286 139h33v11h-33zM330 139h11v11h-11zM363 139h33v11h-33zM22 150h22v11h-22zM55 150h11v11h-11zM77 150h11v11h-11zM99 150h22v11h-22zM132 150h11v11h-11zM154 150h33v11h-33zM198 150h22v11h-22zM253 150h11v11h-11zM286 150h11v11h-11zM319 150h11v11h-11zM341 150h11v11h-11zM363 150h22v11h-22zM0 161h22v11h-22zM33 161h22v11h-22zM66 161h22v11h-22zM99 161h22v11h-22zM132 161h22v11h-22zM231 161h11v11h-11zM264 161h22v11h-22zM319 161h33v11h-33zM363 161h11v11h-11zM55 172h33v11h-33zM121 172h11v11h-11zM143 172h33v11h-33zM198 172h55v11h-55zM297 172h11v11h-11zM319 172h11v11h-11zM341 172h11v11h-11zM374 172h22v11h-22zM0 183h22v11h-22zM33 183h44v11h-44zM88 183h33v11h-33zM132 183h44v11h-44zM187 183h22v11h-22zM220 183h22v11h-22zM253 183h33v11h-33zM297 183h33v11h-33zM352 183h44v11h-44zM11 194h11v11h-11zM33 194h22v11h-22zM110 194h11v11h-11zM143 194h66v11h-66zM231 194h11v11h-11zM319 194h11v11h-11zM352 194h22v11h-22zM385 194h11v11h-11zM0 205h11v11h-11zM22 205h55v11h-55zM99 205h33v11h-33zM165 205h33v11h-33zM220 205h11v11h-11zM242 205h22v11h-22zM275 205h33v11h-33zM330 205h11v11h-11zM11 216h88v11h-88zM110 216h110v11h-110zM242 216h11v11h-11zM264 216h88v11h-88zM363 216h11v11h-11zM11 227h11v11h-11zM66 227h44v11h-44zM121 227h22v11h-22zM154 227h11v11h-11zM176 227h11v11h-11zM220 227h11v11h-11zM242 227h22v11h-22zM297 227h55v11h-55zM363 227h11v11h-11zM385 227h11v11h-11zM0 238h11v11h-11zM33 238h22v11h-22zM66 238h11v11h-11zM165 238h22v11h-22zM209 238h33v11h-33zM308 238h11v11h-11zM330 238h11v11h-11zM352 238h33v11h-33zM0 249h11v11h-11zM33 249h11v11h-11zM55 249h11v11h-11zM77 249h11v11h-11zM99 249h33v11h-33zM143 249h22v11h-22zM176 249h11v11h-11zM198 249h11v11h-11zM242 249h11v11h-11zM264 249h44v11h-44zM352 249h33v11h-33zM11 260h22v11h-22zM44 260h11v11h-11zM66 260h44v11h-44zM132 260h11v11h-11zM209 260h77v11h-77zM297 260h11v11h-11zM341 260h33v11h-33zM0 271h11v11h-11zM33 271h11v11h-11zM55 271h33v11h-33zM99 271h22v11h-22zM154 271h22v11h-22zM209 271h22v11h-22zM264 271h22v11h-22zM297 271h11v11h-11zM319 271h11v11h-11zM341 271h22v11h-22zM22 282h11v11h-11zM55 282h11v11h-11zM77 282h11v11h-11zM121 282h11v11h-11zM154 282h33v11h-33zM198 282h88v11h-88zM319 282h11v11h-11zM341 282h11v11h-11zM374 282h11v11h-11zM11 293h22v11h-22zM66 293h11v11h-11zM99 293h22v11h-22zM154 293h11v11h-11zM187 293h22v11h-22zM220 293h22v11h-22zM264 293h11v11h-11zM286 293h22v11h-22zM330 293h11v11h-11zM374 293h22v11h-22zM11 304h11v11h-11zM33 304h22v11h-22zM66 304h11v11h-11zM88 304h22v11h-22zM132 304h11v11h-11zM154 304h11v11h-11zM176 304h11v11h-11zM198 304h11v11h-11zM220 304h11v11h-11zM253 304h44v11h-44zM319 304h44v11h-44zM374 304h11v11h-11zM55 315h11v11h-11zM77 315h11v11h-11zM99 315h11v11h-11zM132 315h11v11h-11zM165 315h22v11h-22zM198 315h11v11h-11zM220 315h22v11h-22zM253 315h33v11h-33zM297 315h33v11h-33zM363 315h11v11h-11zM385 315h11v11h-11zM11 326h22v11h-22zM55 326h22v11h-22zM88 326h11v11h-11zM110 326h11v11h-11zM165 326h33v11h-33zM209 326h22v11h-22zM242 326h22v11h-22zM275 326h11v11h-11zM319 326h11v11h-11zM352 326h11v11h-11zM374 326h11v11h-11zM0 337h11v11h-11zM22 337h11v11h-11zM44 337h11v11h-11zM66 337h22v11h-22zM121 337h22v11h-22zM154 337h44v11h-44zM209 337h11v11h-11zM286 337h11v11h-11zM308 337h55v11h-55zM374 337h22v11h-22zM0 348h11v11h-11zM22 348h11v11h-11zM44 348h11v11h-11zM66 348h22v11h-22zM99 348h11v11h-11zM121 348h22v11h-22zM165 348h55v11h-55zM242 348h22v11h-22zM319 348h11v11h-11zM352 348h22v11h-22zM0 359h11v11h-11zM22 359h11v11h-11zM77 359h11v11h-11zM110 359h22v11h-22zM143 359h33v11h-33zM187 359h11v11h-11zM209 359h55v11h-55zM275 359h33v11h-33zM319 359h11v11h-11zM352 359h11v11h-11zM374 359h11v11h-11zM11 370h33v11h-33zM66 370h66v11h-66zM154 370h11v11h-11zM176 370h33v11h-33zM242 370h11v11h-11zM264 370h11v11h-11zM297 370h22v11h-22zM330 370h22v11h-22zM363 370h11v11h-11zM0 381h22v11h-22zM33 381h22v11h-22zM99 381h33v11h-33zM143 381h22v11h-22zM187 381h11v11h-11zM209 381h11v11h-11zM231 381h44v11h-44zM319 381h44v11h-44zM374 381h22v11h-22zM55 392h33v11h-33zM110 392h11v11h-11zM154 392h33v11h-33zM198 392h33v11h-33zM253 392h33v11h-33zM297 392h11v11h-11zM352 392h11v11h-11zM374 392h22v11h-22zM22 403h11v11h-11zM44 403h33v11h-33zM88 403h55v11h-55zM154 403h22v11h-22zM209 403h11v11h-11zM231 403h44v11h-44zM286 403h11v11h-11zM308 403h11v11h-11zM330 403h11v11h-11zM374 403h11v11h-11zM11 414h22v11h-22zM44 414h11v11h-11zM77 414h22v11h-22zM143 414h22v11h-22zM187 414h11v11h-11zM209 414h11v11h-11zM253 414h44v11h-44zM308 414h11v11h-11zM341 414h33v11h-33zM0 425h11v11h-11zM33 425h22v11h-22zM77 425h11v11h-11zM110 425h11v11h-11zM143 425h11v11h-11zM187 425h11v11h-11zM209 425h33v11h-33zM264 425h44v11h-44zM330 425h22v11h-22z" fill="#F0A36B"/><path d="M460 40h132v11h-132zM724 40h132v11h-132zM460 51h132v11h-132zM724 51h132v11h-132zM460 62h132v11h-132zM724 62h132v11h-132zM460 73h132v11h-132zM724 73h132v11h-132zM460 84h132v11h-132zM724 84h132v11h-132zM460 95h132v11h-132zM724 95h132v11h-132zM460 106h132v11h-132zM724 106h132v11h-132zM460 117h132v11h-132zM724 117h132v11h-132zM460 128h132v11h-132zM724 128h132v11h-132zM460 139h132v11h-132zM724 139h132v11h-132zM460 150h132v11h-132zM724 150h132v11h-132zM460 161h132v11h-132zM724 161h132v11h-132zM592 172h132v11h-132zM592 183h132v11h-132zM592 194h132v11h-132zM592 205h132v11h-132zM592 216h132v11h-132zM592 227h132v11h-132zM592 238h132v11h-132zM592 249h132v11h-132zM592 260h132v11h-132zM592 271h132v11h-132zM592 282h132v11h-132zM592 293h132v11h-132zM460 304h132v11h-132zM724 304h132v11h-132zM460 315h132v11h-132zM724 315h132v11h-132zM460 326h132v11h-132zM724 326h132v11h-132zM460 337h132v11h-132zM724 337h132v11h-132zM460 348h132v11h-132zM724 348h132v11h-132zM460 359h132v11h-132zM724 359h132v11h-132zM460 370h132v11h-132zM724 370h132v11h-132zM460 381h132v11h-132zM724 381h132v11h-132zM460 392h132v11h-132zM724 392h132v11h-132zM460 403h132v11h-132zM724 403h132v11h-132zM460 414h132v11h-132zM724 414h132v11h-132zM460 425h132v11h-132zM724 425h132v11h-132z" fill="#255E9E"/><path d="M592 40h132v11h-132zM592 51h132v11h-132zM592 62h132v11h-132zM592 73h132v11h-132zM592 84h132v11h-132zM592 95h132v11h-132zM592 106h132v11h-132zM592 117h132v11h-132zM592 128h132v11h-132zM592 139h132v11h-132zM592 150h132v11h-132zM592 161h132v11h-132zM460 172h132v11h-132zM724 172h132v11h-132zM460 183h132v11h-132zM724 183h132v11h-132zM460 194h132v11h-132zM724 194h132v11h-132zM460 205h132v11h-132zM724 205h132v11h-132zM460 216h132v11h-132zM724 216h132v11h-132zM460 227h132v11h-132zM724 227h132v11h-132zM460 238h132v11h-132zM724 238h132v11h-132zM460 249h132v11h-132zM724 249h132v11h-132zM460 260h132v11h-132zM724 260h132v11h-132zM460 271h132v11h-132zM724 271h132v11h-132zM460 282h132v11h-132zM724 282h132v11h-132zM460 293h132v11h-132zM724 293h132v11h-132zM592 304h132v11h-132zM592 315h132v11h-132zM592 326h132v11h-132zM592 337h132v11h-132zM592 348h132v11h-132zM592 359h132v11h-132zM592 370h132v11h-132zM592 381h132v11h-132zM592 392h132v11h-132zM592 403h132v11h-132zM592 414h132v11h-132zM592 425h132v11h-132z" fill="#F0A36B"/><rect x="0" y="40" width="396" height="396" fill="none" stroke="#14213D" stroke-width="2"/><rect x="460" y="40" width="396" height="396" fill="none" stroke="#14213D" stroke-width="2"/></svg>
+<p style="position:absolute;left:0px;top:0px;width:400px;font-size:24px;font-weight:700;color:#14213D">무작위 분할 (칸마다)</p>
+<p style="position:absolute;left:460px;top:0px;width:400px;font-size:24px;font-weight:700;color:#14213D">블록 분할 (240 m 블록)</p>
+<p style="position:absolute;left:0px;top:446px;width:400px;font-size:24px;color:#14213D">보정 후 σ <b style="color:#A84A16">3.3 dB</b></p>
+<p style="position:absolute;left:460px;top:446px;width:400px;font-size:24px;color:#14213D">보정 후 σ <b style="color:#A84A16">4.8 dB</b></p>
+<p style="position:absolute;left:0px;top:486px;width:860px;font-size:24px;color:#4A5262"><b style="color:#255E9E">■</b> 보정용  <b style="color:#F0A36B">■</b> 확인용 · 보정 전 σ ≈ 5.8 dB</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">왜 무작위 분할이 속이나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이웃 칸은 오차가 닮았다 (공간 상관) → 확인 칸 바로 옆 보정 칸이 답을 알려 준다 → 새 지역에서는 그만큼 안 나온다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">떼는 단위</p><p style="font-size:24px;line-height:1.4;color:#4A5262">블록 · 클러스터 · 사이트 단위로 (상관 거리보다 크게)<br>블록 교차 검증: 블록을 돌려 가며 확인용으로 (Roberts 외 2017)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">시간으로도 뗀다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 날 · 같은 경로 반복 주행은 독립이 아니다 → 다른 날 · 다른 계절 자료로 한 번 더</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#5E6675">자세히는</p><p style="font-size:24px;line-height:1.4;color:#4A5262">상관 거리 재기 · 블록 크기 정하기는 spatial-statistics 덱에서</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시: 상관 있는 오차 장 60 × 60칸 (20 m 칸 가정 · σ 5 + 독립 3 dB) · “보정” = 반경 3칸 안 보정용 칸의 평균 오차를 뺌 · 시드 21</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 14</p>
+<aside>(약 55초) 보정한 모델을 확인할 때는 보정에 쓰지 않은 자료를 써야 하고, 그 자료는 공간으로 떼어 놓아야 합니다. 예시 시뮬레이션입니다. 상관이 있는 오차 지도를 만들고, 주변 보정용 칸의 평균 오차를 빼는 간단한 국소 보정을 했습니다. 보정 전 σ는 약 5.8 dB입니다. 왼쪽처럼 칸마다 무작위로 나누면 보정 후 σ가 3.3 dB로 아주 좋아 보입니다. 확인 칸 바로 옆의 보정 칸이 답을 알려 주기 때문입니다. 오른쪽처럼 큰 블록으로 나누면 4.8 dB입니다. 새 지역에 적용했을 때 기대할 수 있는 값은 오른쪽에 가깝습니다. 생태학 분야의 Roberts 등도 공간 구조가 있는 자료에서는 블록 교차 검증이 거의 언제나 더 적절하다고 정리했습니다. 실무에서는 사이트나 클러스터 단위로 떼고, 블록을 돌려 가며 확인용으로 쓰는 블록 교차 검증을 하면 자료를 버리지 않아도 됩니다. 같은 날 같은 경로를 반복 주행한 자료도 독립이 아니니 다른 날 자료로 한 번 더 확인합니다. 상관 거리와 블록 크기를 정하는 법은 공간 통계 자료, spatial-statistics 덱으로 넘기겠습니다.</aside>
+</section>
+<section id="clusters" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">시험 계획 · 클러스터별 보고 · 예시</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">숫자 하나가 아니라 환경별로, 구간으로</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px;align-items:flex-start">
+<div style="width:960px;display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">클러스터</p><p style="width:90px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">n</p><p style="width:90px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">n_eff</p><p style="width:100px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">bias</p><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">σ [95% 구간]</p><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">판정</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">도심 고층</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">280</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">72</p><p style="width:100px;font-size:24px;line-height:1.35;color:#4A5262">+1.9</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">8.71 [7.5, 10.4]</p><p style="width:110px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">불합격</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">도심 저층</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">420</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">108</p><p style="width:100px;font-size:24px;line-height:1.35;color:#4A5262">+0.6</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">6.32 [5.6, 7.3]</p><p style="width:110px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#255E9E">보류</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">주거</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">330</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">85</p><p style="width:100px;font-size:24px;line-height:1.35;color:#4A5262">-1.3</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">4.95 [4.3, 5.8]</p><p style="width:110px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#2F7D5B">합격</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">개활 · 도로</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">170</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">44</p><p style="width:100px;font-size:24px;line-height:1.35;color:#4A5262">-1.9</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">4.46 [3.7, 5.7]</p><p style="width:110px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#2F7D5B">합격</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">전체 (한 숫자)</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">1,200</p><p style="width:90px;font-size:24px;line-height:1.35;color:#4A5262">309</p><p style="width:100px;font-size:24px;line-height:1.35;color:#4A5262">+0.0</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">6.56 [6.1, 7.1]</p><p style="width:110px;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#255E9E">보류</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">판정 규칙 (제안)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">구간 위 끝 ≤ 합격선 → <b style="color:#2F7D5B">합격</b> · 아래 끝 &gt; 합격선 → <b style="color:#A84A16">불합격</b> · 걸치면 <b style="color:#255E9E">보류</b> (자료를 더 모은다)</p></div>
+</div>
+<div style="position:relative;width:640px;height:432px">
+<svg aria-label="클러스터 다섯 줄의 σ 점과 95% 구간 막대, 주황 점선은 합격선 7 dB. 도심 고층은 구간 전체가 선 오른쪽, 주거와 개활은 왼쪽, 도심 저층과 전체는 선에 걸친다" style="position:absolute;left:0px;top:0px;width:640px;height:432px" width="640" height="432" viewBox="0 0 640 432"><line x1="40" y1="57" x2="40" y2="342" stroke="#EAE7DF" stroke-width="2"/><line x1="152" y1="57" x2="152" y2="342" stroke="#EAE7DF" stroke-width="2"/><line x1="264" y1="57" x2="264" y2="342" stroke="#EAE7DF" stroke-width="2"/><line x1="376" y1="57" x2="376" y2="342" stroke="#EAE7DF" stroke-width="2"/><line x1="488" y1="57" x2="488" y2="342" stroke="#EAE7DF" stroke-width="2"/><line x1="600" y1="57" x2="600" y2="342" stroke="#EAE7DF" stroke-width="2"/><line x1="320" y1="57" x2="320" y2="342" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 6"/><line x1="0" y1="282" x2="640" y2="282" stroke="#14213D" stroke-width="2"/><line x1="347" y1="82" x2="511" y2="82" stroke="#A84A16" stroke-width="6" stroke-linecap="round"/><circle cx="416" cy="82" r="11" fill="#A84A16" stroke="#FBFAF7" stroke-width="3"/><line x1="240" y1="139" x2="337" y2="139" stroke="#255E9E" stroke-width="6" stroke-linecap="round"/><circle cx="282" cy="139" r="11" fill="#255E9E" stroke="#FBFAF7" stroke-width="3"/><line x1="169" y1="196" x2="254" y2="196" stroke="#2F7D5B" stroke-width="6" stroke-linecap="round"/><circle cx="205" cy="196" r="11" fill="#2F7D5B" stroke="#FBFAF7" stroke-width="3"/><line x1="134" y1="253" x2="245" y2="253" stroke="#2F7D5B" stroke-width="6" stroke-linecap="round"/><circle cx="178" cy="253" r="11" fill="#2F7D5B" stroke="#FBFAF7" stroke-width="3"/><line x1="269" y1="310" x2="327" y2="310" stroke="#255E9E" stroke-width="6" stroke-linecap="round"/><circle cx="296" cy="310" r="11" fill="#255E9E" stroke="#FBFAF7" stroke-width="3"/></svg>
+<p style="position:absolute;left:0px;top:354px;width:80px;font-size:24px;text-align:center;color:#5E6675">2</p>
+<p style="position:absolute;left:112px;top:354px;width:80px;font-size:24px;text-align:center;color:#5E6675">4</p>
+<p style="position:absolute;left:224px;top:354px;width:80px;font-size:24px;text-align:center;color:#5E6675">6</p>
+<p style="position:absolute;left:336px;top:354px;width:80px;font-size:24px;text-align:center;color:#5E6675">8</p>
+<p style="position:absolute;left:448px;top:354px;width:80px;font-size:24px;text-align:center;color:#5E6675">10</p>
+<p style="position:absolute;left:560px;top:354px;width:80px;font-size:24px;text-align:center;color:#5E6675">12</p>
+<p style="position:absolute;left:220px;top:4px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">합격선 7 dB</p>
+<p style="position:absolute;left:40px;top:392px;width:560px;font-size:24px;text-align:center;color:#14213D">σ와 95% 구간 (dB)</p>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">읽기</b> 전체 6.56 dB는 합격선 안처럼 보이지만 구간이 걸치고, 도심 고층은 불합격 — 쓸 곳과 쓰지 말 곳이 갈린다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시 숫자: 클러스터별 정규 오차를 지어 만든 자료 (시드 8) · n_eff = n × 0.26 (Breakdown 예시의 φ 곱 0.59를 빌림) · 합격선 7 dB도 예시</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 14</p>
+<aside>(약 55초) 시험 계획에는 무엇을 어느 단위로 보고할지가 들어가야 합니다. 핵심은 숫자 하나가 아니라 환경별로, 점이 아니라 구간으로 보고하는 것입니다. 예시 자료입니다. 클러스터 넷의 bias와 σ, 95% 구간을 냈고, 구간은 유효 표본 수로 계산했습니다. 합격선은 예시로 σ 7 dB를 두었습니다. 규칙은 이렇게 제안합니다. 구간의 위 끝이 합격선 안이면 합격, 아래 끝이 밖이면 불합격, 걸치면 보류하고 자료를 더 모읍니다. Sargent가 소개한 구간 가설 검정과 같은 생각입니다. 전체 한 숫자로 보면 6.56 dB로 합격선 안처럼 보이지만 구간이 7.1까지 걸쳐 보류입니다. 클러스터로 나누면 도심 고층은 8.7 dB로 분명히 불합격이고, 주거와 개활 지역은 합격입니다. 이렇게 나눠야 이 모델을 어디에 쓰고 어디에 쓰지 말지가 보입니다.</aside>
+</section>
+<section id="uncertainty" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">지표의 불확실성</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">지표에도 오차 막대가 있다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:820px;height:540px">
+<svg aria-label="유효 표본 수(가로, 로그 10~3000)에 따른 σ 6.41 dB의 95% 구간 띠. 표본이 적을수록 띠가 넓고, n_eff 312에서 약 5.9~7.0, 명목 1204에서 약 6.2~6.7" style="position:absolute;left:0px;top:0px;width:820px;height:540px" width="820" height="540" viewBox="0 0 820 540"><line x1="80" y1="460" x2="780" y2="460" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="387" x2="780" y2="387" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="313" x2="780" y2="313" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="240" x2="780" y2="240" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="167" x2="780" y2="167" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="93" x2="780" y2="93" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="20" x2="780" y2="20" stroke="#EAE7DF" stroke-width="2"/><polygon points="80.0,20.0 91.9,20.0 103.7,20.0 115.6,20.0 127.5,20.0 139.3,27.5 151.2,46.4 163.1,63.4 174.9,78.8 186.8,92.8 198.6,105.5 210.5,117.2 222.4,127.9 234.2,137.7 246.1,146.7 258.0,155.1 269.8,162.8 281.7,169.9 293.6,176.6 305.4,182.8 317.3,188.5 329.2,193.9 341.0,198.9 352.9,203.6 364.7,208.0 376.6,212.1 388.5,216.0 400.3,219.6 412.2,223.0 424.1,226.2 435.9,229.3 447.8,232.1 459.7,234.8 471.5,237.3 483.4,239.7 495.3,241.9 507.1,244.0 519.0,246.0 530.8,247.9 542.7,249.7 554.6,251.4 566.4,253.0 578.3,254.5 590.2,256.0 602.0,257.3 613.9,258.6 625.8,259.8 637.6,261.0 649.5,262.1 661.4,263.1 673.2,264.1 685.1,265.1 696.9,266.0 708.8,266.8 720.7,267.6 732.5,268.4 744.4,269.1 756.3,269.8 768.1,270.4 780.0,271.1 780.0,294.9 768.1,295.4 756.3,296.0 744.4,296.6 732.5,297.3 720.7,297.9 708.8,298.6 696.9,299.4 685.1,300.1 673.2,301.0 661.4,301.8 649.5,302.7 637.6,303.6 625.8,304.6 613.9,305.6 602.0,306.6 590.2,307.7 578.3,308.9 566.4,310.0 554.6,311.3 542.7,312.6 530.8,314.0 519.0,315.4 507.1,316.9 495.3,318.4 483.4,320.0 471.5,321.7 459.7,323.4 447.8,325.2 435.9,327.1 424.1,329.1 412.2,331.1 400.3,333.3 388.5,335.5 376.6,337.8 364.7,340.2 352.9,342.7 341.0,345.2 329.2,347.9 317.3,350.7 305.4,353.5 293.6,356.5 281.7,359.6 269.8,362.8 258.0,366.0 246.1,369.5 234.2,373.0 222.4,376.6 210.5,380.4 198.6,384.2 186.8,388.2 174.9,392.3 163.1,396.6 151.2,401.0 139.3,405.5 127.5,410.1 115.6,414.9 103.7,419.8 91.9,424.8 80.0,430.0" fill="#D5E3F3"/><polyline points="80.0,20.0 91.9,20.0 103.7,20.0 115.6,20.0 127.5,20.0 139.3,27.5 151.2,46.4 163.1,63.4 174.9,78.8 186.8,92.8 198.6,105.5 210.5,117.2 222.4,127.9 234.2,137.7 246.1,146.7 258.0,155.1 269.8,162.8 281.7,169.9 293.6,176.6 305.4,182.8 317.3,188.5 329.2,193.9 341.0,198.9 352.9,203.6 364.7,208.0 376.6,212.1 388.5,216.0 400.3,219.6 412.2,223.0 424.1,226.2 435.9,229.3 447.8,232.1 459.7,234.8 471.5,237.3 483.4,239.7 495.3,241.9 507.1,244.0 519.0,246.0 530.8,247.9 542.7,249.7 554.6,251.4 566.4,253.0 578.3,254.5 590.2,256.0 602.0,257.3 613.9,258.6 625.8,259.8 637.6,261.0 649.5,262.1 661.4,263.1 673.2,264.1 685.1,265.1 696.9,266.0 708.8,266.8 720.7,267.6 732.5,268.4 744.4,269.1 756.3,269.8 768.1,270.4 780.0,271.1" fill="none" stroke="#255E9E" stroke-width="4"/><polyline points="80.0,430.0 91.9,424.8 103.7,419.8 115.6,414.9 127.5,410.1 139.3,405.5 151.2,401.0 163.1,396.6 174.9,392.3 186.8,388.2 198.6,384.2 210.5,380.4 222.4,376.6 234.2,373.0 246.1,369.5 258.0,366.0 269.8,362.8 281.7,359.6 293.6,356.5 305.4,353.5 317.3,350.7 329.2,347.9 341.0,345.2 352.9,342.7 364.7,340.2 376.6,337.8 388.5,335.5 400.3,333.3 412.2,331.1 424.1,329.1 435.9,327.1 447.8,325.2 459.7,323.4 471.5,321.7 483.4,320.0 495.3,318.4 507.1,316.9 519.0,315.4 530.8,314.0 542.7,312.6 554.6,311.3 566.4,310.0 578.3,308.9 590.2,307.7 602.0,306.6 613.9,305.6 625.8,304.6 637.6,303.6 649.5,302.7 661.4,301.8 673.2,301.0 685.1,300.1 696.9,299.4 708.8,298.6 720.7,297.9 732.5,297.3 744.4,296.6 756.3,296.0 768.1,295.4 780.0,294.9" fill="none" stroke="#255E9E" stroke-width="4"/><line x1="80" y1="283" x2="780" y2="283" stroke="#14213D" stroke-width="3"/><line x1="502" y1="243" x2="502" y2="317" stroke="#A84A16" stroke-width="6"/><line x1="668" y1="264" x2="668" y2="301" stroke="#5E6675" stroke-width="6"/><line x1="80" y1="460" x2="780" y2="460" stroke="#14213D" stroke-width="3"/><line x1="80" y1="20" x2="80" y2="460" stroke="#14213D" stroke-width="3"/></svg>
+<p style="position:absolute;left:0px;top:444px;width:66px;font-size:24px;text-align:right;color:#5E6675">4</p>
+<p style="position:absolute;left:0px;top:297px;width:66px;font-size:24px;text-align:right;color:#5E6675">6</p>
+<p style="position:absolute;left:0px;top:151px;width:66px;font-size:24px;text-align:right;color:#5E6675">8</p>
+<p style="position:absolute;left:0px;top:4px;width:66px;font-size:24px;text-align:right;color:#5E6675">10</p>
+<p style="position:absolute;left:40px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">10</p>
+<p style="position:absolute;left:175px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">30</p>
+<p style="position:absolute;left:323px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">100</p>
+<p style="position:absolute;left:457px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">300</p>
+<p style="position:absolute;left:605px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">1,000</p>
+<p style="position:absolute;left:740px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">3,000</p>
+<p style="position:absolute;left:80px;top:504px;width:700px;font-size:24px;text-align:center;color:#14213D">유효 표본 수 n_eff (로그)</p>
+<p style="position:absolute;left:90px;top:24px;width:400px;font-size:24px;color:#14213D;background:#F5F3EE">σ = 6.41 dB의 95% 구간</p>
+<p style="position:absolute;left:442px;top:351px;width:380px;font-size:24px;font-weight:700;color:#A84A16">n_eff 312: 5.9 ~ 7.0</p>
+<p style="position:absolute;left:450px;top:214px;width:330px;font-size:24px;text-align:right;color:#5E6675">명목 1,204: 6.2 ~ 6.7</p>
+<p style="position:absolute;left:225px;top:389px;width:260px;font-size:24px;color:#255E9E">n_eff 30: 5.1 ~ 8.6</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">같은 1,204칸이라도</p><p style="font-size:24px;line-height:1.4;color:#4A5262">명목 n으로 구간을 내면 ±0.26 dB, n_eff 312로 내면 ±0.51 dB — 이웃 칸이 닮아 정보가 적다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">구간 반폭 (예시)</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">1,225칸 · 이웃 상관 0.82</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">실제 흩어짐</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b>±0.74 dB</b> (같은 조건 400회)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">칸 무작위 재표본</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b style="color:#A84A16">±0.24 dB</b> — 너무 좁다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">블록 재표본 (7 × 7)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">±0.58 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">n_eff 근사 (242)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">±0.58 dB</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">둘 다 아직 조금 좁다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Breakdown의 c₁ 구간이 80%만 담은 것(Q-AM-49)과 같은 방향 — 판정은 여유를 두고</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">구간: 정규 가정 χ² 구간 (Wilson–Hilferty 근사) · n_eff 312는 Breakdown 예시 숫자 · 오른쪽 표는 상관 있는 합성 오차 장 (시드 31 · 32)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
+<aside>(약 55초) 판정에 쓰는 σ도 표본에서 잰 추정값이라 오차 막대가 있습니다. 그림은 σ 6.41 dB의 95% 구간이 유효 표본 수에 따라 어떻게 변하는지 보여 줍니다. Breakdown 예시처럼 1,204칸이 유효 표본 312개라면 구간은 5.9에서 7.0 dB입니다. 명목 1,204개로 계산하면 절반쯤으로 좁아져 과신하게 됩니다. 오른쪽은 이웃 상관이 0.82인 합성 오차 장으로 확인한 결과입니다. 같은 조건에서 400번 뽑았을 때 σ 추정값의 실제 흩어짐은 ±0.74 dB였습니다. 칸을 무작위로 재표본하는 보통의 부트스트랩은 ±0.24 dB로 훨씬 좁고, 블록 단위로 재표본하면 ±0.58 dB, 유효 표본 수 근사는 ±0.58 dB입니다. 둘 다 실제보다 아직 조금 좁습니다. Breakdown의 c₁ 구간이 80%만 담았던 Q-AM-49와 같은 방향입니다. 그래서 합격선 판정은 구간으로 하되 여유를 둡니다. Breakdown은 n_eff를 α, r, c₁에만 쓰는데, 판정 숫자에도 구간을 붙이자는 것이 제안입니다.</aside>
+</section>
+<section id="revalidate" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">재확인 조건 (revalidation triggers)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">무엇이 바뀌면 다시 확인하나</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">바뀐 것</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">예</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">다시 할 일</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">망 설정 (CM)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">틸트 · 방위 · 전력 · 빔 설정 · 새 사이트 · 주파수</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">입력 대조(4쪽 ⑦) → 바뀐 셀 주변 구역 재확인</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">환경 (장면)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">새 건물 · 철거 · 고가 · 방음벽 · 대형 공사</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">장면 갱신 → 해당 클러스터 재확인</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">계절 · 식생</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">잎 있음 ↔ 없음 · 1 GHz 부근에서 잎 있는 나무의 감쇠(dB/m)가 약 20% 크다 (ITU-R P.833)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">계절별 DT로 확인 · 카드에 계절 명시</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">소프트웨어</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">솔버 · Sionna 버전 · 광선 설정 · 안테나 패턴 · 재질 값</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">회귀 시험(4쪽 ④) → 차이가 크면 재확인</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">측정 체계</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">단말 기종 · 스캐너 · 처리 파이프라인 · 좌표 처리</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">참조 자료 자체를 다시 확인</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">시간 · 감시</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">정기 (예: 분기) · 새 DT · MDT가 합격선 밖으로</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">감시 지표가 촉발 → 재확인 · 재인증</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">NASA의 “M&amp;S History” 질문</p><p style="font-size:24px;line-height:1.4;color:#4A5262">지금 버전이 이전 버전과 얼마나 같은가 · 지금 용도가 이전에 성공한 용도와 얼마나 같은가</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">인증은 유효 기간이 있다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">인증서에 재확인 조건을 미리 적어 둔다 → 조건이 생기면 인증이 자동으로 “보류”</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">20%: ITU-R P.833-10 (2021) — 1 GHz 부근 대략값 · “분기” 등 주기는 예시 · MDT = Minimization of Drive Tests (3GPP)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 14</p>
+<aside>(약 50초) 확인과 인증은 한 번으로 끝나지 않습니다. 무엇이 바뀌면 다시 확인할지 미리 정해 둡니다. 망 설정이 바뀌면, 틸트나 방위, 전력, 새 사이트 같은 것이죠, 입력을 대조하고 바뀐 셀 주변을 다시 봅니다. 새 건물이나 철거처럼 환경이 바뀌면 장면을 고치고 그 클러스터를 다시 확인합니다. 계절도 있습니다. ITU-R P.833은 1 GHz 부근에서 잎이 있는 나무의 감쇠가 잎이 없을 때보다 약 20% 크다고 합니다. 여름 자료로만 확인했다면 카드에 그렇게 적어야 합니다. 솔버나 Sionna 버전, 광선 설정이 바뀌면 회귀 시험부터 돌립니다. 단말이나 처리 파이프라인처럼 측정 체계가 바뀌면 참조 자료 자체를 다시 봅니다. 마지막으로 정기 점검과 감시입니다. 새 드라이브 테스트나 MDT 자료가 들어올 때마다 같은 지표를 같은 조건으로 재고, 합격선을 벗어나면 재확인합니다. 인증서에 이런 조건을 미리 적어 두면, 조건이 생겼을 때 인증이 자동으로 보류됩니다.</aside>
+</section>
+<section id="card" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">모델 카드 · 확인 보고서</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">한 장에: 범위 · 자료 · 지표 · 한계 · 버전</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px;align-items:flex-start">
+<div style="width:860px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8">model_card:</span> twin-[지역]-v3.2<br><span style="color:#8DB8E8">용도:</span>    커버리지 구멍 찾기 (문턱 −110 dBm)<br><span style="color:#8DB8E8">쓰지 말 곳:</span> 실내 · 지하 · 처리량 예측<br><span style="color:#8DB8E8">범위:</span>    [지역] · 3.5 GHz · 옥외 차량 · 20 m 칸<br><span style="color:#8DB8E8">자료:</span>    보정 A구역 DT · 확인 B구역 DT (날짜)<br><span style="color:#8DB8E8">지표:</span>    bias · σ [95%] · r · 일치율 · 클러스터별<br><span style="color:#8DB8E8">합격선:</span>  <span style="color:#F0A36B">σ 위 끝 ≤ 5 dB · |b| ≤ 1 dB (예시)</span><br><span style="color:#8DB8E8">한계:</span>    σ_sim 미측정 · 여름 자료뿐<br><span style="color:#8DB8E8">버전:</span>    장면 · 솔버 · CM 날짜 · 보정 값 해시<br><span style="color:#8DB8E8">인증:</span>    승인자 · 날짜 · 유효 기간 · 재확인 조건</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">NASA-STD-7009A — 결과와 함께 보고할 다섯</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최선 추정값 · 불확실성 · 신뢰도 평가 · 단서(가정 · 한계 밖 사용) · 받아들일 때의 위험</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">신뢰도 8요인 (0~4 서열 점수)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">개발: 자료 계보 · 검증 · 확인<br>사용: 입력 계보 · 불확실성 · 결과 강건성<br>근거: 사용 이력 · 관리 — 점수는 더하지 않는다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">Model Cards (Mitchell 외 2019)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">ML 모델 보고 양식 — 의도한 용도 · 평가 자료 · 지표 · 조건별로 나눈 결과 · 주의점</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">양식은 예시 (항목 이름 · 값은 프로젝트에 맞게) · NASA-STD-7009A 4.3.8 · 부록 E · Mitchell 외, FAT* 2019</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 14</p>
+<aside>(약 50초) 이 모든 것을 한 장으로 남기는 것이 모델 카드, 또는 확인 보고서입니다. 왼쪽은 예시 양식입니다. 용도와 쓰지 말 곳, 지역과 대역 같은 적용 범위, 보정과 확인에 쓴 자료, 지표와 합격선, 알려진 한계, 장면과 솔버와 망 설정의 버전, 그리고 승인자와 유효 기간, 재확인 조건입니다. 두 가지를 참고했습니다. NASA 표준은 결과를 낼 때 최선 추정값, 불확실성, 신뢰도 평가, 가정이나 한계 밖 사용 같은 단서, 받아들일 때의 위험을 함께 보고하라고 합니다. 신뢰도는 자료 계보, 검증, 확인, 입력 계보, 불확실성, 결과 강건성, 사용 이력, 관리의 여덟 요인을 0에서 4로 매기는데, 서열 점수라서 더하지 말라고 못 박습니다. 머신러닝 쪽의 Model Cards도 의도한 용도와 조건별로 나눈 결과를 보고하라고 합니다. 우리 클러스터별 보고와 같은 생각입니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">“좋은가”가 아니라 “무엇에 써도 되나”</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">검증</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">해석해 · 상반성 · 회귀 · 수렴 · σ_sim · 입력 대조<br>— 확인보다 먼저</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">확인</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">용도별 지표 · 공간으로 뗀 자료<br>클러스터별 · 구간으로 보고</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">인증</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">합격선을 먼저 정하고 · 승인자 · 유효 기간<br>재확인 조건 · 모델 카드</p></div></div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">σ는 판정 오류로 읽는다</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">예시 분포에서 σ 6.41 dB → 오판 12% · 구멍 재현 75%<br>일치 90%에는 σ ≤ 5.2 dB, bias도 따로</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">우리 6.41 dB는</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">구멍 찾기에는 아직 · what-if 비교에는 쓸 만할 수 있다<br>클러스터별로 나누면 쓸 곳이 보인다</p></div></div>
+<p style="font-size:28px;line-height:1.5;color:#C9D3E3">다음 단계: [대상 지역]의 용도 하나를 골라 합격선을 먼저 적고, 블록으로 뗀 DT로 클러스터별 구간을 낸다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">관련 자료: debiased-rmse · dt-breakdown (n_eff · Q-AM-49) · taylor-diagram · coord-registration</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">14 / 14</p>
+<aside>(약 40초) 정리하겠습니다. 트윈을 믿어도 되는지는 세 질문으로 나눕니다. 검증은 해석해, 회귀, 수렴, 입력 대조로 제대로 만들었는지 보고, 확인보다 먼저 합니다. 확인은 용도별 지표로, 공간으로 떼어 놓은 자료로, 클러스터별로, 구간으로 보고합니다. 인증은 합격선을 먼저 정하고, 승인자와 유효 기간, 재확인 조건을 모델 카드에 적습니다. σ는 판정 오류로 읽으면 뜻이 분명해집니다. 예시 분포에서 6.41 dB는 오판 12%, 구멍 재현율 75%입니다. 그래서 우리 6.41 dB는 구멍 찾기에는 아직 모자라지만 what-if 비교에는 쓸 만할 수 있습니다. 다음 단계로 대상 지역에서 용도 하나를 골라 합격선을 먼저 적고, 블록으로 뗀 드라이브 테스트로 클러스터별 구간을 내 보겠습니다. 감사합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

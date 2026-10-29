@@ -1,0 +1,62 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-29T07:00:00Z"
+  },
+  "lists": "css",
+  "title": "망 데이터 파이프라인과 트윈 동기화: CM · PM · FM",
+  "order": [
+    "cover",
+    "why",
+    "kinds",
+    "sources",
+    "specs",
+    "cadence",
+    "versioning",
+    "detect",
+    "tilt",
+    "reconcile",
+    "mapping",
+    "pipeline",
+    "checklist",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 중요한가와 데이터 네 갈래(CM · PM · FM · 사이트)",
+      "start": "cover"
+    },
+    "sources": {
+      "description": "받는 길(O1 · M-Plane · 업체 덤프)과 3GPP 규격 지도",
+      "start": "sources"
+    },
+    "freshness": {
+      "description": "신선도, 버전 · as-of, 변경 감지와 계보",
+      "start": "cadence"
+    },
+    "trust": {
+      "description": "충돌: 틸트 예시 계산, 출처 순위 · 신뢰 표시",
+      "start": "tilt"
+    },
+    "twin": {
+      "description": "트윈 모델 매핑, 파이프라인 구조, 실행 기록, 정리",
+      "start": "mapping"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

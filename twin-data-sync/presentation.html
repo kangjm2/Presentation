@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>망 데이터 파이프라인과 트윈 동기화: CM · PM · FM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="왼쪽의 기지국 탑에서 세 갈래 데이터 흐름(실선 · 긴 점선 · 짧은 점선)이 오른쪽의 겹쳐 쌓인 스냅숏 판으로 들어가고, 그 위에 시계가 있는 그림" style="position:absolute;left:960px;top:0px;width:960px;height:1080px" width="960" height="1080" viewBox="0 0 960 1080"><line x1="150" y1="760" x2="190" y2="330" stroke="#8DB8E8" stroke-width="6"/><line x1="230" y1="760" x2="190" y2="330" stroke="#8DB8E8" stroke-width="6"/><line x1="160" y1="650" x2="220" y2="650" stroke="#8DB8E8" stroke-width="4"/><line x1="170" y1="540" x2="210" y2="540" stroke="#8DB8E8" stroke-width="4"/><rect x="168" y="300" width="14" height="60" rx="3" fill="#F0A36B"/><rect x="198" y="300" width="14" height="60" rx="3" fill="#F0A36B"/><path d="M225 295 A50 50 0 0 1 225 365" fill="none" stroke="#4C7DB8" stroke-width="4"/><path d="M250 270 A85 85 0 0 1 250 390" fill="none" stroke="#4C7DB8" stroke-width="4"/><path d="M274 246 A120 120 0 0 1 274 414" fill="none" stroke="#4C7DB8" stroke-width="4"/><path d="M260 470 C 400 470, 420 420, 560 420" fill="none" stroke="#F0A36B" stroke-width="6"/><line x1="556.0" y1="420.0" x2="582.0" y2="420.0" stroke="#F0A36B" stroke-width="6"/><polygon points="600.0,420.0 582.0,411.0 582.0,429.0" fill="#F0A36B"/><path d="M260 540 C 400 540, 420 530, 560 530" fill="none" stroke="#8DB8E8" stroke-width="6" stroke-dasharray="14 10"/><line x1="556.0" y1="530.0" x2="582.0" y2="530.0" stroke="#8DB8E8" stroke-width="6"/><polygon points="600.0,530.0 582.0,521.0 582.0,539.0" fill="#8DB8E8"/><path d="M260 610 C 400 610, 420 640, 560 640" fill="none" stroke="#E06C5A" stroke-width="6" stroke-dasharray="4 8"/><line x1="556.0" y1="640.0" x2="582.0" y2="640.0" stroke="#E06C5A" stroke-width="6"/><polygon points="600.0,640.0 582.0,631.0 582.0,649.0" fill="#E06C5A"/><rect x="640" y="360" width="180" height="230" rx="12" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/><rect x="666" y="410" width="180" height="230" rx="12" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/><rect x="692" y="460" width="180" height="230" rx="12" fill="#22325A" stroke="#8DB8E8" stroke-width="3"/><rect x="718" y="510" width="180" height="230" rx="12" fill="#2B4A80" stroke="#8DB8E8" stroke-width="3"/><line x1="740" y1="560" x2="880" y2="560" stroke="#8DB8E8" stroke-width="3"/><line x1="740" y1="600" x2="880" y2="600" stroke="#8DB8E8" stroke-width="3"/><line x1="740" y1="640" x2="880" y2="640" stroke="#8DB8E8" stroke-width="3"/><line x1="740" y1="680" x2="880" y2="680" stroke="#8DB8E8" stroke-width="3"/><circle cx="800" cy="300" r="46" fill="none" stroke="#F0A36B" stroke-width="5"/><line x1="800" y1="300" x2="800" y2="268" stroke="#F0A36B" stroke-width="5"/><line x1="800" y1="300" x2="824" y2="312" stroke="#F0A36B" stroke-width="5"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">네트워크 디지털 트윈 · 데이터 동기화</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">망 데이터<br>파이프라인과<br>트윈 동기화:<br>CM · PM · FM</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">설정 · 성능 · 경보를 어디서 받고, 얼마나 자주 맞추고,<br>서로 어긋나면 무엇을 믿나</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 디지털 트윈이 실제 망과 같은 상태를 유지하려면 어떤 데이터를 어디서 받아 어떻게 맞춰야 하는지에 관한 이야기입니다. 설정 CM, 성능 PM, 경보 FM과 사이트 자료를 차례로 보고, 얼마나 자주 갱신되는지, 자료끼리 어긋날 때 무엇을 믿는지, 그리고 시뮬레이션을 재현할 수 있게 무엇을 기록할지로 마치겠습니다.</aside>
+</section>
+<section id="why" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">왜 중요한가</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">트윈은 “언제의 망”을 그리고 있나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px;align-items:flex-start">
+<div style="position:relative;width:690px;height:420px">
+<svg aria-label="두 줄 시간선. 위 실망 줄에서 틸트 변경과 셀 장애가 일어나고, 아래 트윈 줄에는 셀 장애가 곧바로, 틸트 변경은 한참 뒤에 반영되어 그 사이가 어긋난 구간으로 칠해져 있다" style="position:absolute;left:0px;top:0px;width:690px;height:420px" width="690" height="420" viewBox="0 0 690 420"><line x1="150" y1="90" x2="690" y2="90" stroke="#14213D" stroke-width="5"/><line x1="150" y1="250" x2="690" y2="250" stroke="#255E9E" stroke-width="5"/><rect x="200" y="222" width="360" height="56" fill="#F7DDCB"/><rect x="420" y="222" width="20" height="56" fill="#E9B7A8"/><circle cx="200" cy="90" r="13" fill="#A84A16"/><circle cx="420" cy="90" r="13" fill="#B23A2A"/><circle cx="560" cy="250" r="13" fill="#A84A16"/><circle cx="440" cy="250" r="13" fill="#B23A2A"/><line x1="200.0" y1="106.0" x2="540.7" y2="231.8" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 6"/><polygon points="552.0,236.0 542.8,226.2 538.7,237.5" fill="#A84A16"/><line x1="420.0" y1="106.0" x2="434.5" y2="222.1" stroke="#B23A2A" stroke-width="3" stroke-dasharray="8 6"/><polygon points="436.0,234.0 440.5,221.3 428.6,222.8" fill="#B23A2A"/></svg>
+<p style="position:absolute;left:0px;top:74px;width:140px;font-size:24px;font-weight:700;color:#14213D">실망</p>
+<p style="position:absolute;left:0px;top:234px;width:140px;font-size:24px;font-weight:700;color:#255E9E">트윈</p>
+<p style="position:absolute;left:120px;top:20px;width:240px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">틸트 6° → 4°</p>
+<p style="position:absolute;left:330px;top:20px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#B23A2A">셀 장애</p>
+<p style="position:absolute;left:470px;top:290px;width:220px;font-size:24px;text-align:center;line-height:1.3;color:#A84A16">다음 덤프에<br>반영</p>
+<p style="position:absolute;left:330px;top:290px;width:160px;font-size:24px;text-align:center;line-height:1.3;color:#B23A2A">경보로<br>바로 반영</p>
+<p style="position:absolute;left:200px;top:160px;width:300px;font-size:24px;font-weight:700;color:#A84A16">어긋난 구간</p>
+<p style="position:absolute;left:0px;top:380px;width:690px;font-size:24px;color:#5E6675">예시 — 위는 실제 망, 아래는 트윈이 아는 상태</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">시뮬 결과 = 입력 상태의 함수</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 코드 · 같은 장면이라도 어제의 설정을 넣으면 다른 답<br>“모델이 틀렸다”와 “입력이 낡았다”를 구분해야 한다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">낡은 입력은 모델 오차처럼 보인다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">틸트 2° 차이 → 거리에 따라 부호가 바뀌는 오차 (9쪽)<br>Breakdown에서는 거리 경향 몫으로 나타난다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">재현</p><p style="font-size:24px;line-height:1.4;color:#4A5262">석 달 뒤 “그때 무엇을 넣었나”에 답할 수 있어야<br>결과를 다시 만들고, 고친 효과를 비교할 수 있다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 트윈 상태 = 데이터 + 시각 — 시각이 없는 트윈은 비교도 재현도 할 수 없다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림은 예시 (변경 · 장애 시점과 반영 지연은 가정) · 9쪽 틸트 효과도 가정에 따른 계산</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
+<aside>(약 45초) 트윈이 실제 망을 따라가는 데에는 늘 시차가 있습니다. 그림의 위 줄은 실제 망이고 아래 줄은 트윈이 알고 있는 상태입니다. 셀 장애는 경보로 바로 들어오지만, 틸트 변경은 다음 설정 덤프 때에야 반영되어 그 사이 트윈은 옛 틸트로 계산합니다. 시뮬레이션 결과는 입력 상태의 함수라서, 같은 코드라도 어제의 설정을 넣으면 다른 답이 나옵니다. 문제는 이것이 모델 오차처럼 보인다는 점입니다. 틸트가 2도 다르면 거리에 따라 부호가 바뀌는 오차가 생기고, Breakdown 화면에서는 거리 경향 몫으로 나타납니다. 그래서 트윈의 상태는 데이터와 시각을 함께 가져야 합니다.</aside>
+</section>
+<section id="kinds" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">데이터 네 갈래</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">트윈에 들어가는 망 데이터: CM · PM · FM · 사이트</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">종류</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무엇 · 예</p><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">바뀌는 방식</p><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">트윈에서</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">CM 설정<br>(Configuration)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">셀 · 캐리어 설정 — PCI · 주파수(ARFCN) · 송신 전력 · 전기 틸트 · 이웃 관계</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">운용자 · SON이 바꿀 때 (사건)</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">시뮬 입력</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">PM 성능<br>(Performance)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">카운터 · KPI — RSRP 분포 · PRB 사용 · 접속 · 처리량</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">정해진 주기로 집계 (예: 15분)</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">검증 목표 · 부하</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">FM 경보<br>(Fault)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">장애 경보의 발생 · 심각도 변경 · 해제</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">일어날 때 바로 (비동기)</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">셀 빼기 (마스크)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">인벤토리 · 사이트</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">장비 · 안테나 모델 · 좌표 · 높이 · 방위각 · 기계 틸트</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">공사 · 점검 때 (드묾, 사람이 입력)</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">시뮬 입력 (패턴 · 자리)</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">망이 스스로 아는 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">CM · PM · FM — 장비가 보고하므로 형식이 정해져 있고 시각이 붙는다<br>단, CM은 “그렇게 설정했다”이지 “그렇게 설치됐다”가 아니다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">사람이 적어 둔 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">사이트 DB · 설치 기록 — 망은 기계 틸트 · 실제 높이를 모른다<br>공사 뒤 고치지 않으면 그대로 낡는다 → 가장 자주 어긋난다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">요점</b> 갈래마다 갱신 속도 · 신뢰도 · 쓰임이 다르다 — 하나의 “트윈 데이터”로 뭉뚱그리지 않는다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">CM · PM · FM은 3GPP SA5 관리 규격의 구분 (5쪽) · 15분은 흔한 설정의 예 (6쪽)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 14</p>
+<aside>(약 45초) 트윈에 들어가는 망 데이터는 네 갈래입니다. CM은 설정 관리로, PCI, 주파수, 송신 전력, 전기 틸트, 이웃 관계 같은 값이고 운용자나 SON이 바꿀 때 사건으로 바뀝니다. PM은 성능 관리로, 카운터와 KPI가 15분 같은 정해진 주기로 집계됩니다. FM은 경보로, 장애가 생기거나 풀릴 때 바로 옵니다. 넷째는 인벤토리와 사이트 자료로, 안테나 모델, 좌표, 높이, 방위각, 기계 틸트입니다. 앞의 셋은 망이 스스로 보고하는 것이라 형식과 시각이 정해져 있습니다. 하지만 CM은 그렇게 설정했다는 것이지 그렇게 설치됐다는 뜻은 아닙니다. 사이트 자료는 사람이 적어 둔 것이라 공사 뒤 고치지 않으면 그대로 낡고, 실무에서 가장 자주 어긋나는 곳입니다.</aside>
+</section>
+<section id="sources" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">어디서 받나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">받는 길: O1 · M-Plane · 업체 OSS 내보내기</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:700px;height:580px">
+<svg aria-label="SMO 상자에서 O1 선이 Near-RT RIC, O-CU, O-DU로 내려가고, O-DU에서 O-RU로 Open FH M-Plane 선이 이어진다. 오른쪽 점선은 SMO가 O-RU에 직접 닿는 하이브리드 경로" style="position:absolute;left:0px;top:0px;width:700px;height:580px" width="700" height="580" viewBox="0 0 700 580"><rect x="0" y="0" width="700" height="80" rx="14" fill="#14213D"/><line x1="100" y1="80" x2="100" y2="250" stroke="#255E9E" stroke-width="5"/><rect x="0" y="250" width="200" height="72" rx="12" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="330" y1="80" x2="330" y2="250" stroke="#255E9E" stroke-width="5"/><rect x="230" y="250" width="200" height="72" rx="12" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="560" y1="80" x2="560" y2="250" stroke="#255E9E" stroke-width="5"/><rect x="460" y="250" width="200" height="72" rx="12" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><rect x="250" y="146" width="160" height="40" rx="8" fill="#F5F3EE"/><line x1="560" y1="322" x2="560" y2="440" stroke="#A84A16" stroke-width="5"/><rect x="460" y="440" width="200" height="72" rx="12" fill="#F7DDCB" stroke="#A84A16" stroke-width="3"/><path d="M700 40 L 684 40 L 684 476 L 664 476" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 7"/></svg>
+<p style="position:absolute;left:0px;top:22px;width:700px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">SMO · OSS (관리 시스템)</p>
+<p style="position:absolute;left:0px;top:270px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">Near-RT RIC</p>
+<p style="position:absolute;left:230px;top:270px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">O-CU</p>
+<p style="position:absolute;left:460px;top:270px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">O-DU</p>
+<p style="position:absolute;left:250px;top:150px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">O1</p>
+<p style="position:absolute;left:460px;top:460px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">O-RU</p>
+<p style="position:absolute;left:230px;top:362px;width:320px;font-size:24px;text-align:right;line-height:1.3;color:#A84A16">Open FH M-Plane<br>(계층형: O-DU가 관리)</p>
+<p style="position:absolute;left:0px;top:540px;width:700px;font-size:24px;color:#14213D"><b style="color:#A84A16">┅</b> 하이브리드: SMO가 O-RU에 직접 — M-Plane은 <b>m-plane-yang</b> 덱</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">갈래</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">O1에서 받는 법</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">CM</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">NETCONF get-config로 읽기 · edit-config로 쓰기<br>바뀌면 notifyMOIChanges 알림 (HTTPS)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">PM</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">파일: notifyFileReady 알림 → SFTP · FTPES · HTTPS로 가져감<br>스트리밍: WebSocket으로 계속 받음</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">FM</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">경보 알림 (새로 · 변경 · 해제) · 경보 목록 읽기<br>목록 재구성(alarm list rebuilt) 알림</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:110px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">공통</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">알림은 3GPP 형식 그대로 또는 VES로 감싼 것 (stndDefined)<br>heartbeat 알림으로 살아 있음 확인</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">업체 EMS · OSS 북향(northbound) 내보내기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">실무에서는 업체 관리 시스템이 모은 것을 CSV · XML 덤프로 주기적으로 받는 경우가 많다 (일반적 경향) — 형식 · 주기는 계약마다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">ETSI TS 104 043 (O-RAN O1 R003 v11) 6.1~6.6절 · VES 7.2.1 · M-Plane 5.1.2절</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
+<aside>(약 50초) 받는 길은 크게 셋입니다. 첫째는 O-RAN의 O1입니다. 관리 시스템인 SMO가 Near-RT RIC, O-CU, O-DU를 관리하는 인터페이스입니다. 설정은 NETCONF로 읽고 쓰며, 값이 바뀌면 장비가 notifyMOIChanges 알림을 HTTPS로 보냅니다. 성능은 두 가지입니다. 파일 방식은 파일이 준비됐다는 notifyFileReady 알림을 받고 SFTP나 HTTPS로 가져가는 것이고, 스트리밍은 WebSocket으로 계속 받습니다. 경보는 발생, 변경, 해제 알림과 경보 목록 읽기입니다. 알림은 3GPP 형식 그대로 오거나 VES라는 공통 머리로 감싸서 옵니다. 둘째, O-RU는 O1이 아니라 Open Fronthaul M-Plane으로 관리되며, 이것은 m-plane-yang 덱에서 다뤘습니다. 셋째, 실무에서는 업체 관리 시스템이 모은 것을 CSV나 XML 덤프로 주기적으로 받는 경우가 많습니다.</aside>
+</section>
+<section id="specs" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">규격 지도 · 3GPP SA5</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">값의 이름과 뜻은 3GPP 관리 규격에 있다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">규격</p><p style="width:470px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">다루는 것</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">트윈에 쓰는 예 (속성 · 측정 이름)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">TS 28.541</p><p style="width:470px;font-size:24px;line-height:1.35;color:#4A5262">5G NRM — NR · NG-RAN 관리 객체와 속성</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">NRCellDU: nRPCI · arfcnDL · ssbFrequency<br>NRSectorCarrier: configuredMaxTxPower (mW) · NRCellRelation (이웃)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">TS 28.662 · 32.692</p><p style="width:470px;font-size:24px;line-height:1.35;color:#4A5262">안테나 기능 · 인벤토리 (NR NRM이 가져다 씀)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">AntennaFunction: retTiltValue (전기 틸트, 0.1°) · bearing<br>AntennaInventoryUnit: mechanicalOffset (설치로 생긴 틸트)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">TS 28.552</p><p style="width:470px;font-size:24px;line-height:1.35;color:#4A5262">5G 성능 측정 정의</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">L1M.SS-RSRP.Bin (SSB별 RSRP 분포) · RRU.PrbUsedDl (DL PRB 사용)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">TS 28.550</p><p style="width:470px;font-size:24px;line-height:1.35;color:#4A5262">성능 보증 — PM 작업 · 보고</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">granularityPeriod: 파일 5 · 15 · 30분 · 1 · 12 · 24시간 · 스트리밍 초 단위</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">TS 28.532 · 28.545</p><p style="width:470px;font-size:24px;line-height:1.35;color:#4A5262">공통 관리 서비스 · 경보 감시</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">notifyMOIChanges · notifyFileReady · 경보 알림 · PM XML 파일</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">TS 28.622 · 28.623</p><p style="width:470px;font-size:24px;line-height:1.35;color:#4A5262">공통 NRM 정보 모델 · YANG · JSON · XML</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">ManagedElement · PerfMetricJob · AlarmList · HeartbeatControl</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">TS 37.320 · 32.422</p><p style="width:470px;font-size:24px;line-height:1.35;color:#4A5262">MDT — 단말 측정 수집 · 활성화</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">위치가 붙을 수 있는 단말 RSRP 측정 (11쪽)</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">O1</b> O-RAN O1은 이 3GPP 관리 서비스를 그대로 따르고 빈 곳만 확장 — 측정 이름 앞이 OR.이면 O-RAN 정의, VS.이면 업체 정의</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">3GPP 28 · 32 · 37 계열 (SA5 = 관리 · 오케스트레이션 · 과금) · O1 6.3.1.9절 (OR. · VS. 접두사)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 14</p>
+<aside>(약 50초) 받는 값의 이름과 뜻은 3GPP SA5, 관리 규격을 맡는 작업반의 문서에 있습니다. 28.541은 5G 망 자원 모델, NRM으로, 셀 객체 NRCellDU의 PCI, 주파수, SSB 주파수, 섹터 캐리어의 최대 송신 전력, 이웃 관계를 정의합니다. 송신 전력 단위는 밀리와트입니다. 안테나 쪽은 공통 RAN 모델과 인벤토리 모델에 있고, 전기 틸트 retTiltValue와 설치로 생긴 기계 틸트 mechanicalOffset이 따로 있습니다. 성능 측정 이름은 28.552에, 예를 들어 SSB별 RSRP 분포나 PRB 사용량이 있습니다. 집계 주기는 28.550이 정하는데, 파일 보고는 5분, 15분, 30분, 1시간, 12시간, 24시간입니다. 알림과 파일 형식은 28.532, 단말 측정 MDT는 37.320입니다. O1은 이것들을 그대로 따르고, 이름 앞의 OR.이나 VS.로 O-RAN 정의와 업체 정의를 구분합니다.</aside>
+</section>
+<section id="cadence" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:34px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">신선도 · 예시 하루</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">10:17에 트윈은 무엇을 알고 있나</h2>
+</div>
+<div style="position:relative;width:1630px;height:456px">
+<svg aria-label="09:00부터 11:00까지 네 줄 시간선. CM 변경 알림 점 셋, 02:00 덤프를 가리키는 왼쪽 화살표, 15분 PM 구간 막대와 파일 준비 삼각형, 경보 발생과 해제 구간, 10:17의 as-of 세로 점선" style="position:absolute;left:0px;top:0px;width:1630px;height:456px" width="1630" height="456" viewBox="0 0 1630 456"><rect x="300" y="30" width="1330" height="60" rx="8" fill="#FBFAF7"/><rect x="300" y="120" width="1330" height="60" rx="8" fill="#FBFAF7"/><rect x="300" y="210" width="1330" height="60" rx="8" fill="#FBFAF7"/><rect x="300" y="300" width="1330" height="60" rx="8" fill="#FBFAF7"/><line x1="300" y1="20" x2="300" y2="372" stroke="#EAE7DF" stroke-width="2"/><line x1="632" y1="20" x2="632" y2="372" stroke="#EAE7DF" stroke-width="2"/><line x1="965" y1="20" x2="965" y2="372" stroke="#EAE7DF" stroke-width="2"/><line x1="1298" y1="20" x2="1298" y2="372" stroke="#EAE7DF" stroke-width="2"/><line x1="1630" y1="20" x2="1630" y2="372" stroke="#EAE7DF" stroke-width="2"/><circle cx="433" cy="60" r="12" fill="#255E9E"/><circle cx="1054" cy="60" r="12" fill="#255E9E"/><circle cx="1419" cy="60" r="12" fill="#255E9E"/><line x1="560.0" y1="150.0" x2="318.0" y2="150.0" stroke="#5E6675" stroke-width="4" stroke-dasharray="10 7"/><polygon points="304.0,150.0 318.0,157.0 318.0,143.0" fill="#5E6675"/><rect x="302" y="220" width="162" height="40" rx="4" fill="#255E9E"/><polygon points="522,262 514,270 530,270" fill="#14213D"/><rect x="468" y="220" width="162" height="40" rx="4" fill="#255E9E"/><polygon points="688,262 680,270 696,270" fill="#14213D"/><rect x="634" y="220" width="162" height="40" rx="4" fill="#255E9E"/><polygon points="854,262 846,270 862,270" fill="#14213D"/><rect x="801" y="220" width="162" height="40" rx="4" fill="#255E9E"/><polygon points="1020,262 1012,270 1028,270" fill="#14213D"/><rect x="967" y="220" width="162" height="40" rx="4" fill="#D5E3F3"/><polygon points="1187,262 1179,270 1195,270" fill="#14213D"/><rect x="1133" y="220" width="162" height="40" rx="4" fill="#D5E3F3"/><polygon points="1353,262 1345,270 1361,270" fill="#14213D"/><rect x="1300" y="220" width="162" height="40" rx="4" fill="#D5E3F3"/><polygon points="1519,262 1511,270 1527,270" fill="#14213D"/><rect x="1466" y="220" width="162" height="40" rx="4" fill="#D5E3F3"/><rect x="987" y="312" width="344" height="36" rx="6" fill="#E9B7A8"/><circle cx="987" cy="330" r="12" fill="#B23A2A"/><circle cx="1331" cy="330" r="12" fill="#2F7D5B"/><line x1="1153" y1="10" x2="1153" y2="372" stroke="#A84A16" stroke-width="5" stroke-dasharray="12 7"/></svg>
+<p style="position:absolute;left:0px;top:44px;width:280px;font-size:24px;text-align:right;font-weight:700;color:#14213D">CM 변경 알림</p>
+<p style="position:absolute;left:0px;top:134px;width:280px;font-size:24px;text-align:right;font-weight:700;color:#14213D">CM 전체 덤프</p>
+<p style="position:absolute;left:0px;top:224px;width:280px;font-size:24px;text-align:right;font-weight:700;color:#14213D">PM 15분 파일</p>
+<p style="position:absolute;left:0px;top:314px;width:280px;font-size:24px;text-align:right;font-weight:700;color:#14213D">FM 경보</p>
+<p style="position:absolute;left:250px;top:380px;width:100px;font-size:24px;text-align:center;color:#5E6675">09:00</p>
+<p style="position:absolute;left:582px;top:380px;width:100px;font-size:24px;text-align:center;color:#5E6675">09:30</p>
+<p style="position:absolute;left:915px;top:380px;width:100px;font-size:24px;text-align:center;color:#5E6675">10:00</p>
+<p style="position:absolute;left:1248px;top:380px;width:100px;font-size:24px;text-align:center;color:#5E6675">10:30</p>
+<p style="position:absolute;left:1580px;top:380px;width:100px;font-size:24px;text-align:center;color:#5E6675">11:00</p>
+<p style="position:absolute;left:616px;top:44px;width:420px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">10:08 전기 틸트 6° → 4°</p>
+<p style="position:absolute;left:576px;top:134px;width:700px;font-size:24px;color:#5E6675">← 02:00에 받은 하루 1회 덤프 (다음은 내일 02:00)</p>
+<p style="position:absolute;left:1351px;top:314px;width:330px;font-size:24px;color:#B23A2A;font-weight:700">10:02 발생 → 10:33 해제</p>
+<p style="position:absolute;left:1063px;top:380px;width:180px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">as-of 10:17</p>
+<p style="position:absolute;left:300px;top:420px;width:1330px;font-size:24px;color:#14213D"><b style="color:#255E9E">■</b> 받은 PM 구간  <b style="color:#8DB8E8">■</b> 아직 못 받은 구간  <b>▲</b> 파일 준비 (구간 끝 + 5분, 예시)</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">CM — 알림을 받으면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">10:08 틸트 변경을 이미 안다<br>(알림 지연은 초 단위 예상)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">CM — 덤프만 쓰면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">8시간 17분 전 상태<br>틸트 변경을 내일 02:00에야 안다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">PM — 15분 + 지연 5분</p><p style="font-size:24px;line-height:1.4;color:#4A5262">10:00까지의 값 (17분 전)<br>가장 낡을 때 20분 = 주기 + 지연</p></div>
+<div style="background:#F3D9D2;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#B23A2A">FM — 실시간</p><p style="font-size:24px;line-height:1.4;color:#4A5262">10:02부터 경보 1건 활성<br>그 셀을 빼고 비교한다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">시각 · 지연 · 덤프 주기는 예시 · 15분은 TS 28.550 granularityPeriod 값 중 하나 · 실제 값은 망 설정 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 14</p>
+<aside>(약 55초) 같은 순간에 트윈이 아는 것은 갈래마다 다릅니다. 예시로 오전 9시부터 11시까지를 그렸고, 주황 점선 10:17에 트윈에 물어본다고 합시다. CM 변경 알림을 받는 구성이라면 10:08의 틸트 변경을 이미 압니다. 하지만 하루 한 번 02:00 덤프만 쓴다면 트윈은 8시간 17분 전 상태이고, 틸트 변경은 내일 새벽에야 알게 됩니다. PM은 15분 구간이 끝나고 파일이 준비되어야 받으므로, 지연을 5분으로 가정하면 지금 가진 값은 10:00까지, 17분 전 것입니다. 가장 낡을 때는 주기와 지연을 더한 20분입니다. 경보는 실시간이라 10:02부터 활성인 경보를 알고, 그 셀을 빼고 비교할 수 있습니다. 그래서 트윈의 “지금”은 하나가 아니라 갈래마다 다른 시각의 묶음입니다.</aside>
+</section>
+<section id="versioning" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">버전 · 시간 여행</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">“as of t”로 묻는다: 스냅숏 + 변경 기록</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:900px;height:390px">
+<svg aria-label="시간선 위에 S1과 S2 덤프 막대, 변경 점 e1 · e2 · e3, 10:17의 as-of 점선. S1부터 as-of까지 칠해져 있고, 놓친 변경 e2에서 S2로 휘어진 점선 화살표" style="position:absolute;left:0px;top:0px;width:900px;height:390px" width="900" height="390" viewBox="0 0 900 390"><line x1="30" y1="150" x2="880" y2="150" stroke="#14213D" stroke-width="4"/><rect x="60" y="150" width="280" height="60" fill="#D5E3F3"/><rect x="40" y="110" width="40" height="80" rx="6" fill="#14213D"/><rect x="800" y="110" width="40" height="80" rx="6" fill="#14213D"/><circle cx="260" cy="150" r="13" fill="#255E9E"/><circle cx="430" cy="150" r="13" fill="#FBFAF7" stroke="#A84A16" stroke-width="5"/><circle cx="600" cy="150" r="13" fill="#255E9E"/><line x1="340" y1="56" x2="340" y2="215" stroke="#A84A16" stroke-width="5" stroke-dasharray="12 7"/><path d="M436 132 C 540 50, 700 50, 806 106" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="9 7"/><line x1="790.0" y1="96.0" x2="796.4" y2="100.2" stroke="#A84A16" stroke-width="4"/><polygon points="808.0,108.0 800.2,94.4 792.5,106.1" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:222px;width:170px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">S1 덤프<br>10-27 02:00</p>
+<p style="position:absolute;left:740px;top:222px;width:160px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">S2 덤프<br>10-28 02:00</p>
+<p style="position:absolute;left:200px;top:94px;width:120px;font-size:24px;text-align:center;color:#255E9E">e1 10:08</p>
+<p style="position:absolute;left:380px;top:172px;width:110px;font-size:24px;text-align:center;color:#A84A16">e2 10:41</p>
+<p style="position:absolute;left:550px;top:172px;width:110px;font-size:24px;text-align:center;color:#255E9E">e3 15:20</p>
+<p style="position:absolute;left:260px;top:14px;width:180px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">as-of 10:17</p>
+<p style="position:absolute;left:480px;top:0px;width:420px;font-size:24px;color:#A84A16">e2: 알림을 놓쳐 S2 비교로 기록</p>
+<p style="position:absolute;left:60px;top:300px;width:600px;font-size:24px;color:#14213D"><b style="color:#255E9E">상태(10:17) = S1 + e1</b> — e2는 아직 없다</p>
+<p style="position:absolute;left:60px;top:344px;width:820px;font-size:24px;color:#4A5262"><b style="color:#255E9E">●</b> 알림으로 들어온 변경  <b style="color:#A84A16">○</b> 놓쳐서 나중에 안 변경</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">두 시각을 함께 저장 (bitemporal)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">적용 시각 — 망에서 실제로 바뀐 때<br>기록 시각 — 트윈이 그것을 안 때</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">as-of 질문은 두 가지</p><p style="font-size:24px;line-height:1.4;color:#4A5262">그때 망은 어땠나 → 적용 시각 기준<br>그때 우리는 무엇을 알았나 → 기록 시각 기준</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">스냅숏 ID</p><p style="font-size:24px;line-height:1.4;color:#4A5262">내용 해시로 붙이면 같은 상태 = 같은 ID<br>시뮬 실행 기록에 남긴다 (13쪽)</p></div>
+</div>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#9AA6BA">applied&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recorded&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;object&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;old → new&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source</span><br>10-27 10:08&nbsp;&nbsp;10-27 10:08&nbsp;&nbsp;AntennaFunction=A2&nbsp;&nbsp;&nbsp;retTiltValue&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;60 → 40&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;O1 알림<br>10-27 10:41&nbsp;&nbsp;<span style="color:#F0A36B">10-28 02:05</span>&nbsp;&nbsp;NRSectorCarrier=C3&nbsp;&nbsp;&nbsp;configuredMaxTxPower&nbsp;&nbsp;40000 → 20000&nbsp;&nbsp;덤프 diff</p></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림 · 변경 기록은 예시 (객체 이름은 3GPP NRM 클래스, 값 단위: 틸트 0.1° · 전력 mW)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 14</p>
+<aside>(약 50초) 트윈 저장소는 덮어쓰지 않고 쌓습니다. 하루 한 번 받는 전체 덤프를 스냅숏으로 두고, 그 사이의 변경을 기록으로 붙입니다. 그러면 10시 17분의 상태는 S1에 그때까지의 변경 e1을 더한 것입니다. 여기서 시각이 두 개 필요합니다. 망에서 실제로 바뀐 적용 시각과 트윈이 그것을 안 기록 시각입니다. 아래 표의 두 번째 줄은 10시 41분에 출력이 바뀌었지만 알림을 놓쳐 다음 날 덤프 비교로야 기록된 경우입니다. 그래서 질문도 둘입니다. 그때 망이 어땠는지는 적용 시각으로, 그때 우리가 무엇을 알고 시뮬레이션을 돌렸는지는 기록 시각으로 답합니다. 스냅숏에는 내용 해시 같은 ID를 붙여 실행 기록에 남깁니다.</aside>
+</section>
+<section id="detect" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">변경 감지 · 계보</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">알림으로 빠르게, 비교로 빠짐없이, 값마다 출처를</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="width:800px;display:flex;flex-direction:column;gap:11px">
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">① 알림 (사건)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">notifyMOIChanges · 경보 알림 — 빠르다<br>연결이 끊기거나 구독이 비면 놓친다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">② 전체 읽기 + 비교 (diff)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">주기적 덤프 · get-config 결과를 앞 스냅숏과 비교<br>느리지만 빠짐없다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">③ 맞추기 (reconcile)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">diff에만 있는 변경 = 놓친 알림 → 기록 시각은 diff 시각<br>놓친 건수는 그 자체로 수집 품질 지표</p></div>
+<div style="background:#F3D9D2;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#B23A2A">조용함 ≠ 정상</p><p style="font-size:24px;line-height:1.4;color:#4A5262">heartbeat가 끊긴 출처는 “변경 없음”이 아니라 “모름”<br>다시 붙으면 경보 목록부터 다시 읽는다</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<p style="font-size:26px;font-weight:700;color:#14213D">계보(lineage) — 값 하나의 내력 (예시)</p>
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:150px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">트윈 값</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">총 틸트 10.0° (as-of 10-27 09:00) · 확인됨</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:150px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">← 계산</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">mechanicalOffset + retTiltValue<br>변환 코드 v1.4</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:150px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">← CM</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">retTiltValue 60 (= 6.0°)<br>스냅숏 cm-7f3a21 · 10-27 02:00 덤프</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:150px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">← 점검</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">mechanicalOffset 4.0°<br>현장 점검 2026-09-14 · 사진 3장</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">W3C PROV의 세 요소로 적으면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">값(Entity) ← 만든 작업(Activity) ← 한 주체(Agent)<br>“이 숫자 누가 · 언제 · 무엇으로?”에 답한다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">알림 · 경보 목록 · heartbeat: O1 6.1.6 · 6.2 · 6.6절 · 계보 값 · 이름 · 날짜는 예시 · W3C PROV-DM (2013)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
+<aside>(약 50초) 변경을 아는 길은 둘입니다. 첫째는 알림입니다. 빠르지만 연결이 끊기거나 구독이 비어 있으면 놓칩니다. 둘째는 전체를 주기적으로 읽어 앞 스냅숏과 비교하는 것입니다. 느리지만 빠짐이 없습니다. 둘을 함께 쓰고, 비교에서만 나온 변경은 놓친 알림으로 보고 기록 시각을 비교 시각으로 둡니다. 놓친 건수는 그 자체로 수집 품질 지표가 됩니다. 또 heartbeat가 끊긴 출처는 변경이 없는 것이 아니라 모르는 것이니, 다시 붙으면 경보 목록부터 다시 읽습니다. 오른쪽은 계보의 예입니다. 트윈의 총 틸트 10도는 CM의 전기 틸트 6도와 현장 점검의 기계 틸트 4도를 더한 값이고, 각각 어느 스냅숏, 어느 점검에서 왔는지가 붙어 있습니다. W3C PROV 모델의 값, 작업, 주체 세 요소로 적으면 이 숫자를 누가 언제 무엇으로 만들었는지 답할 수 있습니다.</aside>
+</section>
+<section id="tilt" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">충돌 ① 틸트 · 예시 계산</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">CM 6° 대 현장 4°: 같은 틸트를 잰 걸까</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:940px;height:530px">
+<svg aria-label="거리(로그, 100 m~2 km)에 따른 안테나 이득 차 곡선. 150 m에서 +4.3 dB, 약 326 m에서 0, 2 km에서 -3.1 dB. 6°와 4° 주빔이 땅에 닿는 거리 271 m와 408 m를 세로 점선으로 표시" style="position:absolute;left:0px;top:0px;width:940px;height:530px" width="940" height="530" viewBox="0 0 940 530"><line x1="90" y1="440" x2="930" y2="440" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="335" x2="930" y2="335" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="230" x2="930" y2="230" stroke="#14213D" stroke-width="3"/><line x1="90" y1="125" x2="930" y2="125" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="20" x2="930" y2="20" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="20" x2="90" y2="440" stroke="#EAE7DF" stroke-width="2"/><line x1="284" y1="20" x2="284" y2="440" stroke="#EAE7DF" stroke-width="2"/><line x1="541" y1="20" x2="541" y2="440" stroke="#EAE7DF" stroke-width="2"/><line x1="736" y1="20" x2="736" y2="440" stroke="#EAE7DF" stroke-width="2"/><line x1="930" y1="20" x2="930" y2="440" stroke="#EAE7DF" stroke-width="2"/><line x1="370" y1="20" x2="370" y2="440" stroke="#255E9E" stroke-width="3" stroke-dasharray="8 6"/><line x1="484" y1="20" x2="484" y2="440" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 6"/><polyline points="90.0,188.1 95.3,161.0 100.6,135.1 105.8,110.3 111.1,86.6 116.4,64.0 121.7,47.3 127.0,52.3 132.3,57.3 137.5,62.2 142.8,66.9 148.1,71.7 153.4,76.3 158.7,80.8 164.0,85.3 169.2,89.7 174.5,94.1 179.8,98.3 185.1,102.5 190.4,106.6 195.7,110.6 200.9,114.6 206.2,118.5 211.5,122.3 216.8,126.1 222.1,129.8 227.4,133.4 232.6,137.0 237.9,140.5 243.2,144.0 248.5,147.3 253.8,150.7 259.1,153.9 264.3,157.1 269.6,160.3 274.9,163.4 280.2,166.4 285.5,169.4 290.8,172.3 296.0,175.2 301.3,178.0 306.6,180.8 311.9,183.5 317.2,186.2 322.5,188.8 327.7,191.4 333.0,193.9 338.3,196.4 343.6,198.9 348.9,201.3 354.2,203.6 359.4,205.9 364.7,208.2 370.0,210.4 375.3,212.6 380.6,214.8 385.8,216.9 391.1,218.9 396.4,221.0 401.7,223.0 407.0,224.9 412.3,226.8 417.5,228.7 422.8,230.6 428.1,232.4 433.4,234.2 438.7,235.9 444.0,237.7 449.2,239.3 454.5,241.0 459.8,242.6 465.1,244.2 470.4,245.8 475.7,247.3 480.9,248.8 486.2,250.3 491.5,251.8 496.8,253.2 502.1,254.6 507.4,256.0 512.6,257.3 517.9,258.6 523.2,259.9 528.5,261.2 533.8,262.5 539.1,263.7 544.3,264.9 549.6,266.1 554.9,267.2 560.2,268.4 565.5,269.5 570.8,270.6 576.0,271.7 581.3,272.7 586.6,273.8 591.9,274.8 597.2,275.8 602.5,276.8 607.7,277.7 613.0,278.7 618.3,279.6 623.6,280.5 628.9,281.4 634.2,282.3 639.4,283.2 644.7,284.0 650.0,284.8 655.3,285.6 660.6,286.4 665.8,287.2 671.1,288.0 676.4,288.7 681.7,289.5 687.0,290.2 692.3,290.9 697.5,291.6 702.8,292.3 708.1,293.0 713.4,293.6 718.7,294.3 724.0,294.9 729.2,295.6 734.5,296.2 739.8,296.8 745.1,297.4 750.4,297.9 755.7,298.5 760.9,299.1 766.2,299.6 771.5,300.2 776.8,300.7 782.1,301.2 787.4,301.7 792.6,302.2 797.9,302.7 803.2,303.2 808.5,303.6 813.8,304.1 819.1,304.6 824.3,305.0 829.6,305.4 834.9,305.9 840.2,306.3 845.5,306.7 850.8,307.1 856.0,307.5 861.3,307.9 866.6,308.3 871.9,308.7 877.2,309.0 882.5,309.4 887.7,309.8 893.0,310.1 898.3,310.4 903.6,310.8 908.9,311.1 914.2,311.4 919.4,311.7 924.7,312.1 930.0,312.4" fill="none" stroke="#14213D" stroke-width="6"/><circle cx="203.7" cy="116.6" r="9" fill="#A84A16"/><circle cx="930.0" cy="312.4" r="9" fill="#255E9E"/><line x1="90" y1="20" x2="90" y2="440" stroke="#14213D" stroke-width="3"/></svg>
+<p style="position:absolute;left:0px;top:424px;width:76px;font-size:24px;text-align:right;color:#5E6675">-8</p>
+<p style="position:absolute;left:0px;top:319px;width:76px;font-size:24px;text-align:right;color:#5E6675">-4</p>
+<p style="position:absolute;left:0px;top:214px;width:76px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:109px;width:76px;font-size:24px;text-align:right;color:#5E6675">+4</p>
+<p style="position:absolute;left:0px;top:4px;width:76px;font-size:24px;text-align:right;color:#5E6675">+8</p>
+<p style="position:absolute;left:40px;top:448px;width:100px;font-size:24px;text-align:center;color:#5E6675">100</p>
+<p style="position:absolute;left:234px;top:448px;width:100px;font-size:24px;text-align:center;color:#5E6675">200</p>
+<p style="position:absolute;left:491px;top:448px;width:100px;font-size:24px;text-align:center;color:#5E6675">500</p>
+<p style="position:absolute;left:686px;top:448px;width:100px;font-size:24px;text-align:center;color:#5E6675">1 km</p>
+<p style="position:absolute;left:880px;top:448px;width:100px;font-size:24px;text-align:center;color:#5E6675">2 km</p>
+<p style="position:absolute;left:90px;top:484px;width:840px;font-size:24px;text-align:center;color:#14213D">RU에서의 거리 (m, 로그 눈금)</p>
+<p style="position:absolute;left:420px;top:26px;width:500px;font-size:24px;color:#14213D;background:#F5F3EE">sim(CM 6°) − 실제(4°)  안테나 이득 차 (dB)</p>
+<p style="position:absolute;left:220px;top:103px;width:220px;font-size:24px;font-weight:700;color:#A84A16">+4.3 dB</p>
+<p style="position:absolute;left:760px;top:326px;width:150px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">-3.1 dB</p>
+<p style="position:absolute;left:170px;top:364px;width:192px;font-size:24px;text-align:right;line-height:1.3;color:#255E9E">6° 주빔<br>271 m</p>
+<p style="position:absolute;left:492px;top:364px;width:160px;font-size:24px;line-height:1.3;color:#A84A16">4° 주빔<br>408 m</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">기계 틸트 (mechanical)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">브래킷 각도 · 설치 때 정함 · 경사계로 잼<br>인벤토리 mechanicalOffset — 망은 모른다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">전기 틸트 (electrical · RET)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">안테나 안 위상으로 기울임 · AISG로 원격 조정<br>CM retTiltValue (0.1° 단위)로 읽힌다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">디지털 틸트 (빔포밍 AAU)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">CommonBeamformingFunction digitalTilt<br>(0.1° 단위, 양수 = 아래쪽)</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">실제 틸트 = 기계 + 전기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">3GPP 정의: mechanicalOffset + retTiltValue<br>→ CM 6°와 현장 4°는 다른 것을 잰 숫자일 수도</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 틸트가 틀리면 상수 편향이 아니라 거리에 따라 부호가 바뀌는 오차 — 가까이 +4.3 dB, 멀리 -3.1 dB → 거리 경향 몫</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">가정: RU 30 m · UE 1.5 m · 수직 패턴 −min(12(Δθ/θ3dB)², 20 dB), θ3dB 8° · 정의: TS 32.692 · 28.541</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 14</p>
+<aside>(약 60초) 이제 충돌입니다. CM은 틸트 6도, 현장 점검은 4도라고 합니다. 먼저 같은 것을 잰 숫자인지 봐야 합니다. 틸트에는 셋이 있습니다. 기계 틸트는 브래킷 각도로 설치 때 정하고 경사계로 잽니다. 3GPP 인벤토리 모델에 mechanicalOffset으로 있지만 망은 이 값을 스스로 알지 못합니다. 전기 틸트는 안테나 안의 위상으로 기울이는 것으로 AISG로 원격 조정하고, CM의 retTiltValue로 0.1도 단위로 읽힙니다. 빔포밍 장비에는 디지털 틸트도 있습니다. 3GPP는 실제 틸트를 기계와 전기의 합으로 정의합니다. 그러니 CM 6도와 현장 4도는 각각 전기, 기계 틸트일 수도 있습니다. 정말 같은 것이 다르다면 영향은 이렇습니다. 가정한 패턴으로 계산하면 가까운 150 m에서는 시뮬이 +4.3 dB 높고, 그보다 안쪽 112 m 부근에서는 +7.0 dB까지 벌어집니다. 약 326 m에서 0, 2 km에서는 -3.1 dB 낮습니다. 상수 편향이 아니라 거리에 따라 부호가 바뀌는 오차라서 Breakdown에서는 거리 경향 몫으로 나타납니다.</aside>
+</section>
+<section id="reconcile" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">충돌 ② 어디를 믿나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">속성마다 출처 순위 · 신뢰 표시 · 증거</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">속성</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">먼저 믿을 것</p><p style="flex:0.8;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">다음</p><p style="flex:1.15;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">확인할 증거</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">전기 틸트</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">CM 읽은 값 (RET 보고)</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">계획 DB</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">DT 가까이 · 멀리 RSRP 기울기 (9쪽)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">기계 틸트</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">현장 점검 (경사계 · 사진)</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">설치 기록</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">점검 날짜 뒤 공사 이력</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">방위각</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">현장 점검 (진북 기준)</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">CM bearing · 설치 기록</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">DT 섹터 경계 · PCI 분포</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">좌표 · 높이</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">측량 · 현장 점검</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">사이트 DB</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">좌표 정합 점검 (coord-registration)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">전력 · PCI · 주파수</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">CM (망이 실제로 쓰는 값)</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">—</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">DT · MR의 셀 식별 · 주파수</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">안테나 모델 · 패턴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">현장 사진 · 인벤토리</p><p style="flex:0.8;font-size:24px;line-height:1.35;color:#4A5262">사이트 DB</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">패턴 파일 이름 · 버전</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:12px">
+<div style="flex:1;background:#D7EBDF;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;border-left:8px solid #2F7D5B"><p style="font-size:24px;font-weight:700;color:#2F7D5B">확인됨</p><p style="font-size:24px;line-height:1.35;color:#4A5262">두 출처 일치 · 현장 증거</p></div>
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;border-left:8px solid #255E9E"><p style="font-size:24px;font-weight:700;color:#255E9E">보고됨</p><p style="font-size:24px;line-height:1.35;color:#4A5262">한 출처만 (CM 또는 DB)</p></div>
+<div style="flex:1;background:#EAE7DF;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;border-left:8px solid #5E6675"><p style="font-size:24px;font-weight:700;color:#5E6675">가정</p><p style="font-size:24px;line-height:1.35;color:#4A5262">기본값 · 같은 기종 평균</p></div>
+<div style="flex:1;background:#F3D9D2;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;border-left:8px solid #B23A2A"><p style="font-size:24px;font-weight:700;color:#B23A2A">충돌</p><p style="font-size:24px;line-height:1.35;color:#4A5262">출처끼리 다름 — 지우지 않는다</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">규칙</b> 충돌은 덮어쓰지 않고 표시한 채 두 값으로 다 돌려 본다 — 결과 차이가 작으면 넘어가고, 크면 현장 확인을 요청</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처 순위와 신뢰 표시 네 단계는 발표자 제안 (예시 규칙) — 팀 합의로 정한다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 14</p>
+<aside>(약 50초) 그러면 어디를 믿을까요. 속성마다 출처 순위를 미리 정해 둡니다. 전기 틸트, 전력, PCI, 주파수처럼 망이 실제로 쓰는 값은 CM을 먼저 믿습니다. 기계 틸트, 방위각, 좌표, 높이, 안테나 모델처럼 망이 모르는 값은 현장 점검이 먼저이고 사이트 DB가 다음입니다. 마지막 열은 그 값을 확인할 증거입니다. 틸트는 드라이브 테스트에서 가까운 곳과 먼 곳의 RSRP 기울기로, 방위각은 섹터 경계로 드러납니다. 각 값에는 신뢰 표시를 붙입니다. 두 출처가 맞으면 확인됨, 하나뿐이면 보고됨, 기본값이면 가정, 서로 다르면 충돌입니다. 중요한 규칙은 충돌을 덮어쓰지 않는 것입니다. 표시한 채 두 값으로 모두 돌려 보고, 결과 차이가 작으면 넘어가고 크면 현장 확인을 요청합니다. 이 순위와 표시는 제 제안이고, 팀에서 합의해 정하면 됩니다.</aside>
+</section>
+<section id="mapping" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">트윈 모델에 매핑</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">CM은 입력, PM은 목표, FM은 마스크</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:150px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">CM →<br>시뮬 입력</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">PCI · ARFCN ·<br>SSB 주파수 → 셀 식별</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">configuredMaxTxPower<br>mW → dBm (40000 → 46.0)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">틸트 = 기계 + 전기<br>(+ 디지털)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">방위각 · 높이 ·<br>안테나 패턴</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#F7DDCB;border-radius:14px;padding:12px 16px"><p style="width:150px;font-size:26px;font-weight:700;line-height:1.3;color:#A84A16">PM →<br>검증 목표</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">L1M.SS-RSRP.Bin<br>SSB별 분포 → Shape(T0)</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">MDT · DT<br>위치 붙은 RSRP → 칸별</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">RRU.PrbUsedDl<br>→ 부하 · 간섭 가정</p><p style="font-size:26px;color:#A84A16;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">같은 시간 창의<br>값만 쓴다</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#F3D9D2;border-radius:14px;padding:12px 16px"><p style="width:150px;font-size:26px;font-weight:700;line-height:1.3;color:#B23A2A">FM →<br>마스크</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">경보 · 장애 구간</p><p style="font-size:26px;color:#B23A2A;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">operationalState<br>= disabled</p><p style="font-size:26px;color:#B23A2A;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">시뮬에서 셀 끄기<br>또는 비교에서 빼기</p><p style="font-size:26px;color:#B23A2A;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">마스크 버전을<br>기록</p></div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">시간 창을 맞춘다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">DT 주행 시각 · PM 구간 · CM as-of · FM 마스크가 같은 창<br>다른 날 PM과 오늘 CM을 섞지 않는다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">이름 · 단위는 한 번만 바꾼다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">정규화 단계에서 셀 ID 매핑 · mW → dBm · 0.1° → °<br>좌표계 통일은 coord-registration 덱</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">속성 · 측정 이름: TS 28.541 · 28.552 · 37.320 · 40000 mW = 46.0 dBm · Shape(T0)는 dt-breakdown</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
+<aside>(약 50초) 받은 데이터는 트윈 모델의 세 자리에 들어갑니다. CM은 시뮬레이션 입력입니다. PCI와 주파수로 셀을 식별하고, 최대 송신 전력은 밀리와트로 오므로 dBm으로 바꿉니다. 4만 밀리와트면 46.0 dBm입니다. 틸트는 기계와 전기를 더하고, 방위각과 높이, 안테나 패턴을 붙입니다. PM은 검증 목표입니다. SSB별 RSRP 분포 카운터는 위치가 없으니 분포끼리, Breakdown의 Shape 비교에 쓰고, 위치가 붙은 MDT나 드라이브 테스트는 칸별 비교에 씁니다. PRB 사용량은 부하와 간섭 가정에 씁니다. FM은 마스크입니다. 장애 구간이나 셀 상태가 disabled인 셀은 시뮬에서 끄거나 비교에서 뺍니다. 두 가지를 지킵니다. 모든 데이터를 같은 시간 창으로 맞추고, 이름과 단위 변환은 정규화 단계에서 한 번만 합니다.</aside>
+</section>
+<section id="pipeline" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:34px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">파이프라인 구조</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">수집 → 정규화 → 검증 → 버전 저장소 → 시뮬 · 분석</h2>
+</div>
+<div style="position:relative;width:1664px;height:480px">
+<svg aria-label="왼쪽 출처 네 상자(O1 · M-Plane, EMS · OSS 덤프, 사이트 DB · 점검, DT · MDT)가 수집으로 모이고, 정규화, 검증, 버전 저장소를 지나 시뮬레이터와 분석으로 갈라진다. 분석에서 검증으로 되돌아가는 점선 화살표" style="position:absolute;left:0px;top:0px;width:1664px;height:480px" width="1664" height="480" viewBox="0 0 1664 480"><rect x="0" y="20" width="230" height="76" rx="12" fill="#EAE7DF"/><line x1="232.0" y1="58.0" x2="287.3" y2="188.9" stroke="#5E6675" stroke-width="3"/><polygon points="292.0,200.0 292.9,186.6 281.8,191.3" fill="#5E6675"/><rect x="0" y="120" width="230" height="76" rx="12" fill="#EAE7DF"/><line x1="232.0" y1="158.0" x2="282.2" y2="193.1" stroke="#5E6675" stroke-width="3"/><polygon points="292.0,200.0 285.6,188.2 278.7,198.0" fill="#5E6675"/><rect x="0" y="220" width="230" height="76" rx="12" fill="#EAE7DF"/><line x1="232.0" y1="258.0" x2="283.4" y2="208.3" stroke="#5E6675" stroke-width="3"/><polygon points="292.0,200.0 279.2,204.0 287.5,212.7" fill="#5E6675"/><rect x="0" y="320" width="230" height="76" rx="12" fill="#EAE7DF"/><line x1="232.0" y1="358.0" x2="287.7" y2="211.2" stroke="#5E6675" stroke-width="3"/><polygon points="292.0,200.0 282.1,209.1 293.3,213.3" fill="#5E6675"/><rect x="290" y="90" width="230" height="220" rx="14" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="522.0" y1="200.0" x2="540.0" y2="200.0" stroke="#14213D" stroke-width="5"/><polygon points="556.0,200.0 540.0,192.0 540.0,208.0" fill="#14213D"/><rect x="560" y="90" width="230" height="220" rx="14" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="792.0" y1="200.0" x2="810.0" y2="200.0" stroke="#14213D" stroke-width="5"/><polygon points="826.0,200.0 810.0,192.0 810.0,208.0" fill="#14213D"/><rect x="830" y="90" width="230" height="220" rx="14" fill="#D5E3F3" stroke="#255E9E" stroke-width="3"/><line x1="1062.0" y1="200.0" x2="1080.0" y2="200.0" stroke="#14213D" stroke-width="5"/><polygon points="1096.0,200.0 1080.0,192.0 1080.0,208.0" fill="#14213D"/><rect x="1100" y="90" width="230" height="220" rx="14" fill="#14213D" stroke="#14213D" stroke-width="3"/><line x1="1334.0" y1="170.0" x2="1403.8" y2="110.4" stroke="#14213D" stroke-width="5"/><polygon points="1416.0,100.0 1398.6,104.3 1409.0,116.5" fill="#14213D"/><line x1="1334.0" y1="230.0" x2="1403.8" y2="289.6" stroke="#14213D" stroke-width="5"/><polygon points="1416.0,300.0 1409.0,283.5 1398.6,295.7" fill="#14213D"/><rect x="1420" y="30" width="244" height="120" rx="14" fill="#F7DDCB" stroke="#A84A16" stroke-width="3"/><rect x="1420" y="250" width="244" height="120" rx="14" fill="#F7DDCB" stroke="#A84A16" stroke-width="3"/><path d="M1542 372 L 1542 430 L 945 430 L 945 316" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 7"/><line x1="945.0" y1="330.0" x2="945.0" y2="330.0" stroke="#A84A16" stroke-width="4"/><polygon points="945.0,314.0 937.0,330.0 953.0,330.0" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:42px;width:230px;font-size:24px;text-align:center;font-weight:700;color:#14213D">O1 · M-Plane</p>
+<p style="position:absolute;left:0px;top:142px;width:230px;font-size:24px;text-align:center;font-weight:700;color:#14213D">EMS · OSS 덤프</p>
+<p style="position:absolute;left:0px;top:242px;width:230px;font-size:24px;text-align:center;font-weight:700;color:#14213D">사이트 DB · 점검</p>
+<p style="position:absolute;left:0px;top:342px;width:230px;font-size:24px;text-align:center;font-weight:700;color:#14213D">DT · MDT</p>
+<p style="position:absolute;left:290px;top:112px;width:230px;font-size:24px;text-align:center;font-size:28px;font-weight:700;color:#14213D">수집</p>
+<p style="position:absolute;left:290px;top:170px;width:230px;font-size:24px;text-align:center;line-height:1.4;color:#4A5262">원본 그대로 보관<br>받은 시각 · 출처</p>
+<p style="position:absolute;left:560px;top:112px;width:230px;font-size:24px;text-align:center;font-size:28px;font-weight:700;color:#14213D">정규화</p>
+<p style="position:absolute;left:560px;top:170px;width:230px;font-size:24px;text-align:center;line-height:1.4;color:#4A5262">이름 · ID 매핑<br>단위 · 좌표계</p>
+<p style="position:absolute;left:830px;top:112px;width:230px;font-size:24px;text-align:center;font-size:28px;font-weight:700;color:#14213D">검증</p>
+<p style="position:absolute;left:830px;top:170px;width:230px;font-size:24px;text-align:center;line-height:1.4;color:#4A5262">범위 · 형식<br>충돌 · 신뢰 표시</p>
+<p style="position:absolute;left:1100px;top:112px;width:230px;font-size:24px;text-align:center;font-size:28px;font-weight:700;color:#F5F3EE">버전 저장소</p>
+<p style="position:absolute;left:1100px;top:170px;width:230px;font-size:24px;text-align:center;line-height:1.4;color:#C9D3E3">스냅숏 + 변경 기록<br>as-of 질의</p>
+<p style="position:absolute;left:1420px;top:54px;width:244px;font-size:24px;text-align:center;line-height:1.35;font-weight:700;color:#14213D">시뮬레이터<br>(Sionna RT 등)</p>
+<p style="position:absolute;left:1420px;top:274px;width:244px;font-size:24px;text-align:center;line-height:1.35;font-weight:700;color:#14213D">분석<br>(Breakdown)</p>
+<p style="position:absolute;left:975px;top:438px;width:560px;font-size:24px;color:#A84A16;font-weight:700">증거 되먹임: DT 결과 → 충돌 판정 · 신뢰 표시</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">원본은 지우지 않는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">변환 규칙을 고치면 원본부터 다시 돌린다<br>→ 수집 단계는 가공하지 않는다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">단계마다 버전</p><p style="font-size:24px;line-height:1.4;color:#4A5262">변환 코드 · 규칙 표 · 패턴 파일에도 버전<br>→ 계보(8쪽)가 저절로 남는다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">검증은 막지 않고 표시</p><p style="font-size:24px;line-height:1.4;color:#4A5262">범위 밖 · 충돌 값도 저장소에 넣고 표시만<br>→ 시뮬이 쓸지 말지는 실행 설정이 정한다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">구조는 발표자 제안 (일반적인 데이터 파이프라인 구성) · 도구 · 저장소 종류는 정하지 않음</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 14</p>
+<aside>(약 50초) 지금까지를 하나의 파이프라인으로 묶으면 이렇습니다. 왼쪽 네 출처, O1과 M-Plane, 업체 덤프, 사이트 DB와 점검, 드라이브 테스트와 MDT가 수집으로 들어옵니다. 수집은 원본을 그대로 보관하고 받은 시각과 출처만 붙입니다. 정규화에서 이름과 ID를 맞추고 단위와 좌표계를 바꿉니다. 검증에서 범위와 형식을 보고 충돌과 신뢰 표시를 붙입니다. 그 결과가 스냅숏과 변경 기록으로 버전 저장소에 쌓이고, 시뮬레이터와 분석이 as-of로 꺼내 씁니다. 분석에서 나온 드라이브 테스트 증거는 다시 검증 단계로 돌아가 충돌 판정에 쓰입니다. 원칙은 셋입니다. 원본은 지우지 않고, 단계마다 버전을 붙이고, 검증은 막지 않고 표시만 합니다. 이 구조는 제안이고, 도구는 정하지 않았습니다.</aside>
+</section>
+<section id="checklist" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">정리 · 점검표</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">시뮬레이션 실행마다 남길 것</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">묶음</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">기록할 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">트윈 상태</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">as-of 시각 · 시간 축(적용 / 기록) · CM 스냅숏 ID · 인벤토리 버전</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">비교 대상</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">PM 구간 · DT 파일과 주행 시각 · FM 마스크 버전</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">장면 · 좌표</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">장면 버전 · 공통 좌표계(EPSG) · 원점</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">시뮬</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">도구 버전 · 설정 해시 · 시드 · 코드 커밋</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">신뢰</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">충돌 · 가정 건수와 목록 — 결과와 함께 보고</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">재현 시험</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 기록으로 다시 돌려 같은 숫자가 나오나 — 새 도구 버전을 들일 때마다 한 번</p></div>
+</div>
+<div style="width:640px;display:flex;flex-direction:column;gap:12px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#9AA6BA"># run manifest (예시)</span><br>run_id:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sim-2026-10-29-0147<br>twin_as_of:&nbsp;&nbsp;2026-10-27T10:17:00Z<br>time_axis:&nbsp;&nbsp;&nbsp;applied<br>cm_snapshot: cm-7f3a21 + 1 change<br>inventory:&nbsp;&nbsp;&nbsp;site-db 2026-10-20<br>fm_mask:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fm-0931 (1 cell off)<br>pm_window:&nbsp;&nbsp;&nbsp;09:45–10:00Z<br>scene:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scene-v3 · EPSG:5179<br>simulator:&nbsp;&nbsp;&nbsp;&lt;도구&gt; &lt;버전&gt; · cfg 9c1e<br>seed:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7 · code: git 4b2d9e0<br><span style="color:#F0A36B">flags:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conflict 2 · assumed 5</span></p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">manifest 항목 · 값 · ID는 예시 · EPSG:5179는 예시 (프로젝트 공통 좌표계를 쓴다)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 14</p>
+<aside>(약 45초) 마지막으로 시뮬레이션을 돌릴 때마다 남길 것입니다. 트윈 상태는 as-of 시각과 시간 축, CM 스냅숏 ID, 인벤토리 버전입니다. 비교 대상은 PM 구간, 드라이브 테스트 파일과 주행 시각, FM 마스크 버전입니다. 장면은 버전과 좌표계, 원점이고, 시뮬은 도구 버전, 설정 해시, 시드, 코드 커밋입니다. 그리고 충돌과 가정이 몇 건이었는지를 결과와 함께 보고합니다. 오른쪽은 이것을 한 파일에 적은 예시입니다. 이 파일만 있으면 석 달 뒤에도 같은 입력으로 다시 돌릴 수 있습니다. 실제로 같은 숫자가 나오는지, 새 도구 버전을 들일 때마다 한 번씩 재현 시험을 하면 좋습니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">트윈의 “지금”은 시각이 붙은 데이터의 묶음</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">받기</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">CM은 NETCONF + 변경 알림, PM은 파일 · 스트림<br>FM은 경보 알림 — O1 · M-Plane · 업체 덤프</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">신선도</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">PM 15분 + 지연 · CM 알림 vs 하루 덤프<br>스냅숏 + 변경 기록 · 적용 / 기록 두 시각</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">변경 감지</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">알림으로 빠르게, diff로 빠짐없이<br>조용함은 정상이 아니라 “모름”</p></div></div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">충돌</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">틸트 = 기계 + 전기 — 같은 것을 쟀나부터<br>출처 순위 · 신뢰 표시 · 덮어쓰지 않기</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">매핑 · 재현</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">CM 입력 · PM 목표 · FM 마스크, 같은 시간 창<br>실행마다 스냅숏 ID · as-of · 버전 기록</p></div></div>
+<p style="font-size:28px;line-height:1.5;color:#C9D3E3">다음 단계: 최근 DT 한 건에 대해 그때의 CM 스냅숏을 찾아 틸트 · 방위각 충돌 목록을 만든다 — [대상 클러스터]</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">관련 자료: m-plane-yang · coord-registration · dt-breakdown · network-digital-twin</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">14 / 14</p>
+<aside>(약 40초) 정리하겠습니다. 트윈의 지금은 하나의 시각이 아니라 시각이 붙은 데이터의 묶음입니다. CM은 NETCONF와 변경 알림으로, PM은 파일이나 스트림으로, FM은 경보 알림으로 받고, 출처는 O1, M-Plane, 업체 덤프입니다. 신선도는 갈래마다 다르니 스냅숏과 변경 기록으로 쌓고 두 시각을 함께 둡니다. 변경은 알림으로 빠르게, 비교로 빠짐없이 잡습니다. 충돌이 나면 같은 것을 잰 숫자인지부터 보고, 출처 순위와 신뢰 표시로 다루되 덮어쓰지 않습니다. CM은 입력, PM은 목표, FM은 마스크로 같은 시간 창에 맞추고, 실행마다 스냅숏 ID와 as-of를 남깁니다. 다음 단계로 최근 드라이브 테스트 한 건에 대해 그때의 CM 스냅숏을 찾아 틸트와 방위각 충돌 목록을 만들어 보겠습니다. 감사합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

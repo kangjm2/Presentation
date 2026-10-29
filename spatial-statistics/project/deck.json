@@ -1,0 +1,62 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-29T06:30:00Z"
+  },
+  "lists": "css",
+  "title": "공간 통계: 상관 거리 · 베리오그램 · 크리깅",
+  "order": [
+    "cover",
+    "why",
+    "corr",
+    "variogram",
+    "empirical",
+    "patterns",
+    "neff",
+    "interval",
+    "kriging",
+    "residual",
+    "cv",
+    "split",
+    "recipe",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "잔차의 공간 상관과 상관 거리(Gudmundson · 3GPP 38.901)",
+      "start": "cover"
+    },
+    "variogram": {
+      "description": "베리오그램: nugget · sill · range, 경험 베리오그램, 모양 읽기",
+      "start": "variogram"
+    },
+    "uncertainty": {
+      "description": "유효 표본 수 n_eff와 c₁ 구간(Q-AM-49)",
+      "start": "neff"
+    },
+    "gapfill": {
+      "description": "크리깅 · 가우시안 과정과 잔차 지도 보정",
+      "start": "kriging"
+    },
+    "validation": {
+      "description": "무작위 vs 블록 교차 검증, 나누는 법, 팀 레시피, 정리",
+      "start": "cv"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

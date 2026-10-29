@@ -1,0 +1,23 @@
+<section id="checklist" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">정리 · 점검표</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">시뮬레이션 실행마다 남길 것</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">묶음</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">기록할 것</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">트윈 상태</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">as-of 시각 · 시간 축(적용 / 기록) · CM 스냅숏 ID · 인벤토리 버전</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">비교 대상</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">PM 구간 · DT 파일과 주행 시각 · FM 마스크 버전</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">장면 · 좌표</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">장면 버전 · 공통 좌표계(EPSG) · 원점</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">시뮬</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">도구 버전 · 설정 해시 · 시드 · 코드 커밋</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">신뢰</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">충돌 · 가정 건수와 목록 — 결과와 함께 보고</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">재현 시험</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 기록으로 다시 돌려 같은 숫자가 나오나 — 새 도구 버전을 들일 때마다 한 번</p></div>
+</div>
+<div style="width:640px;display:flex;flex-direction:column;gap:12px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#9AA6BA"># run manifest (예시)</span><br>run_id:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sim-2026-10-29-0147<br>twin_as_of:&nbsp;&nbsp;2026-10-27T10:17:00Z<br>time_axis:&nbsp;&nbsp;&nbsp;applied<br>cm_snapshot: cm-7f3a21 + 1 change<br>inventory:&nbsp;&nbsp;&nbsp;site-db 2026-10-20<br>fm_mask:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fm-0931 (1 cell off)<br>pm_window:&nbsp;&nbsp;&nbsp;09:45–10:00Z<br>scene:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scene-v3 · EPSG:5179<br>simulator:&nbsp;&nbsp;&nbsp;&lt;도구&gt; &lt;버전&gt; · cfg 9c1e<br>seed:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7 · code: git 4b2d9e0<br><span style="color:#F0A36B">flags:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;conflict 2 · assumed 5</span></p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">manifest 항목 · 값 · ID는 예시 · EPSG:5179는 예시 (프로젝트 공통 좌표계를 쓴다)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 14</p>
+<aside>(약 45초) 마지막으로 시뮬레이션을 돌릴 때마다 남길 것입니다. 트윈 상태는 as-of 시각과 시간 축, CM 스냅숏 ID, 인벤토리 버전입니다. 비교 대상은 PM 구간, 드라이브 테스트 파일과 주행 시각, FM 마스크 버전입니다. 장면은 버전과 좌표계, 원점이고, 시뮬은 도구 버전, 설정 해시, 시드, 코드 커밋입니다. 그리고 충돌과 가정이 몇 건이었는지를 결과와 함께 보고합니다. 오른쪽은 이것을 한 파일에 적은 예시입니다. 이 파일만 있으면 석 달 뒤에도 같은 입력으로 다시 돌릴 수 있습니다. 실제로 같은 숫자가 나오는지, 새 도구 버전을 들일 때마다 한 번씩 재현 시험을 하면 좋습니다.</aside>
+</section>

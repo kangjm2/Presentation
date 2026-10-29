@@ -1,0 +1,34 @@
+<section id="mobility" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">MLB · MRO</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">MLB · MRO: 경계를 옮기고, HO 시점을 맞춘다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;align-items:flex-start">
+<div style="width:700px;display:flex;flex-direction:column;gap:12px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">A3: Mn+Ofn+Ocn−Hys > Mp+Ofp+Ocp+Off</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">손잡이 (TS 38.331 §5.5.4.4)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Ocn = 이웃 셀의 CIO (cellIndividualOffset) · Hys · Off · TTT(timeToTrigger) — 단위 dB · ms</p></div>
+<div style="position:relative;width:700px;height:180px">
+<svg aria-label="A와 B를 잇는 직선 위의 핸드오버 경계. B의 CIO가 −3, 0, +3 dB일 때 경계가 각각 1283, 1200, 1117 m 지점" style="position:absolute;left:0px;top:0px;width:700px;height:180px" width="700" height="180" viewBox="0 0 700 180"><line x1="40.0" y1="70" x2="660.0" y2="70" stroke="#14213D" stroke-width="4"/><line x1="436" y1="38" x2="436" y2="102" stroke="#5E6675" stroke-width="5"/><line x1="350" y1="38" x2="350" y2="102" stroke="#255E9E" stroke-width="5"/><line x1="264" y1="38" x2="264" y2="102" stroke="#A84A16" stroke-width="5"/><line x1="350.0" y1="120.0" x2="276.2" y2="120.0" stroke="#A84A16" stroke-width="3"/><polygon points="266.2,120.0 276.2,125.0 276.2,115.0" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:84px;width:200px;font-size:24px;font-weight:700;color:#14213D">← A 쪽</p>
+<p style="position:absolute;left:500px;top:84px;width:200px;font-size:24px;text-align:right;font-weight:700;color:#14213D">B 쪽 →</p>
+<p style="position:absolute;left:394px;top:4px;width:84px;font-size:24px;text-align:center;color:#5E6675">−3</p>
+<p style="position:absolute;left:308px;top:4px;width:84px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">0</p>
+<p style="position:absolute;left:222px;top:4px;width:84px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">+3</p>
+<p style="position:absolute;left:0px;top:140px;width:700px;font-size:24px;color:#14213D">B의 CIO에 따른 A–B 경계 (직선 위) · +3 dB면 A 쪽으로 83 m</p>
+</div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">MLB 예시 (같은 장난감 지역)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">B의 CIO 0 → +3 dB: B가 맡는 면적 36.7% → 44.5%<br>사용자가 고르면 이것이 부하 몫 — 실제로는 트래픽 분포가 필요</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:170px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">MRO 유형</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">무슨 일이 (TS 38.300 §15.5.2)</p><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">고치는 방향</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:170px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">too-late</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">한 셀에 오래 머문 뒤 RLF → 다른 셀에서 재접속</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">HO를 앞당긴다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:170px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">too-early</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">HO 직후 RLF (또는 HO 실패) → 원래 셀에서 재접속</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">HO를 늦춘다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:170px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">wrong-cell</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">HO 직후 RLF → 원래도 대상도 아닌 셋째 셀에서 재접속</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">셀 쌍별 CIO</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:170px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">ping-pong</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">짧은 시간 안에 A → B → A (불필요한 HO)</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">Hys · TTT ↑</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">트윈에 필요한 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칸 지도로는 부족 — 경로를 따라 시간에 따른 RSRP (L3 필터 · TTT) · HO · RLF 절차 (T310 · N310, upper-layers 11쪽) · 트래픽 · 이동 모델 → 시스템 수준 시뮬레이션</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">같은 손잡이 · 다른 목표</p><p style="font-size:24px;line-height:1.4;color:#4A5262">MLB가 CIO를 키우면 MRO의 too-early가 늘 수 있다 → 두 기능을 함께 조정한다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">경계 · 면적: 4쪽 예시 지역 (틸트 6°) · ping-pong은 일반적 용법 (28.313 PM은 시스템 간 횟수)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 14</p>
+<aside>(약 55초) MLB와 MRO는 둘 다 핸드오버 기준값을 만집니다. 위의 식이 5G의 A3 이벤트 조건입니다. 이웃 셀 측정값에 오프셋을 더해 서빙 셀보다 일정 이상 좋으면 보고하고, 보통 이것이 핸드오버로 이어집니다. 여기서 Ocn이 셀별 오프셋 CIO입니다. 같은 예시 지역에서 B의 CIO를 3 dB 올리면 A와 B 사이 경계가 A 쪽으로 83 m 옮겨 가고, B가 맡는 면적은 36.7%에서 44.5%가 됩니다. 사용자가 고르게 있다면 이것이 부하 몫이고, 이것이 MLB의 원리입니다. MRO는 실패를 봅니다. 38.300의 정의로, 한 셀에 오래 머문 뒤 끊기고 다른 셀에서 다시 붙으면 너무 늦은 핸드오버, 핸드오버 직후 끊기고 원래 셀로 돌아가면 너무 이른 핸드오버, 셋째 셀로 가면 엉뚱한 셀입니다. 이것을 트윈으로 보려면 칸 지도로는 부족하고, 경로를 따라 시간에 따른 RSRP와 핸드오버, RLF 절차를 흉내 내야 합니다. 또 MLB가 CIO를 키우면 MRO 쪽 실패가 늘 수 있어 함께 조정해야 합니다.</aside>
+</section>

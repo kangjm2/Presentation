@@ -1,0 +1,62 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-29T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "빠른 대리 모델: AI 전파 지도",
+  "order": [
+    "cover",
+    "why",
+    "idea",
+    "classic",
+    "radiounet",
+    "generalize",
+    "later",
+    "io",
+    "toy-setup",
+    "toy-map",
+    "toy-curve",
+    "validate",
+    "pipeline",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 필요한가와 대리 모델의 개념",
+      "start": "cover"
+    },
+    "approaches": {
+      "description": "고전 대리 모델(다항식 · GP)과 이미지 모델(RadioUNet), 정확도와 일반화, 그 뒤의 흐름",
+      "start": "classic"
+    },
+    "ours": {
+      "description": "우리 판의 입력 · 출력과 학습 데이터 비용",
+      "start": "io"
+    },
+    "example": {
+      "description": "계산 예시: 가짜 비싼 모델, 20회 GP, 실행 수에 따른 오차와 속도",
+      "start": "toy-setup"
+    },
+    "use": {
+      "description": "두 층 검증, 파이프라인에 넣는 곳, 정리",
+      "start": "validate"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

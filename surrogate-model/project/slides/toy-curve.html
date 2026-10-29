@@ -1,0 +1,37 @@
+<section id="toy-curve" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">계산 예시 ③ · 몇 번 돌려야 하나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">오차는 실행 수에 따라 — 그리고 속도</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:510px">
+<svg aria-label="실행 수에 따른 대리 모델 오차 곡선 셋. 2차 다항식은 약 1.6 dB에서 멈추고, GP 무작위 설계는 꾸준히 내려가며, 능동 학습 GP가 가장 빨리 내려간다" style="position:absolute;left:0px;top:0px;width:860px;height:510px" width="860" height="510" viewBox="0 0 860 510"><line x1="80" y1="430" x2="840" y2="430" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="321" x2="840" y2="321" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="213" x2="840" y2="213" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="104" x2="840" y2="104" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="430" x2="840" y2="430" stroke="#14213D" stroke-width="3"/><line x1="80" y1="50" x2="80" y2="430" stroke="#14213D" stroke-width="3"/><polyline points="229.9,309.4 348.8,304.7 433.3,331.4 552.2,334.6 702.1,338.0 840.0,342.4" fill="none" stroke="#5E6675" stroke-width="5" stroke-dasharray="10 7"/><circle cx="229.9" cy="309.4" r="6" fill="#5E6675"/><circle cx="348.8" cy="304.7" r="6" fill="#5E6675"/><circle cx="433.3" cy="331.4" r="6" fill="#5E6675"/><circle cx="552.2" cy="334.6" r="6" fill="#5E6675"/><circle cx="702.1" cy="338.0" r="6" fill="#5E6675"/><circle cx="840.0" cy="342.4" r="6" fill="#5E6675"/><polyline points="80.0,75.5 229.9,212.6 348.8,308.8 433.3,372.6 552.2,393.9 702.1,410.2 840.0,416.5" fill="none" stroke="#255E9E" stroke-width="5"/><circle cx="80.0" cy="75.5" r="6" fill="#255E9E"/><circle cx="229.9" cy="212.6" r="6" fill="#255E9E"/><circle cx="348.8" cy="308.8" r="6" fill="#255E9E"/><circle cx="433.3" cy="372.6" r="6" fill="#255E9E"/><circle cx="552.2" cy="393.9" r="6" fill="#255E9E"/><circle cx="702.1" cy="410.2" r="6" fill="#255E9E"/><circle cx="840.0" cy="416.5" r="6" fill="#255E9E"/><polyline points="80.0,75.5 229.9,313.7 348.8,378.5 433.3,398.5 552.2,415.0 702.1,421.5 840.0,425.1" fill="none" stroke="#A84A16" stroke-width="5"/><circle cx="80.0" cy="75.5" r="6" fill="#A84A16"/><circle cx="229.9" cy="313.7" r="6" fill="#A84A16"/><circle cx="348.8" cy="378.5" r="6" fill="#A84A16"/><circle cx="433.3" cy="398.5" r="6" fill="#A84A16"/><circle cx="552.2" cy="415.0" r="6" fill="#A84A16"/><circle cx="702.1" cy="421.5" r="6" fill="#A84A16"/><circle cx="840.0" cy="425.1" r="6" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:414px;width:66px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:305px;width:66px;font-size:24px;text-align:right;color:#5E6675">2</p>
+<p style="position:absolute;left:0px;top:197px;width:66px;font-size:24px;text-align:right;color:#5E6675">4</p>
+<p style="position:absolute;left:0px;top:88px;width:66px;font-size:24px;text-align:right;color:#5E6675">6</p>
+<p style="position:absolute;left:40px;top:438px;width:80px;font-size:24px;text-align:center;color:#5E6675">6</p>
+<p style="position:absolute;left:190px;top:438px;width:80px;font-size:24px;text-align:center;color:#5E6675">10</p>
+<p style="position:absolute;left:393px;top:438px;width:80px;font-size:24px;text-align:center;color:#5E6675">20</p>
+<p style="position:absolute;left:662px;top:438px;width:80px;font-size:24px;text-align:center;color:#5E6675">50</p>
+<p style="position:absolute;left:800px;top:438px;width:80px;font-size:24px;text-align:center;color:#5E6675">80</p>
+<p style="position:absolute;left:80px;top:474px;width:760px;font-size:24px;text-align:center;color:#14213D">RT 실행 수 N (로그 눈금)</p>
+<p style="position:absolute;left:10px;top:0px;width:400px;font-size:24px;color:#14213D">KPI RMSE (dB, 961칸)</p>
+<p style="position:absolute;left:461px;top:93px;width:400px;font-size:24px;font-weight:700;color:#5E6675;background:#F5F3EE">2차 다항식</p>
+<p style="position:absolute;left:461px;top:131px;width:400px;font-size:24px;font-weight:700;color:#255E9E;background:#F5F3EE">GP · 무작위 설계</p>
+<p style="position:absolute;left:461px;top:169px;width:400px;font-size:24px;font-weight:700;color:#A84A16;background:#F5F3EE">GP · 능동 학습 (σ 최대)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">읽는 법</p><p style="font-size:24px;line-height:1.4;color:#4A5262">다항식: 모양이 단순해 1.6 dB에서 멈춘다<br>GP 20회: 무작위 1.06 · 능동 0.58 dB<br>GP 50회: 무작위 0.37 · 능동 0.16 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">1회 시간</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">값</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">비싼 모델 (예시)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">1.8 ms</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">GP 질의 (예시)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">0.9 µs — 약 1,929배</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">WinProp (논문)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">DPM ~1 s · IRT4 ~10² s</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">RadioUNet (논문)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">10⁻³ ~ 10⁻² s (GPU)</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 대리 모델이 이기는 조건: 질의 수 ≫ 학습 실행 수 — 학습 데이터 값까지 넣어 따진다 (8쪽)</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시 계산: 무작위 설계 8벌 평균 · 다항식은 N = 6에서 13 dB라 10부터 표시 · 시간은 이 컴퓨터 측정값 (실행마다 다름)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
+<aside>(약 55초) 몇 번 돌려야 할까요. 같은 예시에서 실행 수를 6번부터 80번까지 늘리며 961칸 전체의 오차를 쟀습니다. 회색 점선 2차 다항식은 금방 좋아지지만 모양이 단순해서 1.6 dB 근처에서 멈춥니다. 파란 선, 무작위로 고른 GP는 꾸준히 내려가 20회에 1.06, 50회에 0.37 dB입니다. 주황 선은 능동 학습입니다. GP의 불확실성이 가장 큰 설정을 골라 하나씩 더 돌린 것으로, 같은 20회에 0.58 dB로 가장 빨리 내려갑니다. 속도는 이 예시에서 비싼 모델 1회가 1.8밀리초, GP 질의 1회가 0.9마이크로초로 약 1,929배입니다. 논문의 실제 비교는 1초 대 수 밀리초 수준이었습니다. 다만 대리 모델은 질의가 학습 실행보다 훨씬 많을 때만 이득이고, 학습 데이터를 만드는 값까지 넣어 따져야 합니다.</aside>
+</section>
