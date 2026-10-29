@@ -1,0 +1,62 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-29T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "트윈 검증 · 인증 (V&V): 언제 믿어도 되나",
+  "order": [
+    "cover",
+    "question",
+    "terms",
+    "verify",
+    "purpose",
+    "onebin",
+    "rate",
+    "criteria",
+    "split",
+    "clusters",
+    "uncertainty",
+    "revalidate",
+    "card",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "질문과 용어: 검증 · 타당성 확인 · 인증",
+      "start": "cover"
+    },
+    "verification": {
+      "description": "검증: 해석해 · 수렴 · 회귀 · 입력 대조",
+      "start": "verify"
+    },
+    "purpose": {
+      "description": "용도에 맞는 정확도, σ를 판정 오류로 바꾸기, 합격선",
+      "start": "purpose"
+    },
+    "process": {
+      "description": "자료 나누기, 클러스터별 보고, 지표의 불확실성",
+      "start": "split"
+    },
+    "operate": {
+      "description": "재확인 조건, 모델 카드, 정리",
+      "start": "revalidate"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

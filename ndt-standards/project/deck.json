@@ -1,0 +1,57 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-29T06:30:00Z"
+  },
+  "lists": "css",
+  "title": "네트워크 디지털 트윈 표준 · 참조 구조",
+  "order": [
+    "cover",
+    "why",
+    "landscape",
+    "y3090",
+    "elements",
+    "sa5",
+    "zsm-oran",
+    "levels",
+    "compare",
+    "glossary",
+    "mapping",
+    "gaps",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 표준 어휘인가와 표준 지도",
+      "start": "cover"
+    },
+    "arch": {
+      "description": "ITU-T Y.3090 참조 구조와 네 요소 (IETF NMRG 초안)",
+      "start": "y3090"
+    },
+    "bodies": {
+      "description": "3GPP SA5 · ETSI ZSM · O-RAN 문서, 레벨, 비교",
+      "start": "sa5"
+    },
+    "ours": {
+      "description": "용어, 우리 플랫폼 대입, 표준이 비운 것, 정리",
+      "start": "glossary"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

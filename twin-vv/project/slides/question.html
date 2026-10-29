@@ -1,0 +1,33 @@
+<section id="question" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">질문</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">6.41 dB — 좋은 숫자인가?</h2>
+</div>
+<div style="position:relative;width:1664px;height:344px">
+<svg aria-label="0에서 16 dB 가로 눈금 위의 숫자 다섯. 영국 사례 보정 후 2.57, 보정 전 5.71, 우리 보정 전 6.41, 튜닝한 모델 RMSE 8~9, 튜닝 전 최선 12~15" style="position:absolute;left:0px;top:0px;width:1664px;height:344px" width="1664" height="344" viewBox="0 0 1664 344"><line x1="560" y1="0" x2="560" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="805" y1="0" x2="805" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="1050" y1="0" x2="1050" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="1295" y1="0" x2="1295" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="1540" y1="0" x2="1540" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="560" y1="300" x2="1540" y2="300" stroke="#14213D" stroke-width="3"/><circle cx="717" cy="30" r="13" fill="#255E9E"/><circle cx="910" cy="90" r="13" fill="#5E6675"/><circle cx="953" cy="150" r="13" fill="#A84A16"/><line x1="1050" y1="210" x2="1111" y2="210" stroke="#14213D" stroke-width="18" stroke-linecap="round"/><line x1="1295" y1="270" x2="1479" y2="270" stroke="#5E6675" stroke-width="18" stroke-linecap="round"/></svg>
+<p style="position:absolute;left:0px;top:13px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">영국 사례 · 보정 후 (σ)</p>
+<p style="position:absolute;left:739px;top:13px;width:200px;font-size:24px;color:#255E9E">2.57 dB</p>
+<p style="position:absolute;left:0px;top:73px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">영국 사례 · 보정 전 (σ)</p>
+<p style="position:absolute;left:932px;top:73px;width:200px;font-size:24px;color:#5E6675">5.71 dB</p>
+<p style="position:absolute;left:0px;top:133px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">우리 · 보정 전 (σ)</p>
+<p style="position:absolute;left:975px;top:133px;width:200px;font-size:24px;color:#A84A16"><b>6.41 dB</b></p>
+<p style="position:absolute;left:0px;top:193px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">측정으로 튜닝한 모델 (RMSE)</p>
+<p style="position:absolute;left:1133px;top:193px;width:200px;font-size:24px;color:#14213D">8~9 dB</p>
+<p style="position:absolute;left:0px;top:253px;width:530px;font-size:24px;text-align:right;font-weight:700;color:#14213D">튜닝 전 모델의 최선 (RMSE)</p>
+<p style="position:absolute;left:1501px;top:253px;width:200px;font-size:24px;color:#5E6675">12~15 dB</p>
+<p style="position:absolute;left:520px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:765px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">4</p>
+<p style="position:absolute;left:1010px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">8</p>
+<p style="position:absolute;left:1255px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">12</p>
+<p style="position:absolute;left:1500px;top:306px;width:80px;font-size:24px;text-align:center;color:#5E6675">16</p>
+<p style="position:absolute;left:1584px;top:306px;width:80px;font-size:24px;color:#5E6675">dB</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">줄 세우면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">영국 보정 후보다 나쁘고<br>문헌의 튜닝 모델보다 낫다 → 판정 불가</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">Sargent의 답</p><p style="font-size:24px;line-height:1.4;color:#4A5262">“모델은 특정 목적을 위해 만들고,<br>타당성은 그 목적에 대해 판단한다”</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">오늘의 질문</p><p style="font-size:24px;line-height:1.4;color:#4A5262">“좋은가” → “무엇에 · 어느 지역에 ·<br>어느 버전까지 써도 되나”</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">영국: arXiv 2510.09478 (구역 70개) · RMSE: Phillips 외 2012 (ISM 대역 · 30개 모델) — 지표 · 조건이 달라 직접 비교 불가</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
+<aside>(약 50초) 우리 트윈의 보정 전 de-biased RMSE는 6.41 dB였습니다. 이것은 좋은 숫자일까요. 알려진 숫자와 줄을 세워 보면, 영국 Sionna 트윈 사례의 보정 후 2.57 dB보다는 나쁘고 보정 전 5.71 dB와는 비슷합니다. 경로 손실 모델 30개를 비교한 Phillips 등의 연구는 측정으로 튜닝한 모델의 RMSE를 8에서 9 dB, 튜닝 전 최선을 12에서 15 dB로 보고했습니다. 지표와 조건이 다 달라서 직접 비교할 수는 없지만, 어쨌든 줄을 세워도 좋다, 나쁘다가 정해지지 않습니다. 시뮬레이션 검증의 고전인 Sargent의 답은 이렇습니다. 모델은 특정 목적을 위해 만들고, 타당성은 그 목적에 대해 판단한다. 그래서 오늘은 질문을 바꿉니다. 좋은가가 아니라, 무엇에, 어느 지역에, 어느 버전까지 써도 되는가입니다.</aside>
+</section>

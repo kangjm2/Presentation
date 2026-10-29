@@ -1,0 +1,19 @@
+<section id="card" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">모델 카드 · 확인 보고서</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">한 장에: 범위 · 자료 · 지표 · 한계 · 버전</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px;align-items:flex-start">
+<div style="width:860px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap"><span style="color:#8DB8E8">model_card:</span> twin-[지역]-v3.2<br><span style="color:#8DB8E8">용도:</span>    커버리지 구멍 찾기 (문턱 −110 dBm)<br><span style="color:#8DB8E8">쓰지 말 곳:</span> 실내 · 지하 · 처리량 예측<br><span style="color:#8DB8E8">범위:</span>    [지역] · 3.5 GHz · 옥외 차량 · 20 m 칸<br><span style="color:#8DB8E8">자료:</span>    보정 A구역 DT · 확인 B구역 DT (날짜)<br><span style="color:#8DB8E8">지표:</span>    bias · σ [95%] · r · 일치율 · 클러스터별<br><span style="color:#8DB8E8">합격선:</span>  <span style="color:#F0A36B">σ 위 끝 ≤ 5 dB · |b| ≤ 1 dB (예시)</span><br><span style="color:#8DB8E8">한계:</span>    σ_sim 미측정 · 여름 자료뿐<br><span style="color:#8DB8E8">버전:</span>    장면 · 솔버 · CM 날짜 · 보정 값 해시<br><span style="color:#8DB8E8">인증:</span>    승인자 · 날짜 · 유효 기간 · 재확인 조건</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">NASA-STD-7009A — 결과와 함께 보고할 다섯</p><p style="font-size:24px;line-height:1.4;color:#4A5262">최선 추정값 · 불확실성 · 신뢰도 평가 · 단서(가정 · 한계 밖 사용) · 받아들일 때의 위험</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">신뢰도 8요인 (0~4 서열 점수)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">개발: 자료 계보 · 검증 · 확인<br>사용: 입력 계보 · 불확실성 · 결과 강건성<br>근거: 사용 이력 · 관리 — 점수는 더하지 않는다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">Model Cards (Mitchell 외 2019)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">ML 모델 보고 양식 — 의도한 용도 · 평가 자료 · 지표 · 조건별로 나눈 결과 · 주의점</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">양식은 예시 (항목 이름 · 값은 프로젝트에 맞게) · NASA-STD-7009A 4.3.8 · 부록 E · Mitchell 외, FAT* 2019</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 14</p>
+<aside>(약 50초) 이 모든 것을 한 장으로 남기는 것이 모델 카드, 또는 확인 보고서입니다. 왼쪽은 예시 양식입니다. 용도와 쓰지 말 곳, 지역과 대역 같은 적용 범위, 보정과 확인에 쓴 자료, 지표와 합격선, 알려진 한계, 장면과 솔버와 망 설정의 버전, 그리고 승인자와 유효 기간, 재확인 조건입니다. 두 가지를 참고했습니다. NASA 표준은 결과를 낼 때 최선 추정값, 불확실성, 신뢰도 평가, 가정이나 한계 밖 사용 같은 단서, 받아들일 때의 위험을 함께 보고하라고 합니다. 신뢰도는 자료 계보, 검증, 확인, 입력 계보, 불확실성, 결과 강건성, 사용 이력, 관리의 여덟 요인을 0에서 4로 매기는데, 서열 점수라서 더하지 말라고 못 박습니다. 머신러닝 쪽의 Model Cards도 의도한 용도와 조건별로 나눈 결과를 보고하라고 합니다. 우리 클러스터별 보고와 같은 생각입니다.</aside>
+</section>
