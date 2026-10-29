@@ -1,0 +1,32 @@
+<section id="validate" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">검증 · 오차는 두 층</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">검증: 대리 오차 위에 RT 오차가 얹힌다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="width:700px;display:flex;flex-direction:column;gap:7px">
+<div style="position:relative;width:700px;height:350px">
+<svg aria-label="세 상자가 위에서부터 실측, 레이 트레이싱, 대리 모델 순으로 쌓여 있다. 대리 모델과 RT 사이 오차 e_s, RT와 실측 사이 오차 e_rt, 오른쪽 점선 화살표가 두 오차의 합" style="position:absolute;left:0px;top:0px;width:700px;height:350px" width="700" height="350" viewBox="0 0 700 350"><rect x="40" y="10" width="340" height="72" rx="14" fill="#EAE7DF"/><rect x="40" y="140" width="340" height="72" rx="14" fill="#D5E3F3"/><rect x="40" y="270" width="340" height="72" rx="14" fill="#F7DDCB"/><line x1="210.0" y1="136.0" x2="210.0" y2="100.0" stroke="#14213D" stroke-width="4"/><polygon points="210.0,86.0 203.0,100.0 217.0,100.0" fill="#14213D"/><line x1="210.0" y1="266.0" x2="210.0" y2="230.0" stroke="#14213D" stroke-width="4"/><polygon points="210.0,216.0 203.0,230.0 217.0,230.0" fill="#14213D"/><path d="M384 306 C 470 306, 470 46, 384 46" fill="none" stroke="#A84A16" stroke-width="4" stroke-dasharray="10 7"/><polygon points="384,46 398,38 398,54" fill="#A84A16"/></svg>
+<p style="position:absolute;left:40px;top:30px;width:340px;font-size:24px;text-align:center;font-weight:700;color:#14213D">실측 (드라이브 테스트)</p>
+<p style="position:absolute;left:40px;top:160px;width:340px;font-size:24px;text-align:center;font-weight:700;color:#14213D">RT (Sionna 장면)</p>
+<p style="position:absolute;left:40px;top:290px;width:340px;font-size:24px;text-align:center;font-weight:700;color:#14213D">대리 모델 g</p>
+<p style="position:absolute;left:226px;top:94px;width:260px;font-size:24px;font-weight:700;color:#14213D">e_rt = 6.41 dB</p>
+<p style="position:absolute;left:226px;top:224px;width:260px;font-size:24px;font-weight:700;color:#A84A16">e_s (대리 오차)</p>
+<p style="position:absolute;left:480px;top:160px;width:200px;font-size:24px;line-height:1.35;font-weight:700;color:#A84A16">합 ≈ √(e_rt² + e_s²)</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">e_s</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">실측 대비 합</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">늘어난 몫</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">1 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">6.49 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+0.08 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">3 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">7.08 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+0.67 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">6 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">8.78 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+2.37 dB</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">① 대리 vs RT</p><p style="font-size:24px;line-height:1.4;color:#4A5262">학습에 안 쓴 RT 실행 · 다른 구역에서 잰다<br>최적화라면 “고른 최적점”에서의 오차도 (10쪽)</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">② RT vs 실측</p><p style="font-size:24px;line-height:1.4;color:#4A5262">기존 Breakdown · de-biased RMSE 그대로<br>대리 모델 출력도 같은 화면에 함께 올린다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">③ 불확실한 곳에 RT를 더한다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">GP σ · 앙상블 분산이 큰 설정부터 RT 실행 → 다시 학습<br>11쪽: 같은 20회에서 1.06 → 0.58 dB</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">σ_sim과 연결</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Breakdown에서 아직 안 잰 시뮬 잡음 σ_sim<br>대리 모델을 쓰면 그 위에 한 층이 더 얹힌다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">e_rt 6.41 dB = 우리 보정 전 de-biased RMSE (debiased-rmse) · 합은 두 오차가 독립이라는 가정의 계산</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 14</p>
+<aside>(약 55초) 대리 모델을 쓰면 오차가 두 층이 됩니다. 대리 모델은 레이 트레이싱을 흉내 내고, 레이 트레이싱은 다시 실측과 다릅니다. 우리 레이 트레이싱의 실측 대비 de-biased RMSE는 보정 전 6.41 dB였습니다. 두 오차가 독립이라고 가정하면 제곱으로 더해지므로, 대리 오차가 1 dB면 합은 6.49, 3 dB면 7.08 dB로 늘어나는 몫이 생각보다 작습니다. 하지만 6 dB면 8.78 dB가 됩니다. 그래서 검증도 두 층으로 합니다. 첫째, 학습에 쓰지 않은 레이 트레이싱 실행과 다른 구역에서 대리 오차를 잽니다. 둘째, 실측과는 기존 Breakdown 화면으로 비교합니다. 셋째, GP의 불확실성이나 여러 모델의 분산이 큰 곳에 레이 트레이싱을 더 돌려 다시 학습합니다. 앞의 예시에서 같은 20회로 오차가 1.06에서 0.58 dB로 줄었습니다. Breakdown에서 아직 재지 않은 시뮬 잡음 σ_sim 위에 대리 오차가 한 층 더 얹힌다는 점도 기억해야 합니다.</aside>
+</section>

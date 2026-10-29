@@ -1,0 +1,37 @@
+<section id="generalize" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">정확도와 일반화</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">학습한 세상을 벗어나면 오차가 커진다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:900px;height:296px">
+<svg aria-label="RadioUNet 오차 막대 넷. 같은 시뮬 시험 1.6 dB, IRT4 표본으로 적응 2.3 dB, 더 정밀한 레이 트레이싱에 그대로 3.1 dB, 건물 네 개가 빠진 지도 5.9 dB" style="position:absolute;left:0px;top:0px;width:900px;height:296px" width="900" height="296" viewBox="0 0 900 296"><line x1="330" y1="0" x2="330" y2="256" stroke="#EAE7DF" stroke-width="2"/><line x1="450" y1="0" x2="450" y2="256" stroke="#EAE7DF" stroke-width="2"/><line x1="570" y1="0" x2="570" y2="256" stroke="#EAE7DF" stroke-width="2"/><line x1="690" y1="0" x2="690" y2="256" stroke="#EAE7DF" stroke-width="2"/><rect x="330" y="10" width="96" height="40" rx="6" fill="#255E9E"/><rect x="330" y="74" width="140" height="40" rx="6" fill="#2F7D5B"/><rect x="330" y="138" width="184" height="40" rx="6" fill="#A84A16"/><rect x="330" y="202" width="356" height="40" rx="6" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:14px;width:316px;font-size:24px;text-align:right;font-weight:700;color:#14213D">같은 시뮬 (DPM) 시험 지도</p>
+<p style="position:absolute;left:436px;top:14px;width:140px;font-size:24px;font-weight:700;color:#255E9E">1.6 dB</p>
+<p style="position:absolute;left:0px;top:78px;width:316px;font-size:24px;text-align:right;font-weight:700;color:#14213D">IRT4 표본 300점으로 적응</p>
+<p style="position:absolute;left:480px;top:78px;width:140px;font-size:24px;font-weight:700;color:#2F7D5B">2.3 dB</p>
+<p style="position:absolute;left:0px;top:142px;width:316px;font-size:24px;text-align:right;font-weight:700;color:#14213D">더 정밀한 RT (IRT4) 그대로</p>
+<p style="position:absolute;left:524px;top:142px;width:140px;font-size:24px;font-weight:700;color:#A84A16">3.1 dB</p>
+<p style="position:absolute;left:0px;top:206px;width:316px;font-size:24px;text-align:right;font-weight:700;color:#14213D">건물 4개 빠진 지도 (DPM)</p>
+<p style="position:absolute;left:696px;top:206px;width:140px;font-size:24px;font-weight:700;color:#A84A16">5.9 dB</p>
+<p style="position:absolute;left:290px;top:260px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:410px;top:260px;width:80px;font-size:24px;text-align:center;color:#5E6675">2</p>
+<p style="position:absolute;left:530px;top:260px;width:80px;font-size:24px;text-align:center;color:#5E6675">4</p>
+<p style="position:absolute;left:650px;top:260px;width:80px;font-size:24px;text-align:center;color:#5E6675">6</p>
+<p style="position:absolute;left:780px;top:260px;width:120px;font-size:24px;color:#5E6675">RMSE dB</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">ICASSP 2023 경로손실 지도 예측 대회</p><p style="font-size:24px;line-height:1.4;color:#4A5262">학습: 6개 도시 701장 × 옥상 Tx 80곳 (IRT)<br>시험: 처음 보는 도시 이스탄불 84장<br>→ <b style="color:#A84A16">제출한 모든 방법에서 큰 성능 저하</b><br>1위 PMNet RMSE 0.0383 (0~1 회색 단계) · 약 10 ms</p></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">일반화 위험</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">근거 → 우리 경우</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">새 도시 · 새 구역</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">건물 배치 분포가 다르다 → 학습에 안 쓴 구(區)로 시험한다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">Tx 높이 · 안테나 패턴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">RadioMapSeer는 Tx 1.5 m · 패턴 없음 → RU 높이 · 틸트 · 패턴을 입력에 넣고 다시 학습</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">주파수 · 재질</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">한 주파수 · 같은 재질로 만든 데이터 → 대역마다 데이터와 모델</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">분포 밖 기하</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">지도에서 건물이 빠지면 1.6 → 5.9 dB (위) → 장면 품질(누락 · 높이)부터 점검</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">막대: RadioUNet_C, 논문 Fig. 3의 회색 단계 RMSE × 80 (논문 설명) · 대회: Yapar 외, ICASSP 2023</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 14</p>
+<aside>(약 55초) 그러면 얼마나 정확할까요. 왼쪽 막대는 RadioUNet 논문의 표를 dB로 옮긴 것입니다. 학습과 같은 단순 시뮬레이션으로 만든 시험 지도에서는 약 1.6 dB입니다. 그런데 정답을 더 정밀한 레이 트레이싱, 반사 4번까지 보는 IRT4로 바꾸면 3.1 dB로 커지고, IRT4 표본 300점으로 적응시키면 2.3 dB까지 내려옵니다. 지도에서 건물 네 개가 빠지면 5.9 dB가 됩니다. 2023년 ICASSP 대회도 같은 이야기를 합니다. 6개 도시로 학습하고 처음 보는 이스탄불 지도로 시험했더니 제출한 모든 방법의 성능이 크게 떨어졌습니다. 우리에게는 네 가지 위험이 있습니다. 새 구역, 송신기 높이와 안테나 패턴, 주파수와 재질, 그리고 지도 누락 같은 분포 밖 기하입니다. 공개 모델을 그대로 가져오기보다 우리 조건으로 다시 학습하고 다른 구역으로 시험해야 합니다.</aside>
+</section>
