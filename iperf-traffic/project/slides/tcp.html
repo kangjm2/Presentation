@@ -33,6 +33,6 @@
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">망 사정 (혼잡 제어)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">cwnd — 리눅스 기본 CUBIC, BBR 등 알고리즘마다 반응이 다르다</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">한 번에 보낼 수 있는 양 = min(cwnd, rwnd) · 오른쪽 그림은 개념도 (실제 모양은 알고리즘 · 망에 따라 다름) · RFC 9293 (TCP)</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 16</p>
 <aside>(약 55초) TCP는 믿을 수 있는 전송을 위해 세 가지를 합니다. 먼저 SYN, SYN-ACK, ACK 세 번으로 연결을 엽니다. 그다음 보내는 바이트마다 번호를 매기고, 받는 쪽은 받은 만큼 ACK로 알려 주며, 안 온 것은 다시 보냅니다. 속도는 두 창으로 조절합니다. 받는 쪽 버퍼를 넘지 않게 하는 수신 창, 그리고 망이 막히지 않게 하는 혼잡 창입니다. 오른쪽 개념도처럼 처음에는 두 배씩 빠르게 늘리는 느린 시작, 그다음 천천히 늘리는 혼잡 회피를 하다가 손실이나 혼잡 신호가 오면 창을 줄입니다. 리눅스 기본은 CUBIC이고 BBR 같은 알고리즘은 반응이 다릅니다. 결국 TCP 처리량은 무선 용량뿐 아니라 이 조절 과정의 결과입니다.</aside>
 </section>

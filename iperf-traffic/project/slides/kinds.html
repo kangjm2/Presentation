@@ -17,6 +17,6 @@
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">UDP 쪽</p><p style="font-size:24px;line-height:1.4;color:#4A5262">조절 없이 정한 속도로 밀어 넣음 → 무선 구간이 얼마나 받아 내나를 보는 숫자</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">HTTP/3는 QUIC(UDP 위) · 영상 · 웹 시험은 앱마다 지표가 다름 · iperf3 기본 포트 5201 (iperf3 문서)</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 16</p>
 <aside>(약 50초) 시험에 쓰는 트래픽을 다섯 가지로 정리했습니다. ping은 ICMP 에코 요청을 보내고 서버 운영체제가 같은 크기로 답해 왕복 시간을 잽니다. iperf3 TCP는 한쪽이 계속 보내고 받는 쪽은 ACK만 돌려주며 처리량과 재전송을 잽니다. iperf3 UDP는 정한 속도로 한쪽만 보내고 응답은 없습니다. 받은 속도와 손실, 지터를 잽니다. FTP는 TCP로 파일을 주고받고, 웹과 영상은 TCP나 QUIC으로 서비스 체감을 봅니다. 기지국 입장에서는 모두 같은 IP 패킷이고, 다른 것은 양과 리듬, 응답 방식입니다. TCP는 ACK로 속도를 스스로 조절하니 체감 숫자가 되고, UDP는 조절 없이 밀어 넣으니 무선 구간의 그릇을 보는 숫자가 됩니다.</aside>
 </section>

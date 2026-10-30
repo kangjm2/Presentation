@@ -28,6 +28,6 @@
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> UDP 결과는 받은 쪽 숫자를 본다 — UL은 서버 쪽, DL(-R)은 UE 쪽 receiver 줄</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그래프는 용량 350 Mbps를 가정한 개념 계산 · -b · 1 Mbit/s 기본값: iperf3 문서 · 지터 식: iperf3 소스(iperf_udp.c)</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 16</p>
 <aside>(약 50초) UDP는 연결도, ACK도, 속도 조절도 없습니다. iperf3 UDP는 -b로 정한 속도로 계속 보냅니다. 기본값이 1 Mbit/s라서 -b를 꼭 줘야 합니다. 받는 쪽은 패킷 번호로 손실을 세고, 도착 간격의 흔들림으로 지터를 계산합니다. 그래프는 무선 용량을 350 Mbps로 가정한 개념 계산입니다. 보낸 속도가 용량보다 낮으면 받은 속도가 같고, 넘으면 받은 속도는 용량에서 멈추고 나머지는 손실이 됩니다. 예를 들어 500을 보내면 30퍼센트를 잃습니다. 그래서 용량을 잴 때는 -b를 조금 높게 주고 받은 속도를 봅니다. 다만 넘친 분은 버퍼에 쌓였다 버려지므로 지연과 단말 부하가 커집니다. 결과는 받은 쪽 숫자를 봅니다.</aside>
 </section>

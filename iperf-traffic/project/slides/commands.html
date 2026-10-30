@@ -21,6 +21,6 @@
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> Bitrate = 앱이 실제로 주고받은 속도 · Retr = TCP 재전송 수 · 마지막 두 줄이 다르면 receiver를 믿는다 — Transfer는 바이트, Bitrate는 비트(8배)</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출력은 형식을 보여 주는 예시 (숫자는 가상) · 옵션 뜻: iperf3 문서 (-l 기본: TCP 128 KB, UDP는 경로 MTU 기준 · 실패 시 1,460 B)</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 16</p>
 <aside>(약 55초) 실제 명령입니다. 서버에서 iperf3 -s, 단말에서 -c와 서버 주소를 줍니다. -t로 시간을 정하고, -O 2로 처음 2초를 통계에서 빼서 느린 시작 구간을 지웁니다. -R은 DL, -P 4는 스트림 네 개입니다. UDP는 -u와 함께 -b로 속도를 줍니다. -J로 JSON을 저장해 두면 나중에 DM 로그와 시간을 맞추기 쉽습니다. 아래 출력은 형식을 보여 주는 예시입니다. 1초마다 전송한 양과 비트레이트, TCP 재전송 수가 나옵니다. 마지막 두 줄은 보낸 쪽과 받은 쪽 합계인데, 다르면 받은 쪽을 믿습니다. Transfer는 바이트, Bitrate는 비트라서 8배 차이가 나는 것도 주의합니다.</aside>
 </section>
