@@ -1,0 +1,33 @@
+<section id="udp" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">③ UDP</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">UDP: 정한 속도로 밀어 넣고, 받은 쪽이 센다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:530px">
+<svg aria-label="보낸 속도와 받은 속도 그래프. 무선 용량 350 Mbps(예)까지는 받은 속도가 보낸 속도와 같고, 그 뒤로는 평평하게 머물며 차이가 손실이 된다" style="position:absolute;left:0px;top:0px;width:860px;height:530px" width="860" height="530" viewBox="0 0 860 530"><line x1="90" y1="460" x2="850" y2="460" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="387" x2="850" y2="387" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="313" x2="850" y2="313" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="240" x2="850" y2="240" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="167" x2="850" y2="167" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="93" x2="850" y2="93" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="20" x2="850" y2="20" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="460" x2="850" y2="460" stroke="#14213D" stroke-width="3"/><line x1="90" y1="20" x2="90" y2="460" stroke="#14213D" stroke-width="3"/><line x1="90.0" y1="460.0" x2="850.0" y2="20.0" stroke="#5E6675" stroke-width="3" stroke-dasharray="8 6"/><polyline points="90.0,460.0 533.3333333333334,203.33333333333331 850.0,203.33333333333331" fill="none" stroke="#255E9E" stroke-width="6"/><line x1="723.3333333333334" y1="93.33333333333331" x2="723.3333333333334" y2="203.33333333333331" stroke="#A84A16" stroke-width="4"/><circle cx="723.3333333333334" cy="203.33333333333331" r="9" fill="#255E9E"/><circle cx="723.3333333333334" cy="93.33333333333331" r="9" fill="#5E6675"/></svg>
+<p style="position:absolute;left:0px;top:444px;width:80px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:50px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:297px;width:80px;font-size:24px;text-align:right;color:#5E6675">200</p>
+<p style="position:absolute;left:303px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">200</p>
+<p style="position:absolute;left:0px;top:151px;width:80px;font-size:24px;text-align:right;color:#5E6675">400</p>
+<p style="position:absolute;left:557px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">400</p>
+<p style="position:absolute;left:0px;top:4px;width:80px;font-size:24px;text-align:right;color:#5E6675">600</p>
+<p style="position:absolute;left:810px;top:468px;width:80px;font-size:24px;text-align:center;color:#5E6675">600</p>
+<p style="position:absolute;left:90px;top:500px;width:760px;font-size:24px;text-align:center;color:#14213D">보낸 속도 -b (Mbps)</p>
+<p style="position:absolute;left:100px;top:22px;width:300px;font-size:24px;color:#14213D;background:#F5F3EE">받은 속도 (Mbps)</p>
+<p style="position:absolute;left:141px;top:79px;width:300px;font-size:24px;color:#5E6675">받은 = 보낸 (손실 0) ↘</p>
+<p style="position:absolute;left:280px;top:153px;width:300px;font-size:24px;font-weight:700;color:#255E9E">무선 용량 350 (예)</p>
+<p style="position:absolute;left:735px;top:130px;width:124px;font-size:24px;line-height:1.3;font-weight:700;color:#A84A16">-b 500<br>손실 30%</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">보내는 쪽</p><p style="font-size:24px;line-height:1.4;color:#4A5262">연결 · ACK · 속도 조절 없음 — -b 속도로 계속 보냄<br>iperf3 UDP 기본은 1 Mbit/s → 꼭 -b를 준다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">받는 쪽이 계산</p><p style="font-size:24px;line-height:1.4;color:#4A5262">번호로 손실 (Lost/Total)<br>도착 간격으로 지터: J += (|D| − J) / 16 (RFC 1889 방식)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">용량 재기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">-b를 용량보다 높게 → 받은 속도 ≈ 무선이 받아 낸 양<br>단, 손실 분은 버퍼에 쌓였다 버려진다 → 지연 · 단말 부하↑</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> UDP 결과는 받은 쪽 숫자를 본다 — UL은 서버 쪽, DL(-R)은 UE 쪽 receiver 줄</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그래프는 용량 350 Mbps를 가정한 개념 계산 · -b · 1 Mbit/s 기본값: iperf3 문서 · 지터 식: iperf3 소스(iperf_udp.c)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
+<aside>(약 50초) UDP는 연결도, ACK도, 속도 조절도 없습니다. iperf3 UDP는 -b로 정한 속도로 계속 보냅니다. 기본값이 1 Mbit/s라서 -b를 꼭 줘야 합니다. 받는 쪽은 패킷 번호로 손실을 세고, 도착 간격의 흔들림으로 지터를 계산합니다. 그래프는 무선 용량을 350 Mbps로 가정한 개념 계산입니다. 보낸 속도가 용량보다 낮으면 받은 속도가 같고, 넘으면 받은 속도는 용량에서 멈추고 나머지는 손실이 됩니다. 예를 들어 500을 보내면 30퍼센트를 잃습니다. 그래서 용량을 잴 때는 -b를 조금 높게 주고 받은 속도를 봅니다. 다만 넘친 분은 버퍼에 쌓였다 버려지므로 지연과 단말 부하가 커집니다. 결과는 받은 쪽 숫자를 봅니다.</aside>
+</section>

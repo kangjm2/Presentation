@@ -1,0 +1,28 @@
+<section id="ping" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">① ping</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">ping: 서버가 같은 것을 되돌려 준다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:700px;height:530px">
+<svg aria-label="UE와 서버 두 세로선 사이에 요청과 응답 화살표가 세 번 오가는 그림. 첫 번째 왕복은 연결 설정 때문에 더 길다" style="position:absolute;left:0px;top:0px;width:700px;height:530px" width="700" height="530" viewBox="0 0 700 530"><line x1="90" y1="40" x2="90" y2="520" stroke="#255E9E" stroke-width="4"/><line x1="560" y1="40" x2="560" y2="520" stroke="#A84A16" stroke-width="4"/><rect x="76" y="60" width="28" height="90" fill="#F7DDCB"/><line x1="90.0" y1="150.0" x2="548.1" y2="208.5" stroke="#255E9E" stroke-width="3"/><polygon points="560.0,210.0 548.9,202.5 547.3,214.4" fill="#255E9E"/><line x1="560.0" y1="210.0" x2="101.9" y2="268.5" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 5"/><polygon points="90.0,270.0 102.7,274.4 101.1,262.5" fill="#A84A16"/><line x1="50" y1="150" x2="50" y2="270" stroke="#14213D" stroke-width="2"/><line x1="90.0" y1="310.0" x2="548.0" y2="349.0" stroke="#255E9E" stroke-width="3"/><polygon points="560.0,350.0 548.6,343.0 547.5,355.0" fill="#255E9E"/><line x1="560.0" y1="350.0" x2="102.0" y2="389.0" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 5"/><polygon points="90.0,390.0 102.5,395.0 101.4,383.0" fill="#A84A16"/><line x1="50" y1="310" x2="50" y2="390" stroke="#14213D" stroke-width="2"/><line x1="90.0" y1="430.0" x2="548.0" y2="469.0" stroke="#255E9E" stroke-width="3"/><polygon points="560.0,470.0 548.6,463.0 547.5,475.0" fill="#255E9E"/><line x1="560.0" y1="470.0" x2="102.0" y2="509.0" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 5"/><polygon points="90.0,510.0 102.5,515.0 101.4,503.0" fill="#A84A16"/><line x1="50" y1="430" x2="50" y2="510" stroke="#14213D" stroke-width="2"/></svg>
+<p style="position:absolute;left:10px;top:0px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">UE</p>
+<p style="position:absolute;left:480px;top:0px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">서버</p>
+<p style="position:absolute;left:110px;top:70px;width:300px;font-size:24px;color:#A84A16">유휴 → 연결 설정 (첫 패킷만)</p>
+<p style="position:absolute;left:572px;top:180px;width:130px;font-size:24px;line-height:1.25;color:#255E9E">request<br>(유형 8)</p>
+<p style="position:absolute;left:100px;top:276px;width:220px;font-size:24px;color:#A84A16">reply (유형 0)</p>
+<p style="position:absolute;left:0px;top:196px;width:70px;font-size:24px;text-align:right;font-weight:700;color:#14213D">RTT₁</p>
+<p style="position:absolute;left:0px;top:336px;width:70px;font-size:24px;text-align:right;font-weight:700;color:#14213D">RTT₂</p>
+<p style="position:absolute;left:0px;top:456px;width:70px;font-size:24px;text-align:right;font-weight:700;color:#14213D">RTT₃</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">어떻게</p><p style="font-size:24px;line-height:1.4;color:#4A5262">ICMP echo request에 번호 · 보낸 시각을 담아 보냄 → 서버 OS가 그대로 echo reply → 받은 시각 − 보낸 시각 = RTT</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">RTT에 들어가는 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">UL: 스케줄링 요청(SR) → 그랜트 → 전송 · HARQ 재전송 → 코어 · 유선 → 서버 처리 → DL 스케줄링 · 전송</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">첫 ping이 긴 이유</p><p style="font-size:24px;line-height:1.4;color:#4A5262">단말이 유휴(RRC idle · inactive)면 연결 설정부터 — 첫 값은 따로 보거나 버린다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">옵션 · 주의</p><p style="font-size:24px;line-height:1.4;color:#4A5262">-c 횟수 · -i 간격 · -s 크기 (기본 56 B 데이터) — 서버나 방화벽이 ICMP를 막으면 응답 없음 ≠ 무선 문제</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">ICMP 유형 8 = echo request, 0 = echo reply (RFC 792) · 리눅스 ping 기본 데이터 56 B (+ ICMP 8 B) · 간격이 길면 매번 SR · 연결 상태 영향</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 14</p>
+<aside>(약 50초) ping은 가장 단순합니다. 단말이 ICMP echo request에 순서 번호와 보낸 시각을 담아 보내면, 서버 운영체제가 내용을 그대로 echo reply로 돌려줍니다. 받은 시각에서 보낸 시각을 빼면 왕복 시간, RTT입니다. 이 RTT 안에는 단말이 상향 자원을 요청하고 그랜트를 받는 시간, 전송과 HARQ 재전송, 코어와 유선 구간, 서버 처리, 하향 스케줄링이 모두 들어 있습니다. 그림처럼 단말이 유휴 상태라면 첫 패킷은 연결 설정부터 해야 하니 첫 값이 길게 나옵니다. 그래서 첫 값은 따로 보거나 버립니다. 서버나 방화벽이 ICMP를 막으면 응답이 없는데, 이것은 무선 문제가 아니라는 점도 기억해 두면 좋습니다.</aside>
+</section>

@@ -1,0 +1,58 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-30T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "iperf3와 트래픽 시험: ping · TCP · UDP · FTP",
+  "order": [
+    "cover",
+    "path",
+    "stack",
+    "kinds",
+    "ping",
+    "tcp",
+    "tcplimit",
+    "udp",
+    "iperf",
+    "commands",
+    "ftp",
+    "layers",
+    "checklist",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "트래픽이 오가는 길과 구간별 패킷 모양, 트래픽 종류",
+      "start": "cover"
+    },
+    "protocols": {
+      "description": "ping, TCP(조절 · 상한), UDP(손실 · 지터)",
+      "start": "ping"
+    },
+    "tools": {
+      "description": "iperf3 구조 · 명령 · 결과 읽기, FTP와 웹",
+      "start": "iperf"
+    },
+    "wrap": {
+      "description": "앱 처리량과 무선 처리량 비교, 시험 점검표, 정리",
+      "start": "layers"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

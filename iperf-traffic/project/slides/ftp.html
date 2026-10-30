@@ -1,0 +1,30 @@
+<section id="ftp" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑤ FTP · 웹</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">FTP: 명령 통로와 파일 통로가 따로 있다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:820px;height:360px">
+<svg aria-label="FTP 클라이언트와 서버 사이에 포트 21 제어 연결로 명령이 오가고, 패시브 모드로 단말이 연 데이터 연결로 파일이 내려오는 그림" style="position:absolute;left:0px;top:0px;width:820px;height:360px" width="820" height="360" viewBox="0 0 820 360"><rect x="0" y="40" width="220" height="300" rx="12" fill="#255E9E"/><rect x="600" y="40" width="220" height="300" rx="12" fill="#A84A16"/><line x1="222.0" y1="90.0" x2="585.0" y2="90.0" stroke="#14213D" stroke-width="3"/><polygon points="596.0,90.0 585.0,84.5 585.0,95.5" fill="#14213D"/><line x1="596.0" y1="130.0" x2="233.0" y2="130.0" stroke="#14213D" stroke-width="3" stroke-dasharray="6 4"/><polygon points="222.0,130.0 233.0,135.5 233.0,124.5" fill="#14213D"/><line x1="222.0" y1="230.0" x2="583.0" y2="230.0" stroke="#255E9E" stroke-width="5"/><polygon points="596.0,230.0 583.0,223.5 583.0,236.5" fill="#255E9E"/><line x1="596.0" y1="300.0" x2="236.0" y2="300.0" stroke="#A84A16" stroke-width="6"/><polygon points="222.0,300.0 236.0,307.0 236.0,293.0" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:160px;width:220px;font-size:24px;text-align:center;line-height:1.35;font-weight:700;color:#F5F3EE">UE<br>FTP 클라이언트</p>
+<p style="position:absolute;left:600px;top:160px;width:220px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">FTP 서버</p>
+<p style="position:absolute;left:230px;top:44px;width:360px;font-size:24px;text-align:center;color:#14213D">제어 연결 → 포트 21</p>
+<p style="position:absolute;left:230px;top:96px;width:360px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">USER · PASS · PASV · RETR …</p>
+<p style="position:absolute;left:230px;top:186px;width:360px;font-size:24px;text-align:center;color:#255E9E">패시브: UE가 서버 포트로 연결</p>
+<p style="position:absolute;left:230px;top:306px;width:360px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">파일 데이터 (RETR = DL)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">두 연결</p><p style="font-size:24px;line-height:1.4;color:#4A5262">제어(21): 로그인 · 명령<br>데이터: 파일 하나마다 새 TCP 연결</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">액티브 vs 패시브</p><p style="font-size:24px;line-height:1.4;color:#4A5262">액티브: 서버가 단말 쪽으로 연결 → NAT에서 막힘<br>패시브(PASV): 단말이 연결 → 이동망 시험은 대개 패시브</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">처리량은 TCP 그대로</p><p style="font-size:24px;line-height:1.4;color:#4A5262">+ 서버 디스크 · CPU, 파일 크기 — 작은 파일이면 느린 시작이 대부분</p></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">FTP vs iperf3</p><p style="font-size:24px;line-height:1.4;color:#4A5262">FTP = 실제 파일 · 앱 체감에 가깝다 / iperf3 = 디스크 없이 망만 — 원인 나누기에 유리</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">여러 세션</p><p style="font-size:24px;line-height:1.4;color:#4A5262">파일 여러 개 동시 받기 = iperf3 -P와 같은 효과 (단일 TCP 한계 피하기)</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">웹 · 영상</p><p style="font-size:24px;line-height:1.4;color:#4A5262">HTTP/1.1 · 2는 TCP, HTTP/3는 QUIC(UDP) — 페이지 시간 · 끊김처럼 서비스 지표로 본다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">FTP: RFC 959 (제어 21 · 액티브 데이터 20) · PASV는 서버가 알려 준 포트로 클라이언트가 연결 · HTTP/3 = RFC 9114</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
+<aside>(약 50초) FTP는 연결이 둘입니다. 포트 21의 제어 연결로 로그인하고 명령을 보내며, 파일은 파일마다 새로 여는 데이터 연결로 오갑니다. 데이터 연결을 누가 여느냐에 따라 액티브와 패시브가 있는데, 액티브는 서버가 단말 쪽으로 연결을 열어야 해서 NAT 뒤에 있는 단말에서는 막힙니다. 그래서 이동망 시험은 대개 단말이 여는 패시브를 씁니다. FTP 처리량은 결국 TCP 처리량에 서버 디스크와 CPU, 파일 크기가 더해진 값입니다. 파일이 작으면 느린 시작이 대부분을 차지합니다. 그래서 FTP는 실제 체감에 가깝고, iperf3는 디스크 없이 망만 보니 원인을 나눌 때 유리합니다. 웹과 영상은 TCP나 QUIC 위에서 페이지 시간이나 끊김 같은 서비스 지표로 봅니다.</aside>
+</section>
