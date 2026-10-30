@@ -1,0 +1,36 @@
+<section id="stack" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">패킷의 모양</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">구간마다 다른 봉투에 담긴다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px;align-items:flex-start">
+<div style="position:relative;width:780px;height:380px">
+<svg aria-label="세 줄의 패킷 그림. 첫 줄은 IP 20, TCP 32, 데이터 1448 바이트. 둘째 줄은 바깥 IP, UDP, GTP-U 머리말 안에 단말 패킷이 통째로 들어감. 셋째 줄은 MAC, RLC, PDCP 머리말 뒤에 암호화된 단말 패킷" style="position:absolute;left:0px;top:0px;width:780px;height:380px" width="780" height="380" viewBox="0 0 780 380"><rect x="0" y="40" width="120" height="64" rx="6" fill="#D5E3F3"/><rect x="124" y="40" width="170" height="64" rx="6" fill="#F7DDCB"/><rect x="298" y="40" width="470" height="64" rx="6" fill="#FBFAF7"/><rect x="0" y="40" width="768" height="64" rx="6" fill="none" stroke="#14213D" stroke-width="2"/><rect x="0" y="170" width="110" height="64" rx="6" fill="#C9D3E3"/><rect x="114" y="170" width="100" height="64" rx="6" fill="#C9D3E3"/><rect x="218" y="170" width="120" height="64" rx="6" fill="#C9D3E3"/><rect x="342" y="170" width="426" height="64" rx="6" fill="#FBFAF7"/><rect x="342" y="170" width="426" height="64" rx="6" fill="none" stroke="#14213D" stroke-width="2" stroke-dasharray="6 4"/><rect x="0" y="300" width="100" height="64" rx="6" fill="#F0D8C4"/><rect x="104" y="300" width="100" height="64" rx="6" fill="#F0D8C4"/><rect x="208" y="300" width="100" height="64" rx="6" fill="#F0D8C4"/><rect x="312" y="300" width="456" height="64" rx="6" fill="#FBFAF7"/><rect x="312" y="300" width="456" height="64" rx="6" fill="none" stroke="#14213D" stroke-width="2" stroke-dasharray="6 4"/></svg>
+<p style="position:absolute;left:0px;top:0px;width:780px;font-size:24px;font-weight:700;color:#14213D">단말이 만든 IP 패킷 (MTU 1500 예)</p>
+<p style="position:absolute;left:0px;top:56px;width:120px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">IP 20</p>
+<p style="position:absolute;left:124px;top:56px;width:170px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">TCP 20+12</p>
+<p style="position:absolute;left:298px;top:56px;width:470px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">데이터 1,448 B</p>
+<p style="position:absolute;left:0px;top:130px;width:780px;font-size:24px;font-weight:700;color:#14213D">N3 · F1-U 구간: GTP-U 터널에 통째로 담긴다</p>
+<p style="position:absolute;left:0px;top:186px;width:110px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">IP 20</p>
+<p style="position:absolute;left:114px;top:186px;width:100px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">UDP 8</p>
+<p style="position:absolute;left:218px;top:186px;width:120px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">GTP-U 8+</p>
+<p style="position:absolute;left:342px;top:186px;width:426px;font-size:24px;text-align:center;color:#4A5262">단말 IP 패킷 (위 그대로)</p>
+<p style="position:absolute;left:0px;top:260px;width:780px;font-size:24px;font-weight:700;color:#14213D">무선 Uu 구간: 층마다 짧은 머리말이 붙는다</p>
+<p style="position:absolute;left:0px;top:316px;width:100px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">MAC</p>
+<p style="position:absolute;left:104px;top:316px;width:100px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">RLC</p>
+<p style="position:absolute;left:208px;top:316px;width:100px;font-size:24px;text-align:center;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">PDCP</p>
+<p style="position:absolute;left:312px;top:316px;width:456px;font-size:24px;text-align:center;color:#4A5262">단말 IP 패킷 (암호화됨)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">구간</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">하는 일</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">UE 앱</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">데이터에 TCP · UDP 머리말, 그다음 IP(단말 주소 ↔ 서버 주소)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">Uu</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">SDAP · PDCP(번호 · 암호화) → RLC(분할 · 재전송) → MAC(묶기 · HARQ) → PHY</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">F1-U · N3</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">GTP-U / UDP(포트 2152) / IP 터널 — 터널 ID로 단말 · 세션을 구분</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">N6</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">터널을 벗긴 원래 IP 패킷 그대로 (망에 따라 NAT)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">ping은 TCP도 UDP도 아니다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">IP 머리말의 프로토콜 번호: ICMP 1 · TCP 6 · UDP 17 — ping(ICMP)은 IP 바로 위에 실린다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TCP 머리말 20 B + 타임스탬프 옵션 12 B (리눅스 기본) · GTP-U 8 B + 확장 머리말 · 무선 머리말 크기는 설정마다 다름</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 14</p>
+<aside>(약 50초) 같은 패킷이 구간마다 다른 봉투에 담깁니다. 단말 앱이 만든 데이터에 TCP나 UDP 머리말이 붙고, 그 바깥에 단말 주소와 서버 주소가 적힌 IP 머리말이 붙습니다. 무선 구간에서는 이 IP 패킷 앞에 PDCP, RLC, MAC 머리말이 붙고 PDCP에서 암호화됩니다. DU와 CU 사이, 기지국과 UPF 사이에서는 GTP-U 터널에 통째로 담겨 가고, 터널 ID로 어느 단말의 어느 세션인지 구분합니다. UPF를 지나 데이터망으로 나가면 터널을 벗긴 원래 패킷이 됩니다. 덧붙여 ping이 쓰는 ICMP는 TCP도 UDP도 아니고 IP 바로 위에 실리는 별도 프로토콜입니다.</aside>
+</section>

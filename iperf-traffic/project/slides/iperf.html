@@ -1,0 +1,29 @@
+<section id="iperf" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">④ iperf3 구조</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">iperf3: 제어 연결 하나 + 데이터 스트림</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:36px;align-items:flex-start">
+<div style="position:relative;width:820px;height:260px">
+<svg aria-label="UE의 iperf3 클라이언트와 서버의 iperf3 -s 사이에 제어 연결이 오가고 아래로 굵은 데이터 스트림 화살표가 지나가는 그림" style="position:absolute;left:0px;top:0px;width:820px;height:260px" width="820" height="260" viewBox="0 0 820 260"><rect x="0" y="40" width="260" height="120" rx="12" fill="#255E9E"/><rect x="560" y="40" width="260" height="120" rx="12" fill="#A84A16"/><line x1="262.0" y1="72.0" x2="545.0" y2="72.0" stroke="#14213D" stroke-width="3" stroke-dasharray="6 4"/><polygon points="556.0,72.0 545.0,66.5 545.0,77.5" fill="#14213D"/><line x1="556.0" y1="92.0" x2="273.0" y2="92.0" stroke="#14213D" stroke-width="3" stroke-dasharray="6 4"/><polygon points="262.0,92.0 273.0,97.5 273.0,86.5" fill="#14213D"/><line x1="262.0" y1="135.0" x2="542.0" y2="135.0" stroke="#255E9E" stroke-width="6"/><polygon points="556.0,135.0 542.0,128.0 542.0,142.0" fill="#255E9E"/></svg>
+<p style="position:absolute;left:0px;top:62px;width:260px;font-size:24px;text-align:center;line-height:1.35;font-weight:700;color:#F5F3EE">UE<br>iperf3 -c (클라이언트)</p>
+<p style="position:absolute;left:560px;top:62px;width:260px;font-size:24px;text-align:center;line-height:1.35;font-weight:700;color:#F5F3EE">트래픽 서버<br>iperf3 -s (포트 5201)</p>
+<p style="position:absolute;left:262px;top:34px;width:294px;font-size:24px;text-align:center;color:#14213D">제어 연결 (TCP)</p>
+<p style="position:absolute;left:262px;top:140px;width:294px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">데이터 스트림</p>
+<p style="position:absolute;left:0px;top:180px;width:820px;font-size:24px;line-height:1.4;color:#4A5262">① UE가 서버에 제어 연결을 연다 → ② 시험 조건(-t · -u · -b · -R …)을 넘긴다 → ③ 데이터 스트림을 연다 → ④ 끝나면 양쪽 결과를 주고받는다</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">UE를 클라이언트로</p><p style="font-size:24px;line-height:1.4;color:#4A5262">단말은 보통 사설 주소 · NAT · 방화벽 뒤 → 바깥에서 단말로 연결을 열기 어렵다 → 단말이 열고 -R로 DL을 받는다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">서버는 한 번에 한 시험</p><p style="font-size:24px;line-height:1.4;color:#4A5262">iperf3 -s 하나는 동시에 한 시험만 받는다 — 단말 여러 대면 포트(-p)를 나눠 서버를 여러 개</p></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">모드</p><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">옵션</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">데이터 방향 (UE가 클라이언트일 때)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">기본</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">iperf3 -c 서버</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">UE → 서버 = <b>UL</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">반대</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">iperf3 -c 서버 -R</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">서버 → UE = <b>DL</b> (연결은 UE가 연다)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">양방향</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">iperf3 -c 서버 --bidir</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">UL · DL 동시 (iperf3 3.7부터)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">iperf3 문서: 기본 포트 5201, -R = 서버가 보냄, -u여도 제어 연결은 TCP · --bidir: 3.7 릴리스 노트 (2019)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 14</p>
+<aside>(약 50초) iperf3의 구조입니다. 서버에서 iperf3 -s를 띄우면 포트 5201에서 기다립니다. 단말에서 iperf3 -c로 서버에 접속하면 먼저 TCP 제어 연결이 열리고, 시험 시간이나 UDP 여부, 속도, 방향 같은 조건을 넘깁니다. 그다음 데이터 스트림을 열어 시험하고, 끝나면 양쪽 결과를 주고받습니다. 기본은 클라이언트가 보내므로 단말이 클라이언트면 UL 시험입니다. -R을 주면 서버가 보내서 DL 시험이 되고, --bidir는 양방향을 동시에 합니다. 단말을 클라이언트로 두는 이유는 단말이 보통 사설 주소나 NAT 뒤에 있어서 바깥에서 단말로 연결을 열기 어렵기 때문입니다. 서버 하나는 한 번에 한 시험만 받으니 단말이 여러 대면 포트를 나눠 서버를 여러 개 띄웁니다.</aside>
+</section>
