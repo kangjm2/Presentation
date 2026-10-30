@@ -23,6 +23,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">ICMP 유형 8 = echo request, 0 = echo reply (RFC 792) · 리눅스 ping 기본 데이터 56 B (+ ICMP 8 B) · 간격이 길면 매번 SR · 연결 상태 영향</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 16</p>
 <aside>(약 50초) ping은 가장 단순합니다. 단말이 ICMP echo request에 순서 번호와 보낸 시각을 담아 보내면, 서버 운영체제가 내용을 그대로 echo reply로 돌려줍니다. 받은 시각에서 보낸 시각을 빼면 왕복 시간, RTT입니다. 이 RTT 안에는 단말이 상향 자원을 요청하고 그랜트를 받는 시간, 전송과 HARQ 재전송, 코어와 유선 구간, 서버 처리, 하향 스케줄링이 모두 들어 있습니다. 그림처럼 단말이 유휴 상태라면 첫 패킷은 연결 설정부터 해야 하니 첫 값이 길게 나옵니다. 그래서 첫 값은 따로 보거나 버립니다. 서버나 방화벽이 ICMP를 막으면 응답이 없는데, 이것은 무선 문제가 아니라는 점도 기억해 두면 좋습니다.</aside>
 </section>

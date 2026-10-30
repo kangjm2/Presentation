@@ -32,6 +32,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">계산값 (창 ÷ RTT) · Mathis 외 (1997) 근사 · 리눅스는 창 크기 조절(RFC 7323)로 수 MB까지 키운다 — -w로 크기 지정</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 16</p>
 <aside>(약 55초) TCP는 ACK를 받기 전에 창만큼만 보낼 수 있습니다. 그래서 처리량 상한은 창 크기를 RTT로 나눈 값입니다. 그래프는 이것을 계산한 것으로, 창 64 KB에 RTT 20 ms면 약 26 Mbps가 끝입니다. 무선이 1 Gbps를 줄 수 있어도 못 씁니다. 1 Gbps를 RTT 20 ms에서 채우려면 대역폭 곱하기 RTT, 즉 2.5 MB의 창이 필요합니다. 손실이 있으면 Mathis 근사식처럼 손실률의 제곱근에 반비례해 줄어듭니다. 손실률 만분의 일에서도 약 71 Mbps입니다. 무선에서는 HARQ와 RLC가 손실을 대부분 숨겨 주지만 그 대가로 지연이 흔들리고, RTT가 늘면 TCP가 느려집니다. 그래서 iperf3에서는 창을 키우거나 스트림을 여러 개 씁니다.</aside>
 </section>

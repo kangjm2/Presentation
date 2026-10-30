@@ -17,6 +17,8 @@
     "udp",
     "iperf",
     "commands",
+    "vue",
+    "vuerun",
     "ftp",
     "layers",
     "checklist",
@@ -32,7 +34,7 @@
       "start": "ping"
     },
     "tools": {
-      "description": "iperf3 구조 · 명령 · 결과 읽기, FTP와 웹",
+      "description": "iperf3 구조 · 명령 · 결과 읽기, 가상 UE(TUN · netns · curl), FTP와 웹",
       "start": "iperf"
     },
     "wrap": {

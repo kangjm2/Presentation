@@ -26,8 +26,8 @@
 <div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">기지국은 나르기만</p><p style="font-size:24px;line-height:1.4;color:#4A5262">앱 종류를 모른 채 IP 패킷을 베어러에 실어 나른다 — 그 과정에서 무선 KPI가 생긴다</p></div>
 <div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">KPI는 세 곳에서</p><p style="font-size:24px;line-height:1.4;color:#4A5262">① UE의 DM 로그 (PHY ~ IP · 앱)<br>② 기지국 PM 카운터 (DU · CU)<br>③ 서버의 iperf3 결과</p></div>
 </div>
-<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 세 곳의 숫자가 서로 다른 것은 정상 — 어느 층 · 어느 구간에서 · 어느 시간 창으로 셌는지가 다르다 (12쪽)</p>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 세 곳의 숫자가 서로 다른 것은 정상 — 어느 층 · 어느 구간에서 · 어느 시간 창으로 셌는지가 다르다 (14쪽)</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">구간 이름: Uu(무선) · FH(프런트홀) · F1-U(DU–CU) · N3(gNB–UPF) · N6(UPF–데이터망) — 서버 위치는 시험마다 다르다</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 16</p>
 <aside>(약 50초) 먼저 길부터 보겠습니다. 단말이 트래픽 서버에 요청하면 패킷은 RU, DU, CU를 거쳐 코어의 UPF로 가고, UPF에서 MEC나 인터넷을 지나 트래픽 서버에 닿습니다. 응답도 같은 길을 거꾸로 옵니다. 여기서 중요한 점은 되돌려 보내는 주체가 RU나 CU가 아니라 서버라는 것입니다. ping은 서버의 운영체제가, iperf3는 서버에서 대기 중인 iperf3 프로그램이 답합니다. 기지국은 앱의 종류를 모른 채 IP 패킷을 실어 나르기만 하고, 그 과정에서 무선 KPI가 생깁니다. 그래서 KPI는 단말의 DM 로그, 기지국 PM 카운터, 서버의 iperf3 결과 세 곳에서 따로 잡히고, 숫자가 서로 다른 것이 정상입니다.</aside>
 </section>
