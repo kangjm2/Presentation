@@ -26,6 +26,7 @@
   - [`sim-real-alignment`](../sim-real-alignment/): 보정 방법
   - [`propagation-models`](../propagation-models/): 음영(shadow fading)과 경로손실 모델
   - [`twin-vv`](../twin-vv/): 공간으로 떼어 놓은 검증 · 합격선
+  - [`covariates`](../covariates/): Gap Lab 갈래 ② — 공변량으로 잔차가 몰린 칸 찾기 (같은 n_eff 생각)
 
 ## 구성 (≈ 10분 45초)
 

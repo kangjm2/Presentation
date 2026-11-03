@@ -1,0 +1,59 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-03T12:00:00Z"
+  },
+  "lists": "css",
+  "title": "공변량: 잔차는 어느 요인 탓인가",
+  "order": [
+    "cover",
+    "why",
+    "map",
+    "list1",
+    "list2",
+    "distance",
+    "steps",
+    "neff",
+    "verdicts",
+    "example",
+    "countneff",
+    "ladder",
+    "pitfalls",
+    "status",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 필요한가와 직관 (잔차 지도 · 공변량 지도)",
+      "start": "cover"
+    },
+    "what": {
+      "description": "무엇을 공변량으로 두나: 조건 셋, 목록, 통제 공변량 거리",
+      "start": "list1"
+    },
+    "how": {
+      "description": "다섯 단계, 유효 표본 수, 판정, 손으로 따라가는 예",
+      "start": "steps"
+    },
+    "where": {
+      "description": "세 갈래 안의 자리, 함정, 지금 상태, 정리",
+      "start": "ladder"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

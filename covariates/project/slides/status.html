@@ -1,0 +1,20 @@
+<section id="status" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">지금 상태</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">있는 것과 기다리는 것</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">있다</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">기다린다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">공변량 열</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">n_paths · 서빙 셀의 los</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">CF 1 단계: 모든 셀 los · path_kind · foliage_m · off_az · off_el / 3 단계: blocker_id · 건물 표 (CF 요청서 V3)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">구간 계산</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">dt-viewer 엔진의 n_eff (compare.trend())</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">—</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">판정</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">Gap Lab은 ① 만 판정 (L1)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">② · ③ 판정은 L3 — 실측과 공변량이 온 뒤 (experiment-ledger §11)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">동등성 ε</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">없음 → ② 의 ruled_out은 아직 안 나온다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">Q-CAL-31</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#2F7D5B">갈래 ① 에서 이미 쓴 같은 생각</p><p style="font-size:24px;line-height:1.4;color:#4A5262">재질 ±30%: 경로 전체로는 “못 가른다” → 반사가 전력의 50% 넘게를 차지하는 칸만 모으자 supported (sensitivity-split)</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">갈래 ② 는</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 칸 고르기를 실측 잔차에 쓰는 것 — 공변량 열이 오면 바로 시작한다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">상태 기준일 2026-11-03 (초안) · 출처: 공변량 문서 §5 · sensitivity-split · CF 요청서 V3</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 15</p>
+<aside>(약 45초) 지금 상태입니다. 공변량 열은 경로 수와 서빙 셀의 시야 여부만 있고, 모든 셀의 시야, 지배 경로 종류, 수목 통과 길이, 안테나 정면에서 벗어난 각은 CF 1 단계, 가로막은 건물과 건물 표는 3 단계를 기다립니다. 구간 계산은 dt-viewer 엔진에 이미 있습니다. 판정은 지금 Gap Lab이 갈래 ①만 하고, ②와 ③은 실측과 공변량이 온 뒤입니다. 동등성 ε도 아직 없어서 ruled_out은 나오지 않습니다. 같은 생각은 갈래 ①에서 이미 썼습니다. 재질을 ±30% 흔들었을 때 경로 전체로는 못 가른다였지만, 반사가 전력의 절반 넘게를 차지하는 칸만 모으자 supported였습니다. 이 칸 고르기를 실측 잔차에 쓰는 것이 갈래 ②입니다.</aside>
+</section>
