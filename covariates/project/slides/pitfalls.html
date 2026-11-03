@@ -1,0 +1,18 @@
+<section id="pitfalls" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">함정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">함정 다섯 — 그리고 정직한 답</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">① 공변량끼리 얽힌다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">나무 많은 곳은 NLOS이기도 하다 → 수목 탓인지 가림 탓인지 섞인다<br><b>→ 하나를 고정하고 나눈다</b> (los = true 칸 안에서만 수목 대 없음) · 칸이 적으면 not_distinguished — 그게 정직한 답</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">② 한 공변량, 여러 요인</p><p style="font-size:24px;line-height:1.4;color:#4A5262">los는 RU 위치 · 높이 · 엔진 판을 모두 가리킨다<br><b>→ ① 이 먼저</b>: 현실적 범위에서 움직이지도 않는 요인은 빠지고, 남은 후보를 ③ 으로 가른다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">③ 시뮬의 눈으로 본 값</p><p style="font-size:24px;line-height:1.4;color:#4A5262">blocker_id는 씬에 있는 건물만 안다 → 빠진 건물 뒤는 “안 가려짐”<br><b>→ 이웃 칸 잔차의 뭉침</b>으로 후보를 찾고 전문가 단서(New clue)와 함께</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">④ 경계값을 결과 보고 고르지 않는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">“5 m로는 안 되는데 7 m면 된다”는 우연 찾기<br><b>→ 등록 때 정하고 고정</b> (criterion은 registered 뒤로 고정) · 다른 경계는 새 실험으로 — 둘 다 기록에 남는다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">⑤ 칸 하나를 판정하지 않는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">3 m 칸에 차량 주행 표본은 1개 남짓<br><b>→ 같은 공변량의 칸을 모아</b> 맞댄다 · 칸 하나의 이상은 취약한 점(fragile-points) · 전문가 단서의 몫</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: 공변량 문서 §4-1 ~ §4-5 · 실험 등록 규칙: experiment-ledger</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 15</p>
+<aside>(약 55초) 함정 다섯 가지입니다. 첫째, 공변량끼리 얽힙니다. 나무가 많은 곳은 가려진 곳이기도 해서, 수목 칸의 음수 잔차가 수목 탓인지 가림 탓인지 섞입니다. 하나를 고정하고 다른 것을 나눕니다. 칸이 적어져 못 가르면 그게 정직한 답입니다. 둘째, 한 공변량이 여러 요인을 가리킵니다. 그래서 ① 가능성이 먼저 후보를 줄입니다. 셋째, 공변량은 시뮬의 눈으로 본 값입니다. 씬에 빠진 건물은 공변량으로 안 보이니 이웃 칸 잔차의 뭉침으로 후보를 찾습니다. 넷째, 경계값을 결과를 보고 고르지 않습니다. 등록 때 정하고 고치지 않으며, 다른 경계는 새 실험으로 등록해 둘 다 남깁니다. 다섯째, 칸 하나를 판정하지 않습니다. 3 m 칸에 표본은 1개 남짓이라, 같은 공변량의 칸을 모아서 봅니다.</aside>
+</section>

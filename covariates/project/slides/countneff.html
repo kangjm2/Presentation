@@ -1,0 +1,32 @@
+<section id="countneff" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">그림 3 · 예시</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">효과가 작을 때 — 구간의 넓이가 판정을 바꾼다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:1000px;height:320px">
+<svg aria-label="차이 −1.5 dB의 95% 구간 막대 둘. 칸 수로 세면 [-2.32, -0.68]로 0의 왼쪽에만 있고, 유효 표본으로 세면 [-4.09, +1.09]로 0을 걸친다" style="position:absolute;left:0px;top:0px;width:1000px;height:320px" width="1000" height="320" viewBox="0 0 1000 320"><line x1="794" y1="30" x2="794" y2="270" stroke="#14213D" stroke-width="3"/><line x1="330" y1="270" x2="980" y2="270" stroke="#5E6675" stroke-width="2"/><line x1="579" y1="95" x2="731" y2="95" stroke="#A84A16" stroke-width="10" stroke-linecap="round"/><circle cx="655" cy="95" r="11" fill="#F5F3EE" stroke="#A84A16" stroke-width="5"/><line x1="415" y1="205" x2="895" y2="205" stroke="#255E9E" stroke-width="10" stroke-linecap="round"/><circle cx="655" cy="205" r="11" fill="#F5F3EE" stroke="#255E9E" stroke-width="5"/></svg>
+<p style="position:absolute;left:0px;top:78px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">칸 수로 셈 (300 · 900)</p>
+<p style="position:absolute;left:0px;top:188px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">유효 표본 (30 · 90)</p>
+<p style="position:absolute;left:290px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-5</p>
+<p style="position:absolute;left:383px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-4</p>
+<p style="position:absolute;left:476px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-3</p>
+<p style="position:absolute;left:569px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-2</p>
+<p style="position:absolute;left:661px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-1</p>
+<p style="position:absolute;left:754px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:847px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">+1</p>
+<p style="position:absolute;left:940px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">+2</p>
+<p style="position:absolute;left:549px;top:50px;width:360px;font-size:24px;font-weight:700;color:#A84A16">[-2.32, -0.68]</p>
+<p style="position:absolute;left:415px;top:160px;width:420px;font-size:24px;font-weight:700;color:#255E9E">[-4.09, +1.09]</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">같은 차이 −1.5 dB</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칸 수, 중앙값, 흩어짐은 앞 쪽과 같고 차이만 작다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">칸 수로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SE 0.418 dB → supported — <b>틀린 확신</b></p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">유효 표본으로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SE 1.321 dB → not_distinguished — 이 주행으로는 못 가른다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 효과가 클 때(−3.8 dB)는 어느 쪽으로 세도 supported — 차이는 효과가 작을 때 드러난다 → 칸 수로 세면 작은 효과를 모두 “있다”고 말한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">숫자는 설명용 예시 (실측 아님) · 정규 근사 · 출처: 공변량 문서 §3-4</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 15</p>
+<aside>(약 45초) 칸 수로 잘못 세면 무슨 일이 생기는지는 효과가 작을 때 드러납니다. 같은 조건에서 차이만 −1.5 dB라고 해 보겠습니다. 칸 수 300과 900으로 세면 표준오차가 0.418 dB라 구간이 -2.32에서 -0.68로 좁아져 supported, 하지만 이것은 틀린 확신입니다. 유효 표본 30과 90으로 세면 구간이 -4.09에서 +1.09로 0을 걸쳐 not_distinguished, 이 주행으로는 못 가른다는 정직한 답이 됩니다. 효과가 −3.8처럼 크면 어느 쪽이든 supported지만, 작은 효과에서는 세는 법이 판정을 바꿉니다.</aside>
+</section>

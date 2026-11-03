@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>공변량: 잔차는 어느 요인 탓인가</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="10 × 10 칸 격자에 잔차 색이 칠해져 있고, 가운데 한 무리의 칸이 점선 테두리로 묶여 더 진하게 몰려 있는 그림" style="position:absolute;left:1000px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><rect x="120" y="220" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="282" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="344" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="406" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="468" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="530" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="592" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="654" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="716" width="56" height="56" rx="6" fill="#776468"/><rect x="120" y="778" width="56" height="56" rx="6" fill="#776468"/><rect x="182" y="220" width="56" height="56" rx="6" fill="#A87D69"/><rect x="182" y="282" width="56" height="56" rx="6" fill="#A27A69"/><rect x="182" y="344" width="56" height="56" rx="6" fill="#917169"/><rect x="182" y="406" width="56" height="56" rx="6" fill="#7A6568"/><rect x="182" y="468" width="56" height="56" rx="6" fill="#625967"/><rect x="182" y="530" width="56" height="56" rx="6" fill="#504F67"/><rect x="182" y="592" width="56" height="56" rx="6" fill="#464A67"/><rect x="182" y="654" width="56" height="56" rx="6" fill="#494C67"/><rect x="182" y="716" width="56" height="56" rx="6" fill="#575367"/><rect x="182" y="778" width="56" height="56" rx="6" fill="#6C5E68"/><rect x="244" y="220" width="56" height="56" rx="6" fill="#C18B6A"/><rect x="244" y="282" width="56" height="56" rx="6" fill="#B8866A"/><rect x="244" y="344" width="56" height="56" rx="6" fill="#9F7969"/><rect x="244" y="406" width="56" height="56" rx="6" fill="#7C6668"/><rect x="244" y="468" width="56" height="56" rx="6" fill="#585367"/><rect x="244" y="530" width="56" height="56" rx="6" fill="#3B4466"/><rect x="244" y="592" width="56" height="56" rx="6" fill="#2D3D66"/><rect x="244" y="654" width="56" height="56" rx="6" fill="#313F66"/><rect x="244" y="716" width="56" height="56" rx="6" fill="#464A67"/><rect x="244" y="778" width="56" height="56" rx="6" fill="#675B68"/><rect x="306" y="220" width="56" height="56" rx="6" fill="#B8866A"/><rect x="306" y="282" width="56" height="56" rx="6" fill="#B08269"/><rect x="306" y="344" width="56" height="56" rx="6" fill="#9A7669"/><rect x="306" y="406" width="56" height="56" rx="6" fill="#7B6668"/><rect x="306" y="468" width="56" height="56" rx="6" fill="#987569"/><rect x="306" y="530" width="56" height="56" rx="6" fill="#7F6868"/><rect x="306" y="592" width="56" height="56" rx="6" fill="#736168"/><rect x="306" y="654" width="56" height="56" rx="6" fill="#766368"/><rect x="306" y="716" width="56" height="56" rx="6" fill="#4C4D67"/><rect x="306" y="778" width="56" height="56" rx="6" fill="#695C68"/><rect x="368" y="220" width="56" height="56" rx="6" fill="#907169"/><rect x="368" y="282" width="56" height="56" rx="6" fill="#8D6F68"/><rect x="368" y="344" width="56" height="56" rx="6" fill="#846B68"/><rect x="368" y="406" width="56" height="56" rx="6" fill="#796568"/><rect x="368" y="468" width="56" height="56" rx="6" fill="#A97E69"/><rect x="368" y="530" width="56" height="56" rx="6" fill="#9F7969"/><rect x="368" y="592" width="56" height="56" rx="6" fill="#9A7669"/><rect x="368" y="654" width="56" height="56" rx="6" fill="#9C7769"/><rect x="368" y="716" width="56" height="56" rx="6" fill="#665B68"/><rect x="368" y="778" width="56" height="56" rx="6" fill="#716168"/><rect x="430" y="220" width="56" height="56" rx="6" fill="#5C5667"/><rect x="430" y="282" width="56" height="56" rx="6" fill="#5F5767"/><rect x="430" y="344" width="56" height="56" rx="6" fill="#685C68"/><rect x="430" y="406" width="56" height="56" rx="6" fill="#756368"/><rect x="430" y="468" width="56" height="56" rx="6" fill="#BE896A"/><rect x="430" y="530" width="56" height="56" rx="6" fill="#C98E6A"/><rect x="430" y="592" width="56" height="56" rx="6" fill="#CE916A"/><rect x="430" y="654" width="56" height="56" rx="6" fill="#CC906A"/><rect x="430" y="716" width="56" height="56" rx="6" fill="#886D68"/><rect x="430" y="778" width="56" height="56" rx="6" fill="#7C6768"/><rect x="492" y="220" width="56" height="56" rx="6" fill="#354166"/><rect x="492" y="282" width="56" height="56" rx="6" fill="#3D4566"/><rect x="492" y="344" width="56" height="56" rx="6" fill="#535167"/><rect x="492" y="406" width="56" height="56" rx="6" fill="#726168"/><rect x="492" y="468" width="56" height="56" rx="6" fill="#CF926A"/><rect x="492" y="530" width="56" height="56" rx="6" fill="#E89F6B"/><rect x="492" y="592" width="56" height="56" rx="6" fill="#F0A36B"/><rect x="492" y="654" width="56" height="56" rx="6" fill="#F0A36B"/><rect x="492" y="716" width="56" height="56" rx="6" fill="#A27A69"/><rect x="492" y="778" width="56" height="56" rx="6" fill="#856B68"/><rect x="554" y="220" width="56" height="56" rx="6" fill="#2C3D66"/><rect x="554" y="282" width="56" height="56" rx="6" fill="#354166"/><rect x="554" y="344" width="56" height="56" rx="6" fill="#4F4F67"/><rect x="554" y="406" width="56" height="56" rx="6" fill="#726168"/><rect x="554" y="468" width="56" height="56" rx="6" fill="#967469"/><rect x="554" y="530" width="56" height="56" rx="6" fill="#B28369"/><rect x="554" y="592" width="56" height="56" rx="6" fill="#C08A6A"/><rect x="554" y="654" width="56" height="56" rx="6" fill="#BC886A"/><rect x="554" y="716" width="56" height="56" rx="6" fill="#A77D69"/><rect x="554" y="778" width="56" height="56" rx="6" fill="#866C68"/><rect x="616" y="220" width="56" height="56" rx="6" fill="#474B67"/><rect x="616" y="282" width="56" height="56" rx="6" fill="#4D4E67"/><rect x="616" y="344" width="56" height="56" rx="6" fill="#5D5667"/><rect x="616" y="406" width="56" height="56" rx="6" fill="#736268"/><rect x="616" y="468" width="56" height="56" rx="6" fill="#8B6E68"/><rect x="616" y="530" width="56" height="56" rx="6" fill="#9D7869"/><rect x="616" y="592" width="56" height="56" rx="6" fill="#A67C69"/><rect x="616" y="654" width="56" height="56" rx="6" fill="#A47B69"/><rect x="616" y="716" width="56" height="56" rx="6" fill="#967469"/><rect x="616" y="778" width="56" height="56" rx="6" fill="#816968"/><rect x="678" y="220" width="56" height="56" rx="6" fill="#786468"/><rect x="678" y="282" width="56" height="56" rx="6" fill="#786468"/><rect x="678" y="344" width="56" height="56" rx="6" fill="#776468"/><rect x="678" y="406" width="56" height="56" rx="6" fill="#776468"/><rect x="678" y="468" width="56" height="56" rx="6" fill="#766368"/><rect x="678" y="530" width="56" height="56" rx="6" fill="#766368"/><rect x="678" y="592" width="56" height="56" rx="6" fill="#766368"/><rect x="678" y="654" width="56" height="56" rx="6" fill="#766368"/><rect x="678" y="716" width="56" height="56" rx="6" fill="#766368"/><rect x="678" y="778" width="56" height="56" rx="6" fill="#776368"/><rect x="300" y="462" width="254" height="254" rx="10" fill="none" stroke="#8DB8E8" stroke-width="5" stroke-dasharray="12 8"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">Gap Lab · 갈래 ② 정합</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:96px;font-weight:700;line-height:1.2;color:#F5F3EE">공변량:<br>잔차는<br>어느 요인 탓인가</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">3 m 칸마다 붙는 “그 칸의 사정”으로<br>실측 잔차가 몰린 자리를 찾는 법</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) Gap Lab에서 실측과 시뮬의 차이가 어느 요인 탓인지 좁혀 가는 방법 중, 갈래 ② 정합의 바탕인 공변량을 설명하겠습니다. 공변량이 무엇인지, 무엇을 공변량으로 두는지, 그리고 어떻게 분석하고 판정하는지를 차례로 보겠습니다. 새로 정하는 것은 없고, 이미 정한 내용을 처음 읽는 사람의 순서로 다시 정리한 자료입니다.</aside>
+</section>
+<section id="why" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">왜 필요한가</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">잔차 하나에는 모든 요인이 섞여 있다</h2>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">한 줄</b> 공변량 = 3 m 칸마다 붙는 그 칸의 사정 — 송신기까지 몇 m · 시야가 트였나 · 나무를 몇 m 지나나 · 안테나 정면에서 몇 도 벗어났나</p>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">요인이 정말 원인이라면</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">잔차는 이런 칸에 몰린다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">시뮬이 수목 감쇠를 덜 잡는다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">나무를 오래 지나는 칸에서 실측이 더 약하다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">안테나 방위각이 장부와 다르다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">정면에서 한쪽으로 벗어난 칸에서 한 방향으로 기운다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">건물 높이가 틀렸다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">그 건물에 가려진 칸, 특히 높이가 가정인 건물 뒤</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">재질 값이 틀렸다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">반사파가 전력을 좌우하는 칸</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:560px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">씬에 건물이 빠졌다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">이웃끼리 뭉친 칸 무리</p></div>
+</div>
+<div style="width:440px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">잔차</p><p style="font-size:24px;line-height:1.4;color:#4A5262">e = 실측 − 시뮬 (dB), 같은 칸끼리<br>수목 · 건물 · 방위각 · 재질 · 위치 오차가 모두 더해져 있다 → 칸 하나로는 무엇 탓인지 모른다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">비유</p><p style="font-size:24px;line-height:1.4;color:#4A5262">열(잔차)만으로는 원인을 모르지만, 아픈 자리(공변량)와 겹쳐 보면 후보가 준다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">공변량이 없으면 오른쪽 열을 칸마다 알 수 없고, 갈래 ②(정합)는 서지 않는다 · 출처: 공변량 문서 §0 · §1</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 15</p>
+<aside>(약 50초) 실측과 시뮬을 같은 칸끼리 맞대면 칸마다 잔차 하나가 나옵니다. 실측에서 시뮬을 뺀 값이죠. 그런데 이 숫자에는 수목, 건물 높이, 안테나 방위각, 재질, 위치 오차가 모두 더해져 있어서, 칸 하나를 아무리 봐도 무엇 탓인지 모릅니다. 대신 요인마다 흔적이 남는 자리가 다릅니다. 수목 감쇠를 덜 잡으면 나무를 오래 지나는 칸에서, 방위각이 틀리면 정면에서 한쪽으로 벗어난 칸에서, 건물 높이가 틀리면 그 건물 뒤에서 잔차가 몰립니다. 그 칸을 가려 주는 값, 예를 들어 수목 통과 길이가 공변량입니다. 공변량은 3 m 칸마다 붙는 그 칸의 사정입니다. 의사가 열만 보고는 원인을 모르지만 아픈 자리와 겹쳐 보면 후보가 주는 것과 같습니다.</aside>
+</section>
+<section id="map" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">직관 · 그림 1</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">두 지도의 무늬가 겹치면 “몰려 있다”</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="position:relative;width:720px;height:600px">
+<svg aria-label="주행 경로를 따라 칸마다 잔차 색을 칠한 지도. 경로의 두 구간에 주황(실측이 약함)이 몰려 있다" style="position:absolute;left:0px;top:0px;width:720px;height:600px" width="720" height="600" viewBox="0 0 720 600"><polyline points="40,60 660,60 660,508 40,508 40,172 164,172" fill="none" stroke="#EAE7DF" stroke-width="30" stroke-linejoin="round"/><path d="M39 60L43 60M43 60L47 60M47 60L50 60M50 60L54 60M128 60L132 60M132 60L136 60M136 60L140 60M140 60L143 60M143 60L147 60M147 60L151 60M151 60L154 60M154 60L158 60M381 60L385 60M385 60L389 60M389 60L392 60M392 60L396 60M396 60L400 60M400 60L404 60M430 60L433 60M433 60L437 60M437 60L441 60M441 60L445 60M452 60L456 60M456 60L459 60M459 60L463 60M545 60L549 60M549 60L552 60M552 60L556 60M556 60L560 60M571 60L575 60M575 60L578 60M623 60L627 60M660 67L660 70M660 158L660 161M660 161L660 164M660 164L660 168M660 168L660 171M660 171L660 175M660 175L660 178M660 178L660 181M635 508L631 508M631 508L627 508M534 508L531 508M467 508L464 508M464 508L460 508M460 508L456 508M456 508L453 508M441 508L438 508M438 508L434 508M434 508L430 508M430 508L427 508M389 508L386 508M40 491L40 488M40 488L40 484M40 484L40 481M40 481L40 477M40 467L40 464M40 444L40 441M40 441L40 437M40 437L40 434M40 434L40 430M40 430L40 427M40 420L40 417M40 417L40 414M40 414L40 410M40 410L40 407M40 407L40 404M40 404L40 400M40 400L40 397M40 397L40 393M40 393L40 390M40 390L40 387M40 367L40 363M40 309L40 306M40 306L40 303M40 303L40 299M40 299L40 296M40 296L40 293M40 178L40 175M40 175L40 172M118 172L122 172M148 172L152 172M152 172L156 172M156 172L159 172M159 172L163 172" stroke="#88A2BE" stroke-width="24" fill="none"/><path d="M54 60L58 60M121 60L125 60M125 60L128 60M158 60L162 60M225 60L229 60M229 60L233 60M233 60L236 60M236 60L240 60M240 60L244 60M244 60L247 60M247 60L251 60M251 60L255 60M374 60L378 60M378 60L381 60M404 60L407 60M407 60L411 60M411 60L415 60M422 60L426 60M426 60L430 60M463 60L467 60M467 60L471 60M471 60L474 60M474 60L478 60M478 60L482 60M482 60L485 60M485 60L489 60M489 60L493 60M526 60L530 60M530 60L534 60M534 60L538 60M538 60L541 60M541 60L545 60M578 60L582 60M619 60L623 60M627 60L631 60M631 60L634 60M634 60L638 60M660 60L660 64M660 64L660 67M660 70L660 74M660 74L660 77M660 154L660 158M660 181L660 185M646 508L642 508M642 508L639 508M639 508L635 508M627 508L624 508M624 508L620 508M620 508L616 508M616 508L613 508M594 508L590 508M590 508L587 508M538 508L534 508M453 508L449 508M449 508L445 508M445 508L441 508M386 508L382 508M382 508L378 508M308 508L304 508M304 508L300 508M300 508L296 508M293 508L289 508M289 508L285 508M285 508L281 508M281 508L278 508M200 508L196 508M196 508L192 508M192 508L188 508M188 508L185 508M185 508L181 508M181 508L177 508M177 508L174 508M174 508L170 508M40 498L40 494M40 494L40 491M40 464L40 461M40 461L40 457M40 457L40 454M40 454L40 451M40 451L40 447M40 447L40 444M40 427L40 424M40 424L40 420M40 363L40 360M40 360L40 357M40 357L40 353M40 353L40 350M40 350L40 346M40 346L40 343M40 316L40 313M40 313L40 309M40 293L40 289M40 289L40 286M40 182L40 178M122 172L126 172M126 172L130 172M137 172L141 172M141 172L144 172M144 172L148 172" stroke="#B9C5CF" stroke-width="24" fill="none"/><path d="M58 60L61 60M113 60L117 60M117 60L121 60M162 60L166 60M166 60L169 60M169 60L173 60M173 60L177 60M214 60L218 60M218 60L221 60M221 60L225 60M255 60L259 60M259 60L262 60M262 60L266 60M296 60L299 60M299 60L303 60M303 60L307 60M307 60L311 60M311 60L314 60M314 60L318 60M318 60L322 60M344 60L348 60M348 60L352 60M352 60L355 60M355 60L359 60M359 60L363 60M363 60L366 60M366 60L370 60M370 60L374 60M415 60L419 60M419 60L422 60M493 60L497 60M497 60L500 60M500 60L504 60M523 60L526 60M582 60L586 60M586 60L590 60M616 60L619 60M638 60L642 60M642 60L645 60M653 60L657 60M657 60L660 60M660 77L660 80M660 80L660 84M660 97L660 101M660 101L660 104M660 104L660 107M660 111L660 114M660 114L660 117M660 117L660 121M660 148L660 151M660 151L660 154M660 185L660 188M660 269L660 272M660 363L660 366M660 366L660 369M660 369L660 373M660 373L660 376M660 376L660 379M660 447L660 450M660 450L660 453M660 453L660 457M660 457L660 460M660 494L660 497M660 497L660 500M660 500L660 504M660 504L660 507M660 507L657 508M657 508L653 508M653 508L650 508M650 508L646 508M613 508L609 508M609 508L605 508M605 508L601 508M601 508L598 508M598 508L594 508M587 508L583 508M583 508L579 508M579 508L575 508M575 508L572 508M572 508L568 508M568 508L564 508M542 508L538 508M378 508L374 508M374 508L371 508M319 508L315 508M315 508L311 508M311 508L308 508M296 508L293 508M278 508L274 508M274 508L270 508M270 508L267 508M267 508L263 508M263 508L259 508M259 508L255 508M241 508L237 508M218 508L215 508M215 508L211 508M211 508L207 508M207 508L203 508M203 508L200 508M170 508L166 508M43 508L40 508M40 508L40 504M40 504L40 501M40 501L40 498M40 343L40 340M40 340L40 336M40 336L40 333M40 333L40 330M40 330L40 326M40 326L40 323M40 323L40 320M40 320L40 316M40 286L40 283M40 283L40 279M40 199L40 195M40 195L40 192M40 192L40 189M40 189L40 185M40 185L40 182M130 172L133 172M133 172L137 172" stroke="#EAE7DF" stroke-width="24" fill="none"/><path d="M61 60L65 60M106 60L110 60M110 60L113 60M177 60L180 60M180 60L184 60M192 60L195 60M206 60L210 60M210 60L214 60M266 60L270 60M270 60L273 60M273 60L277 60M288 60L292 60M292 60L296 60M322 60L326 60M326 60L329 60M329 60L333 60M333 60L337 60M337 60L340 60M340 60L344 60M504 60L508 60M508 60L512 60M512 60L515 60M515 60L519 60M519 60L523 60M590 60L593 60M593 60L597 60M608 60L612 60M612 60L616 60M645 60L649 60M649 60L653 60M660 84L660 87M660 87L660 91M660 91L660 94M660 94L660 97M660 107L660 111M660 121L660 124M660 124L660 127M660 127L660 131M660 131L660 134M660 134L660 138M660 138L660 141M660 141L660 144M660 144L660 148M660 188L660 191M660 191L660 195M660 262L660 265M660 265L660 269M660 272L660 275M660 275L660 279M660 279L660 282M660 282L660 285M660 353L660 356M660 356L660 359M660 359L660 363M660 379L660 383M660 433L660 437M660 437L660 440M660 440L660 443M660 443L660 447M660 460L660 463M660 463L660 467M660 467L660 470M660 470L660 474M660 474L660 477M660 477L660 480M660 480L660 484M660 484L660 487M660 487L660 490M660 490L660 494M564 508L560 508M560 508L557 508M557 508L553 508M553 508L549 508M549 508L546 508M546 508L542 508M371 508L367 508M367 508L363 508M322 508L319 508M255 508L252 508M252 508L248 508M248 508L244 508M244 508L241 508M237 508L233 508M233 508L229 508M229 508L226 508M226 508L222 508M222 508L218 508M166 508L162 508M162 508L159 508M125 508L122 508M122 508L118 508M118 508L114 508M114 508L110 508M110 508L107 508M77 508L73 508M73 508L69 508M69 508L66 508M66 508L62 508M62 508L58 508M58 508L55 508M55 508L51 508M51 508L47 508M47 508L43 508M40 279L40 276M40 252L40 249M40 249L40 246M40 246L40 242M40 242L40 239M40 239L40 236M40 236L40 232M40 232L40 229M40 215L40 212M40 212L40 209M40 209L40 205M40 205L40 202M40 202L40 199" stroke="#DAC0AD" stroke-width="24" fill="none"/><path d="M65 60L69 60M69 60L73 60M99 60L102 60M102 60L106 60M184 60L188 60M188 60L192 60M195 60L199 60M199 60L203 60M203 60L206 60M277 60L281 60M281 60L285 60M285 60L288 60M597 60L601 60M601 60L605 60M605 60L608 60M660 195L660 198M660 228L660 232M660 232L660 235M660 255L660 259M660 259L660 262M660 285L660 289M660 289L660 292M660 339L660 343M660 343L660 346M660 346L660 349M660 349L660 353M660 383L660 386M660 386L660 390M660 423L660 427M660 427L660 430M660 430L660 433M363 508L360 508M360 508L356 508M326 508L322 508M159 508L155 508M155 508L151 508M136 508L133 508M133 508L129 508M129 508L125 508M107 508L103 508M103 508L99 508M99 508L95 508M95 508L92 508M92 508L88 508M88 508L84 508M84 508L81 508M81 508L77 508M40 276L40 273M40 273L40 269M40 269L40 266M40 266L40 262M40 262L40 259M40 259L40 256M40 256L40 252M40 229L40 225M40 225L40 222M40 222L40 219M40 219L40 215" stroke="#C9987A" stroke-width="24" fill="none"/><path d="M73 60L76 60M76 60L80 60M80 60L84 60M84 60L87 60M87 60L91 60M91 60L95 60M95 60L99 60M660 198L660 201M660 201L660 205M660 218L660 222M660 222L660 225M660 225L660 228M660 235L660 238M660 238L660 242M660 242L660 245M660 245L660 248M660 248L660 252M660 252L660 255M660 292L660 295M660 295L660 299M660 332L660 336M660 336L660 339M660 390L660 393M660 393L660 396M660 413L660 416M660 416L660 420M660 420L660 423M356 508L352 508M352 508L348 508M330 508L326 508M151 508L148 508M148 508L144 508M144 508L140 508M140 508L136 508" stroke="#B87148" stroke-width="24" fill="none"/><path d="M445 60L448 60M448 60L452 60M560 60L564 60M564 60L567 60M567 60L571 60M531 508L527 508M486 508L482 508M482 508L479 508M479 508L475 508M475 508L471 508M471 508L467 508M427 508L423 508M423 508L419 508M397 508L393 508M393 508L389 508M40 477L40 474M40 474L40 471M40 471L40 467M40 387L40 383M40 383L40 380M40 380L40 377M40 377L40 373M40 373L40 370M40 370L40 367M40 172L44 172M44 172L48 172M111 172L115 172M115 172L118 172" stroke="#5680AE" stroke-width="24" fill="none"/><path d="M660 205L660 208M660 208L660 211M660 211L660 215M660 215L660 218M660 299L660 302M660 302L660 306M660 306L660 309M660 309L660 312M660 312L660 316M660 316L660 319M660 319L660 322M660 322L660 326M660 326L660 329M660 329L660 332M660 396L660 400M660 400L660 403M660 403L660 406M660 406L660 410M660 410L660 413M348 508L345 508M345 508L341 508M341 508L337 508M337 508L334 508M334 508L330 508" stroke="#A84A16" stroke-width="24" fill="none"/><path d="M527 508L523 508M523 508L520 508M520 508L516 508M516 508L512 508M512 508L508 508M508 508L505 508M505 508L501 508M501 508L497 508M497 508L494 508M494 508L490 508M490 508L486 508M419 508L415 508M415 508L412 508M412 508L408 508M408 508L404 508M404 508L401 508M401 508L397 508M48 172L51 172M51 172L55 172M55 172L59 172M59 172L63 172M63 172L66 172M66 172L70 172M70 172L74 172M74 172L78 172M78 172L81 172M81 172L85 172M85 172L89 172M89 172L92 172M92 172L96 172M96 172L100 172M100 172L104 172M104 172L107 172M107 172L111 172" stroke="#255E9E" stroke-width="24" fill="none"/><line x1="686" y1="172" x2="686" y2="424" stroke="#2F7D5B" stroke-width="5" stroke-dasharray="10 6"/><line x1="350" y1="534" x2="71" y2="534" stroke="#2F7D5B" stroke-width="5" stroke-dasharray="10 6"/></svg>
+<p style="position:absolute;left:0px;top:0px;width:720px;font-size:24px;font-weight:700;color:#14213D">잔차 지도 e = 실측 − 시뮬 (편향 뺌)</p>
+<p style="position:absolute;left:0px;top:560px;width:720px;font-size:24px;color:#4A5262"><b style="color:#A84A16">■</b> 실측이 약함 (−)  <b style="color:#255E9E">■</b> 실측이 셈 (+)  <b style="color:#2F7D5B">┅</b> 수목 구간</p>
+<p style="position:absolute;left:64px;top:82px;width:160px;font-size:24px;color:#5E6675">↖ 출발</p>
+<p style="position:absolute;left:410px;top:282px;width:230px;font-size:24px;text-align:right;font-weight:700;color:#2F7D5B">수목 구간 ┆</p>
+</div>
+<div style="position:relative;width:720px;height:600px">
+<svg aria-label="같은 주행 경로에 수목 통과 길이를 칠한 지도. 같은 두 구간이 초록으로 칠해져 있다" style="position:absolute;left:0px;top:0px;width:720px;height:600px" width="720" height="600" viewBox="0 0 720 600"><polyline points="40,60 660,60 660,508 40,508 40,172 164,172" fill="none" stroke="#EAE7DF" stroke-width="30" stroke-linejoin="round"/><path d="M39 60L43 60M43 60L47 60M47 60L50 60M50 60L54 60M54 60L58 60M58 60L61 60M61 60L65 60M65 60L69 60M69 60L73 60M73 60L76 60M76 60L80 60M80 60L84 60M84 60L87 60M87 60L91 60M91 60L95 60M95 60L99 60M99 60L102 60M102 60L106 60M106 60L110 60M110 60L113 60M113 60L117 60M117 60L121 60M121 60L125 60M125 60L128 60M128 60L132 60M132 60L136 60M136 60L140 60M140 60L143 60M143 60L147 60M147 60L151 60M151 60L154 60M154 60L158 60M158 60L162 60M162 60L166 60M166 60L169 60M169 60L173 60M173 60L177 60M177 60L180 60M180 60L184 60M184 60L188 60M188 60L192 60M192 60L195 60M195 60L199 60M199 60L203 60M203 60L206 60M206 60L210 60M210 60L214 60M214 60L218 60M218 60L221 60M221 60L225 60M225 60L229 60M229 60L233 60M233 60L236 60M236 60L240 60M240 60L244 60M244 60L247 60M247 60L251 60M251 60L255 60M255 60L259 60M259 60L262 60M262 60L266 60M266 60L270 60M270 60L273 60M273 60L277 60M277 60L281 60M281 60L285 60M285 60L288 60M288 60L292 60M292 60L296 60M296 60L299 60M299 60L303 60M303 60L307 60M307 60L311 60M311 60L314 60M314 60L318 60M318 60L322 60M322 60L326 60M326 60L329 60M329 60L333 60M333 60L337 60M337 60L340 60M340 60L344 60M344 60L348 60M348 60L352 60M352 60L355 60M355 60L359 60M359 60L363 60M363 60L366 60M366 60L370 60M370 60L374 60M374 60L378 60M378 60L381 60M381 60L385 60M385 60L389 60M389 60L392 60M392 60L396 60M396 60L400 60M400 60L404 60M404 60L407 60M407 60L411 60M411 60L415 60M415 60L419 60M419 60L422 60M422 60L426 60M426 60L430 60M430 60L433 60M433 60L437 60M437 60L441 60M441 60L445 60M445 60L448 60M448 60L452 60M452 60L456 60M456 60L459 60M459 60L463 60M463 60L467 60M467 60L471 60M471 60L474 60M474 60L478 60M478 60L482 60M482 60L485 60M485 60L489 60M489 60L493 60M493 60L497 60M497 60L500 60M500 60L504 60M504 60L508 60M508 60L512 60M512 60L515 60M515 60L519 60M519 60L523 60M523 60L526 60M526 60L530 60M530 60L534 60M534 60L538 60M538 60L541 60M541 60L545 60M545 60L549 60M549 60L552 60M552 60L556 60M556 60L560 60M560 60L564 60M564 60L567 60M567 60L571 60M571 60L575 60M575 60L578 60M578 60L582 60M582 60L586 60M586 60L590 60M590 60L593 60M593 60L597 60M597 60L601 60M601 60L605 60M605 60L608 60M608 60L612 60M612 60L616 60M616 60L619 60M619 60L623 60M623 60L627 60M627 60L631 60M631 60L634 60M634 60L638 60M638 60L642 60M642 60L645 60M645 60L649 60M649 60L653 60M653 60L657 60M657 60L660 60M660 60L660 64M660 64L660 67M660 67L660 70M660 70L660 74M660 74L660 77M660 77L660 80M660 80L660 84M660 84L660 87M660 87L660 91M660 91L660 94M660 94L660 97M660 97L660 101M660 101L660 104M660 104L660 107M660 107L660 111M660 111L660 114M660 114L660 117M660 117L660 121M660 121L660 124M660 124L660 127M660 127L660 131M660 131L660 134M660 134L660 138M660 138L660 141M660 141L660 144M660 144L660 148M660 148L660 151M660 151L660 154M660 154L660 158M660 158L660 161M660 161L660 164M660 164L660 168M660 168L660 171M660 423L660 427M660 427L660 430M660 430L660 433M660 433L660 437M660 437L660 440M660 440L660 443M660 443L660 447M660 447L660 450M660 450L660 453M660 453L660 457M660 457L660 460M660 460L660 463M660 463L660 467M660 467L660 470M660 470L660 474M660 474L660 477M660 477L660 480M660 480L660 484M660 484L660 487M660 487L660 490M660 490L660 494M660 494L660 497M660 497L660 500M660 500L660 504M660 504L660 507M660 507L657 508M657 508L653 508M653 508L650 508M650 508L646 508M646 508L642 508M642 508L639 508M639 508L635 508M635 508L631 508M631 508L627 508M627 508L624 508M624 508L620 508M620 508L616 508M616 508L613 508M613 508L609 508M609 508L605 508M605 508L601 508M601 508L598 508M598 508L594 508M594 508L590 508M590 508L587 508M587 508L583 508M583 508L579 508M579 508L575 508M575 508L572 508M572 508L568 508M568 508L564 508M564 508L560 508M560 508L557 508M557 508L553 508M553 508L549 508M549 508L546 508M546 508L542 508M542 508L538 508M538 508L534 508M534 508L531 508M531 508L527 508M527 508L523 508M523 508L520 508M520 508L516 508M516 508L512 508M512 508L508 508M508 508L505 508M505 508L501 508M501 508L497 508M497 508L494 508M494 508L490 508M490 508L486 508M486 508L482 508M482 508L479 508M479 508L475 508M475 508L471 508M471 508L467 508M467 508L464 508M464 508L460 508M460 508L456 508M456 508L453 508M453 508L449 508M449 508L445 508M445 508L441 508M441 508L438 508M438 508L434 508M434 508L430 508M430 508L427 508M427 508L423 508M423 508L419 508M419 508L415 508M415 508L412 508M412 508L408 508M408 508L404 508M404 508L401 508M401 508L397 508M397 508L393 508M393 508L389 508M389 508L386 508M386 508L382 508M382 508L378 508M378 508L374 508M374 508L371 508M371 508L367 508M367 508L363 508M363 508L360 508M360 508L356 508M356 508L352 508M352 508L348 508M69 508L66 508M66 508L62 508M62 508L58 508M58 508L55 508M55 508L51 508M51 508L47 508M47 508L43 508M43 508L40 508M40 508L40 504M40 504L40 501M40 501L40 498M40 498L40 494M40 494L40 491M40 491L40 488M40 488L40 484M40 484L40 481M40 481L40 477M40 477L40 474M40 474L40 471M40 471L40 467M40 467L40 464M40 464L40 461M40 461L40 457M40 457L40 454M40 454L40 451M40 451L40 447M40 447L40 444M40 444L40 441M40 441L40 437M40 437L40 434M40 434L40 430M40 430L40 427M40 427L40 424M40 424L40 420M40 420L40 417M40 417L40 414M40 414L40 410M40 410L40 407M40 407L40 404M40 404L40 400M40 400L40 397M40 397L40 393M40 393L40 390M40 390L40 387M40 387L40 383M40 383L40 380M40 380L40 377M40 377L40 373M40 373L40 370M40 370L40 367M40 367L40 363M40 363L40 360M40 360L40 357M40 357L40 353M40 353L40 350M40 350L40 346M40 346L40 343M40 343L40 340M40 340L40 336M40 336L40 333M40 333L40 330M40 330L40 326M40 326L40 323M40 323L40 320M40 320L40 316M40 316L40 313M40 313L40 309M40 309L40 306M40 306L40 303M40 303L40 299M40 299L40 296M40 296L40 293M40 293L40 289M40 289L40 286M40 286L40 283M40 283L40 279M40 279L40 276M40 276L40 273M40 273L40 269M40 269L40 266M40 266L40 262M40 262L40 259M40 259L40 256M40 256L40 252M40 252L40 249M40 249L40 246M40 246L40 242M40 242L40 239M40 239L40 236M40 236L40 232M40 232L40 229M40 229L40 225M40 225L40 222M40 222L40 219M40 219L40 215M40 215L40 212M40 212L40 209M40 209L40 205M40 205L40 202M40 202L40 199M40 199L40 195M40 195L40 192M40 192L40 189M40 189L40 185M40 185L40 182M40 182L40 178M40 178L40 175M40 175L40 172M40 172L44 172M44 172L48 172M48 172L51 172M51 172L55 172M55 172L59 172M59 172L63 172M63 172L66 172M66 172L70 172M70 172L74 172M74 172L78 172M78 172L81 172M81 172L85 172M85 172L89 172M89 172L92 172M92 172L96 172M96 172L100 172M100 172L104 172M104 172L107 172M107 172L111 172M111 172L115 172M115 172L118 172M118 172L122 172M122 172L126 172M126 172L130 172M130 172L133 172M133 172L137 172M137 172L141 172M141 172L144 172M144 172L148 172M148 172L152 172M152 172L156 172M156 172L159 172M159 172L163 172" stroke="#E3DED3" stroke-width="24" fill="none"/><path d="M660 171L660 175M660 175L660 178M660 178L660 181M660 181L660 185M660 185L660 188M660 188L660 191M660 191L660 195M660 195L660 198M660 400L660 403M660 403L660 406M660 406L660 410M660 410L660 413M660 413L660 416M660 416L660 420M660 420L660 423M348 508L345 508M345 508L341 508M341 508L337 508M337 508L334 508M334 508L330 508M330 508L326 508M326 508L322 508M99 508L95 508M95 508L92 508M92 508L88 508M88 508L84 508M84 508L81 508M81 508L77 508M77 508L73 508M73 508L69 508" stroke="#9FCBB0" stroke-width="24" fill="none"/><path d="M660 198L660 201M660 201L660 205M660 205L660 208M660 208L660 211M660 211L660 215M660 215L660 218M660 218L660 222M660 222L660 225M660 225L660 228M660 369L660 373M660 373L660 376M660 376L660 379M660 379L660 383M660 383L660 386M660 386L660 390M660 390L660 393M660 393L660 396M660 396L660 400M322 508L319 508M319 508L315 508M315 508L311 508M311 508L308 508M308 508L304 508M304 508L300 508M300 508L296 508M296 508L293 508M293 508L289 508M133 508L129 508M129 508L125 508M125 508L122 508M122 508L118 508M118 508L114 508M114 508L110 508M110 508L107 508M107 508L103 508M103 508L99 508" stroke="#7AB194" stroke-width="24" fill="none"/><path d="M660 228L660 232M660 232L660 235M660 235L660 238M660 238L660 242M660 242L660 245M660 245L660 248M660 248L660 252M660 252L660 255M660 255L660 259M660 336L660 339M660 339L660 343M660 343L660 346M660 346L660 349M660 349L660 353M660 353L660 356M660 356L660 359M660 359L660 363M660 363L660 366M660 366L660 369M289 508L285 508M285 508L281 508M281 508L278 508M278 508L274 508M274 508L270 508M270 508L267 508M267 508L263 508M263 508L259 508M259 508L255 508M255 508L252 508M166 508L162 508M162 508L159 508M159 508L155 508M155 508L151 508M151 508L148 508M148 508L144 508M144 508L140 508M140 508L136 508M136 508L133 508" stroke="#549777" stroke-width="24" fill="none"/><path d="M660 259L660 262M660 262L660 265M660 265L660 269M660 269L660 272M660 272L660 275M660 275L660 279M660 279L660 282M660 282L660 285M660 285L660 289M660 289L660 292M660 292L660 295M660 295L660 299M660 299L660 302M660 302L660 306M660 306L660 309M660 309L660 312M660 312L660 316M660 316L660 319M660 319L660 322M660 322L660 326M660 326L660 329M660 329L660 332M660 332L660 336M252 508L248 508M248 508L244 508M244 508L241 508M241 508L237 508M237 508L233 508M233 508L229 508M229 508L226 508M226 508L222 508M222 508L218 508M218 508L215 508M215 508L211 508M211 508L207 508M207 508L203 508M203 508L200 508M200 508L196 508M196 508L192 508M192 508L188 508M188 508L185 508M185 508L181 508M181 508L177 508M177 508L174 508M174 508L170 508M170 508L166 508" stroke="#2F7D5B" stroke-width="24" fill="none"/></svg>
+<p style="position:absolute;left:0px;top:0px;width:720px;font-size:24px;font-weight:700;color:#14213D">공변량 지도 foliage_m (수목 통과 길이)</p>
+<p style="position:absolute;left:0px;top:560px;width:720px;font-size:24px;color:#4A5262"><b style="color:#2F7D5B">■</b> 5 ~ 20 m (진할수록 길다)  <b style="color:#B9B2A3">■</b> 0 m</p>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 나무를 지나는 칸(오른쪽 초록)과 잔차가 음수인 칸(왼쪽 주황)이 겹친다 — 예시에서 두 층의 잔차 중앙값 -2.8 dB 대 +1.1 dB</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시 시뮬레이션 — 3 m 칸 1,200개(3.6 km), 상관거리 30 m · σ 5 dB + 수목 칸 −3.8 dB를 심음 · 색은 15칸 이동 평균 · 초록 점선 = 수목 구간</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 15</p>
+<aside>(약 45초) 몰려 있다는 것이 무엇인지 그림으로 보겠습니다. 예시 시뮬레이션입니다. 왼쪽은 주행 경로를 따라 칸마다 잔차를 칠한 지도이고, 주황이 실측이 시뮬보다 약한 칸입니다. 오른쪽은 같은 경로에 공변량인 수목 통과 길이를 칠한 것입니다. 두 지도의 무늬가 겹칩니다. 나무를 지나는 두 구간에 음수 잔차가 몰려 있습니다. 이 예시에서는 수목 칸의 잔차 중앙값이 -2.8 dB, 수목이 없는 칸은 +1.1 dB입니다. 이렇게 잔차가 그 요인이 작용하는 칸에 몰려 있으면 그 요인이 차이를 만든다는 정황이 됩니다. 이것이 갈래 ② 정합입니다. 물론 눈으로 본 겹침은 시작일 뿐이고, 숫자와 구간으로 판정해야 합니다.</aside>
+</section>
+<section id="list1" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">무엇을 공변량으로 두나 ①</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">조건 셋, 그리고 시뮬 · 씬에서 계산하는 값</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">조건 1</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">칸마다 값이 있다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">3 m 칸마다 — 시뮬이 실측 주행 좌표에서 계산되니 그 지점 값을 그대로 (Q-AM-88)</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">조건 2</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">요인의 작용 정도를 나타낸다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">값이 크면 요인의 효과도 커야 한다</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">조건 3</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">실측을 보기 전에 정해진다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">시뮬 · 씬에서 계산 — 잔차를 보고 만든 값은 공변량이 아니다</p></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">공변량</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">뜻</p><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">가리키는 요인</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">기대하는 모양</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">los</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">송신기까지 시야 (수목 · 지형도 가림으로 셈)</p><p style="width:380px;font-size:24px;line-height:1.35;color:#4A5262">F-RU-XY · F-RU-H · F-RT-VER</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">NLOS 칸에서 잔차가 크고 흩어진다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">path_kind</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">전력을 좌우하는 경로: 직접 · 반사 · 회절 · 투과 · 확산</p><p style="width:380px;font-size:24px;line-height:1.35;color:#4A5262">F-MAT-EPS · F-MAT-GLASS · F-RU-H</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">그 종류의 칸에서만 기운다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">foliage_m</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">지배 경로가 나무를 지나는 길이 (m)</p><p style="width:380px;font-size:24px;line-height:1.35;color:#4A5262">F-VEG-DENS</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">길수록 실측이 더 약하다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">off_az · off_el</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">안테나 정면에서 벗어난 각 (°, 부호)</p><p style="width:380px;font-size:24px;line-height:1.35;color:#4A5262">F-ANT-AZ · TILT · PAT · ARRAY</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">한쪽 부호 +, 반대쪽 −</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">거리</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">송신기까지 수평 거리 (m)</p><p style="width:380px;font-size:24px;line-height:1.35;color:#4A5262">F-ANT-TILT · F-RU-H</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">가까운 칸 대 먼 칸이 다르다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF(채널 팩토리) — 지금은 서빙 셀 los · n_paths, 1 단계에서 모든 셀 los · path_kind · foliage_m · off_az · off_el</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 15</p>
+<aside>(약 55초) 무엇을 공변량으로 두는지입니다. 조건은 셋입니다. 첫째, 3 m 칸마다 값이 있어야 합니다. 시뮬이 실측 주행 좌표에서 계산되므로 그 지점의 값을 그대로 칸에 붙입니다. 둘째, 요인이 작용하는 정도를 나타내야 합니다. 값이 크면 효과도 커야 합니다. 셋째, 실측을 보기 전에 정해져야 합니다. 시뮬과 씬에서 계산하고, 잔차를 보고 만든 값은 공변량이 아닙니다. 표는 시뮬과 씬에서 계산하는 다섯 가지입니다. 시야 여부 los는 RU 위치와 높이, 엔진 판을, 지배 경로 종류 path_kind는 재질과 유리, RU 높이를, 수목 통과 길이는 수목 밀도를, 안테나 정면에서 벗어난 각은 방위각과 틸트, 패턴을, 거리는 틸트와 RU 높이를 가리킵니다. 오른쪽 열의 기대하는 모양이 판정의 방향이 됩니다.</aside>
+</section>
+<section id="list2" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">무엇을 공변량으로 두나 ②</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">건물 · 경로 수 · 이웃 · 위치 — 그리고 예외 하나</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">공변량</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">뜻 · 출처</p><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">가리키는 요인</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">기대하는 모양</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">blocker_id + 높이 출처</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">처음 가로막은 건물과 높이 출처: observed(OSM) · assumed(층수 환산 · 기본값) · 사용자 입력 — CF 3 단계</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">F-SCN-BLDH</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">가정 높이 건물 뒤에서만 기운다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">n_paths</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">그 지점에 닿은 경로 수 — CF에 지금 있다</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">F-SOLV-DIFF · DEPTH · DIFFUSE</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">0인데 실측이 잡히면 회절 · 확산 누락</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">이웃 칸 잔차 <b style="color:#A84A16">(예외)</b></p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">주변 칸 잔차의 평균 — 잔차에서 계산하므로 조건 3을 어긴다</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">F-SCN-MISS</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">뭉친 덩어리</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">σ_pos</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">그 칸의 위치 불확실 (m) — 실측 기록</p><p style="width:330px;font-size:24px;line-height:1.35;color:#4A5262">F-POS-UE</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">음영 경계에서 흩어짐이 커진다</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">예외의 쓰임</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이웃 칸 잔차는 정황이 아니라 후보 찾기에만 — 빠진 건물은 씬이 모르니 다른 공변량으로는 안 보인다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">요인 사전과 연결</p><p style="font-size:24px;line-height:1.4;color:#4A5262">요인마다 covariates 칸에 “어느 공변량으로 볼지”가 적혀 있다 (experiment-ledger §2)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: 공변량 문서 §2-1 · blocker_id · 건물 표는 CF 3 단계 (건물 윤곽 직선 검사) — CF 요청서 V3</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 15</p>
+<aside>(약 50초) 나머지 넷입니다. blocker_id는 처음 가로막은 건물과 그 높이가 어디서 왔는지입니다. OSM에 높이가 있는 건물인지, 층수로 환산했거나 기본값을 쓴 가정 높이인지를 구분합니다. 건물 높이가 원인이라면 가정 높이 건물 뒤에서만 잔차가 기울 것입니다. n_paths는 그 지점에 닿은 경로 수로, 0인데 실측이 잡히면 회절이나 확산을 놓친 것입니다. σ_pos는 칸의 위치 불확실성입니다. 하나 예외가 있습니다. 이웃 칸 잔차는 잔차에서 계산하므로 실측 전에 정해진다는 조건 3을 어깁니다. 그래서 정황이 아니라 빠진 건물 같은 후보를 찾는 데만 씁니다. 요인 사전에는 요인마다 어느 공변량으로 볼지가 적혀 있습니다.</aside>
+</section>
+<section id="distance" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">비교를 공정하게</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">거리는 따로 쓴다 — 같은 거리 띠 안에서 맞댄다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:900px;height:540px">
+<svg aria-label="거리에 따른 잔차 산점도. 수목 칸(초록)은 먼 곳에 많고, 잔차는 거리가 멀수록 내려간다. 배경에 거리 띠 네 개" style="position:absolute;left:0px;top:0px;width:900px;height:540px" width="900" height="540" viewBox="0 0 900 540"><rect x="80" y="30" width="224" height="440" fill="#EAE7DF" opacity="0.6"/><rect x="527" y="30" width="224" height="440" fill="#EAE7DF" opacity="0.6"/><line x1="80" y1="250" x2="900" y2="250" stroke="#5E6675" stroke-width="2"/><line x1="80" y1="470" x2="900" y2="470" stroke="#14213D" stroke-width="3"/><line x1="80" y1="30" x2="80" y2="470" stroke="#14213D" stroke-width="3"/><circle cx="348" cy="267" r="5" fill="#2F7D5B"/><circle cx="890" cy="341" r="5" fill="#2F7D5B"/><circle cx="341" cy="167" r="5" fill="#8DB8E8"/><circle cx="727" cy="258" r="5" fill="#8DB8E8"/><circle cx="793" cy="284" r="5" fill="#8DB8E8"/><circle cx="401" cy="235" r="5" fill="#8DB8E8"/><circle cx="439" cy="308" r="5" fill="#8DB8E8"/><circle cx="386" cy="254" r="5" fill="#8DB8E8"/><circle cx="168" cy="359" r="5" fill="#2F7D5B"/><circle cx="473" cy="406" r="5" fill="#8DB8E8"/><circle cx="278" cy="254" r="5" fill="#8DB8E8"/><circle cx="291" cy="184" r="5" fill="#8DB8E8"/><circle cx="231" cy="291" r="5" fill="#8DB8E8"/><circle cx="239" cy="237" r="5" fill="#2F7D5B"/><circle cx="747" cy="405" r="5" fill="#2F7D5B"/><circle cx="427" cy="278" r="5" fill="#2F7D5B"/><circle cx="290" cy="235" r="5" fill="#8DB8E8"/><circle cx="565" cy="263" r="5" fill="#8DB8E8"/><circle cx="576" cy="344" r="5" fill="#8DB8E8"/><circle cx="610" cy="237" r="5" fill="#8DB8E8"/><circle cx="827" cy="277" r="5" fill="#2F7D5B"/><circle cx="203" cy="224" r="5" fill="#2F7D5B"/><circle cx="385" cy="119" r="5" fill="#8DB8E8"/><circle cx="313" cy="257" r="5" fill="#8DB8E8"/><circle cx="94" cy="205" r="5" fill="#8DB8E8"/><circle cx="229" cy="189" r="5" fill="#2F7D5B"/><circle cx="404" cy="320" r="5" fill="#8DB8E8"/><circle cx="403" cy="296" r="5" fill="#8DB8E8"/><circle cx="586" cy="203" r="5" fill="#8DB8E8"/><circle cx="451" cy="270" r="5" fill="#8DB8E8"/><circle cx="578" cy="307" r="5" fill="#8DB8E8"/><circle cx="263" cy="205" r="5" fill="#8DB8E8"/><circle cx="190" cy="300" r="5" fill="#8DB8E8"/><circle cx="350" cy="232" r="5" fill="#8DB8E8"/><circle cx="159" cy="279" r="5" fill="#8DB8E8"/><circle cx="380" cy="279" r="5" fill="#8DB8E8"/><circle cx="457" cy="398" r="5" fill="#8DB8E8"/><circle cx="670" cy="287" r="5" fill="#2F7D5B"/><circle cx="791" cy="297" r="5" fill="#2F7D5B"/><circle cx="123" cy="255" r="5" fill="#2F7D5B"/><circle cx="864" cy="355" r="5" fill="#2F7D5B"/><circle cx="670" cy="286" r="5" fill="#2F7D5B"/><circle cx="891" cy="212" r="5" fill="#8DB8E8"/><circle cx="177" cy="202" r="5" fill="#2F7D5B"/><circle cx="388" cy="310" r="5" fill="#2F7D5B"/><circle cx="492" cy="240" r="5" fill="#8DB8E8"/><circle cx="693" cy="315" r="5" fill="#2F7D5B"/><circle cx="335" cy="208" r="5" fill="#8DB8E8"/><circle cx="449" cy="294" r="5" fill="#8DB8E8"/><circle cx="306" cy="153" r="5" fill="#8DB8E8"/><circle cx="448" cy="292" r="5" fill="#8DB8E8"/><circle cx="498" cy="309" r="5" fill="#8DB8E8"/><circle cx="543" cy="267" r="5" fill="#2F7D5B"/><circle cx="657" cy="179" r="5" fill="#8DB8E8"/><circle cx="278" cy="325" r="5" fill="#8DB8E8"/><circle cx="597" cy="288" r="5" fill="#2F7D5B"/><circle cx="154" cy="213" r="5" fill="#2F7D5B"/><circle cx="581" cy="140" r="5" fill="#2F7D5B"/><circle cx="456" cy="333" r="5" fill="#8DB8E8"/><circle cx="191" cy="161" r="5" fill="#8DB8E8"/><circle cx="290" cy="274" r="5" fill="#8DB8E8"/><circle cx="133" cy="236" r="5" fill="#8DB8E8"/><circle cx="385" cy="217" r="5" fill="#2F7D5B"/><circle cx="411" cy="269" r="5" fill="#2F7D5B"/><circle cx="481" cy="355" r="5" fill="#2F7D5B"/><circle cx="137" cy="230" r="5" fill="#8DB8E8"/><circle cx="667" cy="292" r="5" fill="#8DB8E8"/><circle cx="342" cy="228" r="5" fill="#8DB8E8"/><circle cx="311" cy="287" r="5" fill="#8DB8E8"/><circle cx="811" cy="323" r="5" fill="#8DB8E8"/><circle cx="573" cy="308" r="5" fill="#2F7D5B"/><circle cx="620" cy="265" r="5" fill="#8DB8E8"/><circle cx="516" cy="265" r="5" fill="#8DB8E8"/><circle cx="257" cy="207" r="5" fill="#8DB8E8"/><circle cx="204" cy="190" r="5" fill="#8DB8E8"/><circle cx="231" cy="210" r="5" fill="#8DB8E8"/><circle cx="359" cy="277" r="5" fill="#8DB8E8"/><circle cx="219" cy="313" r="5" fill="#8DB8E8"/><circle cx="472" cy="301" r="5" fill="#8DB8E8"/><circle cx="873" cy="357" r="5" fill="#2F7D5B"/><circle cx="686" cy="288" r="5" fill="#8DB8E8"/><circle cx="335" cy="189" r="5" fill="#8DB8E8"/><circle cx="331" cy="244" r="5" fill="#8DB8E8"/><circle cx="721" cy="359" r="5" fill="#2F7D5B"/><circle cx="879" cy="395" r="5" fill="#2F7D5B"/><circle cx="584" cy="300" r="5" fill="#2F7D5B"/><circle cx="290" cy="251" r="5" fill="#8DB8E8"/><circle cx="449" cy="312" r="5" fill="#8DB8E8"/><circle cx="209" cy="320" r="5" fill="#8DB8E8"/><circle cx="436" cy="299" r="5" fill="#2F7D5B"/><circle cx="810" cy="268" r="5" fill="#8DB8E8"/><circle cx="246" cy="222" r="5" fill="#8DB8E8"/><circle cx="442" cy="333" r="5" fill="#8DB8E8"/><circle cx="598" cy="292" r="5" fill="#8DB8E8"/><circle cx="858" cy="332" r="5" fill="#2F7D5B"/><circle cx="596" cy="349" r="5" fill="#2F7D5B"/><circle cx="443" cy="286" r="5" fill="#2F7D5B"/><circle cx="616" cy="306" r="5" fill="#8DB8E8"/><circle cx="322" cy="190" r="5" fill="#8DB8E8"/><circle cx="161" cy="262" r="5" fill="#8DB8E8"/><circle cx="763" cy="195" r="5" fill="#8DB8E8"/><circle cx="463" cy="199" r="5" fill="#8DB8E8"/><circle cx="840" cy="298" r="5" fill="#2F7D5B"/><circle cx="234" cy="217" r="5" fill="#8DB8E8"/><circle cx="91" cy="139" r="5" fill="#8DB8E8"/><circle cx="502" cy="304" r="5" fill="#2F7D5B"/><circle cx="665" cy="277" r="5" fill="#2F7D5B"/><circle cx="892" cy="308" r="5" fill="#8DB8E8"/><circle cx="603" cy="181" r="5" fill="#8DB8E8"/><circle cx="155" cy="238" r="5" fill="#8DB8E8"/><circle cx="538" cy="273" r="5" fill="#8DB8E8"/><circle cx="397" cy="390" r="5" fill="#8DB8E8"/><circle cx="232" cy="215" r="5" fill="#8DB8E8"/><circle cx="752" cy="300" r="5" fill="#8DB8E8"/><circle cx="666" cy="268" r="5" fill="#2F7D5B"/><circle cx="743" cy="388" r="5" fill="#2F7D5B"/><circle cx="580" cy="311" r="5" fill="#8DB8E8"/><circle cx="652" cy="199" r="5" fill="#8DB8E8"/><circle cx="643" cy="339" r="5" fill="#2F7D5B"/><circle cx="288" cy="251" r="5" fill="#2F7D5B"/><circle cx="539" cy="237" r="5" fill="#2F7D5B"/><circle cx="795" cy="308" r="5" fill="#2F7D5B"/><circle cx="383" cy="241" r="5" fill="#8DB8E8"/><circle cx="217" cy="161" r="5" fill="#8DB8E8"/><circle cx="98" cy="245" r="5" fill="#8DB8E8"/><circle cx="145" cy="189" r="5" fill="#8DB8E8"/><circle cx="437" cy="264" r="5" fill="#8DB8E8"/><circle cx="96" cy="278" r="5" fill="#8DB8E8"/><circle cx="636" cy="294" r="5" fill="#2F7D5B"/><circle cx="674" cy="199" r="5" fill="#8DB8E8"/><circle cx="847" cy="326" r="5" fill="#2F7D5B"/><circle cx="689" cy="339" r="5" fill="#2F7D5B"/><circle cx="430" cy="259" r="5" fill="#8DB8E8"/><circle cx="717" cy="303" r="5" fill="#8DB8E8"/><circle cx="702" cy="247" r="5" fill="#8DB8E8"/><circle cx="134" cy="302" r="5" fill="#2F7D5B"/><circle cx="102" cy="194" r="5" fill="#2F7D5B"/><circle cx="239" cy="234" r="5" fill="#2F7D5B"/><circle cx="858" cy="250" r="5" fill="#2F7D5B"/><circle cx="392" cy="269" r="5" fill="#8DB8E8"/><circle cx="751" cy="255" r="5" fill="#2F7D5B"/><circle cx="379" cy="298" r="5" fill="#8DB8E8"/><circle cx="613" cy="260" r="5" fill="#2F7D5B"/><circle cx="386" cy="256" r="5" fill="#8DB8E8"/><circle cx="753" cy="369" r="5" fill="#2F7D5B"/><circle cx="503" cy="211" r="5" fill="#8DB8E8"/><circle cx="855" cy="237" r="5" fill="#2F7D5B"/><circle cx="746" cy="180" r="5" fill="#8DB8E8"/><circle cx="884" cy="295" r="5" fill="#2F7D5B"/><circle cx="352" cy="253" r="5" fill="#8DB8E8"/><circle cx="307" cy="154" r="5" fill="#8DB8E8"/><circle cx="610" cy="345" r="5" fill="#2F7D5B"/><circle cx="658" cy="262" r="5" fill="#8DB8E8"/><circle cx="429" cy="329" r="5" fill="#8DB8E8"/><circle cx="204" cy="218" r="5" fill="#8DB8E8"/><circle cx="284" cy="219" r="5" fill="#8DB8E8"/><circle cx="899" cy="344" r="5" fill="#2F7D5B"/><circle cx="331" cy="180" r="5" fill="#8DB8E8"/><circle cx="352" cy="247" r="5" fill="#8DB8E8"/><circle cx="502" cy="229" r="5" fill="#8DB8E8"/><circle cx="175" cy="193" r="5" fill="#8DB8E8"/><circle cx="204" cy="232" r="5" fill="#8DB8E8"/><circle cx="730" cy="446" r="5" fill="#2F7D5B"/><circle cx="483" cy="276" r="5" fill="#8DB8E8"/><circle cx="259" cy="222" r="5" fill="#8DB8E8"/><circle cx="823" cy="343" r="5" fill="#8DB8E8"/><circle cx="299" cy="232" r="5" fill="#8DB8E8"/><circle cx="642" cy="351" r="5" fill="#8DB8E8"/><circle cx="650" cy="263" r="5" fill="#2F7D5B"/><circle cx="158" cy="187" r="5" fill="#8DB8E8"/><circle cx="143" cy="198" r="5" fill="#8DB8E8"/><circle cx="714" cy="330" r="5" fill="#2F7D5B"/><circle cx="191" cy="209" r="5" fill="#8DB8E8"/><circle cx="240" cy="299" r="5" fill="#8DB8E8"/><circle cx="795" cy="328" r="5" fill="#8DB8E8"/><circle cx="532" cy="235" r="5" fill="#8DB8E8"/><circle cx="813" cy="351" r="5" fill="#2F7D5B"/><circle cx="807" cy="300" r="5" fill="#8DB8E8"/><circle cx="679" cy="302" r="5" fill="#2F7D5B"/><circle cx="151" cy="163" r="5" fill="#8DB8E8"/><circle cx="506" cy="294" r="5" fill="#8DB8E8"/><circle cx="290" cy="294" r="5" fill="#2F7D5B"/><circle cx="219" cy="294" r="5" fill="#2F7D5B"/><circle cx="435" cy="341" r="5" fill="#8DB8E8"/><circle cx="739" cy="269" r="5" fill="#8DB8E8"/><circle cx="855" cy="433" r="5" fill="#2F7D5B"/><circle cx="498" cy="301" r="5" fill="#8DB8E8"/><circle cx="497" cy="185" r="5" fill="#8DB8E8"/><circle cx="801" cy="313" r="5" fill="#2F7D5B"/><circle cx="557" cy="415" r="5" fill="#2F7D5B"/><circle cx="762" cy="365" r="5" fill="#2F7D5B"/><circle cx="488" cy="191" r="5" fill="#2F7D5B"/><circle cx="876" cy="337" r="5" fill="#2F7D5B"/><circle cx="659" cy="198" r="5" fill="#2F7D5B"/><circle cx="453" cy="311" r="5" fill="#2F7D5B"/><circle cx="213" cy="363" r="5" fill="#8DB8E8"/><circle cx="830" cy="275" r="5" fill="#8DB8E8"/><circle cx="129" cy="234" r="5" fill="#8DB8E8"/><circle cx="127" cy="205" r="5" fill="#8DB8E8"/><circle cx="94" cy="275" r="5" fill="#8DB8E8"/><circle cx="768" cy="343" r="5" fill="#8DB8E8"/><circle cx="670" cy="307" r="5" fill="#8DB8E8"/><circle cx="128" cy="280" r="5" fill="#8DB8E8"/><circle cx="128" cy="174" r="5" fill="#8DB8E8"/><circle cx="217" cy="168" r="5" fill="#8DB8E8"/><circle cx="648" cy="312" r="5" fill="#2F7D5B"/><circle cx="370" cy="193" r="5" fill="#8DB8E8"/><circle cx="745" cy="347" r="5" fill="#2F7D5B"/><circle cx="868" cy="338" r="5" fill="#2F7D5B"/><circle cx="614" cy="388" r="5" fill="#2F7D5B"/><circle cx="468" cy="185" r="5" fill="#8DB8E8"/><circle cx="794" cy="343" r="5" fill="#2F7D5B"/><circle cx="304" cy="169" r="5" fill="#8DB8E8"/><circle cx="671" cy="205" r="5" fill="#8DB8E8"/><circle cx="112" cy="190" r="5" fill="#8DB8E8"/><circle cx="296" cy="224" r="5" fill="#8DB8E8"/><circle cx="608" cy="324" r="5" fill="#8DB8E8"/><circle cx="693" cy="255" r="5" fill="#2F7D5B"/><circle cx="439" cy="243" r="5" fill="#2F7D5B"/><circle cx="463" cy="191" r="5" fill="#8DB8E8"/><circle cx="693" cy="255" r="5" fill="#8DB8E8"/><circle cx="683" cy="341" r="5" fill="#8DB8E8"/><circle cx="684" cy="363" r="5" fill="#2F7D5B"/><circle cx="820" cy="262" r="5" fill="#2F7D5B"/><circle cx="146" cy="129" r="5" fill="#8DB8E8"/><circle cx="320" cy="251" r="5" fill="#8DB8E8"/><circle cx="688" cy="305" r="5" fill="#2F7D5B"/><circle cx="813" cy="268" r="5" fill="#8DB8E8"/><circle cx="775" cy="270" r="5" fill="#8DB8E8"/><circle cx="448" cy="261" r="5" fill="#2F7D5B"/><circle cx="735" cy="320" r="5" fill="#2F7D5B"/><circle cx="562" cy="278" r="5" fill="#2F7D5B"/><circle cx="167" cy="254" r="5" fill="#8DB8E8"/><circle cx="772" cy="288" r="5" fill="#8DB8E8"/><circle cx="417" cy="210" r="5" fill="#8DB8E8"/><circle cx="91" cy="212" r="5" fill="#8DB8E8"/><circle cx="250" cy="293" r="5" fill="#2F7D5B"/><circle cx="264" cy="216" r="5" fill="#8DB8E8"/><circle cx="130" cy="308" r="5" fill="#2F7D5B"/><circle cx="868" cy="328" r="5" fill="#8DB8E8"/><circle cx="431" cy="307" r="5" fill="#8DB8E8"/><circle cx="538" cy="244" r="5" fill="#8DB8E8"/><circle cx="568" cy="227" r="5" fill="#8DB8E8"/><circle cx="854" cy="339" r="5" fill="#2F7D5B"/><circle cx="528" cy="308" r="5" fill="#8DB8E8"/><circle cx="360" cy="217" r="5" fill="#8DB8E8"/><circle cx="438" cy="236" r="5" fill="#8DB8E8"/><circle cx="333" cy="326" r="5" fill="#8DB8E8"/><circle cx="700" cy="223" r="5" fill="#8DB8E8"/><circle cx="794" cy="235" r="5" fill="#8DB8E8"/><circle cx="227" cy="244" r="5" fill="#8DB8E8"/><circle cx="104" cy="222" r="5" fill="#8DB8E8"/><circle cx="791" cy="319" r="5" fill="#2F7D5B"/><circle cx="611" cy="294" r="5" fill="#8DB8E8"/><circle cx="845" cy="295" r="5" fill="#2F7D5B"/><circle cx="355" cy="283" r="5" fill="#8DB8E8"/><circle cx="243" cy="249" r="5" fill="#8DB8E8"/><circle cx="817" cy="281" r="5" fill="#8DB8E8"/><circle cx="131" cy="315" r="5" fill="#8DB8E8"/><circle cx="722" cy="308" r="5" fill="#8DB8E8"/><circle cx="732" cy="378" r="5" fill="#2F7D5B"/><circle cx="770" cy="338" r="5" fill="#2F7D5B"/><circle cx="458" cy="311" r="5" fill="#2F7D5B"/><circle cx="265" cy="247" r="5" fill="#8DB8E8"/><circle cx="105" cy="214" r="5" fill="#8DB8E8"/><circle cx="465" cy="341" r="5" fill="#2F7D5B"/><circle cx="898" cy="312" r="5" fill="#2F7D5B"/><circle cx="362" cy="342" r="5" fill="#8DB8E8"/><circle cx="518" cy="240" r="5" fill="#2F7D5B"/><circle cx="199" cy="237" r="5" fill="#8DB8E8"/><circle cx="644" cy="233" r="5" fill="#8DB8E8"/><circle cx="766" cy="421" r="5" fill="#2F7D5B"/><circle cx="331" cy="198" r="5" fill="#2F7D5B"/><circle cx="518" cy="280" r="5" fill="#8DB8E8"/><circle cx="305" cy="225" r="5" fill="#8DB8E8"/><circle cx="317" cy="239" r="5" fill="#8DB8E8"/><circle cx="121" cy="229" r="5" fill="#8DB8E8"/><circle cx="417" cy="280" r="5" fill="#8DB8E8"/><circle cx="770" cy="427" r="5" fill="#2F7D5B"/><circle cx="703" cy="214" r="5" fill="#8DB8E8"/><circle cx="655" cy="175" r="5" fill="#8DB8E8"/><circle cx="399" cy="285" r="5" fill="#8DB8E8"/><circle cx="505" cy="216" r="5" fill="#2F7D5B"/><circle cx="581" cy="245" r="5" fill="#2F7D5B"/><circle cx="172" cy="209" r="5" fill="#8DB8E8"/><circle cx="752" cy="320" r="5" fill="#2F7D5B"/><circle cx="307" cy="208" r="5" fill="#8DB8E8"/><circle cx="377" cy="283" r="5" fill="#8DB8E8"/><circle cx="136" cy="242" r="5" fill="#8DB8E8"/><circle cx="453" cy="284" r="5" fill="#8DB8E8"/><circle cx="692" cy="319" r="5" fill="#8DB8E8"/><circle cx="412" cy="308" r="5" fill="#2F7D5B"/><circle cx="515" cy="228" r="5" fill="#8DB8E8"/><circle cx="583" cy="258" r="5" fill="#2F7D5B"/><circle cx="840" cy="364" r="5" fill="#2F7D5B"/><circle cx="775" cy="290" r="5" fill="#8DB8E8"/><circle cx="478" cy="267" r="5" fill="#8DB8E8"/><circle cx="351" cy="340" r="5" fill="#8DB8E8"/><circle cx="760" cy="250" r="5" fill="#2F7D5B"/><circle cx="516" cy="321" r="5" fill="#8DB8E8"/><circle cx="755" cy="249" r="5" fill="#2F7D5B"/><circle cx="213" cy="358" r="5" fill="#8DB8E8"/><circle cx="292" cy="280" r="5" fill="#8DB8E8"/><circle cx="636" cy="229" r="5" fill="#8DB8E8"/><circle cx="569" cy="240" r="5" fill="#8DB8E8"/><circle cx="352" cy="215" r="5" fill="#8DB8E8"/><circle cx="381" cy="276" r="5" fill="#2F7D5B"/><circle cx="369" cy="131" r="5" fill="#8DB8E8"/><circle cx="721" cy="303" r="5" fill="#2F7D5B"/><circle cx="136" cy="203" r="5" fill="#8DB8E8"/><circle cx="250" cy="272" r="5" fill="#8DB8E8"/><circle cx="627" cy="341" r="5" fill="#2F7D5B"/><circle cx="230" cy="182" r="5" fill="#2F7D5B"/><circle cx="573" cy="215" r="5" fill="#2F7D5B"/><circle cx="428" cy="349" r="5" fill="#8DB8E8"/><circle cx="744" cy="311" r="5" fill="#8DB8E8"/><circle cx="722" cy="236" r="5" fill="#2F7D5B"/><circle cx="319" cy="233" r="5" fill="#8DB8E8"/><circle cx="245" cy="177" r="5" fill="#8DB8E8"/><circle cx="130" cy="319" r="5" fill="#8DB8E8"/><circle cx="438" cy="266" r="5" fill="#2F7D5B"/><circle cx="441" cy="248" r="5" fill="#8DB8E8"/><circle cx="680" cy="269" r="5" fill="#8DB8E8"/><circle cx="686" cy="309" r="5" fill="#8DB8E8"/><circle cx="702" cy="277" r="5" fill="#8DB8E8"/><circle cx="653" cy="172" r="5" fill="#8DB8E8"/><circle cx="586" cy="350" r="5" fill="#2F7D5B"/><circle cx="429" cy="279" r="5" fill="#2F7D5B"/><circle cx="258" cy="248" r="5" fill="#8DB8E8"/><circle cx="688" cy="315" r="5" fill="#2F7D5B"/><circle cx="726" cy="204" r="5" fill="#2F7D5B"/><circle cx="214" cy="166" r="5" fill="#2F7D5B"/><circle cx="291" cy="282" r="5" fill="#2F7D5B"/><circle cx="526" cy="228" r="5" fill="#8DB8E8"/><circle cx="297" cy="280" r="5" fill="#8DB8E8"/><circle cx="481" cy="235" r="5" fill="#8DB8E8"/><circle cx="820" cy="307" r="5" fill="#8DB8E8"/><circle cx="345" cy="157" r="5" fill="#8DB8E8"/><circle cx="599" cy="239" r="5" fill="#8DB8E8"/><circle cx="557" cy="318" r="5" fill="#8DB8E8"/><circle cx="376" cy="369" r="5" fill="#2F7D5B"/><circle cx="350" cy="302" r="5" fill="#8DB8E8"/><circle cx="429" cy="130" r="5" fill="#8DB8E8"/><circle cx="83" cy="267" r="5" fill="#8DB8E8"/><circle cx="172" cy="301" r="5" fill="#8DB8E8"/><circle cx="729" cy="342" r="5" fill="#2F7D5B"/><circle cx="211" cy="253" r="5" fill="#8DB8E8"/><circle cx="314" cy="202" r="5" fill="#8DB8E8"/><circle cx="465" cy="293" r="5" fill="#8DB8E8"/><circle cx="746" cy="186" r="5" fill="#8DB8E8"/><circle cx="676" cy="271" r="5" fill="#8DB8E8"/><circle cx="460" cy="233" r="5" fill="#8DB8E8"/><circle cx="682" cy="220" r="5" fill="#2F7D5B"/><circle cx="303" cy="225" r="5" fill="#8DB8E8"/><circle cx="739" cy="287" r="5" fill="#2F7D5B"/><circle cx="129" cy="182" r="5" fill="#8DB8E8"/><circle cx="291" cy="274" r="5" fill="#8DB8E8"/><circle cx="290" cy="263" r="5" fill="#8DB8E8"/><circle cx="409" cy="235" r="5" fill="#2F7D5B"/><circle cx="184" cy="266" r="5" fill="#8DB8E8"/><circle cx="811" cy="344" r="5" fill="#2F7D5B"/><circle cx="356" cy="188" r="5" fill="#8DB8E8"/><circle cx="552" cy="226" r="5" fill="#8DB8E8"/><circle cx="151" cy="201" r="5" fill="#8DB8E8"/><circle cx="485" cy="343" r="5" fill="#2F7D5B"/><circle cx="421" cy="136" r="5" fill="#8DB8E8"/><circle cx="118" cy="225" r="5" fill="#8DB8E8"/><circle cx="503" cy="272" r="5" fill="#8DB8E8"/><circle cx="641" cy="278" r="5" fill="#8DB8E8"/><circle cx="750" cy="353" r="5" fill="#2F7D5B"/><circle cx="666" cy="286" r="5" fill="#8DB8E8"/><circle cx="711" cy="191" r="5" fill="#2F7D5B"/><circle cx="585" cy="374" r="5" fill="#2F7D5B"/><circle cx="655" cy="145" r="5" fill="#8DB8E8"/><circle cx="419" cy="299" r="5" fill="#8DB8E8"/><circle cx="465" cy="304" r="5" fill="#8DB8E8"/><circle cx="376" cy="194" r="5" fill="#2F7D5B"/><circle cx="601" cy="158" r="5" fill="#8DB8E8"/><circle cx="418" cy="269" r="5" fill="#8DB8E8"/><circle cx="528" cy="212" r="5" fill="#8DB8E8"/><circle cx="794" cy="355" r="5" fill="#2F7D5B"/><circle cx="599" cy="285" r="5" fill="#8DB8E8"/><circle cx="506" cy="326" r="5" fill="#2F7D5B"/><circle cx="459" cy="245" r="5" fill="#8DB8E8"/><circle cx="662" cy="336" r="5" fill="#2F7D5B"/><circle cx="691" cy="268" r="5" fill="#8DB8E8"/><circle cx="822" cy="335" r="5" fill="#2F7D5B"/><circle cx="348" cy="242" r="5" fill="#8DB8E8"/><circle cx="465" cy="250" r="5" fill="#8DB8E8"/><circle cx="567" cy="329" r="5" fill="#2F7D5B"/><circle cx="726" cy="329" r="5" fill="#2F7D5B"/><circle cx="502" cy="323" r="5" fill="#8DB8E8"/><circle cx="230" cy="204" r="5" fill="#8DB8E8"/><circle cx="680" cy="236" r="5" fill="#8DB8E8"/><circle cx="194" cy="249" r="5" fill="#8DB8E8"/><circle cx="488" cy="274" r="5" fill="#8DB8E8"/><circle cx="892" cy="356" r="5" fill="#2F7D5B"/><circle cx="806" cy="315" r="5" fill="#8DB8E8"/><circle cx="816" cy="310" r="5" fill="#2F7D5B"/><circle cx="263" cy="330" r="5" fill="#8DB8E8"/></svg>
+<p style="position:absolute;left:0px;top:417px;width:70px;font-size:24px;text-align:right;color:#5E6675">-10</p>
+<p style="position:absolute;left:0px;top:234px;width:70px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:51px;width:70px;font-size:24px;text-align:right;color:#5E6675">+10</p>
+<p style="position:absolute;left:115px;top:476px;width:80px;font-size:24px;text-align:center;color:#5E6675">100</p>
+<p style="position:absolute;left:413px;top:476px;width:80px;font-size:24px;text-align:center;color:#5E6675">300</p>
+<p style="position:absolute;left:711px;top:476px;width:80px;font-size:24px;text-align:center;color:#5E6675">500</p>
+<p style="position:absolute;left:80px;top:34px;width:224px;font-size:24px;text-align:center;color:#5E6675">띠 1</p>
+<p style="position:absolute;left:304px;top:34px;width:224px;font-size:24px;text-align:center;color:#5E6675">띠 2</p>
+<p style="position:absolute;left:527px;top:34px;width:224px;font-size:24px;text-align:center;color:#5E6675">띠 3</p>
+<p style="position:absolute;left:751px;top:34px;width:149px;font-size:24px;text-align:center;color:#5E6675">띠 4</p>
+<p style="position:absolute;left:80px;top:508px;width:820px;font-size:24px;text-align:center;color:#14213D">송신기까지 거리 (m)</p>
+<p style="position:absolute;left:90px;top:430px;width:520px;font-size:24px;color:#4A5262;background:#F5F3EE"><b style="color:#2F7D5B">●</b> 수목 칸  <b style="color:#8DB8E8">●</b> 수목 없는 칸 — 수목 칸은 먼 곳에 많다</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">왜</p><p style="font-size:24px;line-height:1.4;color:#4A5262">거의 모든 것이 거리와 함께 변한다 — 멀수록 나무를 더 지나고, 더 자주 가려지고, 잔차도 커진다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">그냥 비교하면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">수목 칸 − 없는 칸 = <b>-2.8 dB</b> — 거리 차이까지 수목 탓으로 셈</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">띠마다 비교해 모으면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">= <b>-1.7 dB</b> — 심어 둔 수목 효과 −1.5 dB에 가깝다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">통제 공변량</p><p style="font-size:24px;line-height:1.4;color:#4A5262">판정을 흐리는 다른 원인을 막으려고 쓰는 값 — 거리가 대표</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시 시뮬레이션 (점 400개, 거리 기울기 −0.8 dB/100 m + 수목 −1.5 dB를 심음, 시드 고정) · 출처: 공변량 문서 §2-2</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 15</p>
+<aside>(약 50초) 거리는 특별하게 씁니다. 거의 모든 것이 거리와 함께 변하기 때문입니다. 멀수록 나무를 더 지나고, 더 자주 가려지고, 잔차도 커집니다. 그림은 예시 시뮬레이션으로, 초록 수목 칸이 먼 곳에 몰려 있고 잔차는 거리가 멀수록 내려갑니다. 이때 수목 칸과 없는 칸을 그냥 비교하면 -2.8 dB가 나와, 거리 차이까지 수목 탓으로 셉니다. 같은 거리 띠 안에서 비교한 뒤 띠마다의 차이를 모으면 -1.7 dB로, 심어 둔 수목 효과 −1.5 dB에 가까워집니다. 이렇게 판정을 흐리는 다른 원인을 막으려고 쓰는 값을 통제 공변량이라 하고, 거리가 대표입니다.</aside>
+</section>
+<section id="steps" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">어떻게 분석하나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">갈래 ② 의 다섯 단계</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">단계</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">하는 것</p><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">누가</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">① 짝 맞추기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">실측과 기준 시뮬을 같은 3 m 칸으로 — 칸 행마다 잔차와 그 칸의 공변량이 함께 놓인다</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">dt-viewer compare · CF의 열</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">② 편향 빼기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">경로 전체 잔차 중앙값(전체 오프셋)을 뺀다 — “전체가 3 dB 낮다”는 요인이 아니라 보정 · 전력 문제</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">Gap Lab</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③ 층 나누기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">요인이 작용하는 칸 대 아닌 칸 (예: foliage_m ≥ 5 m 대 0) — <b>경계값은 등록 때 정하고 고치지 않는다</b></p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">실험 설계 (등록 때 고정)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">④ 맞대기</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">거리 띠마다 두 층의 잔차 중앙값 차이를 내고 모은다 — 중앙값이라 한 점이 숫자를 좌우하지 않는다</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">Gap Lab</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑤ 구간과 판정</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">차이에 95% 구간 — 칸 수가 아니라 유효 표본 수로 (다음 쪽), 그리고 판정 (9쪽)</p><p style="width:300px;font-size:24px;line-height:1.35;color:#4A5262">Gap Lab</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 한 칸이 아니라 같은 공변량을 가진 칸들을 모아서 맞댄다 — 칸 하나의 이상은 취약한 점(fragile-points) · 전문가 단서의 몫</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: 공변량 문서 §3-1 · 판정 기준(criterion)은 registered 뒤로 고정 (experiment-ledger)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 15</p>
+<aside>(약 50초) 분석은 다섯 단계입니다. 먼저 dt-viewer의 compare로 실측과 기준 시뮬을 같은 3 m 칸으로 짝짓습니다. 칸 행마다 잔차와 그 칸의 공변량이 함께 놓입니다. 둘째, 경로 전체의 잔차 중앙값을 뺍니다. 전체가 3 dB 낮다는 것은 요인이 아니라 보정이나 전력의 문제이기 때문입니다. 셋째, 공변량으로 칸을 요인이 작용하는 칸과 아닌 칸으로 나눕니다. 이 경계값은 등록할 때 정하고 고치지 않습니다. 넷째, 거리 띠마다 두 층의 잔차 중앙값 차이를 내고 모읍니다. 중앙값을 쓰는 것은 한 점이 숫자를 좌우하지 않게 하려는 것입니다. 다섯째, 그 차이에 95% 구간을 붙이고 판정합니다. 이때 구간은 칸 수가 아니라 유효 표본 수로 냅니다.</aside>
+</section>
+<section id="neff" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">구간 ① 유효 표본 수</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">왜 칸 수로 세면 안 되나</h2>
+</div>
+<div style="position:relative;width:940px;height:240px">
+<svg aria-label="작은 칸 60개가 한 줄로 있고, 그 아래에 그것을 30 m씩 묶은 큰 덩어리 6개가 있는 그림" style="position:absolute;left:0px;top:0px;width:940px;height:240px" width="940" height="240" viewBox="0 0 940 240"><rect x="20" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="36" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="51" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="66" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="82" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="98" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="113" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="128" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="144" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="160" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="175" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="190" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="206" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="222" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="237" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="252" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="268" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="284" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="299" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="314" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="330" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="346" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="361" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="376" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="392" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="408" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="423" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="438" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="454" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="470" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="485" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="500" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="516" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="532" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="547" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="562" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="578" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="594" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="609" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="624" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="640" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="656" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="671" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="686" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="702" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="718" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="733" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="748" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="764" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="780" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="795" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="810" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="826" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="842" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="857" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="872" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="888" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="904" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="919" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="934" y="60" width="12" height="40" rx="2" fill="#8DB8E8"/><rect x="20" y="150" width="150" height="40" rx="8" fill="#255E9E"/><rect x="175" y="150" width="150" height="40" rx="8" fill="#255E9E"/><rect x="330" y="150" width="150" height="40" rx="8" fill="#255E9E"/><rect x="485" y="150" width="150" height="40" rx="8" fill="#255E9E"/><rect x="640" y="150" width="150" height="40" rx="8" fill="#255E9E"/><rect x="795" y="150" width="150" height="40" rx="8" fill="#255E9E"/></svg>
+<p style="position:absolute;left:20px;top:10px;width:900px;font-size:24px;font-weight:700;color:#14213D">칸 60개 (3 m) = 180 m</p>
+<p style="position:absolute;left:20px;top:112px;width:900px;font-size:24px;color:#5E6675">상관거리 30 m 로 묶으면 ↓</p>
+<p style="position:absolute;left:20px;top:200px;width:900px;font-size:24px;font-weight:700;color:#255E9E">독립 증거 6개 (180 m ÷ 30 m)</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:flex-start">
+<div style="width:860px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">n_eff ≈ (칸 수 × 3 m) ÷ 상관거리<br>칸 300개 = 900 m, 상관거리 30 m → n_eff = 30</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">칸 수로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">독립 증거를 10배로 셈 → 구간이 √10 ≈ 3배 좁아진다 → 없는 효과를 있다고 말한다</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">이웃 칸은 사실상 같은 칸</p><p style="font-size:24px;line-height:1.4;color:#4A5262">전파의 음영은 20 ~ 50 m에 걸쳐 함께 움직인다 (상관거리)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">실제 엔진</p><p style="font-size:24px;line-height:1.4;color:#4A5262">compare.trend()는 이웃 칸 자기상관으로 n_eff를 내고, 이동 블록 부트스트랩과 맞대 확인 — 위 식은 설명용 근사</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: 공변량 문서 §3-2 · cal/sim-meas-trend-metrics · 공간 통계 덱(spatial-statistics)의 n_eff와 같은 생각</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 15</p>
+<aside>(약 50초) 구간을 칸 수로 세면 안 되는 이유입니다. 3 m 칸의 이웃은 사실상 같은 칸입니다. 전파의 음영은 20에서 50 m에 걸쳐 함께 움직이기 때문입니다. 그래서 독립된 증거의 수는 칸 수가 아니라 지나온 거리를 상관거리로 나눈 값입니다. 칸 300개, 900 m를 지났어도 상관거리가 30 m면 독립 증거는 30개입니다. 칸 수로 세면 증거를 10배로 세는 것이고, 구간이 루트 10, 약 3배 좁아져 없는 효과를 있다고 말하게 됩니다. 실제 엔진은 이웃 칸의 자기상관으로 유효 표본 수를 내고 이동 블록 부트스트랩과 맞대 확인했습니다. 이 식은 설명을 위한 근사입니다.</aside>
+</section>
+<section id="verdicts" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">구간 ② 판정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">판정 셋 — 구간이 0 · ±ε와 어디 있나</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:412px">
+<svg aria-label="차이의 95% 구간 막대 네 개. supported는 0의 가설 쪽에, ruled_out은 ±ε 띠 안에, not_distinguished는 0을 걸치고, 가설과 반대는 0의 반대쪽에 있다" style="position:absolute;left:0px;top:0px;width:860px;height:412px" width="860" height="412" viewBox="0 0 860 412"><rect x="516" y="40" width="108" height="312" fill="#D7EBDF"/><line x1="570" y1="30" x2="570" y2="362" stroke="#14213D" stroke-width="3"/><line x1="300" y1="362" x2="840" y2="362" stroke="#5E6675" stroke-width="2"/><line x1="354" y1="79" x2="498" y2="79" stroke="#255E9E" stroke-width="10" stroke-linecap="round"/><circle cx="426" cy="79" r="11" fill="#F5F3EE" stroke="#255E9E" stroke-width="5"/><line x1="540" y1="157" x2="597" y2="157" stroke="#2F7D5B" stroke-width="10" stroke-linecap="round"/><circle cx="570" cy="157" r="11" fill="#F5F3EE" stroke="#2F7D5B" stroke-width="5"/><line x1="402" y1="235" x2="648" y2="235" stroke="#5E6675" stroke-width="10" stroke-linecap="round"/><circle cx="522" cy="235" r="11" fill="#F5F3EE" stroke="#5E6675" stroke-width="5"/><line x1="636" y1="313" x2="774" y2="313" stroke="#A84A16" stroke-width="10" stroke-linecap="round"/><circle cx="702" cy="313" r="11" fill="#F5F3EE" stroke="#A84A16" stroke-width="5"/></svg>
+<p style="position:absolute;left:0px;top:62px;width:280px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">supported</p>
+<p style="position:absolute;left:0px;top:140px;width:280px;font-size:24px;text-align:right;font-weight:700;color:#2F7D5B">ruled_out</p>
+<p style="position:absolute;left:0px;top:218px;width:280px;font-size:24px;text-align:right;font-weight:700;color:#5E6675">not_distinguished</p>
+<p style="position:absolute;left:0px;top:296px;width:280px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">가설과 반대</p>
+<p style="position:absolute;left:516px;top:6px;width:108px;font-size:24px;text-align:center;font-weight:700;color:#2F7D5B">±ε</p>
+<p style="position:absolute;left:300px;top:372px;width:540px;font-size:24px;text-align:center;color:#5E6675">← 음수 (가설 방향 예)      잔차 차이      양수 →</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">판정</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">조건 · 뜻</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">supported</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">구간 전체가 0의 한쪽 + 가설의 방향 → 정황이 선다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D7EBDF;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">ruled_out</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">구간 전체가 ±ε 안 (동등성) → 몰려 있지 않다 — ε 미정(Q-CAL-31)이라 아직 안 나온다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">not_distinguished</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">그 밖 → 이 실측으로는 못 가른다, 실측이 더 필요 (Q-LAB-5)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">반대 방향이 선명하면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">supported가 아니다 — 다른 가설(예: 수목 감쇠를 과하게 잡는다)로 새로 등록</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림의 막대 위치는 개념 설명용 · ε은 아직 정하지 않음 (Q-CAL-31) · 출처: 공변량 문서 §3-3</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 15</p>
+<aside>(약 50초) 판정은 구간이 0과 ±ε 띠에 대해 어디 있느냐로 정합니다. 구간 전체가 0의 한쪽에 있고 그 쪽이 가설의 방향과 같으면 supported, 정황이 섭니다. 구간 전체가 ±ε 띠 안에 들면 동등성이 성립해 ruled_out, 몰려 있지 않다고 말할 수 있습니다. 다만 ε을 아직 정하지 않았으니 지금은 ruled_out이 나오지 않습니다. 그 밖, 예를 들어 0을 걸치면 not_distinguished로, 이 실측으로는 못 가르니 실측이 더 필요합니다. 하나 주의할 것은 방향이 반대로 선명한 경우입니다. 이것은 supported가 아니라 가설과 반대이므로, 수목 감쇠를 과하게 잡는다 같은 다른 가설로 새로 등록합니다.</aside>
+</section>
+<section id="example" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">손으로 따라가기 · 그림 2 · 예시</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">가설 “수목 감쇠를 덜 잡는다” → 수목 칸 잔차가 음수로</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="position:relative;width:900px;height:370px">
+<svg aria-label="두 층의 잔차 분포 상자. 수목 칸은 중앙값 −4.1 dB, 수목 없는 칸은 −0.3 dB" style="position:absolute;left:0px;top:0px;width:900px;height:370px" width="900" height="370" viewBox="0 0 900 370"><line x1="183" y1="20" x2="183" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="310" y1="20" x2="310" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="437" y1="20" x2="437" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="563" y1="20" x2="563" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="690" y1="20" x2="690" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="817" y1="20" x2="817" y2="300" stroke="#EAE7DF" stroke-width="2"/><line x1="563" y1="20" x2="563" y2="300" stroke="#14213D" stroke-width="3"/><line x1="173" y1="100" x2="694" y2="100" stroke="#2F7D5B" stroke-width="4"/><rect x="327" y="70" width="213" height="60" rx="6" fill="#2F7D5B" opacity="0.85"/><line x1="434" y1="66" x2="434" y2="134" stroke="#14213D" stroke-width="5"/><line x1="293" y1="220" x2="814" y2="220" stroke="#8DB8E8" stroke-width="4"/><rect x="447" y="190" width="213" height="60" rx="6" fill="#8DB8E8" opacity="0.85"/><line x1="554" y1="186" x2="554" y2="254" stroke="#14213D" stroke-width="5"/></svg>
+<p style="position:absolute;left:0px;top:84px;width:110px;font-size:24px;text-align:right;font-weight:700;color:#2F7D5B">수목 칸</p>
+<p style="position:absolute;left:0px;top:204px;width:110px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">없는 칸</p>
+<p style="position:absolute;left:374px;top:34px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#14213D">−4.1</p>
+<p style="position:absolute;left:494px;top:154px;width:120px;font-size:24px;text-align:center;font-weight:700;color:#14213D">−0.3</p>
+<p style="position:absolute;left:143px;top:304px;width:80px;font-size:24px;text-align:center;color:#5E6675">-12</p>
+<p style="position:absolute;left:270px;top:304px;width:80px;font-size:24px;text-align:center;color:#5E6675">-8</p>
+<p style="position:absolute;left:397px;top:304px;width:80px;font-size:24px;text-align:center;color:#5E6675">-4</p>
+<p style="position:absolute;left:523px;top:304px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:650px;top:304px;width:80px;font-size:24px;text-align:center;color:#5E6675">+4</p>
+<p style="position:absolute;left:777px;top:304px;width:80px;font-size:24px;text-align:center;color:#5E6675">+8</p>
+<p style="position:absolute;left:120px;top:334px;width:760px;font-size:24px;text-align:center;color:#5E6675">편향 뺀 잔차 (dB) — 상자 = 사분위, 선 = 5 ~ 95%</p>
+</div>
+<div style="position:relative;width:900px;height:180px">
+<svg aria-label="차이 −3.8 dB의 95% 구간 막대 [-6.39, -1.21] dB, 0의 왼쪽에만 있다" style="position:absolute;left:0px;top:0px;width:900px;height:180px" width="900" height="180" viewBox="0 0 900 180"><line x1="744" y1="30" x2="744" y2="130" stroke="#14213D" stroke-width="3"/><line x1="200" y1="130" x2="880" y2="130" stroke="#5E6675" stroke-width="2"/><line x1="310" y1="80" x2="662" y2="80" stroke="#255E9E" stroke-width="10" stroke-linecap="round"/><circle cx="486" cy="80" r="11" fill="#F5F3EE" stroke="#255E9E" stroke-width="5"/></svg>
+<p style="position:absolute;left:0px;top:63px;width:180px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">차이 −3.8</p>
+<p style="position:absolute;left:160px;top:138px;width:80px;font-size:24px;text-align:center;color:#5E6675">-8</p>
+<p style="position:absolute;left:296px;top:138px;width:80px;font-size:24px;text-align:center;color:#5E6675">-6</p>
+<p style="position:absolute;left:432px;top:138px;width:80px;font-size:24px;text-align:center;color:#5E6675">-4</p>
+<p style="position:absolute;left:568px;top:138px;width:80px;font-size:24px;text-align:center;color:#5E6675">-2</p>
+<p style="position:absolute;left:704px;top:138px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:840px;top:138px;width:80px;font-size:24px;text-align:center;color:#5E6675">+2</p>
+<p style="position:absolute;left:190px;top:14px;width:240px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">[-6.39, -1.21]</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">수목 칸</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">없는 칸</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">칸 수</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">300 (900 m)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">900 (2,700 m)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">중앙값</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">−4.1 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">−0.3 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">흩어짐 σ</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">5 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">5 dB</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">n_eff (30 m)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">30</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">90</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">표준오차</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">1.144 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">0.661 dB</p></div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:22px;line-height:1.55;color:#F5F3EE;white-space:nowrap">차이 = −3.8 dB<br>SE = √(1.144² + 0.661²) = 1.321<br>95% = −3.8 ± 1.96 × 1.321<br>    = [-6.39, -1.21] → supported</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">숫자는 설명용 예시 (실측 아님) · 중앙값의 표준오차 ≈ 1.2533 · σ / √n_eff — 정규 근사 가정 · 출처: 공변량 문서 §3-4</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 15</p>
+<aside>(약 55초) 손으로 따라가 보겠습니다. 숫자는 설명용 예시입니다. 가설은 시뮬이 수목 감쇠를 덜 잡는다는 것이고, 그렇다면 나무를 지나는 칸에서 실측이 더 약해 잔차가 음수로 기웁니다. 수목 칸 300개, 없는 칸 900개이고, 편향을 뺀 잔차 중앙값이 각각 −4.1과 −0.3 dB, 흩어짐은 둘 다 5 dB입니다. 상관거리 30 m로 유효 표본은 30과 90입니다. 중앙값의 표준오차는 정규 근사로 1.2533 곱하기 σ 나누기 루트 n_eff라서 1.144과 0.661 dB입니다. 차이는 −3.8 dB, 차이의 표준오차는 1.321 dB, 95% 구간은 -6.39에서 -1.21 dB입니다. 구간이 0을 넘지 않고 방향이 가설과 같은 음수이므로 supported입니다.</aside>
+</section>
+<section id="countneff" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">그림 3 · 예시</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">효과가 작을 때 — 구간의 넓이가 판정을 바꾼다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:1000px;height:320px">
+<svg aria-label="차이 −1.5 dB의 95% 구간 막대 둘. 칸 수로 세면 [-2.32, -0.68]로 0의 왼쪽에만 있고, 유효 표본으로 세면 [-4.09, +1.09]로 0을 걸친다" style="position:absolute;left:0px;top:0px;width:1000px;height:320px" width="1000" height="320" viewBox="0 0 1000 320"><line x1="794" y1="30" x2="794" y2="270" stroke="#14213D" stroke-width="3"/><line x1="330" y1="270" x2="980" y2="270" stroke="#5E6675" stroke-width="2"/><line x1="579" y1="95" x2="731" y2="95" stroke="#A84A16" stroke-width="10" stroke-linecap="round"/><circle cx="655" cy="95" r="11" fill="#F5F3EE" stroke="#A84A16" stroke-width="5"/><line x1="415" y1="205" x2="895" y2="205" stroke="#255E9E" stroke-width="10" stroke-linecap="round"/><circle cx="655" cy="205" r="11" fill="#F5F3EE" stroke="#255E9E" stroke-width="5"/></svg>
+<p style="position:absolute;left:0px;top:78px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">칸 수로 셈 (300 · 900)</p>
+<p style="position:absolute;left:0px;top:188px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">유효 표본 (30 · 90)</p>
+<p style="position:absolute;left:290px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-5</p>
+<p style="position:absolute;left:383px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-4</p>
+<p style="position:absolute;left:476px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-3</p>
+<p style="position:absolute;left:569px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-2</p>
+<p style="position:absolute;left:661px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-1</p>
+<p style="position:absolute;left:754px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:847px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">+1</p>
+<p style="position:absolute;left:940px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">+2</p>
+<p style="position:absolute;left:549px;top:50px;width:360px;font-size:24px;font-weight:700;color:#A84A16">[-2.32, -0.68]</p>
+<p style="position:absolute;left:415px;top:160px;width:420px;font-size:24px;font-weight:700;color:#255E9E">[-4.09, +1.09]</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">같은 차이 −1.5 dB</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칸 수, 중앙값, 흩어짐은 앞 쪽과 같고 차이만 작다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">칸 수로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SE 0.418 dB → supported — <b>틀린 확신</b></p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">유효 표본으로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SE 1.321 dB → not_distinguished — 이 주행으로는 못 가른다</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 효과가 클 때(−3.8 dB)는 어느 쪽으로 세도 supported — 차이는 효과가 작을 때 드러난다 → 칸 수로 세면 작은 효과를 모두 “있다”고 말한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">숫자는 설명용 예시 (실측 아님) · 정규 근사 · 출처: 공변량 문서 §3-4</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 15</p>
+<aside>(약 45초) 칸 수로 잘못 세면 무슨 일이 생기는지는 효과가 작을 때 드러납니다. 같은 조건에서 차이만 −1.5 dB라고 해 보겠습니다. 칸 수 300과 900으로 세면 표준오차가 0.418 dB라 구간이 -2.32에서 -0.68로 좁아져 supported, 하지만 이것은 틀린 확신입니다. 유효 표본 30과 90으로 세면 구간이 -4.09에서 +1.09로 0을 걸쳐 not_distinguished, 이 주행으로는 못 가른다는 정직한 답이 됩니다. 효과가 −3.8처럼 크면 어느 쪽이든 supported지만, 작은 효과에서는 세는 법이 판정을 바꿉니다.</aside>
+</section>
+<section id="ladder" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">세 갈래 · 그림 4</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">② 는 사다리의 가운데 — 정황을 준다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:700px;height:480px">
+<svg aria-label="네 칸 계단. candidate에서 ① 가능성이 supported면 possible, ② 정합까지 supported면 clue, ③ 개입까지 supported면 evidence로 오른다" style="position:absolute;left:0px;top:0px;width:700px;height:480px" width="700" height="480" viewBox="0 0 700 480"><rect x="20" y="400" width="160" height="80" rx="10" fill="#5E6675" opacity="0.35"/><rect x="190" y="305" width="160" height="175" rx="10" fill="#4C7DB8" opacity="1"/><rect x="360" y="210" width="160" height="270" rx="10" fill="#A84A16" opacity="1"/><rect x="530" y="115" width="160" height="365" rx="10" fill="#14213D" opacity="1"/></svg>
+<p style="position:absolute;left:20px;top:414px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#14213D">candidate</p>
+<p style="position:absolute;left:190px;top:319px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">possible</p>
+<p style="position:absolute;left:185px;top:237px;width:170px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#4C7DB8">① 가능성<br>supported</p>
+<p style="position:absolute;left:360px;top:224px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">clue</p>
+<p style="position:absolute;left:355px;top:142px;width:170px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#A84A16">② 정합<br>supported</p>
+<p style="position:absolute;left:530px;top:129px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">evidence</p>
+<p style="position:absolute;left:525px;top:47px;width:170px;font-size:24px;text-align:center;line-height:1.3;font-weight:700;color:#14213D">③ 개입<br>supported</p>
+<p style="position:absolute;left:355px;top:98px;width:200px;font-size:24px;font-weight:700;color:#A84A16">이 자료의 자리 ↓</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">갈래</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">묻는 것</p><p style="width:120px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">실측</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">공변량</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">① 가능성</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">현실적 범위로 흔들면 시뮬이 실측으로 볼 만큼 움직이나</p><p style="width:120px;font-size:24px;line-height:1.35;color:#4A5262">없다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">칸 고르기에만</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D"><b>② 정합</b></p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">실측 잔차가 그 요인이 작용하는 칸에 몰려 있나</p><p style="width:120px;font-size:24px;line-height:1.35;color:#4A5262">있다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b>있어야 한다</b></p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:140px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">③ 개입</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">고치면 검증 경로에서 잔차가 줄고, ② 가 지목한 칸에서 더 주나</p><p style="width:120px;font-size:24px;line-height:1.35;color:#4A5262">있다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">② 가 지목한 칸</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">② 만으로는 못 박는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">los는 RU 위치 · 높이 · 엔진 판을 모두 가리킨다 → ① 이 후보를 좁히고, ② 가 정황을 주고, ③ 이 확인한다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: 공변량 문서 §3-5 · 세 갈래: Gap Lab README · 가설의 위상 candidate → possible → clue → evidence</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 15</p>
+<aside>(약 50초) 공변량 분석이 전체 흐름에서 어디에 있는지입니다. Gap Lab은 세 갈래로 원인을 좁힙니다. ① 가능성은 실측 없이, 그 요인을 현실적 범위로 흔들면 시뮬이 실측으로 볼 수 있을 만큼 움직이는지 봅니다. ② 정합이 오늘의 주제로, 실측 잔차가 그 요인이 작용하는 칸에 몰려 있는지 보고, 공변량이 반드시 필요합니다. ③ 개입은 그 요인을 고치면 검증 경로에서 잔차가 줄고, ②가 지목한 칸에서 더 많이 주는지 봅니다. 가설은 ①이 supported면 possible, ②까지면 clue, ③까지면 evidence로 오릅니다. ②만으로는 요인 하나를 못 박습니다. 시야 여부 하나가 RU 위치, 높이, 엔진 판을 모두 가리키기 때문입니다. 그래서 ①이 후보를 좁히고, ②가 정황을 주고, ③이 확인합니다.</aside>
+</section>
+<section id="pitfalls" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">함정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">함정 다섯 — 그리고 정직한 답</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">① 공변량끼리 얽힌다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">나무 많은 곳은 NLOS이기도 하다 → 수목 탓인지 가림 탓인지 섞인다<br><b>→ 하나를 고정하고 나눈다</b> (los = true 칸 안에서만 수목 대 없음) · 칸이 적으면 not_distinguished — 그게 정직한 답</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">② 한 공변량, 여러 요인</p><p style="font-size:24px;line-height:1.4;color:#4A5262">los는 RU 위치 · 높이 · 엔진 판을 모두 가리킨다<br><b>→ ① 이 먼저</b>: 현실적 범위에서 움직이지도 않는 요인은 빠지고, 남은 후보를 ③ 으로 가른다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">③ 시뮬의 눈으로 본 값</p><p style="font-size:24px;line-height:1.4;color:#4A5262">blocker_id는 씬에 있는 건물만 안다 → 빠진 건물 뒤는 “안 가려짐”<br><b>→ 이웃 칸 잔차의 뭉침</b>으로 후보를 찾고 전문가 단서(New clue)와 함께</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">④ 경계값을 결과 보고 고르지 않는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">“5 m로는 안 되는데 7 m면 된다”는 우연 찾기<br><b>→ 등록 때 정하고 고정</b> (criterion은 registered 뒤로 고정) · 다른 경계는 새 실험으로 — 둘 다 기록에 남는다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">⑤ 칸 하나를 판정하지 않는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">3 m 칸에 차량 주행 표본은 1개 남짓<br><b>→ 같은 공변량의 칸을 모아</b> 맞댄다 · 칸 하나의 이상은 취약한 점(fragile-points) · 전문가 단서의 몫</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: 공변량 문서 §4-1 ~ §4-5 · 실험 등록 규칙: experiment-ledger</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 15</p>
+<aside>(약 55초) 함정 다섯 가지입니다. 첫째, 공변량끼리 얽힙니다. 나무가 많은 곳은 가려진 곳이기도 해서, 수목 칸의 음수 잔차가 수목 탓인지 가림 탓인지 섞입니다. 하나를 고정하고 다른 것을 나눕니다. 칸이 적어져 못 가르면 그게 정직한 답입니다. 둘째, 한 공변량이 여러 요인을 가리킵니다. 그래서 ① 가능성이 먼저 후보를 줄입니다. 셋째, 공변량은 시뮬의 눈으로 본 값입니다. 씬에 빠진 건물은 공변량으로 안 보이니 이웃 칸 잔차의 뭉침으로 후보를 찾습니다. 넷째, 경계값을 결과를 보고 고르지 않습니다. 등록 때 정하고 고치지 않으며, 다른 경계는 새 실험으로 등록해 둘 다 남깁니다. 다섯째, 칸 하나를 판정하지 않습니다. 3 m 칸에 표본은 1개 남짓이라, 같은 공변량의 칸을 모아서 봅니다.</aside>
+</section>
+<section id="status" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">지금 상태</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">있는 것과 기다리는 것</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">있다</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">기다린다</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">공변량 열</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">n_paths · 서빙 셀의 los</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">CF 1 단계: 모든 셀 los · path_kind · foliage_m · off_az · off_el / 3 단계: blocker_id · 건물 표 (CF 요청서 V3)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">구간 계산</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">dt-viewer 엔진의 n_eff (compare.trend())</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">—</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">판정</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">Gap Lab은 ① 만 판정 (L1)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">② · ③ 판정은 L3 — 실측과 공변량이 온 뒤 (experiment-ledger §11)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:220px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">동등성 ε</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">없음 → ② 의 ruled_out은 아직 안 나온다</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">Q-CAL-31</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#2F7D5B">갈래 ① 에서 이미 쓴 같은 생각</p><p style="font-size:24px;line-height:1.4;color:#4A5262">재질 ±30%: 경로 전체로는 “못 가른다” → 반사가 전력의 50% 넘게를 차지하는 칸만 모으자 supported (sensitivity-split)</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">갈래 ② 는</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 칸 고르기를 실측 잔차에 쓰는 것 — 공변량 열이 오면 바로 시작한다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">상태 기준일 2026-11-03 (초안) · 출처: 공변량 문서 §5 · sensitivity-split · CF 요청서 V3</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 15</p>
+<aside>(약 45초) 지금 상태입니다. 공변량 열은 경로 수와 서빙 셀의 시야 여부만 있고, 모든 셀의 시야, 지배 경로 종류, 수목 통과 길이, 안테나 정면에서 벗어난 각은 CF 1 단계, 가로막은 건물과 건물 표는 3 단계를 기다립니다. 구간 계산은 dt-viewer 엔진에 이미 있습니다. 판정은 지금 Gap Lab이 갈래 ①만 하고, ②와 ③은 실측과 공변량이 온 뒤입니다. 동등성 ε도 아직 없어서 ruled_out은 나오지 않습니다. 같은 생각은 갈래 ①에서 이미 썼습니다. 재질을 ±30% 흔들었을 때 경로 전체로는 못 가른다였지만, 반사가 전력의 절반 넘게를 차지하는 칸만 모으자 supported였습니다. 이 칸 고르기를 실측 잔차에 쓰는 것이 갈래 ②입니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">잔차가 몰린 자리가 원인의 정황이다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">공변량</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">3 m 칸마다 붙는 그 칸의 사정<br>칸마다 · 요인의 정도 · 실측 전에 정해짐</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">분석</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">짝 맞추기 → 편향 빼기 → 층 나누기<br>→ 거리 띠마다 맞대기 → 구간 · 판정</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">구간</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">칸 수가 아니라 유효 표본 수로<br>n_eff ≈ 지나온 거리 ÷ 상관거리</p></div></div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">판정</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">supported · ruled_out(ε 이후) · not_distinguished<br>반대 방향은 새 가설로</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">자리</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">① 이 좁히고 ② 가 정황을 주고 ③ 이 확인<br>② 만으로는 못 박는다</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">함정</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">얽힘 · 시뮬의 눈 · 경계값 고정 · 칸 하나 금지</p></div></div>
+<p style="font-size:28px;line-height:1.5;color:#C9D3E3">다음 단계: CF 1 단계 공변량 열이 오면 [대상 경로]에서 foliage_m · los로 첫 ② 실험을 등록한다 (경계값 · 거리 띠 · 방향을 먼저 적는다)</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">관련 자료: spatial-statistics (n_eff) · sensitivity-analysis (갈래 ①) · dt-breakdown · twin-vv</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">15 / 15</p>
+<aside>(약 40초) 정리하겠습니다. 공변량은 3 m 칸마다 붙는 그 칸의 사정이고, 칸마다 값이 있고, 요인의 정도를 나타내고, 실측 전에 정해져야 합니다. 분석은 짝 맞추기, 편향 빼기, 층 나누기, 거리 띠마다 맞대기, 구간과 판정의 다섯 단계이고, 구간은 칸 수가 아니라 유효 표본 수로 냅니다. 판정은 supported, ruled_out, not_distinguished 셋이며, 반대 방향은 새 가설로 등록합니다. 갈래 ②는 정황을 주는 자리이고, 그것만으로 요인을 못 박지는 않습니다. 다음 단계로 CF 1 단계 공변량 열이 오면, 대상 경로에서 수목 통과 길이와 시야 여부로 첫 실험을 등록하려 합니다. 감사합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

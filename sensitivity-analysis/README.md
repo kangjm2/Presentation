@@ -26,6 +26,7 @@
   - [`debiased-rmse`](../debiased-rmse/): 보정 전 · 후 오차 비교
   - [`sionna-rt-antenna`](../sionna-rt-antenna/): TR 38.901 소자 패턴(8 dBi · 65° · 30 dB)
   - [`surrogate-model`](../surrogate-model/): 실행이 비쌀 때 Sobol을 대리 모델 위에서 돌리기
+  - [`covariates`](../covariates/): Gap Lab 갈래 ② 정합 — 갈래 ① 가능성 다음 단계
 
 ## 구성 (≈ 11분 50초)
 
