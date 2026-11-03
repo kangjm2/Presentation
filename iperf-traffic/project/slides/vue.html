@@ -26,6 +26,6 @@
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">비교</b> 실단말: 앱 → 단말 OS → 모뎀 / 가상 UE: 앱 → 커널 → TUN → UE 프로그램 — 모뎀 자리를 TUN과 프로그램이 대신한다</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">TUN = 리눅스 L3 가상 장치 (/dev/net/tun) · 장치 이름은 도구마다 다름 (다음 쪽) · 칸 구성은 srsRAN ZMQ 안내서의 netns 방식</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 18</p>
 <aside>(약 55초) 가상 UE는 실제 단말 대신 리눅스 서버에서 UE 소프트웨어를 돌리는 방식입니다. 핵심은 두 가지입니다. 첫째, TUN 장치입니다. IP 패킷만 오가는 가상 네트워크 장치로, 커널이 이 장치로 보낸 패킷을 UE 프로그램이 읽어서 PDCP, RLC, MAC, PHY를 거쳐 가상 무선이나 SDR로 기지국에 보냅니다. DL은 반대로 프로그램이 받은 패킷을 TUN에 써 넣으면 앱에 도착합니다. PDU 세션이 서면 코어가 준 UE 주소가 이 장치에 붙습니다. 둘째, 네트워크 네임스페이스입니다. 인터페이스와 라우팅 표를 따로 가진 칸이라서, UE마다 칸을 하나씩 만들고 기본 경로를 그 UE의 TUN으로 둡니다. 그래야 트래픽이 호스트의 일반 랜카드로 새지 않습니다. curl은 이 칸 안에서 HTTP로 파일을 받아 트래픽을 일으키는 방아쇠입니다. 실단말의 모뎀 자리를 TUN과 UE 프로그램이 대신한다고 보면 됩니다.</aside>
 </section>
