@@ -19,6 +19,7 @@
     "commands",
     "vue",
     "vuerun",
+    "vuegnb",
     "ftp",
     "layers",
     "checklist",
@@ -34,7 +35,7 @@
       "start": "ping"
     },
     "tools": {
-      "description": "iperf3 구조 · 명령 · 결과 읽기, 가상 UE(TUN · netns · curl), FTP와 웹",
+      "description": "iperf3 구조 · 명령 · 결과 읽기, 가상 UE(TUN · netns · curl · gNB 쪽 흐름), FTP와 웹",
       "start": "iperf"
     },
     "wrap": {
