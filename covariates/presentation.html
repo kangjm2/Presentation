@@ -349,37 +349,40 @@ body.fs.idle .stage { cursor: none }
 <p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 15</p>
 <aside>(약 55초) 손으로 따라가 보겠습니다. 숫자는 설명용 예시입니다. 가설은 시뮬이 수목 감쇠를 덜 잡는다는 것이고, 그렇다면 나무를 지나는 칸에서 실측이 더 약해 잔차가 음수로 기웁니다. 수목 칸 300개, 없는 칸 900개이고, 편향을 뺀 잔차 중앙값이 각각 −4.1과 −0.3 dB, 흩어짐은 둘 다 5 dB입니다. 상관거리 30 m로 유효 표본은 30과 90입니다. 중앙값의 표준오차는 정규 근사로 1.2533 곱하기 σ 나누기 루트 n_eff라서 1.144과 0.661 dB입니다. 차이는 −3.8 dB, 차이의 표준오차는 1.321 dB, 95% 구간은 -6.39에서 -1.21 dB입니다. 구간이 0을 넘지 않고 방향이 가설과 같은 음수이므로 supported입니다.</aside>
 </section>
-<section id="countneff" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
+<section id="countneff" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
 <div style="display:flex;flex-direction:column;gap:16px">
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">그림 3 · 예시</p>
-<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">효과가 작을 때 — 구간의 넓이가 판정을 바꾼다</h2>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">같은 −1.5 dB, 세는 법만 다르다 — 구간이 0을 넘는가</h2>
 </div>
 <div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
-<div style="position:relative;width:1000px;height:320px">
-<svg aria-label="차이 −1.5 dB의 95% 구간 막대 둘. 칸 수로 세면 [-2.32, -0.68]로 0의 왼쪽에만 있고, 유효 표본으로 세면 [-4.09, +1.09]로 0을 걸친다" style="position:absolute;left:0px;top:0px;width:1000px;height:320px" width="1000" height="320" viewBox="0 0 1000 320"><line x1="794" y1="30" x2="794" y2="270" stroke="#14213D" stroke-width="3"/><line x1="330" y1="270" x2="980" y2="270" stroke="#5E6675" stroke-width="2"/><line x1="579" y1="95" x2="731" y2="95" stroke="#A84A16" stroke-width="10" stroke-linecap="round"/><circle cx="655" cy="95" r="11" fill="#F5F3EE" stroke="#A84A16" stroke-width="5"/><line x1="415" y1="205" x2="895" y2="205" stroke="#255E9E" stroke-width="10" stroke-linecap="round"/><circle cx="655" cy="205" r="11" fill="#F5F3EE" stroke="#255E9E" stroke-width="5"/></svg>
-<p style="position:absolute;left:0px;top:78px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">칸 수로 셈 (300 · 900)</p>
-<p style="position:absolute;left:0px;top:188px;width:310px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">유효 표본 (30 · 90)</p>
-<p style="position:absolute;left:290px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-5</p>
-<p style="position:absolute;left:383px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-4</p>
-<p style="position:absolute;left:476px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-3</p>
-<p style="position:absolute;left:569px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-2</p>
-<p style="position:absolute;left:661px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">-1</p>
-<p style="position:absolute;left:754px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
-<p style="position:absolute;left:847px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">+1</p>
-<p style="position:absolute;left:940px;top:278px;width:80px;font-size:24px;text-align:center;color:#5E6675">+2</p>
-<p style="position:absolute;left:549px;top:50px;width:360px;font-size:24px;font-weight:700;color:#A84A16">[-2.32, -0.68]</p>
-<p style="position:absolute;left:415px;top:160px;width:420px;font-size:24px;font-weight:700;color:#255E9E">[-4.09, +1.09]</p>
+<div style="position:relative;width:980px;height:340px">
+<svg aria-label="차이 −1.5 dB의 95% 구간 막대 둘. 점(차이)은 같은 자리이고, 칸 수로 세면 [-2.32, -0.68]로 좁아 0의 왼쪽에만 있고, 유효 표본으로 세면 [-4.09, +1.09]로 넓어 0을 걸친다" style="position:absolute;left:0px;top:0px;width:980px;height:340px" width="980" height="340" viewBox="0 0 980 340"><line x1="766" y1="30" x2="766" y2="290" stroke="#14213D" stroke-width="3"/><line x1="280" y1="290" x2="960" y2="290" stroke="#5E6675" stroke-width="2"/><line x1="540" y1="100" x2="700" y2="100" stroke="#A84A16" stroke-width="10" stroke-linecap="round"/><circle cx="620" cy="100" r="11" fill="#F5F3EE" stroke="#A84A16" stroke-width="5"/><line x1="368" y1="220" x2="872" y2="220" stroke="#255E9E" stroke-width="10" stroke-linecap="round"/><circle cx="620" cy="220" r="11" fill="#F5F3EE" stroke="#255E9E" stroke-width="5"/></svg>
+<p style="position:absolute;left:0px;top:83px;width:260px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">칸 수로 셈<br>(300 · 900)</p>
+<p style="position:absolute;left:0px;top:203px;width:260px;font-size:24px;text-align:right;font-weight:700;color:#255E9E">유효 표본으로 셈<br>(30 · 90)</p>
+<p style="position:absolute;left:240px;top:298px;width:80px;font-size:24px;text-align:center;color:#5E6675">-5</p>
+<p style="position:absolute;left:337px;top:298px;width:80px;font-size:24px;text-align:center;color:#5E6675">-4</p>
+<p style="position:absolute;left:434px;top:298px;width:80px;font-size:24px;text-align:center;color:#5E6675">-3</p>
+<p style="position:absolute;left:531px;top:298px;width:80px;font-size:24px;text-align:center;color:#5E6675">-2</p>
+<p style="position:absolute;left:629px;top:298px;width:80px;font-size:24px;text-align:center;color:#5E6675">-1</p>
+<p style="position:absolute;left:726px;top:298px;width:80px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:823px;top:298px;width:80px;font-size:24px;text-align:center;color:#5E6675">+1</p>
+<p style="position:absolute;left:920px;top:298px;width:80px;font-size:24px;text-align:center;color:#5E6675">+2</p>
+<p style="position:absolute;left:314px;top:36px;width:440px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">[-2.32, -0.68] — 0을 안 넘음</p>
+<p style="position:absolute;left:368px;top:156px;width:520px;font-size:24px;font-weight:700;color:#255E9E">[-4.09, +1.09] — 0을 걸침</p>
+<p style="position:absolute;left:314px;top:0px;width:440px;font-size:24px;text-align:right;color:#5E6675">점 = 차이 −1.5 dB (둘 다 같다)</p>
+<p style="position:absolute;left:774px;top:256px;width:120px;font-size:24px;font-weight:700;color:#14213D">← 0</p>
 </div>
-<div style="flex:1;display:flex;flex-direction:column;gap:10px">
-<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">같은 차이 −1.5 dB</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칸 수, 중앙값, 흩어짐은 앞 쪽과 같고 차이만 작다</p></div>
-<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">칸 수로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SE 0.418 dB → supported — <b>틀린 확신</b></p></div>
-<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">유효 표본으로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SE 1.321 dB → not_distinguished — 이 주행으로는 못 가른다</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">읽는 법</p><p style="font-size:24px;line-height:1.4;color:#4A5262">점 = 차이(둘 다 −1.5 dB) · 막대 = 95% 구간<br>0을 넘지 않으면 supported, 0을 걸치면 not_distinguished</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">칸 수로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칸 1,200개를 모두 독립으로 셈 → SE 0.418 dB → 0을 안 넘음 → supported — <b>틀린 확신</b></p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">유효 표본으로 세면</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이웃 칸은 같은 음영 → 독립 증거 30 · 90 → SE 1.321 dB → 0을 걸침 → <b>이 주행으로는 모른다</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">비유</p><p style="font-size:24px;line-height:1.4;color:#4A5262">같은 사람에게 열 번 묻고 “열 명에게 물었다”고 세는 것</p></div>
 </div>
 </div>
-<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 효과가 클 때(−3.8 dB)는 어느 쪽으로 세도 supported — 차이는 효과가 작을 때 드러난다 → 칸 수로 세면 작은 효과를 모두 “있다”고 말한다</p>
-<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">숫자는 설명용 예시 (실측 아님) · 정규 근사 · 출처: 공변량 문서 §3-4</p>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 차이(점)는 그대로, 구간 폭만 √10 ≈ 3배 — 효과가 크면(10쪽 −3.8 dB) 결론이 같고 작으면 갈린다 → 칸 수로 세면 작은 효과를 다 “있다”고 말한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">숫자는 설명용 예시 (실측 아님) · 판정 대상은 공변량이 아니라 가설(요인) · 정규 근사 · 출처: 공변량 문서 §3-4</p>
 <p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 15</p>
-<aside>(약 45초) 칸 수로 잘못 세면 무슨 일이 생기는지는 효과가 작을 때 드러납니다. 같은 조건에서 차이만 −1.5 dB라고 해 보겠습니다. 칸 수 300과 900으로 세면 표준오차가 0.418 dB라 구간이 -2.32에서 -0.68로 좁아져 supported, 하지만 이것은 틀린 확신입니다. 유효 표본 30과 90으로 세면 구간이 -4.09에서 +1.09로 0을 걸쳐 not_distinguished, 이 주행으로는 못 가른다는 정직한 답이 됩니다. 효과가 −3.8처럼 크면 어느 쪽이든 supported지만, 작은 효과에서는 세는 법이 판정을 바꿉니다.</aside>
+<aside>(약 50초) 이 쪽은 같은 데이터라도 증거 개수를 어떻게 세느냐에 따라 결론이 뒤집힌다는 이야기입니다. 앞 쪽과 같은 조건에서 차이만 −1.5 dB로 작다고 해 보겠습니다. 두 막대의 점, 즉 차이는 둘 다 −1.5 dB로 같습니다. 다른 것은 막대의 길이, 95% 구간입니다. 판단 기준은 하나입니다. 구간이 0을 넘지 않으면 supported, 0을 걸치면 not_distinguished입니다. 칸 1,200개를 모두 독립된 증거로 세면 표준오차가 0.418 dB라 구간이 0의 왼쪽에만 있어 supported가 나옵니다. 하지만 이웃 칸은 같은 음영을 공유하므로 실제 독립 증거는 30과 90 정도이고, 그렇게 세면 표준오차가 1.321 dB, 구간이 0을 걸쳐 이 주행으로는 모른다가 정직한 답입니다. 같은 사람에게 열 번 묻고 열 명에게 물었다고 세는 것과 같습니다. 효과가 −3.8 dB처럼 크면 어느 쪽으로 세도 결론이 같지만, 작을 때는 세는 법이 판정을 바꿉니다. 덧붙여, 여기서 판정하는 것은 공변량이 아니라 수목이 차이를 만든다는 가설입니다.</aside>
 </section>
 <section id="ladder" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
 <div style="display:flex;flex-direction:column;gap:16px">
