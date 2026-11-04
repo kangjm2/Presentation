@@ -18,6 +18,7 @@
     "verdicts",
     "example",
     "countneff",
+    "nextstep",
     "ladder",
     "pitfalls",
     "status",
@@ -37,8 +38,8 @@
       "start": "steps"
     },
     "where": {
-      "description": "세 갈래 안의 자리, 함정, 지금 상태, 정리",
-      "start": "ladder"
+      "description": "판정 뒤 다음 행동, 세 갈래 안의 자리, 함정, 지금 상태, 정리",
+      "start": "nextstep"
     }
   },
   "faces": {
