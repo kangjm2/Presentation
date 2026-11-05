@@ -1,0 +1,28 @@
+<section id="orient" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">④ 계산 · 방향</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">기계 틸트는 회전으로, 전기 틸트는 패턴 모양으로</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:470px">
+<svg aria-label="왼쪽은 위에서 본 나침반: 북쪽 기준 시계 방향 방위각 120°가 동쪽 기준 반시계 yaw -30°와 같은 방향. 오른쪽은 옆에서 본 그림: 수평선 아래로 기운 주엽 축" style="position:absolute;left:0px;top:0px;width:860px;height:470px" width="860" height="470" viewBox="0 0 860 470"><circle cx="210" cy="230" r="160" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="3"/><line x1="210.0" y1="230.0" x2="210.0" y2="72.0" stroke="#14213D" stroke-width="3"/><polygon points="210.0,60.0 204.0,72.0 216.0,72.0" fill="#14213D"/><line x1="210.0" y1="230.0" x2="368.0" y2="230.0" stroke="#5E6675" stroke-width="3" stroke-dasharray="6 5"/><polygon points="380.0,230.0 368.0,224.0 368.0,236.0" fill="#5E6675"/><line x1="210.0" y1="230.0" x2="326.0" y2="297.0" stroke="#A84A16" stroke-width="6"/><polygon points="341.6,306.0 330.5,289.2 321.5,304.8" fill="#A84A16"/><path d="M210 160 A70 70 0 0 1 270.6 265.0" fill="none" stroke="#14213D" stroke-width="4"/><path d="M320 230 A110 110 0 0 1 305.3 285.0" fill="none" stroke="#255E9E" stroke-width="4" stroke-dasharray="7 5"/><line x1="520" y1="410" x2="850" y2="410" stroke="#EAE7DF" stroke-width="4"/><rect x="530" y="240" width="16" height="170" fill="#5E6675"/><rect x="546" y="220" width="14" height="70" rx="4" fill="#14213D"/><line x1="560" y1="255" x2="850" y2="255" stroke="#5E6675" stroke-width="3" stroke-dasharray="6 5"/><line x1="560.0" y1="255.0" x2="823.9" y2="320.8" stroke="#A84A16" stroke-width="6"/><polygon points="841.4,325.2 826.1,312.1 821.7,329.5" fill="#A84A16"/></svg>
+<p style="position:absolute;left:180px;top:18px;width:60px;font-size:24px;text-align:center;font-weight:700;color:#14213D">N</p>
+<p style="position:absolute;left:386px;top:180px;width:50px;font-size:24px;font-weight:700;color:#5E6675">E</p>
+<p style="position:absolute;left:60px;top:118px;width:140px;font-size:24px;line-height:1.25;text-align:right;color:#14213D;font-weight:700">방위각<br>120°</p>
+<p style="position:absolute;left:390px;top:236px;width:120px;font-size:24px;line-height:1.25;color:#255E9E;font-weight:700">yaw<br>-30°</p>
+<p style="position:absolute;left:0px;top:410px;width:430px;font-size:24px;text-align:center;color:#5E6675">위에서 본 그림 · 방위 시계 · yaw 반시계</p>
+<p style="position:absolute;left:520px;top:140px;width:340px;font-size:24px;font-weight:700;color:#14213D">옆에서 본 그림</p>
+<p style="position:absolute;left:640px;top:335px;width:220px;font-size:24px;line-height:1.25;color:#A84A16;font-weight:700">pitch = +6°<br>(아래로)</p>
+<p style="position:absolute;left:520px;top:426px;width:340px;font-size:24px;text-align:center;color:#5E6675">기울기는 보이게 키워 그림</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">방향 = [yaw = 90° − 방위각,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pitch = +기계 틸트,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roll = 0]</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">yaw</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Sionna는 동쪽 기준 반시계 · 방위각은 북쪽 기준 시계 → 예: 방위 120° = yaw -30°</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">pitch (ADR 0070)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">+ 면 아래를 향한다 — downtilt_deg를 그대로</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">전기 틸트는 더하지 않는다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">파일의 TILT 줄 = “몇 도 틸트된 버전인지” 표시 · 그 틸트는 이미 수직 단면에 들어 있다 → 회전으로 또 더하면 두 번 · 라이브러리는 대신 measured_downtilt_deg를 보여 준다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림의 방위 120° · 틸트 6°는 예시 · 출처: CF 문서 §4-3 · ADR 0070</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 15</p>
+<aside>(약 50초) 송신 배열의 방향입니다. 방향은 yaw, pitch, roll 세 값으로 정합니다. Sionna의 yaw는 동쪽 기준 반시계 방향이고, 우리 방위각은 북쪽 기준 시계 방향이라 yaw는 90도 빼기 방위각입니다. 예를 들어 방위 120도면 yaw는 -30도입니다. pitch에는 기계 틸트를 그대로 넣고, 플러스면 아래를 향합니다. ADR 0070입니다. 중요한 점은 전기 틸트를 더하지 않는다는 것입니다. 벤더 파일의 TILT 줄은 이 파일이 몇 도로 전기 틸트된 버전인지를 적은 것이고, 그 틸트는 이미 수직 단면 모양에 들어 있습니다. 회전으로 또 더하면 두 번 적용됩니다. 그래서 라이브러리는 파일의 TILT 값 대신 패턴에서 실제로 측정한 틸트를 보여 줍니다.</aside>
+</section>

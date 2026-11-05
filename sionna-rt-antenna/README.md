@@ -15,6 +15,7 @@ Sionna RT에서 안테나의 물리적 특성을 정하는 파라미터를 설�
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py sionna-rt-antenna`로 뷰어를 다시 만듭니다.
 - 입력 전체 지도는 [`../sionna-rt-inputs/`](../sionna-rt-inputs/) 덱, 그중 5쪽(안테나 배열)을 자세히 푼 자료입니다.
+- CF 빌드에서 실제 패턴 파일이 PlanarArray · 경로 계수 a로 들어가는 과정은 [`../cf-antenna-pattern/`](../cf-antenna-pattern/) 덱에 있습니다.
 
 ## 구성 (≈ 9분 40초)
 
