@@ -17,6 +17,6 @@
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">이득이지 전력이 아니다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">경로 계산에 송신 전력은 없다 → 전력(포트 전력 − 급전 손실)은 /meta tx_power_dbm_per_cell, 수신 전력 계산 때 더함</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 §5 · 스키마 configs/h5_schema.yaml</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 15</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 18</p>
 <aside>(약 55초) CIR입니다. 경로마다 Sionna가 복소 계수 a를 계산하는데, a에는 경로 손실과 반사, 회절, 투과 계수, 송신 소자 패턴의 출발각 값과 수신 소자 패턴의 도착각 값, 그리고 편파 모델과 소자 위치에 따른 위상이 모두 들어 있습니다. 패턴이 들어가는 자리는 여기 하나이고, CF는 RT가 끝난 뒤 a를 패턴으로 다시 조정하지 않습니다. 저장 형태는 h5 스키마에 있습니다. cir a는 셀, 격자점, 경로, 수신 안테나, 송신 안테나, I/Q 축의 RT 원값이고, a served는 보정을 적용한 값, tau는 절대 지연으로 음수면 채움용 무효 경로입니다. paths에는 경로별 각도와 상호작용이 있습니다. 그리고 이 값들은 이득입니다. 송신 전력은 meta의 tx_power_dbm_per_cell에 따로 기록되고, 수신 전력을 계산할 때 더해집니다.</aside>
 </section>

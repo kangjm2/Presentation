@@ -20,6 +20,9 @@
     "cfr",
     "nobf",
     "weights",
+    "beammake",
+    "beamuse",
+    "beamcheck",
     "points",
     "summary"
   ],
