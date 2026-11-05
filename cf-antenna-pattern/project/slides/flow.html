@@ -11,6 +11,6 @@
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">CF가 하지 않는 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">빔포밍(가중치 곱) · 배열 이득 — 원하면 빔 패턴을 쓰거나 H @ w를 직접 (12 · 13쪽)</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 “안테나 패턴이 빌드(CIR/CFR)에 쓰이는 방식” §1 — 이 덱의 모든 내용은 이 문서를 옮긴 것</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 15</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 18</p>
 <aside>(약 50초) 전체 흐름입니다. 먼저 Antennas 페이지에서 파일을 가져오면 라이브러리 레코드가 됩니다. Planner에서 섹터가 패턴을 고르면 요청에 lib 접두어가 붙은 패턴 이름이 들어가고, 요청을 확정할 때 패턴 개정판 번호가 붙어 job id, 즉 캐시 키에 들어갑니다. 계산하는 worker에서는 레코드를 Sionna 안테나 패턴으로 등록하고, 배열을 만들고, 송신기 방향을 정한 뒤 경로를 찾습니다. 결과로 경로마다 패턴이 포함된 복소 계수 a와 지연 tau가 나오고, 이것이 CIR입니다. CFR은 이를 주파수별로 합한 뒤 보정 레이어를 곱해 저장합니다. 핵심은 패턴이 Sionna가 계산하는 a 안에 들어간다는 것, 그리고 CF가 빔포밍이나 배열 이득을 따로 더하지 않는다는 것입니다.</aside>
 </section>

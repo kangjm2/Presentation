@@ -18,6 +18,6 @@
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">계산이 읽지 않는 값</p><p style="font-size:24px;line-height:1.4;color:#4A5262">frequency_mhz · polarization · electrical_tilt_deg<br>→ 다른 대역 패턴도 그대로 쓰이고, 편파는 요청에서 정한다</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 §2 · 레코드 위치 data/antennas/&lt;id&gt;.json</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 15</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 18</p>
 <aside>(약 55초) 등록부터 보겠습니다. 받아들이는 형식은 셋입니다. MSI나 Planet 계열은 수평과 수직 단면 두 개를 1도 간격 360점의 감쇠 dB로 저장합니다. NGMN BASTA는 천정각 181, 방위 360의 3D 격자로 저장합니다. 벤더 가중치 파일은 빔마다 3D 격자 레코드와 포트 레코드를 만듭니다. 이건 13쪽에서 다시 봅니다. 이득은 숫자만 있으면 dBd로 보고 2.15 dB를 더해 dBi로 바꿉니다. BASTA는 Co와 Cross 편파를 선형 전력으로 합쳐 하나의 패턴으로 만들고 최대값을 0 dB로 맞춥니다. 중요한 것은 계산에 실제로 쓰이는 값이 일곱 개뿐이라는 점입니다. 파일에 적힌 주파수, 편파, 전기 틸트는 계산이 읽지 않습니다. 그래서 다른 대역에서 잰 패턴도 그대로 쓰이고, 편파는 요청에서 정합니다.</aside>
 </section>

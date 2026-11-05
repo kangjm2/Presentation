@@ -21,6 +21,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림의 경로 4개는 예시(생성기에서 계산) · 출처: CF 문서 §6 · B = bandwidth_hz, N = num_subcarriers</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 15</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 18</p>
 <aside>(약 50초) CFR은 경로를 주파수로 합성한 것입니다. 반송파를 기준으로 대역폭 B를 부반송파 N개로 나누고, 경로마다 a에 지연에 따른 위상 회전을 곱해 모두 더합니다. 지연이 음수인 무효 경로는 0으로 처리합니다. 패턴은 이미 a 안에 들어 있고 반송파 주파수에서 한 번 계산되므로, 모든 부반송파에 같은 패턴 이득이 적용됩니다. 그림 예시는 경로 네 개를 100 MHz, 부반송파 400개로 합성한 것인데, 대역 안 기복 -24.5에서 +6.4 dB는 패턴이 아니라 지연 차이에서만 생깁니다. CFR을 만든 뒤에는 레벨 오프셋, 수목 감쇠, 실내 투과, 날씨, 클러터, 확산 꼬리 같은 보정 레이어가 링크별로 곱해집니다. 모두 진폭 보정이고 패턴과는 관계없습니다. cir a는 늘 RT 원값으로 남고, 보정한 값은 a served와 cfr H에 들어갑니다.</aside>
 </section>

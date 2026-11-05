@@ -10,6 +10,6 @@
 <div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">왜 중요한가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">패턴 파일만 고치고 다시 돌렸는데 결과가 그대로라면? — 개정판 없이는 캐시가 옛 결과를 돌려준다</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 §2 (개정판 pattern_rev)</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 15</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 18</p>
 <aside>(약 40초) 같은 id로 다른 패턴을 다시 가져오면 개정판 번호가 하나 올라갑니다. 빌드 요청에 이 번호가 붙고 job id, 즉 캐시 키에 들어가므로, 패턴 내용이 바뀌면 이전 계산 결과를 재사용하지 않습니다. 개정판 0은 키에서 빠지기 때문에 예전 키는 그대로 유지됩니다. 그리고 요청이 키로 만들어진 뒤에 패턴이 또 바뀌면 계산 시점에 오류로 막습니다. 다른 패턴으로 계산한 결과가 같은 키에 섞이지 않게 하려는 것입니다. 패턴 파일만 고치고 다시 돌렸는데 결과가 그대로인 상황을 막는 장치입니다.</aside>
 </section>

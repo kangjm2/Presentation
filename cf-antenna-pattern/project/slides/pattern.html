@@ -22,6 +22,6 @@
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림: 38.901 모양(빔폭 65°, 단면 바닥 30 dB)으로 만든 두 단면의 예시 — 실제 측정 패턴 아님 · 출처: CF 문서 §4-1</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 15</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 18</p>
 <aside>(약 55초) 이제 패턴이 Sionna에 들어가는 방식입니다. 레코드는 lib 접두어 이름의 Sionna 안테나 패턴으로 등록되고, Sionna가 경로의 각도를 넣으면 패턴 함수가 값을 돌려줍니다. 주의할 점은 돌려주는 값이 전력이 아니라 전계 진폭, 즉 전력의 제곱근이라는 것입니다. MSI처럼 2D 단면 두 개만 있으면, 최대 이득에서 수평 감쇠와 수직 감쇠를 dB로 빼서 3D를 만듭니다. 선형으로는 두 단면을 곱하는 셈입니다. 3D 격자는 쌍선형 보간합니다. 오른쪽 그림은 38.901 모양의 단면으로 만든 예시입니다. MSI 방식은 두 단면 위에서는 정확하지만, 대각선 방향에서는 감쇠가 그대로 더해져, 예를 들어 방위 100도 앙각 48도에서 34 dB가 됩니다. 3GPP 패턴은 같은 방향에서 30 dB 바닥에서 멈춥니다. 그래서 MSI 재구성은 근사이고, 주엽 바깥 대각선 방향에서 감쇠를 실제보다 크게 잡습니다. BASTA 같은 3D 격자에는 이런 근사가 없습니다.</aside>
 </section>
