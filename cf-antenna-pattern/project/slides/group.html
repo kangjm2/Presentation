@@ -1,0 +1,33 @@
+<section id="group" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">④ 계산 · 섹터마다 안테나가 다를 때 (ADR 0079)</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">같은 안테나끼리 묶어 따로 추적하고, 순서대로 합친다</h2>
+</div>
+<div style="position:relative;width:1340px;height:390px">
+<svg aria-label="섹터 다섯 개 중 안테나 A 셋과 B 둘이 각각 묶여 따로 추적되고, 결과가 송신기 순서대로 다시 합쳐진다. 경로 수가 적은 B 묶음은 37개까지 무효 경로로 채운다" style="position:absolute;left:0px;top:0px;width:1340px;height:390px" width="1340" height="390" viewBox="0 0 1340 390"><rect x="0" y="50" width="200" height="52" rx="12" fill="#D5E3F3"/><rect x="0" y="116" width="200" height="52" rx="12" fill="#D5E3F3"/><rect x="0" y="182" width="200" height="52" rx="12" fill="#F7DDCB"/><rect x="0" y="248" width="200" height="52" rx="12" fill="#D5E3F3"/><rect x="0" y="314" width="200" height="52" rx="12" fill="#F7DDCB"/><rect x="330" y="60" width="280" height="110" rx="12" fill="#255E9E"/><rect x="330" y="250" width="280" height="110" rx="12" fill="#A84A16"/><line x1="204.0" y1="76.0" x2="314.5" y2="111.9" stroke="#255E9E" stroke-width="3"/><polygon points="324.0,115.0 316.0,107.2 312.9,116.7" fill="#255E9E"/><line x1="204.0" y1="142.0" x2="314.2" y2="117.2" stroke="#255E9E" stroke-width="3"/><polygon points="324.0,115.0 313.1,112.3 315.3,122.1" fill="#255E9E"/><line x1="204.0" y1="208.0" x2="316.2" y2="298.7" stroke="#A84A16" stroke-width="3"/><polygon points="324.0,305.0 319.4,294.8 313.1,302.6" fill="#A84A16"/><line x1="204.0" y1="274.0" x2="318.0" y2="123.0" stroke="#255E9E" stroke-width="3"/><polygon points="324.0,115.0 314.0,120.0 322.0,126.0" fill="#255E9E"/><line x1="204.0" y1="340.0" x2="314.4" y2="307.8" stroke="#A84A16" stroke-width="3"/><polygon points="324.0,305.0 313.0,303.0 315.8,312.6" fill="#A84A16"/><rect x="760" y="50" width="560" height="52" rx="6" fill="#D5E3F3"/><rect x="760" y="116" width="560" height="52" rx="6" fill="#D5E3F3"/><rect x="760" y="182" width="333" height="52" rx="6" fill="#F7DDCB"/><rect x="1093" y="182" width="227" height="52" rx="6" fill="none" stroke="#5E6675" stroke-width="2" stroke-dasharray="6 5"/><rect x="760" y="248" width="560" height="52" rx="6" fill="#D5E3F3"/><rect x="760" y="314" width="333" height="52" rx="6" fill="#F7DDCB"/><rect x="1093" y="314" width="227" height="52" rx="6" fill="none" stroke="#5E6675" stroke-width="2" stroke-dasharray="6 5"/><line x1="614.0" y1="115.0" x2="742.2" y2="140.1" stroke="#255E9E" stroke-width="3"/><polygon points="752.0,142.0 743.1,135.2 741.2,145.0" fill="#255E9E"/><line x1="614.0" y1="305.0" x2="742.2" y2="276.2" stroke="#A84A16" stroke-width="3"/><polygon points="752.0,274.0 741.1,271.3 743.3,281.1" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:60px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">tx 0 · 안테나 A</p>
+<p style="position:absolute;left:0px;top:126px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">tx 1 · 안테나 A</p>
+<p style="position:absolute;left:0px;top:192px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">tx 2 · 안테나 B</p>
+<p style="position:absolute;left:0px;top:258px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">tx 3 · 안테나 A</p>
+<p style="position:absolute;left:0px;top:324px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">tx 4 · 안테나 B</p>
+<p style="position:absolute;left:330px;top:78px;width:280px;font-size:24px;text-align:center;line-height:1.35;font-weight:700;color:#F5F3EE">묶음 A · 따로 추적<br>최대 경로 37개</p>
+<p style="position:absolute;left:330px;top:268px;width:280px;font-size:24px;text-align:center;line-height:1.35;font-weight:700;color:#F5F3EE">묶음 B · 따로 추적<br>최대 경로 22개</p>
+<p style="position:absolute;left:772px;top:60px;width:220px;font-size:24px;font-weight:700;color:#255E9E">tx 0</p>
+<p style="position:absolute;left:772px;top:126px;width:220px;font-size:24px;font-weight:700;color:#255E9E">tx 1</p>
+<p style="position:absolute;left:772px;top:192px;width:220px;font-size:24px;font-weight:700;color:#A84A16">tx 2</p>
+<p style="position:absolute;left:772px;top:258px;width:220px;font-size:24px;font-weight:700;color:#255E9E">tx 3</p>
+<p style="position:absolute;left:772px;top:324px;width:220px;font-size:24px;font-weight:700;color:#A84A16">tx 4</p>
+<p style="position:absolute;left:1103px;top:192px;width:217px;font-size:24px;text-align:center;color:#5E6675">채움 (tau &lt; 0)</p>
+<p style="position:absolute;left:760px;top:10px;width:560px;font-size:24px;text-align:center;font-weight:700;color:#14213D">송신기 순서로 합침 · 경로 축 37</p>
+<p style="position:absolute;left:0px;top:10px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#14213D">섹터 (tx 순서)</p>
+<p style="position:absolute;left:330px;top:10px;width:280px;font-size:24px;text-align:center;font-weight:700;color:#14213D">Sionna 추적</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">왜 묶나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Sionna는 씬 하나에 송신 배열을 하나만 둔다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">“같은 안테나”</p><p style="font-size:24px;line-height:1.4;color:#4A5262">패턴 · 편파 · 배열(행 · 열) · 간격이 모두 같을 때</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">섞을 수 없는 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">소자 수가 다른 배열 — 결과의 송신 안테나 축(bs_ant)이 하나여야 한다 → 요청 단계에서 거부</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림의 섹터 구성과 경로 수(37 · 22)는 예시 · 출처: CF 문서 §4-4 · ADR 0079</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 15</p>
+<aside>(약 45초) 섹터마다 안테나가 다를 수 있습니다. 그런데 Sionna는 씬 하나에 송신 배열을 하나만 둡니다. 그래서 패턴, 편파, 배열, 간격이 모두 같은 섹터끼리 묶어 따로 추적한 뒤, 결과를 원래 송신기 순서대로 합칩니다. ADR 0079입니다. 그림 예시에서 A 묶음은 경로가 최대 37개, B 묶음은 22개라면, B 쪽은 37개까지 무효 경로로 채웁니다. 무효 경로는 지연을 음수로 둬서 표시합니다. 다만 결과 채널의 송신 안테나 축이 하나여야 하므로, 소자 수가 다른 배열은 한 빌드에 섞을 수 없고 요청 단계에서 거부됩니다.</aside>
+</section>

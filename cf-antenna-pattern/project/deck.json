@@ -1,0 +1,63 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-05T12:00:00Z"
+  },
+  "lists": "css",
+  "title": "안테나 패턴은 CIR · CFR에 어떻게 들어가나",
+  "order": [
+    "cover",
+    "flow",
+    "register",
+    "revision",
+    "request",
+    "pattern",
+    "array",
+    "orient",
+    "group",
+    "cir",
+    "cfr",
+    "nobf",
+    "weights",
+    "points",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "한 줄 요약과 전체 흐름 ①–⑥",
+      "start": "cover"
+    },
+    "register": {
+      "description": "등록과 요청: 형식, 쓰는 값, 개정판, AntennaConfig",
+      "start": "register"
+    },
+    "compute": {
+      "description": "계산: 패턴 함수, 배열, 방향, 섹터별 묶음",
+      "start": "pattern"
+    },
+    "result": {
+      "description": "결과: CIR 경로 계수 a와 CFR 합성",
+      "start": "cir"
+    },
+    "beam": {
+      "description": "CF가 하지 않는 것(빔포밍 · 배열 이득), 가중치 파일, 포인트, 정리",
+      "start": "nobf"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

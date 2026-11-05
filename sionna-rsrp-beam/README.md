@@ -15,7 +15,7 @@ Sionna RT로 계산한 RSRP를 실측 SS-RSRP와 비교할 때 빔을 어떻게 
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별, 부록 포함)
 - 가중치 파일 · 안테나 데이터 설명을 읽을 때: [`glossary.md` 13절](glossary.md#13-가중치-파일-설명을-읽을-때) (자주 나오는 문장 → 뜻 → 쪽)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py sionna-rsrp-beam`로 뷰어를 다시 만듭니다.
-- 관련 덱: [`ss-rsrp`](../ss-rsrp/) (빔에서 SS-RSRP까지) · [`sionna-rt-antenna`](../sionna-rt-antenna/) (Sionna 안테나 파라미터) · [`sionna-rt-inputs`](../sionna-rt-inputs/) · [`rf-modeling-tools`](../rf-modeling-tools/) (모델 보정)
+- 관련 덱: [`ss-rsrp`](../ss-rsrp/) (빔에서 SS-RSRP까지) · [`sionna-rt-antenna`](../sionna-rt-antenna/) (Sionna 안테나 파라미터) · [`cf-antenna-pattern`](../cf-antenna-pattern/) (CF 빌드는 빔포밍 · 배열 이득을 하지 않음) · [`sionna-rt-inputs`](../sionna-rt-inputs/) · [`rf-modeling-tools`](../rf-modeling-tools/) (모델 보정)
 
 ## 구성 (본편 ≈ 15분 · 부록 ≈ 3분 35초)
 
