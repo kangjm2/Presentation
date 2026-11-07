@@ -126,7 +126,7 @@ body.fs.idle .stage { cursor: none }
 <div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">계산은 미리</p><p style="font-size:24px;line-height:1.4;color:#4A5262">화면은 계산하지 않는다 — 비교 번들을 구울 때<br>코어가 summary.trend에 넣은 값 → 같은 입력이면 같은 숫자</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §0 · §1 — 옛 비교 번들에 trend가 없으면 버튼이 서지 않는다 (다시 구우면 선다)</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 16</p>
 <aside>(약 55초) 문제 제기부터 하겠습니다. 비교 요약의 판정 숫자는 de-biased RMSE, 즉 편향을 뺀 뒤 남는 오차의 크기입니다. 이 숫자는 얼마나 틀렸는지는 알려 주지만 왜 틀렸는지는 알려 주지 않습니다. 같은 6.8 dB라도 거리가 멀수록 틀리는 것이면 경로손실이나 송신 출력을, 음영이 너무 깊거나 얕게 그려진 것이면 음영 모델의 세기를, 음영의 자리가 어긋난 것이면 지도와 좌표, 건물 배치를 봐야 합니다. Breakdown 화면은 판정 숫자를 거리 경향, 진폭, 패턴 세 갈래로 나눠 가장 큰 몫부터 고치도록 알려 줍니다. 비교 요약의 첫 제목 옆 Breakdown 버튼, 한국어 화면에서는 경향 버튼으로 열고, 비모달 창이라 옮겨 가며 볼 수 있습니다. 화면은 스스로 계산하지 않고, 비교 번들을 만들 때 코어가 미리 넣어 둔 값을 보여 줍니다. 그래서 같은 입력이면 늘 같은 숫자가 나옵니다.</aside>
 </section>
 <section id="defs" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -150,7 +150,7 @@ body.fs.idle .stage { cursor: none }
 <div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:260px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">A/B · 시뮬 대 시뮬</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">A</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">B</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §1 — 판정 숫자와 Breakdown은 같은 칸을 쓴다</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 16</p>
 <aside>(약 55초) 먼저 정의입니다. 그림마다 어느 층의 데이터를 쓰는지 꼬리표가 붙습니다. T0는 위치를 보지 않고 두 쪽 값의 분포 전체를 맞댑니다. 아무것도 필요 없어 늘 그릴 수 있습니다. T1은 RU에서의 거리 구간별 잔차로, RU 위경도가 필요합니다. T2는 같은 격자 칸끼리 짝지은 값으로, 기본 20 m 격자이고 두 쪽 모두 위경도가 있어야 합니다. 칸 하나의 값은 그 칸에 들어온 표본의 중앙값이고, 칸 오차는 둘째 중앙값 빼기 첫째 중앙값입니다. 표본이 기본 3개 이상인 칸만 쓰고, 첫째가 시뮬레이션 지점이면 1개면 됩니다. 판정 숫자와 Breakdown은 같은 칸을 씁니다. 부호도 중요합니다. 오차는 둘째 빼기 첫째이고, 시뮬 대 실측 비교라면 Simulated 빼기 Measured라서 양수면 시뮬이 높다는 뜻입니다. A/B나 시뮬 대 시뮬 비교에서는 A가 첫째, B가 둘째입니다.</aside>
 </section>
 <section id="layout" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -172,7 +172,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">빈자리</b> 그릴 수 없는 그림은 비우고 그 자리에만 까닭 한 줄 — “그리지 못한 것”과 “0인 것”은 다르다 (ADR-HUB-3)</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §2 · §3 · §7 — 예: RSRP · Measured vs Simulated · grid 20 m · 1,204 cells</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 16</p>
 <aside>(약 50초) 화면은 위에서 아래로 일곱 부분입니다. 맨 위 머리 줄에는 물리량, 첫째 대 둘째, 격자 크기와 칸 수가 적힙니다. 예를 들어 RSRP, Measured vs Simulated, 20 m 격자, 1,204칸입니다. 격자와 칸 수는 칸 짝, 즉 T2가 있을 때만 나옵니다. 그 아래 숫자 타일 다섯 개가 있고, 그 아래 한 줄이 구간 계산에 쓴 유효 표본 수를 알려 줍니다. 다음이 핵심인 Error breakdown 가로 띠이고, 맨 아래에 Taylor diagram, 거리 대 잔차, 분포 모양 그림 세 개가 있습니다. 한 가지 규칙을 기억해 주세요. 그릴 수 없는 그림은 비워 두고 그 자리에만 까닭을 한 줄 적습니다. 그리지 못한 것과 값이 0인 것은 전혀 다른 의미이기 때문입니다.</aside>
 </section>
 <section id="tiles" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -188,8 +188,82 @@ body.fs.idle .stage { cursor: none }
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">예</b> c₁ = +4.2 dB/decade → 경로손실 지수 차 Δn ≈ 0.42 · 오차가 거리와 함께 커진다 = 시뮬의 거리 감쇠가 더 완만하다</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §4 · 타일 값은 §8 예시</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 16</p>
 <aside>(약 60초) 숫자 타일 다섯 개는 역할이 셋으로 나뉩니다. 첫째 Bias는 칸 오차의 중앙값으로, 지도 전체가 일정하게 높거나 낮은 정도입니다. 보정 한 번으로 없앨 수 있는 오차라 기록만 하고 판정에는 쓰지 않아서 회색으로 보입니다. 둘째 de-biased RMSE가 판정 숫자로, 편향을 뺀 뒤 남는 오차를 짝지은 칸 전부로 계산합니다. 칸 짝이 없으면 거리 구간으로 계산하고 distance bins라고 적습니다. 나머지 셋이 진단 숫자입니다. α는 거리 경향을 뺀 국소 변동의 세기 비로, 1보다 크면 둘째가 더 출렁이고 작으면 음영을 밋밋하게 그립니다. r은 국소 변동끼리의 상관으로, 음영과 피크가 같은 자리에서 오르내리는지 봅니다. reach는 잡음 때문에 완벽한 트윈도 넘을 수 없는 상한입니다. c₁은 거리가 10배 될 때 오차가 몇 dB 변하는지로, 10 곱하기 경로손실 지수 차와 같습니다. 예시의 +4.2는 지수 차 약 0.42이고, 시뮬의 거리 감쇠가 더 완만하다는 뜻입니다. 진단 숫자 아래 괄호는 95% 구간입니다.</aside>
+</section>
+<section id="local" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">보충 · 국소 변동이란</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">칸 값 = 거리 경향 + 국소 변동</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:590px">
+<svg aria-label="가상 칸 6개의 실측(남색 원)과 시뮬(주황 사각) RSRP를 로그 거리 위에 찍고, 각자 회귀선을 그었다. 점에서 자기 선까지의 짧은 막대가 국소 변동. 실측 기울기 -35.3, 시뮬 -31.0 dB/decade" style="position:absolute;left:0px;top:0px;width:860px;height:590px" width="860" height="590" viewBox="0 0 860 590"><rect x="90" y="50" width="760" height="470" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="140" x2="850" y2="140" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="231" x2="850" y2="231" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="321" x2="850" y2="321" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="412" x2="850" y2="412" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="502" x2="850" y2="502" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="123" x2="850" y2="474" stroke="#14213D" stroke-width="4"/><line x1="90" y1="126" x2="850" y2="435" stroke="#A84A16" stroke-width="4" stroke-dasharray="12 8"/><line x1="118" y1="139" x2="118" y2="104" stroke="#14213D" stroke-width="3"/><line x1="132" y1="140" x2="132" y2="122" stroke="#A84A16" stroke-width="3"/><circle cx="118" cy="104" r="10" fill="#14213D"/><rect x="123" y="113" width="18" height="18" fill="#A84A16"/><line x1="239" y1="195" x2="239" y2="250" stroke="#14213D" stroke-width="3"/><line x1="253" y1="190" x2="253" y2="217" stroke="#A84A16" stroke-width="3"/><circle cx="239" cy="250" r="10" fill="#14213D"/><rect x="244" y="208" width="18" height="18" fill="#A84A16"/><line x1="392" y1="266" x2="392" y2="239" stroke="#14213D" stroke-width="3"/><line x1="406" y1="252" x2="406" y2="243" stroke="#A84A16" stroke-width="3"/><circle cx="392" cy="239" r="10" fill="#14213D"/><rect x="397" y="234" width="18" height="18" fill="#A84A16"/><line x1="534" y1="331" x2="534" y2="376" stroke="#14213D" stroke-width="3"/><line x1="548" y1="309" x2="548" y2="327" stroke="#A84A16" stroke-width="3"/><circle cx="534" cy="376" r="10" fill="#14213D"/><rect x="539" y="318" width="18" height="18" fill="#A84A16"/><line x1="655" y1="387" x2="655" y2="332" stroke="#14213D" stroke-width="3"/><line x1="669" y1="358" x2="669" y2="331" stroke="#A84A16" stroke-width="3"/><circle cx="655" cy="332" r="10" fill="#14213D"/><rect x="660" y="322" width="18" height="18" fill="#A84A16"/><line x1="808" y1="458" x2="808" y2="475" stroke="#14213D" stroke-width="3"/><line x1="822" y1="421" x2="822" y2="430" stroke="#A84A16" stroke-width="3"/><circle cx="808" cy="475" r="10" fill="#14213D"/><rect x="813" y="421" width="18" height="18" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:124px;width:80px;font-size:24px;text-align:right;color:#5E6675">−50</p>
+<p style="position:absolute;left:0px;top:305px;width:80px;font-size:24px;text-align:right;color:#5E6675">−70</p>
+<p style="position:absolute;left:0px;top:486px;width:80px;font-size:24px;text-align:right;color:#5E6675">−90</p>
+<p style="position:absolute;left:90px;top:8px;width:760px;font-size:24px;font-weight:700;color:#14213D">RSRP (dBm) · 칸 6개 (가상)</p>
+<p style="position:absolute;left:65px;top:526px;width:120px;font-size:24px;text-align:center;color:#5E6675">100 m</p>
+<p style="position:absolute;left:410px;top:526px;width:120px;font-size:24px;text-align:center;color:#5E6675">316 m</p>
+<p style="position:absolute;left:755px;top:526px;width:120px;font-size:24px;text-align:center;color:#5E6675">1 km</p>
+<p style="position:absolute;left:90px;top:560px;width:760px;font-size:24px;text-align:center;color:#5E6675">RU에서의 거리 (log 눈금)</p>
+<p style="position:absolute;left:553px;top:194px;width:300px;font-size:24px;line-height:1.3;font-weight:700;color:#A84A16">시뮬 경향<br>-31.0 dB/decade</p>
+<p style="position:absolute;left:125px;top:430px;width:300px;font-size:24px;line-height:1.3;font-weight:700;color:#14213D">실측 경향<br>-35.3 dB/decade</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">거리 경향</p><p style="font-size:24px;line-height:1.4;color:#4A5262">log₁₀(거리)에 그은 직선 — RU에서 멀어질수록 떨어지는 몫 · <b>두 쪽을 각자</b> 회귀</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">국소 변동 = 점 − 자기 직선</p><p style="font-size:24px;line-height:1.4;color:#4A5262">거리로는 설명이 안 되는 그 자리만의 오르내림 — 건물 음영 · 나무 · 반사 피크</p></div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">거리</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">실측 국소</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">시뮬 국소</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">100 m</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+3.9</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+2.0</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">150 m</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-6.1</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-3.0</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">250 m</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+3.0</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+1.0</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">400 m</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-5.0</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-2.0</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">600 m</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+6.1</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">+3.0</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">1000 m</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-1.9</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">-1.0</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">σ (국소)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">4.58 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">2.16 dB</p></div>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">가상 예: 칸 6개 · 실측 −35 · 시뮬 −31 dB/decade에 국소 변동을 더해 만든 값 — 실제 데이터 아님</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 16</p>
+<aside>(약 50초) 진단 숫자 셋을 이해하려면 먼저 국소 변동을 알아야 합니다. 가상의 칸 여섯 개로 보겠습니다. 가로축은 RU에서의 거리를 로그 눈금으로, 세로축은 RSRP입니다. 남색 원이 실측, 주황 사각이 시뮬입니다. RSRP는 멀어질수록 로그 거리에 비례해 떨어지므로, 두 쪽에 각각 직선을 긋습니다. 이것이 거리 경향이고, 실측은 10배 멀어질 때 35.3 dB, 시뮬은 31.0 dB 떨어집니다. 그런데 같은 거리라도 점이 직선 위아래로 흩어져 있습니다. 건물 음영, 나무, 반사 피크처럼 그 자리만의 사정 때문이고, 이 점과 자기 직선의 차이가 국소 변동입니다. 오른쪽 표처럼 실측 국소 변동의 표준편차는 4.58 dB, 시뮬은 2.16 dB입니다. 다음 쪽에서 이 숫자로 진단 셋을 직접 계산해 보겠습니다.</aside>
+</section>
+<section id="diag3" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">보충 · 진단 셋을 손으로 계산하면</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">α는 깊이, r은 자리, c₁은 거리 기울기</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">Amplitude α — 국소 변동의 비</p><p style="font-size:24px;line-height:1.35;color:#4A5262">σ(시뮬 국소) ÷ σ(실측 국소)</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">2.16 ÷ 4.58</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;font-weight:700;color:#255E9E">0.47</p><p style="font-size:24px;line-height:1.35;color:#4A5262">시뮬의 출렁임이 절반 — 음영을 얕게 그린다 · 크기만 보고 자리는 안 본다</p></div>
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">Local corr. r</p><p style="font-size:24px;line-height:1.35;color:#4A5262">corr(실측 국소, 시뮬 국소)</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">같은 칸에서 + − + − + −</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;font-weight:700;color:#255E9E">0.99</p><p style="font-size:24px;line-height:1.35;color:#4A5262">음영 · 피크가 같은 자리에서 오르내린다 · 자리만 보고 크기는 안 본다</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">Distance slope c₁</p><p style="font-size:24px;line-height:1.35;color:#4A5262">E = 시뮬 − 실측을 log₁₀(거리)에 회귀한 기울기</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">(-31.0) − (-35.3)</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;font-weight:700;color:#A84A16">+4.3</p><p style="font-size:24px;line-height:1.35;color:#4A5262">dB/decade → Δn ≈ 0.43 · 시뮬 감쇠가 완만 · 1 km에서 시뮬이 약 4.3 dB 높다</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:330px">
+<svg aria-label="칸 여섯 개의 국소 변동 막대. 실측과 시뮬이 같은 칸에서 같은 부호이고 시뮬 막대가 절반 크기. α 0.47, r 0.99" style="position:absolute;left:0px;top:0px;width:860px;height:330px" width="860" height="330" viewBox="0 0 860 330"><line x1="70" y1="165" x2="830" y2="165" stroke="#14213D" stroke-width="2"/><rect x="88" y="96" width="40" height="69" fill="#14213D"/><rect x="132" y="129" width="40" height="36" fill="#A84A16"/><rect x="215" y="165" width="40" height="109" fill="#14213D"/><rect x="259" y="165" width="40" height="54" fill="#A84A16"/><rect x="341" y="112" width="40" height="53" fill="#14213D"/><rect x="385" y="147" width="40" height="18" fill="#A84A16"/><rect x="468" y="165" width="40" height="89" fill="#14213D"/><rect x="512" y="165" width="40" height="36" fill="#A84A16"/><rect x="595" y="56" width="40" height="109" fill="#14213D"/><rect x="639" y="111" width="40" height="54" fill="#A84A16"/><rect x="721" y="165" width="40" height="33" fill="#14213D"/><rect x="765" y="165" width="40" height="18" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:42px;width:62px;font-size:24px;text-align:right;color:#5E6675">+6</p>
+<p style="position:absolute;left:0px;top:149px;width:62px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:256px;width:62px;font-size:24px;text-align:right;color:#5E6675">−6</p>
+<p style="position:absolute;left:70px;top:0px;width:760px;font-size:24px;font-weight:700;color:#14213D">국소 변동 (dB) · <span style="color:#14213D">■ 실측</span> · <span style="color:#A84A16">■ 시뮬</span> — 같은 칸에서 같은 부호, 크기는 절반</p>
+<p style="position:absolute;left:70px;top:294px;width:760px;font-size:24px;text-align:center;color:#5E6675">칸 100 m → 1 km</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;font-weight:700;color:#14213D">이 예의 Breakdown 띠 (cRMSE² = 8.1 dB²)</p>
+<div style="position:relative;width:760px;height:56px">
+<svg aria-label="가상 예의 띠: 거리 26%, 진폭 72%, 패턴 2%" style="position:absolute;left:0px;top:0px;width:760px;height:56px" width="760" height="56" viewBox="0 0 760 56"><rect x="0.0" y="0" width="169.4" height="56" fill="#14365E"/><rect x="169.4" y="0" width="460.6" height="56" fill="#255E9E"/><rect x="630.0" y="0" width="10.0" height="56" fill="#8DB8E8"/></svg>
+<p style="position:absolute;left:0px;top:14px;width:169px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">거리 26%</p>
+<p style="position:absolute;left:169px;top:14px;width:461px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">진폭 72%</p>
+<p style="position:absolute;left:630px;top:14px;width:10px;font-size:24px;text-align:center;font-weight:700;color:#14213D"></p>
+<p style="position:absolute;left:652px;top:14px;width:108px;font-size:24px;font-weight:700;color:#255E9E">패턴 2%</p>
+</div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#4A5262">거리 c₁² · var(log₁₀ d) = 2.2<br>진폭 (σb − σa)² = 5.9<br>패턴 2σaσb(1 − r) = 0.13</p>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">읽기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">진폭이 가장 크다 → 음영의 세기부터 (11쪽) · 자리는 맞으니(r ≈ 1) 좌표는 뒤로</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">앞쪽과 같은 가상 칸 6개로 계산 (생성기에서 numpy) · 식: Breakdown 화면 설명서 §4 · §6-0</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 16</p>
+<aside>(약 60초) 앞의 숫자로 진단 셋을 직접 계산해 보겠습니다. α는 국소 변동의 비입니다. 시뮬 국소 변동의 표준편차 2.16를 실측 4.58로 나누면 0.47, 시뮬의 출렁임이 실측의 절반이라 음영을 얕게 그린다는 뜻입니다. α는 크기만 보고 자리는 보지 않습니다. r은 두 국소 변동의 상관입니다. 아래 막대처럼 같은 칸에서 플러스, 마이너스가 똑같이 나오므로 r은 0.99입니다. r은 자리만 보고 크기는 보지 않습니다. 그래서 이 예는 음영 자리는 맞는데 깊이가 절반인 경우입니다. c₁은 칸 오차, 즉 시뮬 빼기 실측을 로그 거리에 회귀한 기울기이고, 두 쪽 기울기의 차와 같습니다. -31.0 빼기 -35.3로 +4.3 dB/decade, 경로손실 지수 차 약 0.43이고, 시뮬의 거리 감쇠가 완만해서 1 km에서는 시뮬이 약 4.3 dB 높습니다. 이 셋을 띠의 식에 넣으면 거리 2.2, 진폭 5.9, 패턴 0.13이고, 합이 정확히 오차의 분산 8.1입니다. 진폭 몫이 가장 크니 음영 모델의 세기부터 보면 됩니다.</aside>
 </section>
 <section id="detrend" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
 <div style="display:flex;flex-direction:column;gap:16px">
@@ -215,7 +289,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">근거</b> 설명서의 합성 데이터에서도 전역 α 1.0 · 국소 α 0.66 — 거리 경향이 국소 변동의 차이를 가려 버린다</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">가정 예: log₁₀ 거리 분산 0.2133 (50 m ~ 2 km 고르게) · 기울기 30 / 31.5 dB/decade · 국소 σ 6 / 4 dB · 설명서 §4 합성 예</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 16</p>
 <aside>(약 55초) 진단 숫자에서 가장 중요한 설계가 이것입니다. 거리 경향을 먼저 떼고 α와 r을 잽니다. 이유를 가정 예로 보겠습니다. 막대는 각 쪽의 분산을 거리 경향 부분과 국소 변동 부분으로 나눈 것입니다. 첫째, 실측은 거리 경향 192에 국소 36, 둘째, 시뮬은 거리 경향 212에 국소 16으로, 전체는 둘 다 228 정도로 같습니다. 그래서 전역 표준편차로 비를 내면 α가 1.00으로, 진폭이 멀쩡해 보입니다. 하지만 거리 경향을 떼고 남은 국소 변동을 보면 6 dB 대 4 dB, α가 0.67로, 시뮬이 음영을 얕게 그리고 있습니다. 거리 감쇠의 차이가 국소 변동의 차이를 가려 버린 것이죠. 설명서의 합성 데이터에서도 전역 α는 1.0, 국소 α는 0.66이었습니다. 그래서 화면은 두 쪽을 각자 거리에 회귀한 뒤, 남은 변동으로 α와 r을 잽니다.</aside>
 </section>
 <section id="neff" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -239,7 +313,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §5 · 왼쪽 격자는 공간 자기상관을 보여 주는 개념도</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 16</p>
 <aside>(약 55초) 숫자 타일 아래 한 줄은 유효 표본 수를 알려 줍니다. 칸이 1,204개여도 이웃 칸끼리 값이 닮아 있어서, 독립된 정보가 1,204개인 것은 아닙니다. 왼쪽 그림처럼 이웃 칸은 비슷한 색을 띱니다. 이를 공간 자기상관이라고 합니다. 화면은 이웃 칸 사이의 자기상관 φ를 두 쪽에서 구하고, AR(1)로 근사한 식으로 유효 표본 수를 냅니다. 예시처럼 1,204칸이 312로 줄었다면 두 쪽 자기상관의 곱이 약 0.59라는 뜻입니다. 이 값은 α, r, c₁의 95% 구간에만 씁니다. 명목 n으로 구간을 내면 너무 좁아지기 때문입니다. Bias와 판정 숫자는 칸 전부로 계산합니다. 재표본 방식 대신 근사식을 쓰는 이유는 같은 입력에 늘 같은 숫자를 내기 위해서입니다. 합성 데이터 500회로 확인한 결과 α와 r의 구간은 실제로 94, 91퍼센트를 담았지만, c₁은 80퍼센트에 그쳤습니다. 이 한계는 마지막에 다시 보겠습니다.</aside>
 </section>
 <section id="breakdown" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -263,7 +337,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 <div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">cRMSE² = var(E) = 거리 경향 + 진폭 + 패턴      ← 같은 x 위의 OLS라 세 몫이 겹치지 않는 정확한 항등식<br><span style="color:#C9D3E3">de-biased RMSE² = cRMSE² + (평균 − 중앙값)²  · 비율의 분모는 bias² 포함 → 세 몫 합 = 100 − bias² %</span></p></div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §6-0 · 거리를 모르면(A/B · 시뮬 대 시뮬 · RU 위치 없음) cRMSE² = 진폭 + 패턴 두 몫</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 16</p>
 <aside>(약 60초) 이 화면의 핵심인 Error breakdown 가로 띠입니다. 오차를 네 몫의 비율로 나눕니다. 빗금은 Bias 제곱으로, 지도 전체가 높거나 낮은 몫이고 기록만 합니다. 진한 파랑은 거리 경향으로, RU에서 멀어질수록 오차가 커지거나 작아지는 몫이며 c₁ 제곱 곱하기 로그 거리의 분산입니다. 중간 파랑은 진폭으로, 음영과 피크가 한쪽에서 더 깊거나 얕은 몫이며 두 표준편차 차의 제곱입니다. 연한 파랑은 패턴으로, 음영과 피크가 다른 자리에 있는 몫이며 2 σa σb 곱하기 1 빼기 r입니다. 세 몫을 더하면 정확히 평균 중심의 퍼짐, cRMSE 제곱이 됩니다. 같은 거리 축 위에서 최소제곱 회귀를 했기 때문에 세 몫이 서로 겹치지 않습니다. 판정 숫자는 중앙값 중심이라 평균과 중앙값 차이만큼 다르지만 대개 작습니다. 비율의 분모에는 bias 제곱이 포함되어, 세 몫의 합은 100에서 bias 몫을 뺀 값입니다. 거리를 모르는 비교에서는 진폭과 패턴 두 몫으로만 나눕니다.</aside>
 </section>
 <section id="fix" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -283,9 +357,9 @@ body.fs.idle .stage { cursor: none }
 <div style="background:#EAE7DF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#5E6675">띠가 비는 경우</p><p style="font-size:24px;line-height:1.4;color:#4A5262">칸 짝이 없을 때 — “No paired cells — needs T2.”<br>두 쪽 모두 변동이 없을 때</p></div>
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">왜 패턴이 클까</p><p style="font-size:24px;line-height:1.4;color:#4A5262">좌표가 몇십 m만 어긋나도 음영 자리가 밀린다<br>→ 진폭 · 거리보다 패턴 몫부터 커진다</p></div>
 </div>
-<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">확인</b> 고친 뒤 다시 비교하면 Taylor diagram에 ○ 전 → ● 후 화살표가 그려진다 (10쪽)</p>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">확인</b> 고친 뒤 다시 비교하면 Taylor diagram에 ○ 전 → ● 후 화살표가 그려진다 (12쪽)</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §6-0 “읽는 법” · 좌표 어긋남과 패턴의 관계는 일반적인 경향</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 16</p>
 <aside>(약 50초) 읽는 법은 간단합니다. 가장 큰 몫부터 고칩니다. 거리 경향이 크면 거리에 따라 오차가 기우는 것이니 경로손실 모델, 송신 전력, 안테나 이득을 봅니다. 진폭이 크면 음영과 피크의 깊이가 다른 것이니 건물과 지형 해상도 같은 음영 모델의 세기를 봅니다. 패턴이 크면 음영의 자리가 어긋난 것이니 지도와 좌표 정합, 건물 위치, 안테나 방위를 봅니다. Bias는 보정 한 번으로 없앨 수 있는 오프셋입니다. 다만 이 대응은 진단의 출발점이지 원인과 일대일은 아닙니다. 고친 뒤 다시 구워서 몫이 어떻게 바뀌는지 확인하는 것이 중요합니다. 경험적으로는 좌표가 몇십 미터만 어긋나도 음영의 자리가 밀려 패턴 몫부터 커지는 경우가 많습니다. 칸 짝이 없으면 띠는 비고, 그 자리에 T2가 필요하다고 적힙니다.</aside>
 </section>
 <section id="taylor" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -319,7 +393,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">설명서 §6-1 · α 축은 2.0까지(넘으면 가장자리 ▸ + 값), r &lt; 0이면 가로축에 붙이고 표시 · ○ 위치와 reach 선은 예시</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 16</p>
 <aside>(약 60초) Taylor diagram은 진폭과 패턴을 한 점에 찍습니다. 원점에서의 거리가 α, 가로축에서의 각도가 arccos r입니다. 첫째, 기준인 실측은 α 1, r 1이라 가로축 1.0 자리의 마름모입니다. 둘째가 완벽하면 여기에 겹칩니다. 예시의 둘째는 α 1.21, r 0.62로, 마름모에서 약 0.98 떨어져 있습니다. 마름모 둘레 점선 원 두 개가 국소 오차 0.5와 1.0의 등고선이라, 이 거리가 곧 국소 오차입니다. 도달점은 실측 잡음과 위치 오차, 시뮬 잡음 때문에 완벽한 트윈이라도 찍힐 자리입니다. 점이 여기에 닿으면 남은 차이는 잡음이라 더 고칠 것이 없습니다. 다만 잡음 성분을 하나라도 모르면 그리지 않는데, 지금은 시뮬 잡음이 측정되지 않아 기본적으로 그려지지 않고 그림 아래에 까닭이 적힙니다. 이전 비교를 지정하면 전에서 후로 화살표가 그려집니다. 단, Taylor는 bias를 뺀 모양만 그리므로 보정의 주된 효과인 bias 감소는 화살표에 거의 보이지 않습니다. 그래서 요약 맨 위에 bias와 RMSE의 전후가 따로 나옵니다.</aside>
 </section>
 <section id="plots" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -356,7 +430,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">설명서 §6-2 · §6-3 · 두 그림은 개념 예(합성 점 · 분포) · A/B · RU 위치 없음이면 왼쪽은 비우고 까닭을 적는다</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 16</p>
 <aside>(약 60초) 아래쪽 나머지 두 그림입니다. 왼쪽 Residual vs distance는 칸마다 점 하나를 찍습니다. 가로는 RU에서의 거리를 로그 축으로, 세로는 칸 오차입니다. 주황 선이 거리 로그에 대한 회귀선이고, 띠가 기울기 c₁의 95% 구간입니다. 위에 c₁ 값과 구간, 그리고 구간이 0을 포함하는지가 적힙니다. 0을 포함하지 않으면 거리 감쇠 차이가 통계적으로 있다는 뜻입니다. 칸 짝이 없으면 거리 구간 데이터로 c₁만 내고, A/B 비교처럼 RU 기준점이 없으면 비워 둡니다. 오른쪽 Shape는 두 쪽 값에서 각자 중앙값을 빼서 맞춘 누적분포입니다. 위치를 지웠으니 퍼짐과 꼬리 모양만 비교합니다. W₁은 두 분포 모양의 차이로 0이면 같고, α_IQR은 사분위 범위의 비로, 0.9보다 작으면 시뮬이 좁게, 1.1보다 크면 넓게 퍼진다고 적힙니다. 위치 정보가 필요 없는 T0라, 좌표가 맞지 않아도 늘 그릴 수 있는 그림입니다.</aside>
 </section>
 <section id="example" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -381,7 +455,7 @@ body.fs.idle .stage { cursor: none }
 <div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:70px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">⑥</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b>n_eff 312</b> — 칸은 1,204개지만 이웃끼리 닮아 독립 정보는 312개만큼 → 구간은 이것으로</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">설명서 §8 스크린샷 값 · 확인 필요: α 1.21 · r 0.62에서 식으로 계산한 진폭 몫은 패턴 몫의 약 5% (≈ 2%) — 28%와 맞지 않음</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 16</p>
 <aside>(약 60초) 예시 화면을 함께 읽어 보겠습니다. RSRP 1,204칸 비교입니다. 먼저 Bias가 +2.4 dB로 시뮬이 전체적으로 2.4 dB 높습니다. 기록만 하며 보정 한 번이면 없앨 수 있습니다. 편향을 빼도 6.8 dB가 남고, 이것이 판정 대상입니다. 띠를 보면 가장 큰 몫이 패턴 43퍼센트입니다. 음영과 피크의 자리가 어긋나 있고, r 0.62는 잡음만으로 도달할 수 있는 상한 0.85보다 한참 낮습니다. 그래서 좌표 정합이나 건물, 지형 배치를 먼저 봅니다. 다음은 진폭 28퍼센트입니다. α 1.21이고 구간이 1을 포함하지 않으니 시뮬이 음영을 실제보다 깊게 그립니다. 거리 경향 20퍼센트는 c₁ +4.2로 구간이 0을 포함하지 않아, 시뮬의 거리 감쇠가 실측보다 완만합니다. 경로손실 지수로 약 0.4 차이입니다. 모든 구간은 유효 표본 312로 냈습니다. 한 가지 확인할 점이 있습니다. 식으로 계산하면 α 1.21과 r 0.62에서 진폭 몫은 패턴 몫의 5퍼센트 정도여야 해서, 28퍼센트와는 맞지 않습니다. 스크린샷 값을 한 번 확인해 볼 필요가 있습니다.</aside>
 </section>
 <section id="limits" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:22px">
@@ -402,7 +476,7 @@ body.fs.idle .stage { cursor: none }
 <div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">구간은 근사</p><p style="font-size:24px;line-height:1.4;color:#4A5262">n_eff는 두 쪽을 AR(1)로 근사한 값<br>재표본 대신 결정적 계산 — 같은 입력 → 같은 숫자</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">Breakdown 화면 설명서 §5 · §6 · §7 · §9 — Q-AM-49 · Q-47 · ADR-HUB-3은 설계 문서의 열린 질문 · 결정 번호</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 16</p>
 <aside>(약 55초) 숫자를 믿기 전에 알아 둘 한계입니다. 첫째, c₁의 구간이 좁게 나옵니다. 합성 데이터에서 95퍼센트 구간이 실제로는 80퍼센트만 담았습니다. 공간 상관거리가 칸 두 개를 넘으면 c₁의 95퍼센트 구간은 약 80퍼센트 구간으로 읽어야 합니다. 둘째, 실물 데이터의 좌표 정합이 아직 열린 문제입니다. 두 쪽 위경도가 어긋나면 칸 짝이 틀어지고 패턴 몫이 커집니다. 패턴이 클 때 먼저 의심할 부분이고, 좌표와 무관한 Shape 그림을 함께 보면 도움이 됩니다. 셋째, 시뮬 잡음이 측정되지 않아 도달점을 그리지 못합니다. 그래서 더 고칠 여지가 얼마나 남았는지의 상한은 아직 모릅니다. 그 밖에 평균 중심과 중앙값 중심의 차이, 옛 번들은 다시 구워야 버튼이 선다는 점도 기억해 주세요. 빈자리는 그 자체로 정보입니다. 그리지 못한 것과 0인 것을 구분해서 읽어야 합니다.</aside>
 </section>
 <section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
@@ -414,7 +488,7 @@ body.fs.idle .stage { cursor: none }
 <div style="display:flex;flex-direction:row;gap:14px"><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F5F3EE">구간</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">n_eff로 낸 95% 구간<br>c₁은 약 80%로 읽는다</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F5F3EE">그림</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">Taylor (T2) · 거리 잔차 (T1)<br>Shape (T0, 좌표 무관)</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F5F3EE">빈자리</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">그리지 못한 것 ≠ 0<br>까닭은 그 자리에만</p></div></div>
 <p style="font-size:24px;line-height:1.45;color:#C9D3E3">다음 단계: [대상 클러스터] 비교 번들을 다시 구워 Breakdown을 열고, 가장 큰 몫의 원인을 고친 뒤 prev=로 전 → 후를 비교한다</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">함께 볼 자료: debiased-rmse (de-biased RMSE) · taylor-diagram · sim-real-alignment</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">14 / 14</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">16 / 16</p>
 <aside>(약 40초) 정리하겠습니다. Breakdown 화면에서 판정 숫자는 de-biased RMSE 하나이고, Bias는 기록만 합니다. 진단 숫자는 거리 경향 c₁, 진폭 α, 패턴 r 셋이며, 거리 경향을 먼저 떼고 잽니다. 가로 띠는 남은 오차를 이 세 몫으로 정확히 나누고, 가장 큰 몫부터 고칩니다. 구간은 유효 표본 수로 냈고, c₁ 구간은 약 80퍼센트로 읽어야 합니다. 그림은 Taylor, 거리 잔차, 분포 모양 셋이고, 그릴 수 없는 그림의 빈자리도 정보입니다. 다음 단계로 대상 클러스터의 비교 번들을 다시 구워 Breakdown을 열어 보고, 가장 큰 몫의 원인을 고친 뒤 이전 비교와 전후를 비교해 보시길 권합니다.</aside>
 </section>
     </div>

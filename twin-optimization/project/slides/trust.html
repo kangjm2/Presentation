@@ -34,7 +34,7 @@
 <div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:120px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">0.99</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">0.91 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">13</p></div>
 </div>
 </div>
-<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">σ 6.41 · 2.57 dB: debiased-rmse 덱 · n_eff: dt-breakdown 7쪽 · 칸 오차가 n_eff개만큼 독립이라는 가정</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">σ 6.41 · 2.57 dB: debiased-rmse 덱 · n_eff: dt-breakdown 9쪽 · 칸 오차가 n_eff개만큼 독립이라는 가정</p>
 <p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 14</p>
 <aside>(약 50초) 이제 트윈을 얼마나 믿을지입니다. 우리 트윈의 칸별 오차는 보정 전 6.41 dB였습니다. 그런데 최적화가 예측하는 이득은 0.5 dB 같은 작은 값입니다. 이것이 보일까요. 열쇠는 차이입니다. 두 설정의 예측 차이에는 두 오차의 차이가 섞이고, 그 크기는 σ 곱하기 루트 2(1 − ρ)입니다. ρ는 두 설정에서 오차가 얼마나 같은지입니다. ρ가 0이면 칸 하나에서 9.1 dB로 오히려 커지고, 0.9면 2.9 dB, 0.99면 0.9 dB입니다. 네모는 몬테카를로로 확인한 값입니다. 음영이나 재질, 평균 편향처럼 설정을 바꿔도 그대로인 오차는 차이에서 지워져 ρ가 높고, 틸트 기록이나 수직 패턴처럼 설정에 따라 바뀌는 오차는 지워지지 않습니다. 0.5 dB를 2σ로 보려면 ρ가 0일 때 유효 표본 1,315개, 0.99면 13개가 필요합니다. 그래서 차이 예측이 절대값 예측보다 정확한 경우가 많지만, 그것은 오차가 공통일 때의 일반적 경향입니다.</aside>
 </section>
