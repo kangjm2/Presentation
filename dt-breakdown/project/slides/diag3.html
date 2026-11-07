@@ -1,0 +1,36 @@
+<section id="diag3" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">보충 · 진단 셋을 손으로 계산하면</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">α는 깊이, r은 자리, c₁은 거리 기울기</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">Amplitude α — 국소 변동의 비</p><p style="font-size:24px;line-height:1.35;color:#4A5262">σ(시뮬 국소) ÷ σ(실측 국소)</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">2.16 ÷ 4.58</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;font-weight:700;color:#255E9E">0.47</p><p style="font-size:24px;line-height:1.35;color:#4A5262">시뮬의 출렁임이 절반 — 음영을 얕게 그린다 · 크기만 보고 자리는 안 본다</p></div>
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">Local corr. r</p><p style="font-size:24px;line-height:1.35;color:#4A5262">corr(실측 국소, 시뮬 국소)</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">같은 칸에서 + − + − + −</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;font-weight:700;color:#255E9E">0.99</p><p style="font-size:24px;line-height:1.35;color:#4A5262">음영 · 피크가 같은 자리에서 오르내린다 · 자리만 보고 크기는 안 본다</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">Distance slope c₁</p><p style="font-size:24px;line-height:1.35;color:#4A5262">E = 시뮬 − 실측을 log₁₀(거리)에 회귀한 기울기</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">(-31.0) − (-35.3)</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;font-weight:700;color:#A84A16">+4.3</p><p style="font-size:24px;line-height:1.35;color:#4A5262">dB/decade → Δn ≈ 0.43 · 시뮬 감쇠가 완만 · 1 km에서 시뮬이 약 4.3 dB 높다</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:860px;height:330px">
+<svg aria-label="칸 여섯 개의 국소 변동 막대. 실측과 시뮬이 같은 칸에서 같은 부호이고 시뮬 막대가 절반 크기. α 0.47, r 0.99" style="position:absolute;left:0px;top:0px;width:860px;height:330px" width="860" height="330" viewBox="0 0 860 330"><line x1="70" y1="165" x2="830" y2="165" stroke="#14213D" stroke-width="2"/><rect x="88" y="96" width="40" height="69" fill="#14213D"/><rect x="132" y="129" width="40" height="36" fill="#A84A16"/><rect x="215" y="165" width="40" height="109" fill="#14213D"/><rect x="259" y="165" width="40" height="54" fill="#A84A16"/><rect x="341" y="112" width="40" height="53" fill="#14213D"/><rect x="385" y="147" width="40" height="18" fill="#A84A16"/><rect x="468" y="165" width="40" height="89" fill="#14213D"/><rect x="512" y="165" width="40" height="36" fill="#A84A16"/><rect x="595" y="56" width="40" height="109" fill="#14213D"/><rect x="639" y="111" width="40" height="54" fill="#A84A16"/><rect x="721" y="165" width="40" height="33" fill="#14213D"/><rect x="765" y="165" width="40" height="18" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:42px;width:62px;font-size:24px;text-align:right;color:#5E6675">+6</p>
+<p style="position:absolute;left:0px;top:149px;width:62px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:256px;width:62px;font-size:24px;text-align:right;color:#5E6675">−6</p>
+<p style="position:absolute;left:70px;top:0px;width:760px;font-size:24px;font-weight:700;color:#14213D">국소 변동 (dB) · <span style="color:#14213D">■ 실측</span> · <span style="color:#A84A16">■ 시뮬</span> — 같은 칸에서 같은 부호, 크기는 절반</p>
+<p style="position:absolute;left:70px;top:294px;width:760px;font-size:24px;text-align:center;color:#5E6675">칸 100 m → 1 km</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;font-weight:700;color:#14213D">이 예의 Breakdown 띠 (cRMSE² = 8.1 dB²)</p>
+<div style="position:relative;width:760px;height:56px">
+<svg aria-label="가상 예의 띠: 거리 26%, 진폭 72%, 패턴 2%" style="position:absolute;left:0px;top:0px;width:760px;height:56px" width="760" height="56" viewBox="0 0 760 56"><rect x="0.0" y="0" width="169.4" height="56" fill="#14365E"/><rect x="169.4" y="0" width="460.6" height="56" fill="#255E9E"/><rect x="630.0" y="0" width="10.0" height="56" fill="#8DB8E8"/></svg>
+<p style="position:absolute;left:0px;top:14px;width:169px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">거리 26%</p>
+<p style="position:absolute;left:169px;top:14px;width:461px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">진폭 72%</p>
+<p style="position:absolute;left:630px;top:14px;width:10px;font-size:24px;text-align:center;font-weight:700;color:#14213D"></p>
+<p style="position:absolute;left:652px;top:14px;width:108px;font-size:24px;font-weight:700;color:#255E9E">패턴 2%</p>
+</div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.5;color:#4A5262">거리 c₁² · var(log₁₀ d) = 2.2<br>진폭 (σb − σa)² = 5.9<br>패턴 2σaσb(1 − r) = 0.13</p>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">읽기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">진폭이 가장 크다 → 음영의 세기부터 (11쪽) · 자리는 맞으니(r ≈ 1) 좌표는 뒤로</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">앞쪽과 같은 가상 칸 6개로 계산 (생성기에서 numpy) · 식: Breakdown 화면 설명서 §4 · §6-0</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 16</p>
+<aside>(약 60초) 앞의 숫자로 진단 셋을 직접 계산해 보겠습니다. α는 국소 변동의 비입니다. 시뮬 국소 변동의 표준편차 2.16를 실측 4.58로 나누면 0.47, 시뮬의 출렁임이 실측의 절반이라 음영을 얕게 그린다는 뜻입니다. α는 크기만 보고 자리는 보지 않습니다. r은 두 국소 변동의 상관입니다. 아래 막대처럼 같은 칸에서 플러스, 마이너스가 똑같이 나오므로 r은 0.99입니다. r은 자리만 보고 크기는 보지 않습니다. 그래서 이 예는 음영 자리는 맞는데 깊이가 절반인 경우입니다. c₁은 칸 오차, 즉 시뮬 빼기 실측을 로그 거리에 회귀한 기울기이고, 두 쪽 기울기의 차와 같습니다. -31.0 빼기 -35.3로 +4.3 dB/decade, 경로손실 지수 차 약 0.43이고, 시뮬의 거리 감쇠가 완만해서 1 km에서는 시뮬이 약 4.3 dB 높습니다. 이 셋을 띠의 식에 넣으면 거리 2.2, 진폭 5.9, 패턴 0.13이고, 합이 정확히 오차의 분산 8.1입니다. 진폭 몫이 가장 크니 음영 모델의 세기부터 보면 됩니다.</aside>
+</section>

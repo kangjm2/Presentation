@@ -12,6 +12,8 @@
     "defs",
     "layout",
     "tiles",
+    "local",
+    "diag3",
     "detrend",
     "neff",
     "breakdown",
@@ -28,7 +30,7 @@
       "start": "cover"
     },
     "numbers": {
-      "description": "숫자 타일 다섯, 거리 경향을 먼저 떼는 이유, 유효 표본 수",
+      "description": "숫자 타일 다섯, 국소 변동과 진단 셋 손 계산, 거리 경향을 먼저 떼는 이유, 유효 표본 수",
       "start": "tiles"
     },
     "breakdown": {
