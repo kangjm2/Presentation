@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>빔 웨이트 파일은 PlanarArray에 어떻게 매핑되나</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;display=swap">
+<style>
+/* Layout: one-screen viewer — scaled 1920×1080 stage, notes panel beside it on wide screens, control bar below */
+:root {
+  --bg: #E7E4DC; --surface: #F6F4EE; --fg: #14213D; --muted: #5A6272;
+  --accent: #A84A16; --line: #CFCAC0; --stage: #D9D5CB;
+  --ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #17223A; --fg: #E8ECF3; --muted: #9DA8BB;
+  --accent: #F0A36B; --line: #2C3955; --stage: #0A101C; color-scheme: dark }
+[hidden] { display: none !important }
+html, body { height: 100%; margin: 0 }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+.main { flex: 1; min-height: 0; display: flex; gap: 12px }
+.stage { flex: 1; min-width: 0; position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; cursor: pointer; touch-action: pan-y }
+.frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+.notes { width: 360px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px }
+.notes h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600 }
+.notes p { margin: 0; font-size: 16px; line-height: 1.7 }
+.bar { display: flex; flex-direction: column; gap: 8px; padding-top: 10px }
+.progress { display: flex; gap: 3px; height: 6px }
+.progress button { flex: 1; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer }
+.progress button.done { background: var(--muted) }
+.progress button.on { background: var(--accent) }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 14px/1 var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; white-space: nowrap }
+.btn:hover { border-color: var(--muted) }
+.btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.btn:disabled { opacity: .4; cursor: default }
+button:focus-visible, select:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 64px; text-align: center }
+select { font: 14px var(--ui); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1 1 220px; max-width: 420px }
+.spacer { flex: 1 }
+.hint { color: var(--muted); font-size: 12px }
+.grid { position: fixed; inset: 0; z-index: 10; background: var(--bg); overflow-y: auto;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.grid-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px }
+.grid-head h2 { margin: 0; font-size: 18px; font-weight: 600 }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px }
+.thumb { display: flex; flex-direction: column; gap: 6px; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--fg); font: 13px var(--ui) }
+.thumb .pic { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 2px solid transparent; background: var(--stage) }
+.thumb.on .pic { border-color: var(--accent) }
+.thumb .pic > section { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none }
+.thumb span { color: var(--muted) }
+.thumb b { font-family: var(--mono); color: var(--fg); margin-right: 6px }
+:fullscreen body, body.fs { padding: 0 }
+body.fs .stage { border-radius: 0; background: #000 }
+body.fs .notes { display: none }
+body.fs .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); transition: opacity .25s }
+body.fs.idle .bar { opacity: 0; pointer-events: none }
+body.fs.idle .stage { cursor: none }
+@media (max-width: 900px) {
+  .main { flex-direction: column }
+  .notes { width: auto; max-height: 34vh }
+  .hint { display: none }
+}
+
+/* Slide subset — canvas defaults for the deck's inline-styled sections */
+.slide { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden; font-size: 32px; line-height: 1.4 }
+.slide * { box-sizing: border-box; margin: 0 }
+.slide h1 { font-size: 96px; font-weight: 600; line-height: 1.1 }
+.slide h2 { font-size: 64px; font-weight: 600; line-height: 1.15 }
+.slide h3 { font-size: 44px; font-weight: 600; line-height: 1.2 }
+.slide p { line-height: 1.4 }
+.slide ul, .slide ol { padding-left: 1.3em }
+.slide table { width: 100%; border-collapse: collapse; font: inherit }
+.slide th, .slide td { padding: .35em .6em; border-bottom: 1px solid rgba(20, 33, 61, .18); text-align: left; vertical-align: top; font-weight: 400 }
+.slide th { font-weight: 600 }
+.slide svg { display: block }
+.slide x-shape { display: block; flex: none }
+.slide x-shape[kind="arrow-right"] { clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%) }
+.slide x-shape[kind="arrow-left"] { clip-path: polygon(100% 30%, 40% 30%, 40% 0, 0 50%, 40% 100%, 40% 70%, 100% 70%) }
+.slide x-shape[kind="ellipse"] { border-radius: 50% }
+.slide aside { display: none }
+.frame > .slide { visibility: hidden; opacity: 0; transition: opacity .25s ease }
+.frame > .slide.on { visibility: visible; opacity: 1 }
+@media (prefers-reduced-motion: reduce) { .frame > .slide { transition: none } }
+</style>
+
+<div class="main">
+  <div class="stage" id="stage" role="region" aria-roledescription="슬라이드" aria-live="polite">
+    <div class="frame" id="frame">
+<section id="cover" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="4행 8열로 놓인 포트 32자리, 각 자리에 ±45° 두 편파 표시. 위쪽으로 빔 여덟 개가 부채꼴로 뻗는다" style="position:absolute;left:1000px;top:0px;width:880px;height:1080px" width="880" height="1080" viewBox="0 0 880 1080"><rect x="140" y="480" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="154" y1="540" x2="186" y2="508" stroke="#8DB8E8" stroke-width="3"/><line x1="154" y1="508" x2="186" y2="540" stroke="#F0A36B" stroke-width="3"/><rect x="222" y="480" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="236" y1="540" x2="268" y2="508" stroke="#8DB8E8" stroke-width="3"/><line x1="236" y1="508" x2="268" y2="540" stroke="#F0A36B" stroke-width="3"/><rect x="304" y="480" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="318" y1="540" x2="350" y2="508" stroke="#8DB8E8" stroke-width="3"/><line x1="318" y1="508" x2="350" y2="540" stroke="#F0A36B" stroke-width="3"/><rect x="386" y="480" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="400" y1="540" x2="432" y2="508" stroke="#8DB8E8" stroke-width="3"/><line x1="400" y1="508" x2="432" y2="540" stroke="#F0A36B" stroke-width="3"/><rect x="468" y="480" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="482" y1="540" x2="514" y2="508" stroke="#8DB8E8" stroke-width="3"/><line x1="482" y1="508" x2="514" y2="540" stroke="#F0A36B" stroke-width="3"/><rect x="550" y="480" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="564" y1="540" x2="596" y2="508" stroke="#8DB8E8" stroke-width="3"/><line x1="564" y1="508" x2="596" y2="540" stroke="#F0A36B" stroke-width="3"/><rect x="632" y="480" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="646" y1="540" x2="678" y2="508" stroke="#8DB8E8" stroke-width="3"/><line x1="646" y1="508" x2="678" y2="540" stroke="#F0A36B" stroke-width="3"/><rect x="714" y="480" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="728" y1="540" x2="760" y2="508" stroke="#8DB8E8" stroke-width="3"/><line x1="728" y1="508" x2="760" y2="540" stroke="#F0A36B" stroke-width="3"/><rect x="140" y="590" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="154" y1="650" x2="186" y2="618" stroke="#8DB8E8" stroke-width="3"/><line x1="154" y1="618" x2="186" y2="650" stroke="#F0A36B" stroke-width="3"/><rect x="222" y="590" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="236" y1="650" x2="268" y2="618" stroke="#8DB8E8" stroke-width="3"/><line x1="236" y1="618" x2="268" y2="650" stroke="#F0A36B" stroke-width="3"/><rect x="304" y="590" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="318" y1="650" x2="350" y2="618" stroke="#8DB8E8" stroke-width="3"/><line x1="318" y1="618" x2="350" y2="650" stroke="#F0A36B" stroke-width="3"/><rect x="386" y="590" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="400" y1="650" x2="432" y2="618" stroke="#8DB8E8" stroke-width="3"/><line x1="400" y1="618" x2="432" y2="650" stroke="#F0A36B" stroke-width="3"/><rect x="468" y="590" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="482" y1="650" x2="514" y2="618" stroke="#8DB8E8" stroke-width="3"/><line x1="482" y1="618" x2="514" y2="650" stroke="#F0A36B" stroke-width="3"/><rect x="550" y="590" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="564" y1="650" x2="596" y2="618" stroke="#8DB8E8" stroke-width="3"/><line x1="564" y1="618" x2="596" y2="650" stroke="#F0A36B" stroke-width="3"/><rect x="632" y="590" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="646" y1="650" x2="678" y2="618" stroke="#8DB8E8" stroke-width="3"/><line x1="646" y1="618" x2="678" y2="650" stroke="#F0A36B" stroke-width="3"/><rect x="714" y="590" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="728" y1="650" x2="760" y2="618" stroke="#8DB8E8" stroke-width="3"/><line x1="728" y1="618" x2="760" y2="650" stroke="#F0A36B" stroke-width="3"/><rect x="140" y="700" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="154" y1="760" x2="186" y2="728" stroke="#8DB8E8" stroke-width="3"/><line x1="154" y1="728" x2="186" y2="760" stroke="#F0A36B" stroke-width="3"/><rect x="222" y="700" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="236" y1="760" x2="268" y2="728" stroke="#8DB8E8" stroke-width="3"/><line x1="236" y1="728" x2="268" y2="760" stroke="#F0A36B" stroke-width="3"/><rect x="304" y="700" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="318" y1="760" x2="350" y2="728" stroke="#8DB8E8" stroke-width="3"/><line x1="318" y1="728" x2="350" y2="760" stroke="#F0A36B" stroke-width="3"/><rect x="386" y="700" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="400" y1="760" x2="432" y2="728" stroke="#8DB8E8" stroke-width="3"/><line x1="400" y1="728" x2="432" y2="760" stroke="#F0A36B" stroke-width="3"/><rect x="468" y="700" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="482" y1="760" x2="514" y2="728" stroke="#8DB8E8" stroke-width="3"/><line x1="482" y1="728" x2="514" y2="760" stroke="#F0A36B" stroke-width="3"/><rect x="550" y="700" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="564" y1="760" x2="596" y2="728" stroke="#8DB8E8" stroke-width="3"/><line x1="564" y1="728" x2="596" y2="760" stroke="#F0A36B" stroke-width="3"/><rect x="632" y="700" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="646" y1="760" x2="678" y2="728" stroke="#8DB8E8" stroke-width="3"/><line x1="646" y1="728" x2="678" y2="760" stroke="#F0A36B" stroke-width="3"/><rect x="714" y="700" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="728" y1="760" x2="760" y2="728" stroke="#8DB8E8" stroke-width="3"/><line x1="728" y1="728" x2="760" y2="760" stroke="#F0A36B" stroke-width="3"/><rect x="140" y="810" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="154" y1="870" x2="186" y2="838" stroke="#8DB8E8" stroke-width="3"/><line x1="154" y1="838" x2="186" y2="870" stroke="#F0A36B" stroke-width="3"/><rect x="222" y="810" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="236" y1="870" x2="268" y2="838" stroke="#8DB8E8" stroke-width="3"/><line x1="236" y1="838" x2="268" y2="870" stroke="#F0A36B" stroke-width="3"/><rect x="304" y="810" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="318" y1="870" x2="350" y2="838" stroke="#8DB8E8" stroke-width="3"/><line x1="318" y1="838" x2="350" y2="870" stroke="#F0A36B" stroke-width="3"/><rect x="386" y="810" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="400" y1="870" x2="432" y2="838" stroke="#8DB8E8" stroke-width="3"/><line x1="400" y1="838" x2="432" y2="870" stroke="#F0A36B" stroke-width="3"/><rect x="468" y="810" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="482" y1="870" x2="514" y2="838" stroke="#8DB8E8" stroke-width="3"/><line x1="482" y1="838" x2="514" y2="870" stroke="#F0A36B" stroke-width="3"/><rect x="550" y="810" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="564" y1="870" x2="596" y2="838" stroke="#8DB8E8" stroke-width="3"/><line x1="564" y1="838" x2="596" y2="870" stroke="#F0A36B" stroke-width="3"/><rect x="632" y="810" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="646" y1="870" x2="678" y2="838" stroke="#8DB8E8" stroke-width="3"/><line x1="646" y1="838" x2="678" y2="870" stroke="#F0A36B" stroke-width="3"/><rect x="714" y="810" width="60" height="92" rx="8" fill="#22325A" stroke="#8DB8E8" stroke-width="2"/><line x1="728" y1="870" x2="760" y2="838" stroke="#8DB8E8" stroke-width="3"/><line x1="728" y1="838" x2="760" y2="870" stroke="#F0A36B" stroke-width="3"/><line x1="440" y1="440" x2="139" y2="209" stroke="#F0A36B" stroke-width="2" opacity="0.55"/><line x1="440" y1="440" x2="209" y2="139" stroke="#F0A36B" stroke-width="2" opacity="0.55"/><line x1="440" y1="440" x2="295" y2="89" stroke="#F0A36B" stroke-width="2" opacity="0.55"/><line x1="440" y1="440" x2="390" y2="63" stroke="#F0A36B" stroke-width="2" opacity="0.55"/><line x1="440" y1="440" x2="490" y2="63" stroke="#F0A36B" stroke-width="2" opacity="0.55"/><line x1="440" y1="440" x2="585" y2="89" stroke="#F0A36B" stroke-width="5" opacity="1"/><line x1="440" y1="440" x2="671" y2="139" stroke="#F0A36B" stroke-width="2" opacity="0.55"/><line x1="440" y1="440" x2="741" y2="209" stroke="#F0A36B" stroke-width="2" opacity="0.55"/></svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F0A36B;letter-spacing:2px">CF 빌드 · 벤더 가중치 파일</p>
+<h1 style="font-family:'Noto Serif KR', Georgia, serif;font-size:88px;font-weight:700;line-height:1.2;color:#F5F3EE">빔 웨이트 파일은<br>PlanarArray에<br>어떻게 매핑되나</h1>
+<p style="font-size:32px;line-height:1.5;color:#C9D3E3">복소수 64개 × 빔 K개 → 포트 배치 · 포트 패턴 · 어레이 정보<br>무엇이 파일에서 나오고, 무엇이 추론 · 피팅 · 가정인가</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#8DB8E8">[발표자] · [소속] · [날짜]</p>
+<aside>(약 20초) 벤더 빔 웨이트 파일이 Sionna의 PlanarArray에 어떻게 매핑되는지 정리했습니다. 웨이트 파일에는 빔마다 포트별 복소수만 있고, 포트가 어디에 어떻게 놓였는지, 포트 하나가 어떤 패턴을 내는지는 없습니다. CF는 이 빈칸을 추론, 피팅, 가정으로 채웁니다. 오늘은 용어부터 차근차근 정리하고, 각 값이 어디서 왔는지와 얼마나 믿을 수 있는지를 보겠습니다.</aside>
+</section>
+<section id="flow" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">전체 그림</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">라이브러리 패턴 = PlanarArray의 소자 패턴</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px;background:#D5E3F3;border-radius:14px;padding:12px 16px"><p style="width:120px;font-size:26px;font-weight:700;line-height:1.3;color:#255E9E">계산 흐름</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">① 등록<br>lib:&lt;id&gt; 레코드 →<br>register_antenna_pattern</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">② 어레이<br>PlanarArray(rows, cols,<br>간격, pattern, 편파)</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">③ 방향<br>방위각 · 기계 틸트<br>→ orientation</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">④ 편파<br>PolarizedAntennaPattern<br>V · cross, tr38901_2</p><p style="font-size:26px;color:#255E9E;align-self:center">→</p><p style="flex:1;font-size:24px;line-height:1.35;text-align:center;background:#FBFAF7;border-radius:10px;padding:10px 6px">⑤ 리비전 확인<br>요청 뒤 패턴이 바뀌면<br>거절</p></div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> 빔 패턴 = <b>소자(포트) 패턴</b> × <b>어레이 팩터</b> — rows · cols가 1보다 크면 패턴 위에 어레이 팩터가 한 번 더 곱해진다</p>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">재등록</p><p style="font-size:24px;line-height:1.4;color:#4A5262">워커가 계산할 때마다 레코드를 다시 등록 → 패턴을 다시 가져오면 재시작 없이 반영</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">방향은 회전으로</p><p style="font-size:24px;line-height:1.4;color:#4A5262">패턴은 소자 좌표계 기준 · 방위각과 <b>기계</b> 틸트만 회전에 · 전기 틸트는 파일 패턴에 이미 들어 있다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">오늘의 질문</p><p style="font-size:24px;line-height:1.4;color:#4A5262">웨이트 파일에는 rows · cols · 간격 · 패턴이 없다 → 이 다섯 칸을 무엇으로 채우나</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 (antenna_sionna.py:122 · simulator.py:327 · 336) · 자세히는 cf-antenna-pattern 덱</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 17</p>
+<aside>(약 45초) 먼저 전체 그림입니다. 섹터가 라이브러리 패턴을 고르면, 계산할 때 워커가 그 레코드를 Sionna에 등록합니다. 그 다음 PlanarArray를 만드는데, 행과 열, 간격, 패턴 이름, 편파를 넣습니다. 이때 라이브러리 패턴은 어레이를 이루는 소자 하나하나의 패턴이 됩니다. 섹터의 방위각과 기계 틸트는 송신기 방향으로 들어가 패턴을 돌리고, 편파는 PolarizedAntennaPattern으로 감싸 적용합니다. 요청을 만든 뒤 같은 id의 패턴이 바뀌면 계산을 거절합니다. 핵심은 가운데 줄입니다. 빔 패턴은 소자 패턴 곱하기 어레이 팩터라서, 행이나 열이 1보다 크면 패턴 위에 어레이 팩터가 한 번 더 곱해집니다. 그런데 웨이트 파일에는 PlanarArray가 필요로 하는 행, 열, 간격, 패턴이 들어 있지 않습니다. 오늘은 이 빈칸을 어떻게 채우는지를 봅니다.</aside>
+</section>
+<section id="termstruct" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">용어 ① · 구조</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">소자 · 서브어레이 · 포트 · 패널</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:26px;align-items:flex-start">
+<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">소자 (element)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">전파를 내는 가장 작은 방사체 하나 · 보통 ±45° 두 방향 다이폴이 한 자리에 겹쳐 있다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">서브어레이 (subarray)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">세로로 묶여 <b>같은 신호를 받는 소자 묶음</b> · 소자끼리는 고정된 위상(틸트)으로 결합 · 예: 소자 4개, 간격 0.71 λ</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">포트 (port)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">무선 장비(RU)가 <b>따로 웨이트를 줄 수 있는 입력 하나</b> = 서브어레이 하나 × 편파 하나 · 예: 64포트</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">패널 · 어레이</p><p style="font-size:24px;line-height:1.4;color:#4A5262">포트가 행(rows) × 열(cols)로 놓인 판 · Sionna에서는 PlanarArray · 예: 4행 × 8열 × 2편파</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">편파 (polarization)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">전기장이 떨리는 방향 · cross = +45° · −45° 두 소자가 한 자리에 → 포트 수가 2배</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">간격 (λ 단위)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">이웃 중심 사이 거리 ÷ 파장 · 3.5 GHz면 λ ≈ 8.6 cm · 가로 d_h 0.5 λ, 포트 세로 피치 d_v 2.84 λ</p></div>
+</div>
+<div style="position:relative;width:560px;height:560px">
+<svg aria-label="패널 일부의 포트 격자와, 포트 하나를 확대해 세로로 소자 네 개가 있고 각 자리에 ±45° 두 편파가 겹친 모습" style="position:absolute;left:0px;top:0px;width:560px;height:560px" width="560" height="560" viewBox="0 0 560 560"><rect x="20" y="60" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="86" y="60" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="152" y="60" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="218" y="60" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="20" y="180" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="86" y="180" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="152" y="180" width="52" height="108" rx="6" fill="#F7DDCB" stroke="#255E9E" stroke-width="2"/><rect x="218" y="180" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="20" y="300" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="86" y="300" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="152" y="300" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="218" y="300" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="20" y="420" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="86" y="420" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="152" y="420" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="218" y="420" width="52" height="108" rx="6" fill="#D5E3F3" stroke="#255E9E" stroke-width="2"/><rect x="146" y="174" width="64" height="120" rx="8" fill="none" stroke="#A84A16" stroke-width="4"/><rect x="360" y="90" width="150" height="400" rx="12" fill="#F7DDCB" stroke="#A84A16" stroke-width="3"/><line x1="405" y1="180" x2="465" y2="120" stroke="#255E9E" stroke-width="5"/><line x1="405" y1="120" x2="465" y2="180" stroke="#A84A16" stroke-width="5"/><line x1="405" y1="272" x2="465" y2="212" stroke="#255E9E" stroke-width="5"/><line x1="405" y1="212" x2="465" y2="272" stroke="#A84A16" stroke-width="5"/><line x1="405" y1="364" x2="465" y2="304" stroke="#255E9E" stroke-width="5"/><line x1="405" y1="304" x2="465" y2="364" stroke="#A84A16" stroke-width="5"/><line x1="405" y1="456" x2="465" y2="396" stroke="#255E9E" stroke-width="5"/><line x1="405" y1="396" x2="465" y2="456" stroke="#A84A16" stroke-width="5"/><line x1="212.0" y1="230.0" x2="341.0" y2="285.3" stroke="#A84A16" stroke-width="3" stroke-dasharray="8 6"/><polygon points="352.0,290.0 343.3,279.8 338.6,290.8" fill="#A84A16"/></svg>
+<p style="position:absolute;left:0px;top:14px;width:300px;font-size:24px;font-weight:700;color:#14213D">패널(일부) — 포트가 행 × 열</p>
+<p style="position:absolute;left:320px;top:40px;width:240px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">포트 하나 확대</p>
+<p style="position:absolute;left:320px;top:500px;width:240px;font-size:24px;text-align:center;line-height:1.3;color:#4A5262">소자 4개 = 서브어레이<br>× 편파 2 (±45°)</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시 수치(4 × 8 × 2 · 0.71 λ · 2.84 λ)는 CF 문서의 샘플 파일 결과 · 3.5 GHz는 λ 환산 예</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 17</p>
+<aside>(약 60초) 용어부터 정리하겠습니다. 소자는 전파를 내는 가장 작은 방사체 하나입니다. 기지국 안테나는 보통 플러스 45도, 마이너스 45도 두 다이폴이 한 자리에 겹쳐 있습니다. 서브어레이는 세로로 묶여 같은 신호를 받는 소자 묶음입니다. 묶인 소자끼리는 고정된 위상으로 연결돼 있어서, 무선 장비가 따로 조절할 수 없습니다. 포트는 무선 장비가 따로 웨이트를 줄 수 있는 입력 하나이고, 서브어레이 하나와 편파 하나의 조합입니다. 오늘 예에서는 포트가 64개입니다. 패널, 또는 어레이는 포트들이 행과 열로 놓인 판이고, Sionna에서는 PlanarArray로 표현합니다. 편파는 전기장이 떨리는 방향인데, cross라고 하면 플러스 마이너스 45도 두 소자가 한 자리에 있어 포트 수가 두 배가 됩니다. 간격은 이웃 중심 사이 거리를 파장으로 나눈 값입니다. 3.5 GHz라면 파장이 약 8.6 cm라서 0.5 파장은 약 4.3 cm입니다. 오른쪽 그림처럼 패널의 한 칸이 포트이고, 그 안에 소자 네 개가 세로로 들어 있습니다.</aside>
+</section>
+<section id="termpattern" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">용어 ② · 패턴과 빔</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">패턴 · 어레이 팩터 · 웨이트 · 빔</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">패턴 (pattern)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">방향(θ, φ)마다 얼마나 세게 내보내나 · dB로 저장, Sionna에는 진폭 10^(dB/20)</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">소자 · 포트 패턴</p><p style="font-size:24px;line-height:1.35;color:#4A5262">소자 하나, 포트 하나가 <b>혼자</b> 낼 때의 패턴 · 웨이트와 무관</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#255E9E">어레이 팩터 (AF)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">여러 포트의 <b>위치 차이와 웨이트</b>로 생기는 간섭 무늬 · 소자 패턴과 무관</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#A84A16">웨이트 w (beam weight)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">포트마다 곱하는 복소수(크기 · 위상) · 빔 하나 = 포트 수만큼의 복소수</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#255E9E">조향 · 위상 간격 Δψ</p><p style="font-size:24px;line-height:1.35;color:#4A5262">이웃 포트 위상을 일정하게 어긋나게 해 빔을 돌린다 · Δψ = 2π · d · sin(각)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#A84A16">빔 패턴</p><p style="font-size:24px;line-height:1.35;color:#4A5262">포트 패턴 × AF · 웨이트를 곱해 만든 빔 하나의 패턴 · 레코드 &lt;set&gt;-b&lt;k&gt;</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">HPBW (반전력 빔폭)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">최대보다 3 dB(절반) 낮아지는 두 방향 사이의 각 · 수평 · 수직 따로</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">E-tilt (전기 틸트)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">위상으로 빔을 아래로 숙인 각 · 기계 틸트는 장비 자체를 숙인 것</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#A84A16">그레이팅 로브</p><p style="font-size:24px;line-height:1.35;color:#4A5262">간격이 λ보다 넓을 때 주엽과 <b>같은 세기</b>로 다른 방향에 생기는 가짜 주엽</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#255E9E">서브어레이 팩터</p><p style="font-size:24px;line-height:1.35;color:#4A5262">서브어레이 안 소자들이 만드는 AF · 포트 패턴의 세로 모양을 정한다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">지향성 (dBi)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">최대 방향 세기 ÷ 구 전체 평균 · 등방성 안테나 대비 몇 dB 센가</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">켤레 (conjugate)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">복소수의 위상 부호를 뒤집기 · w로 쓰느냐 w*로 쓰느냐에 따라 빔이 위아래로 뒤집힌다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">빔 패턴 = 포트 패턴 × 어레이 팩터 — 아래 쪽들은 이 식의 두 항을 각각 채우는 과정</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 17</p>
+<aside>(약 60초) 패턴 쪽 용어입니다. 패턴은 방향마다 얼마나 세게 내보내는지를 나타내고, CF는 dB로 저장했다가 Sionna에는 진폭으로 바꿔 넘깁니다. 소자 패턴과 포트 패턴은 하나가 혼자 낼 때의 패턴이라 웨이트와 무관합니다. 반대로 어레이 팩터는 여러 포트의 위치 차이와 웨이트만으로 생기는 간섭 무늬이고, 소자 패턴과는 무관합니다. 웨이트는 포트마다 곱하는 복소수로, 크기와 위상을 함께 담습니다. 이웃 포트의 위상을 일정한 간격 델타 프사이만큼 어긋나게 하면 빔이 한쪽으로 돌아가는데, 이것이 조향입니다. 이렇게 만든 빔 하나의 패턴이 빔 패턴이고, 포트 패턴 곱하기 어레이 팩터입니다. HPBW는 최대보다 3 dB 낮아지는 두 방향 사이의 각, E-tilt는 위상으로 빔을 아래로 숙인 각입니다. 그레이팅 로브는 간격이 파장보다 넓을 때 다른 방향에 생기는 가짜 주엽입니다. 서브어레이 팩터는 포트 안 소자들이 만드는 어레이 팩터이고, 지향성은 구 전체 평균 대비 최대 방향의 세기입니다. 켤레는 위상 부호를 뒤집는 것인데, 이걸 잘못 쓰면 빔이 위아래로 뒤집힙니다.</aside>
+</section>
+<section id="formats" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">형식별 이득 계산</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">라이브러리 형식 넷 — 어레이 크기를 누가 정하나</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">형식</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">레코드</p><p style="flex:1.15;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">방향별 이득</p><p style="width:250px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">어레이 크기</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">MSI / Planet</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">수평 · 수직 단면 둘 (1° 간격)</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">최대 이득 + 두 단면 감쇠의 합 (tr38901과 같은 합성) · 단면 사이 선형 보간</p><p style="width:250px;font-size:24px;line-height:1.35;color:#4A5262">사람이 정함</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">NGMN BASTA</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">3D 격자 181 × 360</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">격자에서 이중선형 보간</p><p style="width:250px;font-size:24px;line-height:1.35;color:#4A5262">사람이 정함</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">웨이트 빔 &lt;set&gt;-b&lt;k&gt;</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">3D 격자 (어레이 전체를 포함한 빔)</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">위와 같음</p><p style="width:250px;font-size:24px;line-height:1.35;color:#4A5262">1 × 1로 강제</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:270px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">웨이트 포트 &lt;set&gt;-port</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">3D 격자 (포트 하나) + 어레이 정보</p><p style="flex:1.15;font-size:24px;line-height:1.35;color:#4A5262">위와 같음</p><p style="width:250px;font-size:24px;line-height:1.35;color:#4A5262">파일의 어레이로 강제</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">공통</b> 모든 형식이 Sionna에는 dB를 <b>필드 진폭</b> 10^(dB/20)으로 바꿔 넘긴다 — 전력 10^(dB/10)이 아님</p>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">MSI 두 단면 합성</p><p style="font-size:24px;line-height:1.4;color:#4A5262">단면 위는 정확 · 대각 방향은 감쇠를 더해 실제보다 과하게 줄어든다 · BASTA 3D 격자는 이 근사 없음</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">어레이 이득 이중 계산</p><p style="font-size:24px;line-height:1.4;color:#4A5262">패널 전체 패턴(예: 17 dBi)을 8 × 8에 올리면 어레이 이득이 두 번 → 그런 파일은 1 × 1로 · MSI · BASTA는 CF가 막지 않는다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">같은 격자 · 같은 보간</p><p style="font-size:24px;line-height:1.4;color:#4A5262">뷰어 · Adjust(섹터 피팅 재가중) · 체크가 솔버와 같은 계산 → 화면의 패턴 = 솔버의 패턴 (3D 격자는 테스트로 고정)</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 “형식별 이득 계산 · 알아 둘 점” · 17 dBi는 문서의 예</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 17</p>
+<aside>(약 55초) 라이브러리에 들어오는 형식은 넷입니다. MSI나 Planet은 수평과 수직 단면 두 개를 1도 간격으로 저장하고, 방향별 이득은 최대 이득에 두 단면의 감쇠를 더해 만듭니다. NGMN BASTA는 181 곱하기 360의 3D 격자에서 이중선형 보간합니다. 오늘의 주제인 웨이트 파일은 두 종류의 레코드가 됩니다. 빔 레코드는 어레이 전체를 포함한 빔 하나의 3D 격자이고, 포트 레코드는 포트 하나의 3D 격자에 어레이 정보가 붙어 있습니다. 모든 형식이 Sionna에는 dB를 전력이 아니라 필드 진폭으로 바꿔 넘깁니다. 맨 오른쪽 열이 중요합니다. 빔 패턴은 1×1로, 포트 패턴은 파일의 어레이로 서버가 강제하지만, MSI와 BASTA는 사람이 정하고 CF가 막지 않습니다. 그래서 17 dBi짜리 패널 전체 패턴을 8×8에 올리면 어레이 이득이 두 번 들어가니, 그런 파일은 1×1로 써야 합니다. 뷰어와 Adjust, 체크 기능도 솔버와 같은 격자와 보간을 쓰므로, 화면에서 보는 패턴이 곧 솔버가 쓰는 패턴입니다.</aside>
+</section>
+<section id="gap" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">문제 정리</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">파일에 있는 것 vs PlanarArray가 필요한 것</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:flex-start">
+<div style="width:540px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">웨이트 파일에 있는 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">빔 K개 × 포트별 복소 웨이트<br>= 포트끼리의 <b>위상 · 크기 관계</b><br>+ 선언값: E-tilt · 수평 HPBW</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">없는 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">포트 하나가 내는 <b>패턴</b><br>포트의 <b>위치</b> (몇 행 몇 열 · 간격)<br>웨이트를 펼친 <b>순서</b>의 뜻</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">근거의 세 등급</p><p style="font-size:24px;line-height:1.4;color:#4A5262"><b>추론</b> 웨이트 자체에서 끌어냄<br><b>피팅</b> 선언값에 맞도록 찾음<br><b>가정</b> 기본값을 둠</p></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">PlanarArray에 필요한 것</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">정하는 방법</p><p style="width:190px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">근거</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">편파 × 열 × 행</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">64를 나누는 배치를 다 시험 → 평면파 조향에 가장 잘 맞는 것</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">추론</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">세로 축</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">모든 빔이 같은 위상 간격을 갖는 축</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">추론</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">가로 간격 d_h</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">기본값 0.5 λ</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">가정</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">세로 피치 d_v</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">행 간 위상 간격과 E-tilt로 계산</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">피팅</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">포트 패턴</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">소자 패턴 × 서브어레이 팩터 모델</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">모델</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">└ 소자 수평폭</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">SSB 빔 HPBW가 선언값이 되도록</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">피팅</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">└ 소자 수직폭 · 서브 틸트</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">65° · E-tilt와 같다고 봄</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">가정</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">켤레 · 좌우반전</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">빔이 아래를 향하는 쪽 · false</p><p style="width:190px;font-size:24px;line-height:1.35;color:#4A5262">피팅 · 가정</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 “웨이트 파일의 포트 추정 · 어레이 정보” (beam_weights.py:174 · 213 · 314 · 480)</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 17</p>
+<aside>(약 55초) 문제를 한 장으로 정리하겠습니다. 웨이트 파일에 있는 것은 빔마다 포트별 복소 웨이트, 즉 포트끼리의 위상과 크기 관계, 그리고 E-tilt와 수평 빔폭 같은 선언값뿐입니다. 포트 하나가 내는 패턴, 포트가 몇 행 몇 열로 얼마 간격으로 놓였는지, 웨이트 64개를 어떤 순서로 펼쳤는지는 없습니다. 그런데 PlanarArray에는 오른쪽 표의 값이 모두 필요합니다. CF는 이를 세 등급의 근거로 채웁니다. 추론은 웨이트 자체에서 끌어낸 것이고, 피팅은 선언값에 맞도록 찾은 것, 가정은 기본값을 둔 것입니다. 배치와 세로 축은 추론, 세로 피치와 소자 수평폭은 피팅, 가로 간격과 소자 수직폭, 서브어레이 틸트는 가정입니다. 포트 패턴은 소자 패턴 곱하기 서브어레이 팩터라는 모델입니다. 다음 쪽부터 위에서 아래로 하나씩 보겠습니다.</aside>
+</section>
+<section id="index" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">① 펼친 순서</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">복소수 64개를 [편파, 열, 행] 상자에 다시 접는다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:700px;height:640px">
+<svg aria-label="빔 하나(방위 +7.5°)의 웨이트 64개를 편파 둘 × 열 8 × 행 4 격자에 접어 위상을 색으로 칠한 그림. 열을 따라, 행을 따라 색이 일정하게 바뀐다" style="position:absolute;left:0px;top:0px;width:700px;height:640px" width="700" height="640" viewBox="0 0 700 640"><rect x="60" y="60" width="54" height="54" rx="6" fill="#2962A1"/><rect x="60" y="118" width="54" height="54" rx="6" fill="#E1E8ED"/><rect x="60" y="176" width="54" height="54" rx="6" fill="#C7703A"/><rect x="60" y="234" width="54" height="54" rx="6" fill="#193359"/><rect x="118" y="60" width="54" height="54" rx="6" fill="#5083BD"/><rect x="118" y="118" width="54" height="54" rx="6" fill="#F4E8DC"/><rect x="118" y="176" width="54" height="54" rx="6" fill="#A74A16"/><rect x="118" y="234" width="54" height="54" rx="6" fill="#1F4A7E"/><rect x="176" y="60" width="54" height="54" rx="6" fill="#75A3D7"/><rect x="176" y="118" width="54" height="54" rx="6" fill="#F2C6A5"/><rect x="176" y="176" width="54" height="54" rx="6" fill="#7F3F21"/><rect x="176" y="234" width="54" height="54" rx="6" fill="#3B71AD"/><rect x="234" y="60" width="54" height="54" rx="6" fill="#A6C6E9"/><rect x="234" y="118" width="54" height="54" rx="6" fill="#F0A975"/><rect x="234" y="176" width="54" height="54" rx="6" fill="#362A34"/><rect x="234" y="234" width="54" height="54" rx="6" fill="#5C8EC5"/><rect x="292" y="60" width="54" height="54" rx="6" fill="#B9D1EB"/><rect x="292" y="118" width="54" height="54" rx="6" fill="#D7844D"/><rect x="292" y="176" width="54" height="54" rx="6" fill="#162848"/><rect x="292" y="234" width="54" height="54" rx="6" fill="#83AFE1"/><rect x="350" y="60" width="54" height="54" rx="6" fill="#EAEDED"/><rect x="350" y="118" width="54" height="54" rx="6" fill="#BD632E"/><rect x="350" y="176" width="54" height="54" rx="6" fill="#1D406E"/><rect x="350" y="234" width="54" height="54" rx="6" fill="#B1CDEA"/><rect x="408" y="60" width="54" height="54" rx="6" fill="#F3D7C0"/><rect x="408" y="118" width="54" height="54" rx="6" fill="#97451B"/><rect x="408" y="176" width="54" height="54" rx="6" fill="#255C9C"/><rect x="408" y="234" width="54" height="54" rx="6" fill="#D1DEEC"/><rect x="466" y="60" width="54" height="54" rx="6" fill="#F1BA91"/><rect x="466" y="118" width="54" height="54" rx="6" fill="#6A3926"/><rect x="466" y="176" width="54" height="54" rx="6" fill="#4B7FB9"/><rect x="466" y="234" width="54" height="54" rx="6" fill="#F4EADF"/><rect x="60" y="360" width="54" height="54" rx="6" fill="#7BA9DB"/><rect x="60" y="418" width="54" height="54" rx="6" fill="#F2C3A0"/><rect x="60" y="476" width="54" height="54" rx="6" fill="#743C24"/><rect x="60" y="534" width="54" height="54" rx="6" fill="#336AA8"/><rect x="118" y="360" width="54" height="54" rx="6" fill="#9EC1E9"/><rect x="118" y="418" width="54" height="54" rx="6" fill="#F0A772"/><rect x="118" y="476" width="54" height="54" rx="6" fill="#3B2C33"/><rect x="118" y="534" width="54" height="54" rx="6" fill="#6393CA"/><rect x="176" y="360" width="54" height="54" rx="6" fill="#CADBEC"/><rect x="176" y="418" width="54" height="54" rx="6" fill="#D7854E"/><rect x="176" y="476" width="54" height="54" rx="6" fill="#162746"/><rect x="176" y="534" width="54" height="54" rx="6" fill="#80ADDF"/><rect x="234" y="360" width="54" height="54" rx="6" fill="#F5F0EA"/><rect x="234" y="418" width="54" height="54" rx="6" fill="#B95F2A"/><rect x="234" y="476" width="54" height="54" rx="6" fill="#1D416F"/><rect x="234" y="534" width="54" height="54" rx="6" fill="#AAC8EA"/><rect x="292" y="360" width="54" height="54" rx="6" fill="#F4DCC8"/><rect x="292" y="418" width="54" height="54" rx="6" fill="#96451B"/><rect x="292" y="476" width="54" height="54" rx="6" fill="#245B99"/><rect x="292" y="534" width="54" height="54" rx="6" fill="#D2DFEC"/><rect x="350" y="360" width="54" height="54" rx="6" fill="#F1B990"/><rect x="350" y="418" width="54" height="54" rx="6" fill="#5E352A"/><rect x="350" y="476" width="54" height="54" rx="6" fill="#4479B4"/><rect x="350" y="534" width="54" height="54" rx="6" fill="#F4F3EE"/><rect x="408" y="360" width="54" height="54" rx="6" fill="#E89962"/><rect x="408" y="418" width="54" height="54" rx="6" fill="#292738"/><rect x="408" y="476" width="54" height="54" rx="6" fill="#719FD4"/><rect x="408" y="534" width="54" height="54" rx="6" fill="#F3D1B6"/><rect x="466" y="360" width="54" height="54" rx="6" fill="#C9733D"/><rect x="466" y="418" width="54" height="54" rx="6" fill="#1A3761"/><rect x="466" y="476" width="54" height="54" rx="6" fill="#93BBE8"/><rect x="466" y="534" width="54" height="54" rx="6" fill="#F1B182"/><line x1="60.0" y1="590.0" x2="506.0" y2="590.0" stroke="#5E6675" stroke-width="3"/><polygon points="518.0,590.0 506.0,584.0 506.0,596.0" fill="#5E6675"/><line x1="36.0" y1="60.0" x2="36.0" y2="274.0" stroke="#5E6675" stroke-width="3"/><polygon points="36.0,286.0 42.0,274.0 30.0,274.0" fill="#5E6675"/><rect x="580" y="70" width="34" height="7" fill="#255E9E"/><rect x="580" y="76" width="34" height="7" fill="#22548D"/><rect x="580" y="82" width="34" height="7" fill="#1F497D"/><rect x="580" y="88" width="34" height="7" fill="#1C3F6C"/><rect x="580" y="94" width="34" height="7" fill="#19345B"/><rect x="580" y="100" width="34" height="7" fill="#162A4B"/><rect x="580" y="106" width="34" height="7" fill="#18223C"/><rect x="580" y="112" width="34" height="7" fill="#322935"/><rect x="580" y="118" width="34" height="7" fill="#4B302F"/><rect x="580" y="124" width="34" height="7" fill="#643728"/><rect x="580" y="130" width="34" height="7" fill="#7E3E21"/><rect x="580" y="136" width="34" height="7" fill="#97451A"/><rect x="580" y="142" width="34" height="7" fill="#AC4F1B"/><rect x="580" y="148" width="34" height="7" fill="#B85E29"/><rect x="580" y="154" width="34" height="7" fill="#C56E38"/><rect x="580" y="160" width="34" height="7" fill="#D17D47"/><rect x="580" y="166" width="34" height="7" fill="#DD8C55"/><rect x="580" y="172" width="34" height="7" fill="#EA9B64"/><rect x="580" y="178" width="34" height="7" fill="#F0AA76"/><rect x="580" y="184" width="34" height="7" fill="#F1B88D"/><rect x="580" y="190" width="34" height="7" fill="#F2C5A3"/><rect x="580" y="196" width="34" height="7" fill="#F3D3BA"/><rect x="580" y="202" width="34" height="7" fill="#F4E1D0"/><rect x="580" y="208" width="34" height="7" fill="#F5EEE7"/><rect x="580" y="214" width="34" height="7" fill="#E9ECED"/><rect x="580" y="220" width="34" height="7" fill="#D7E2EC"/><rect x="580" y="226" width="34" height="7" fill="#C5D8EB"/><rect x="580" y="232" width="34" height="7" fill="#B4CEEA"/><rect x="580" y="238" width="34" height="7" fill="#A2C4E9"/><rect x="580" y="244" width="34" height="7" fill="#90BAE8"/><rect x="580" y="250" width="34" height="7" fill="#7EABDD"/><rect x="580" y="256" width="34" height="7" fill="#6C9CD1"/><rect x="580" y="262" width="34" height="7" fill="#5A8CC4"/><rect x="580" y="268" width="34" height="7" fill="#497DB7"/><rect x="580" y="274" width="34" height="7" fill="#376DAB"/><rect x="580" y="280" width="34" height="7" fill="#255E9E"/></svg>
+<p style="position:absolute;left:60px;top:20px;width:464px;font-size:24px;font-weight:700;color:#14213D">편파 p = 0 (+45°)</p>
+<p style="position:absolute;left:60px;top:72px;width:54px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">0</p>
+<p style="position:absolute;left:60px;top:246px;width:54px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">3</p>
+<p style="position:absolute;left:118px;top:72px;width:54px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">4</p>
+<p style="position:absolute;left:466px;top:246px;width:54px;font-size:24px;text-align:center;font-weight:700;color:#14213D">31</p>
+<p style="position:absolute;left:60px;top:320px;width:464px;font-size:24px;font-weight:700;color:#14213D">편파 p = 1 (−45°)</p>
+<p style="position:absolute;left:60px;top:372px;width:54px;font-size:24px;text-align:center;font-weight:700;color:#14213D">32</p>
+<p style="position:absolute;left:60px;top:546px;width:54px;font-size:24px;text-align:center;font-weight:700;color:#F5F3EE">35</p>
+<p style="position:absolute;left:118px;top:372px;width:54px;font-size:24px;text-align:center;font-weight:700;color:#14213D">36</p>
+<p style="position:absolute;left:466px;top:546px;width:54px;font-size:24px;text-align:center;font-weight:700;color:#14213D">63</p>
+<p style="position:absolute;left:60px;top:600px;width:464px;font-size:24px;text-align:center;color:#5E6675">열 c = 0 → 7</p>
+<p style="position:absolute;left:560px;top:30px;width:110px;font-size:24px;text-align:center;font-weight:700;color:#14213D">위상</p>
+<p style="position:absolute;left:622px;top:58px;width:70px;font-size:24px;color:#5E6675">360°</p>
+<p style="position:absolute;left:622px;top:266px;width:70px;font-size:24px;color:#5E6675">0°</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.55;color:#F5F3EE;white-space:nowrap">n = (p · 8 + c) · 4 + r<br>p = n // 32 · c = (n // 4) % 8 · r = n % 4</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">읽는 법 (전제)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">문서의 순서 “편파 → 열 → 행, 위에서 아래”를 <b>바깥 → 안쪽</b>으로 읽은 것 · 행이 가장 빨리 바뀐다 · 정확한 규칙은 코드에서 확인할 것</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">색 = 웨이트의 위상</p><p style="font-size:24px;line-height:1.4;color:#4A5262">예: 방위 +7.5°로 조향한 빔 · 같은 행에서 열을 따라 일정하게, 같은 열에서 행을 따라 일정하게 돈다 → <b>평면파 조향</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">왜 중요한가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">접는 방법이 틀리면 위상이 뒤죽박죽 → 배치 추론(다음 쪽)이 바로 이 “고르게 도는가”를 시험한다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">합성 웨이트 예시(2 × 8 × 4 · d_h 0.5 λ · d_v 2.84 λ · 틸트 6° · 위상 잡음 3°) · 실제 파일 아님</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 17</p>
+<aside>(약 55초) 웨이트 파일의 한 줄은 빔 하나이고, 복소수 64개가 일렬로 놓여 있습니다. 이 64개를 편파, 열, 행이라는 상자에 다시 접어야 어느 숫자가 어느 포트인지 알 수 있습니다. 문서의 순서 표기는 편파, 열, 행, 위에서 아래인데, 이것을 바깥에서 안쪽으로 읽으면 행이 가장 빨리 바뀌고, 위의 식처럼 번호 n에서 편파, 열, 행을 꺼낼 수 있습니다. 이 해석은 코드에서 꼭 확인해야 합니다. 왼쪽 그림은 합성 웨이트로 만든 예시입니다. 방위 +7.5도로 조향한 빔의 64개 웨이트를 접어 위상을 색으로 칠했습니다. 같은 행에서 열을 따라, 같은 열에서 행을 따라 색이 일정하게 돌아갑니다. 이것이 평면파 조향의 모습입니다. 접는 방법이 틀리면 이 규칙성이 깨지는데, 다음 쪽의 배치 추론이 바로 이 점을 이용합니다.</aside>
+</section>
+<section id="layout" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">② 배치 추론 · 추론</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">배치를 모두 시험해 평면파에 맞는 것을 고른다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:760px;height:590px">
+<svg aria-label="배치 후보 13개의 흩어짐 막대. 2 × 8 × 4가 0.005로 가장 작고 나머지는 0.07 이상" style="position:absolute;left:0px;top:0px;width:760px;height:590px" width="760" height="590" viewBox="0 0 760 590"><rect x="190" y="50" width="5" height="30" rx="4" fill="#A84A16" opacity="1"/><rect x="190" y="90" width="76" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="130" width="153" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="170" width="207" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="210" width="230" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="250" width="230" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="290" width="233" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="330" width="245" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="370" width="245" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="410" width="301" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="450" width="401" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="490" width="425" height="30" rx="4" fill="#255E9E" opacity="0.7"/><rect x="190" y="530" width="520" height="30" rx="4" fill="#255E9E" opacity="0.7"/></svg>
+<p style="position:absolute;left:0px;top:49px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#A84A16">2 × 8 × 4</p>
+<p style="position:absolute;left:0px;top:89px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">1 × 16 × 4</p>
+<p style="position:absolute;left:0px;top:129px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">2 × 4 × 8</p>
+<p style="position:absolute;left:0px;top:169px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">2 × 2 × 16</p>
+<p style="position:absolute;left:0px;top:209px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">2 × 1 × 32</p>
+<p style="position:absolute;left:0px;top:249px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">2 × 32 × 1</p>
+<p style="position:absolute;left:0px;top:289px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">1 × 2 × 32</p>
+<p style="position:absolute;left:0px;top:329px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">1 × 1 × 64</p>
+<p style="position:absolute;left:0px;top:369px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">1 × 64 × 1</p>
+<p style="position:absolute;left:0px;top:409px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">1 × 8 × 8</p>
+<p style="position:absolute;left:0px;top:449px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">2 × 16 × 2</p>
+<p style="position:absolute;left:0px;top:489px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">1 × 32 × 2</p>
+<p style="position:absolute;left:0px;top:529px;width:176px;font-size:24px;text-align:right;font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D">1 × 4 × 16</p>
+<p style="position:absolute;left:190px;top:8px;width:640px;font-size:24px;font-weight:700;color:#14213D">흩어짐 (작을수록 평면파) · 편파 × 열 × 행</p>
+<p style="position:absolute;left:204px;top:49px;width:300px;font-size:24px;font-family:'JetBrains Mono', 'Courier New', monospace;font-weight:700;color:#A84A16">0.005 ← 선택</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">①</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">후보 만들기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">64 = 편파(1 또는 2) × 열 × 행 — 나누어떨어지는 모든 경우 13가지</p></div>
+<div style="flex:1;background:#D5E3F3;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">②</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">접어서 위상 차 보기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">열 방향 · 행 방향으로 이웃한 웨이트끼리 위상 차를 구한다</p></div>
+<div style="flex:1;background:#FBFAF7;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">③</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">평면파인가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">조향 빔이면 위상 차가 어디서나 같다 · 흩어짐 = 1 − |위상 차 단위벡터의 평균|</p></div>
+<div style="flex:1;background:#F7DDCB;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16">④</p><p style="font-size:24px;font-weight:700;line-height:1.3;color:#14213D">고르기</p><p style="font-size:24px;line-height:1.4;color:#4A5262">전력이 고른 빔들로 평균해 흩어짐이 가장 작은 배치 → 2 × 8 × 4</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">합성 웨이트(빔 8개, 편파마다 다른 위상 오프셋)로 같은 절차를 계산한 예시 · 실제 기준식은 코드 확인</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 17</p>
+<aside>(약 55초) 첫 번째 추론은 배치입니다. 64는 편파 하나나 둘에, 열과 행을 곱해 여러 방식으로 나눌 수 있습니다. 나누어떨어지는 경우가 모두 13가지입니다. 각 후보마다 웨이트를 그 모양으로 접은 뒤, 열 방향과 행 방향으로 이웃한 웨이트끼리 위상 차를 구합니다. 조향 빔이라면 이 위상 차가 어디서나 같아야 합니다. 그래서 위상 차들이 얼마나 흩어지는지를 재고, 전력이 고른 빔들로 평균해 가장 작은 배치를 고릅니다. 왼쪽은 합성 웨이트로 같은 절차를 돌린 결과입니다. 2 곱하기 8 곱하기 4가 0.005로 압도적으로 작고, 그 다음 후보도 0.07 이상입니다. 문서의 샘플 파일에서도 2 곱하기 8 곱하기 4가 나왔고, 이것은 웨이트 자체에서 나온 값이라 비교적 믿을 만합니다. 다만 앞쪽에서 본 펼친 순서의 전제 위에 서 있다는 점은 기억해야 합니다.</aside>
+</section>
+<section id="axes" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">③ 세로 축 · 추론</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">모든 빔이 같은 위상 간격을 갖는 축이 세로다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:760px;height:560px">
+<svg aria-label="빔 8개의 열 방향 위상 차는 -142°에서 +142°까지 빔마다 다르고, 행 방향 위상 차는 모두 약 107°로 같다" style="position:absolute;left:0px;top:0px;width:760px;height:560px" width="760" height="560" viewBox="0 0 760 560"><rect x="90" y="50" width="640" height="420" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="260" x2="730" y2="260" stroke="#EAE7DF" stroke-width="2"/><circle cx="130" cy="426" r="11" fill="#255E9E"/><rect x="120" y="126" width="20" height="20" fill="#A84A16"/><circle cx="210" cy="387" r="11" fill="#255E9E"/><rect x="200" y="126" width="20" height="20" fill="#A84A16"/><circle cx="290" cy="340" r="11" fill="#255E9E"/><rect x="280" y="125" width="20" height="20" fill="#A84A16"/><circle cx="370" cy="287" r="11" fill="#255E9E"/><rect x="360" y="126" width="20" height="20" fill="#A84A16"/><circle cx="450" cy="233" r="11" fill="#255E9E"/><rect x="440" y="125" width="20" height="20" fill="#A84A16"/><circle cx="530" cy="180" r="11" fill="#255E9E"/><rect x="520" y="125" width="20" height="20" fill="#A84A16"/><circle cx="610" cy="133" r="11" fill="#255E9E"/><rect x="600" y="125" width="20" height="20" fill="#A84A16"/><circle cx="690" cy="94" r="11" fill="#255E9E"/><rect x="680" y="126" width="20" height="20" fill="#A84A16"/><line x1="90" y1="136" x2="730" y2="136" stroke="#A84A16" stroke-width="2" stroke-dasharray="8 6"/></svg>
+<p style="position:absolute;left:0px;top:34px;width:82px;font-size:24px;text-align:right;color:#5E6675">+180°</p>
+<p style="position:absolute;left:0px;top:244px;width:82px;font-size:24px;text-align:right;color:#5E6675">0°</p>
+<p style="position:absolute;left:0px;top:454px;width:82px;font-size:24px;text-align:right;color:#5E6675">−180°</p>
+<p style="position:absolute;left:90px;top:8px;width:640px;font-size:24px;font-weight:700;color:#14213D">이웃 포트 사이 위상 차 Δψ · 빔 8개</p>
+<p style="position:absolute;left:90px;top:476px;width:640px;font-size:24px;text-align:center;color:#5E6675">빔 방위 -52.5° … +52.5° (15° 간격)</p>
+<p style="position:absolute;left:90px;top:514px;width:640px;font-size:24px;text-align:center;color:#4A5262"><span style="color:#255E9E">●</span> 열 방향 Δψ · <span style="color:#A84A16">■</span> 행 방향 Δψ</p>
+<p style="position:absolute;left:102px;top:148px;width:250px;font-size:24px;font-weight:700;color:#A84A16">모두 ≈ 107°</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">왜 이렇게 되나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SSB 빔들은 <b>같은 E-tilt</b>로 숙이고 <b>방위만 다르게</b> 흩어진다 → 세로 위상 간격은 모두 같고, 가로 위상 간격만 빔마다 다르다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">가로 (열 방향)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Δψ = 2π · d_h · cos(틸트) · sin(방위) — 방위가 바뀌면 값이 바뀐다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">세로 (행 방향)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Δψ = 2π · d_v · sin(E-tilt) — 모든 빔이 같다 · 예시에서 106.7°</p></div>
+<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">결과</p><p style="font-size:24px;line-height:1.4;color:#4A5262">행 4개가 세로, 열 8개가 가로 → rows 4 · cols 8 · 편파 2</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">앞쪽과 같은 합성 웨이트로 계산 · 빔이 모두 같은 E-tilt라는 것은 SSB 빔 묶음의 일반적인 설계</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 17</p>
+<aside>(약 50초) 배치가 2 곱하기 8 곱하기 4로 정해져도, 8과 4 중 어느 쪽이 세로인지는 아직 모릅니다. 여기서 쓰는 규칙이, 모든 빔이 같은 위상 간격을 갖는 축을 세로로 본다는 것입니다. SSB 빔들은 보통 같은 전기 틸트로 숙이고 방위만 다르게 흩어지기 때문입니다. 왼쪽 그림의 파란 점은 열 방향 위상 차로, 빔 방위에 따라 -142도에서 +142도까지 바뀝니다. 주황 사각은 행 방향 위상 차로, 여덟 빔이 모두 약 107도로 같습니다. 그래서 행 방향이 세로입니다. 결과는 행 4개, 열 8개, 편파 둘입니다. 그리고 이 세로 위상 간격 107도가 다음 쪽에서 세로 피치를 계산하는 재료가 됩니다.</aside>
+</section>
+<section id="pitch" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">④ 세로 피치 d_v · 피팅</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">세로 위상 간격과 E-tilt로 포트 세로 피치를 푼다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.55;color:#F5F3EE;white-space:nowrap">Δψ_행 = 2π · d_v · sin(E-tilt)   →   d_v = (Δψ_행 / 360° + m) / sin(E-tilt)<br><span style="color:#F0A36B">예: (106.7° / 360° + 0) / sin 6° = 2.84 λ</span></p></div>
+<div style="display:flex;flex-direction:row;gap:26px;align-items:flex-start">
+<div style="position:relative;width:780px;height:290px">
+<svg aria-label="세로 피치 후보를 수직선 위에 찍은 그림. m = 0이면 2.84 λ, m = 1이면 12.4 λ, 0.5 λ 미만은 제외" style="position:absolute;left:0px;top:0px;width:780px;height:290px" width="780" height="290" viewBox="0 0 780 290"><rect x="60" y="120" width="24" height="60" fill="#EAE7DF"/><line x1="60" y1="150" x2="740" y2="150" stroke="#14213D" stroke-width="3"/><line x1="60" y1="142" x2="60" y2="158" stroke="#14213D" stroke-width="2"/><line x1="157" y1="142" x2="157" y2="158" stroke="#14213D" stroke-width="2"/><line x1="254" y1="142" x2="254" y2="158" stroke="#14213D" stroke-width="2"/><line x1="351" y1="142" x2="351" y2="158" stroke="#14213D" stroke-width="2"/><line x1="449" y1="142" x2="449" y2="158" stroke="#14213D" stroke-width="2"/><line x1="546" y1="142" x2="546" y2="158" stroke="#14213D" stroke-width="2"/><line x1="643" y1="142" x2="643" y2="158" stroke="#14213D" stroke-width="2"/><line x1="740" y1="142" x2="740" y2="158" stroke="#14213D" stroke-width="2"/><circle cx="198" cy="150" r="14" fill="#A84A16"/><circle cx="662" cy="150" r="14" fill="#FBFAF7" stroke="#255E9E" stroke-width="4"/><line x1="217.7" y1="210.0" x2="630.4" y2="210.0" stroke="#5E6675" stroke-width="3" stroke-dasharray="8 6"/><polygon points="642.4,210.0 630.4,204.0 630.4,216.0" fill="#5E6675"/></svg>
+<p style="position:absolute;left:30px;top:166px;width:60px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:680px;top:166px;width:120px;font-size:24px;text-align:center;color:#5E6675">14 λ</p>
+<p style="position:absolute;left:60px;top:74px;width:200px;font-size:24px;color:#5E6675">0.5 λ 미만 제외</p>
+<p style="position:absolute;left:98px;top:38px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">m = 0 → 2.84 λ</p>
+<p style="position:absolute;left:542px;top:74px;width:240px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">m = 1 → 12.4 λ</p>
+<p style="position:absolute;left:198px;top:226px;width:465px;font-size:24px;text-align:center;color:#5E6675">해 사이 간격 1 / sin 6° = 9.57 λ</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">2π 모호성</p><p style="font-size:24px;line-height:1.4;color:#4A5262">위상은 360°마다 같아 보인다 → m = 0, 1, 2 …의 해가 모두 맞는다</p></div>
+<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">고르는 규칙</p><p style="font-size:24px;line-height:1.4;color:#4A5262">0.5 λ 이상인 가장 작은 해 · 샘플 2.84 λ ↔ 제품팀 4 × 0.712 = 2.848 λ</p></div>
+</div>
+</div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">켤레 (conjugate) 먼저</p><p style="font-size:24px;line-height:1.4;color:#4A5262">w를 그대로 쓰느냐 w*로 쓰느냐에 따라 Δψ의 부호가 뒤집혀 빔이 위 또는 아래를 향한다 → <b>빔이 아래로 향하는 쪽</b>을 골라 부호를 정한 뒤 d_v를 푼다 (데이터로 결정)</p></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">식과 규칙: CF 문서 (beam_weights.py:314) · 106.7°는 합성 웨이트 값 · 샘플 결과 2.84 λ는 문서 값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 17</p>
+<aside>(약 55초) 세로 위상 간격이 나오면 포트의 세로 피치를 풀 수 있습니다. 빔을 E-tilt만큼 숙이려면 위아래 포트 사이 위상 차가 2파이 곱하기 피치 곱하기 사인 E-tilt여야 합니다. 거꾸로 풀면 피치는 위상 차를 360도로 나눈 값에 정수 m을 더하고, 사인 E-tilt로 나눈 값입니다. 예시의 106.7도와 E-tilt 6도를 넣으면 2.84 파장이 나옵니다. 정수 m이 붙는 이유는 위상이 360도마다 같아 보이기 때문입니다. 그래서 해가 1 나누기 사인 6도, 약 9.6 파장 간격으로 여러 개 있고, CF는 0.5 파장 이상인 가장 작은 해를 고릅니다. 샘플 파일의 결과 2.84 파장은 제품팀 값 0.712 곱하기 4, 2.848과 맞았습니다. 하나 더, 웨이트를 그대로 쓰느냐 켤레로 쓰느냐에 따라 위상 차의 부호가 뒤집혀 빔이 위나 아래를 향합니다. CF는 빔이 아래로 향하는 쪽을 골라 부호를 먼저 정합니다.</aside>
+</section>
+<section id="subarray" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑤ 서브어레이 · 추정 · 가정</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">포트 하나 = 소자 N개를 세로로 묶은 것</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:28px;align-items:flex-start">
+<div style="position:relative;width:860px;height:560px">
+<svg aria-label="세로 단면. 포트 네 개의 어레이 팩터는 피치 2.84 λ 때문에 +14°, -27° 등에 0 dB 그레이팅 로브가 생기지만, 서브어레이 팩터의 널이 같은 자리에 있어 곱은 -44 dB 이하" style="position:absolute;left:0px;top:0px;width:860px;height:560px" width="860" height="560" viewBox="0 0 860 560"><rect x="80" y="50" width="740" height="400" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="150" x2="820" y2="150" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="250" x2="820" y2="250" stroke="#EAE7DF" stroke-width="2"/><line x1="80" y1="350" x2="820" y2="350" stroke="#EAE7DF" stroke-width="2"/><polyline points="80.0,235.8 82.1,236.1 84.1,236.8 86.2,237.9 88.2,239.6 90.3,241.7 92.3,244.5 94.4,247.9 96.4,252.0 98.5,257.0 100.6,262.9 102.6,270.0 104.7,278.6 106.7,289.1 108.8,302.2 110.8,319.0 112.9,341.7 114.9,375.0 117.0,434.9 119.1,450.0 121.1,422.4 123.2,362.0 125.2,325.5 127.3,299.1 129.3,278.3 131.4,261.1 133.4,246.5 135.5,233.9 137.6,222.8 139.6,213.1 141.7,204.4 143.7,196.7 145.8,189.9 147.8,183.9 149.9,178.6 151.9,174.1 154.0,170.4 156.1,167.4 158.1,165.1 160.2,163.7 162.2,163.0 164.3,163.3 166.3,164.7 168.4,167.1 170.4,170.9 172.5,176.3 174.6,183.7 176.6,193.8 178.7,207.4 180.7,226.4 182.8,254.9 184.8,304.6 186.9,450.0 188.9,325.6 191.0,254.0 193.1,213.2 195.1,184.2 197.2,161.7 199.2,143.3 201.3,127.8 203.3,114.5 205.4,103.1 207.4,93.1 209.5,84.4 211.6,76.8 213.6,70.3 215.7,64.7 217.7,60.1 219.8,56.4 221.8,53.5 223.9,51.5 225.9,50.3 228.0,50.0 230.1,50.6 232.1,52.2 234.2,54.8 236.2,58.5 238.3,63.4 240.3,69.6 242.4,77.3 244.4,86.7 246.5,98.2 248.6,112.4 250.6,130.0 252.7,152.5 254.7,182.7 256.8,227.6 258.8,316.8 260.9,353.6 262.9,251.0 265.0,210.5 267.1,187.6 269.1,173.8 271.2,166.1 273.2,163.1 275.3,164.4 277.3,170.1 279.4,180.7 281.4,197.6 283.5,224.0 285.6,268.9 287.6,382.1 289.7,333.6 291.7,252.8 293.8,214.1 295.8,190.5 297.9,175.5 299.9,166.7 302.0,163.1 304.1,164.8 306.1,172.2 308.2,187.4 310.2,215.2 312.3,272.9 314.3,448.6 316.4,242.3 318.4,182.4 320.5,145.7 322.6,119.6 324.6,99.8 326.7,84.5 328.7,72.6 330.8,63.6 332.8,56.9 334.9,52.6 336.9,50.3 339.0,50.2 341.1,52.1 343.1,56.2 345.2,62.7 347.2,71.9 349.3,84.2 351.3,100.4 353.4,121.8 355.4,151.1 357.5,194.7 359.6,277.5 361.6,349.9 363.7,233.7 365.7,193.8 367.8,173.9 369.8,164.7 371.9,163.4 373.9,169.1 376.0,182.5 378.1,206.6 380.1,250.1 382.2,361.3 384.2,316.3 386.3,235.8 388.3,198.7 390.4,177.7 392.4,166.5 394.5,163.0 396.6,167.1 398.6,180.4 400.7,208.2 402.7,271.0 404.8,372.7 406.8,219.0 408.9,163.1 410.9,128.3 413.0,103.7 415.1,85.5 417.1,71.9 419.2,62.0 421.2,55.3 423.3,51.3 425.3,50.0 427.4,51.3 429.4,55.3 431.5,62.1 433.6,72.1 435.6,85.9 437.7,104.4 439.7,129.6 441.8,165.7 443.8,224.9 445.9,420.3 447.9,260.1 450.0,203.2 452.1,177.6 454.1,165.8 456.2,163.2 458.2,168.5 460.3,182.3 462.3,207.8 464.4,255.2 466.4,396.5 468.5,296.5 470.6,226.6 472.6,192.8 474.7,174.0 476.7,164.8 478.8,163.4 480.8,170.3 482.9,187.7 484.9,223.9 487.0,322.0 489.1,286.1 491.1,194.6 493.2,148.7 495.2,118.4 497.3,96.6 499.3,80.3 501.4,68.2 503.4,59.5 505.5,53.8 507.6,50.7 509.6,50.1 511.7,52.0 513.7,56.3 515.8,63.4 517.8,73.5 519.9,87.1 521.9,105.2 524.0,129.3 526.1,163.0 528.1,216.1 530.2,345.8 532.2,284.5 534.3,214.8 536.3,184.6 538.4,169.5 540.4,163.4 542.5,164.5 544.6,172.3 546.6,188.0 548.7,214.7 550.7,262.6 552.8,402.2 554.8,305.7 556.9,234.9 558.9,200.2 561.0,179.8 563.1,168.2 565.1,163.3 567.2,164.6 569.2,172.5 571.3,189.2 573.3,220.7 575.4,290.9 577.4,356.3 579.5,225.7 581.6,172.9 583.6,139.4 585.7,115.2 587.7,96.9 589.8,82.8 591.8,71.8 593.9,63.4 595.9,57.2 598.0,53.0 600.1,50.6 602.1,50.0 604.2,51.1 606.2,53.8 608.3,58.2 610.3,64.4 612.4,72.6 614.4,83.0 616.5,95.9 618.6,112.0 620.6,132.3 622.7,158.7 624.7,195.3 626.8,254.6 628.8,450.0 630.9,285.8 632.9,226.4 635.0,196.9 637.1,179.5 639.1,169.3 641.2,164.2 643.2,163.1 645.3,165.7 647.3,171.9 649.4,182.1 651.4,197.1 653.5,218.9 655.6,251.7 657.6,309.8 659.7,450.0 661.7,315.4 663.8,255.8 665.8,222.8 667.9,201.2 669.9,186.1 672.0,175.6 674.1,168.6 676.1,164.5 678.2,163.0 680.2,164.1 682.3,167.8 684.3,174.4 686.4,184.4 688.4,198.9 690.5,220.2 692.6,253.3 694.6,316.1 696.7,450.0 698.7,288.8 700.8,231.6 702.8,196.6 704.9,171.3 706.9,151.7 709.0,135.7 711.1,122.5 713.1,111.3 715.2,101.7 717.2,93.4 719.3,86.3 721.3,80.0 723.4,74.6 725.4,70.0 727.5,65.9 729.6,62.5 731.6,59.5 733.7,57.1 735.7,55.0 737.8,53.4 739.8,52.1 741.9,51.1 743.9,50.5 746.0,50.1 748.1,50.0 750.1,50.1 752.2,50.5 754.2,51.0 756.3,51.7 758.3,52.6 760.4,53.7 762.4,54.8 764.5,56.1 766.6,57.5 768.6,59.0 770.7,60.6 772.7,62.3 774.8,64.0 776.8,65.7 778.9,67.5 780.9,69.3 783.0,71.1 785.1,72.9 787.1,74.6 789.2,76.4 791.2,78.1 793.3,79.7 795.3,81.3 797.4,82.8 799.4,84.1 801.5,85.4 803.6,86.6 805.6,87.7 807.7,88.6 809.7,89.5 811.8,90.1 813.8,90.7 815.9,91.0 817.9,91.3 820.0,91.3" fill="none" stroke="#255E9E" stroke-width="3" stroke-dasharray="10 6"/><polyline points="80.0,163.0 82.1,163.0 84.1,163.0 86.2,163.0 88.2,163.0 90.3,163.0 92.3,163.0 94.4,163.0 96.4,163.0 98.5,163.0 100.6,163.1 102.6,163.1 104.7,163.1 106.7,163.1 108.8,163.2 110.8,163.2 112.9,163.3 114.9,163.3 117.0,163.4 119.1,163.5 121.1,163.7 123.2,163.8 125.2,164.0 127.3,164.2 129.3,164.4 131.4,164.7 133.4,165.0 135.5,165.3 137.6,165.6 139.6,166.1 141.7,166.5 143.7,167.0 145.8,167.6 147.8,168.2 149.9,168.9 151.9,169.6 154.0,170.4 156.1,171.3 158.1,172.3 160.2,173.3 162.2,174.5 164.3,175.7 166.3,177.0 168.4,178.5 170.4,180.1 172.5,181.8 174.6,183.6 176.6,185.6 178.7,187.8 180.7,190.1 182.8,192.6 184.8,195.4 186.9,198.3 188.9,201.5 191.0,205.0 193.1,208.8 195.1,212.9 197.2,217.4 199.2,222.3 201.3,227.7 203.3,233.7 205.4,240.4 207.4,247.8 209.5,256.2 211.6,265.7 213.6,276.8 215.7,289.7 217.7,305.3 219.8,324.8 221.8,350.6 223.9,388.1 225.9,450.0 228.0,450.0 230.1,423.0 232.1,369.6 234.2,336.5 236.2,312.5 238.3,293.7 240.3,278.2 242.4,265.1 244.4,253.7 246.5,243.7 248.6,234.8 250.6,226.9 252.7,219.7 254.7,213.2 256.8,207.2 258.8,201.8 260.9,196.9 262.9,192.3 265.0,188.2 267.1,184.5 269.1,181.0 271.2,177.9 273.2,175.2 275.3,172.7 277.3,170.5 279.4,168.6 281.4,167.0 283.5,165.6 285.6,164.5 287.6,163.8 289.7,163.2 291.7,163.0 293.8,163.1 295.8,163.5 297.9,164.3 299.9,165.3 302.0,166.8 304.1,168.6 306.1,170.8 308.2,173.6 310.2,176.8 312.3,180.6 314.3,185.0 316.4,190.2 318.4,196.2 320.5,203.3 322.6,211.7 324.6,221.7 326.7,233.8 328.7,248.9 330.8,268.2 332.8,294.7 334.9,335.5 336.9,420.8 339.0,446.9 341.1,339.6 343.1,291.7 345.2,260.2 347.2,236.6 349.3,217.6 351.3,201.7 353.4,188.0 355.4,175.9 357.5,165.2 359.6,155.5 361.6,146.8 363.7,138.7 365.7,131.4 367.8,124.5 369.8,118.2 371.9,112.4 373.9,106.9 376.0,101.8 378.1,97.1 380.1,92.6 382.2,88.5 384.2,84.6 386.3,81.0 388.3,77.6 390.4,74.4 392.4,71.5 394.5,68.8 396.6,66.3 398.6,64.0 400.7,61.9 402.7,59.9 404.8,58.2 406.8,56.6 408.9,55.2 410.9,54.0 413.0,52.9 415.1,52.0 417.1,51.3 419.2,50.7 421.2,50.3 423.3,50.1 425.3,50.0 427.4,50.1 429.4,50.3 431.5,50.7 433.6,51.3 435.6,52.0 437.7,53.0 439.7,54.0 441.8,55.3 443.8,56.7 445.9,58.3 447.9,60.1 450.0,62.1 452.1,64.3 454.1,66.7 456.2,69.4 458.2,72.2 460.3,75.3 462.3,78.6 464.4,82.2 466.4,86.0 468.5,90.2 470.6,94.6 472.6,99.4 474.7,104.6 476.7,110.1 478.8,116.1 480.8,122.6 482.9,129.7 484.9,137.3 487.0,145.7 489.1,155.0 491.1,165.2 493.2,176.7 495.2,189.8 497.3,204.8 499.3,222.7 501.4,244.6 503.4,273.0 505.5,313.9 507.6,389.6 509.6,450.0 511.7,347.3 513.7,298.4 515.8,268.6 517.8,247.4 519.9,231.3 521.9,218.6 524.0,208.1 526.1,199.5 528.1,192.3 530.2,186.2 532.2,181.1 534.3,176.7 536.3,173.1 538.4,170.2 540.4,167.8 542.5,165.9 544.6,164.5 546.6,163.6 548.7,163.1 550.7,163.1 552.8,163.4 554.8,164.1 556.9,165.3 558.9,166.8 561.0,168.7 563.1,171.0 565.1,173.8 567.2,177.0 569.2,180.6 571.3,184.8 573.3,189.5 575.4,194.8 577.4,200.7 579.5,207.4 581.6,215.0 583.6,223.6 585.7,233.4 587.7,244.7 589.8,258.0 591.8,274.0 593.9,293.8 595.9,319.7 598.0,356.9 600.1,423.3 602.1,450.0 604.2,401.8 606.2,347.0 608.3,314.1 610.3,290.6 612.4,272.4 614.4,257.8 616.5,245.5 618.6,235.1 620.6,226.0 622.7,218.1 624.7,211.1 626.8,205.0 628.8,199.4 630.9,194.5 632.9,190.1 635.0,186.2 637.1,182.6 639.1,179.5 641.2,176.7 643.2,174.2 645.3,172.0 647.3,170.1 649.4,168.4 651.4,167.0 653.5,165.8 655.6,164.8 657.6,164.1 659.7,163.5 661.7,163.2 663.8,163.0 665.8,163.1 667.9,163.3 669.9,163.7 672.0,164.2 674.1,165.0 676.1,165.9 678.2,167.0 680.2,168.3 682.3,169.7 684.3,171.3 686.4,173.1 688.4,175.1 690.5,177.2 692.6,179.6 694.6,182.1 696.7,184.8 698.7,187.8 700.8,191.0 702.8,194.4 704.9,198.0 706.9,201.9 709.0,206.1 711.1,210.6 713.1,215.4 715.2,220.6 717.2,226.1 719.3,232.2 721.3,238.7 723.4,245.7 725.4,253.5 727.5,262.0 729.6,271.4 731.6,282.0 733.7,294.0 735.7,307.8 737.8,324.2 739.8,344.2 741.9,369.9 743.9,406.0 746.0,450.0 748.1,450.0 750.1,450.0 752.2,406.8 754.2,372.7 756.3,348.8 758.3,330.4 760.4,315.5 762.4,303.1 764.5,292.6 766.6,283.4 768.6,275.4 770.7,268.3 772.7,261.9 774.8,256.2 776.8,251.0 778.9,246.3 780.9,242.1 783.0,238.2 785.1,234.7 787.1,231.5 789.2,228.6 791.2,225.9 793.3,223.5 795.3,221.4 797.4,219.4 799.4,217.6 801.5,216.1 803.6,214.7 805.6,213.5 807.7,212.5 809.7,211.6 811.8,210.9 813.8,210.4 815.9,210.0 817.9,209.8 820.0,209.7" fill="none" stroke="#A84A16" stroke-width="4"/><polyline points="80.0,348.9 82.1,349.1 84.1,349.8 86.2,351.0 88.2,352.6 90.3,354.8 92.3,357.5 94.4,360.9 96.4,365.0 98.5,370.0 100.6,375.9 102.6,383.1 104.7,391.7 106.7,402.2 108.8,415.4 110.8,432.3 112.9,450.0 114.9,450.0 117.0,450.0 119.1,450.0 121.1,450.0 123.2,450.0 125.2,439.5 127.3,413.3 129.3,392.7 131.4,375.8 133.4,361.5 135.5,349.2 137.6,338.5 139.6,329.1 141.7,320.9 143.7,313.7 145.8,307.4 147.8,302.0 149.9,297.5 151.9,293.7 154.0,290.8 156.1,288.7 158.1,287.4 160.2,287.0 162.2,287.5 164.3,289.1 166.3,291.7 168.4,295.6 170.4,301.0 172.5,308.1 174.6,317.4 176.6,329.4 178.7,345.2 180.7,366.6 182.8,397.6 184.8,450.0 186.9,450.0 188.9,450.0 191.0,409.0 193.1,372.0 195.1,347.1 197.2,329.1 199.2,315.6 201.3,305.5 203.3,298.3 205.4,293.4 207.4,290.9 209.5,290.5 211.6,292.5 213.6,297.0 215.7,304.4 217.7,315.4 219.8,331.2 221.8,354.0 223.9,389.6 225.9,450.0 228.0,450.0 230.1,423.7 232.1,371.8 234.2,341.4 236.2,321.0 238.3,307.1 240.3,297.8 242.4,292.3 244.4,290.4 246.5,292.0 248.6,297.3 250.6,306.9 252.7,322.2 254.7,345.9 256.8,384.8 258.8,450.0 260.9,450.0 262.9,393.4 265.0,348.7 267.1,322.0 269.1,304.8 271.2,294.0 273.2,288.3 275.3,287.1 277.3,290.6 279.4,299.3 281.4,314.5 283.5,339.6 285.6,383.4 287.6,450.0 289.7,446.9 291.7,365.8 293.8,327.2 295.8,304.0 297.9,289.7 299.9,282.0 302.0,279.9 304.1,283.3 306.1,293.0 308.2,310.9 310.2,342.0 312.3,403.5 314.3,450.0 316.4,382.5 318.4,328.6 320.5,299.1 322.6,281.3 324.6,271.6 326.7,268.3 328.7,271.5 330.8,281.8 332.8,301.7 334.9,338.1 336.9,421.1 339.0,447.1 341.1,341.7 343.1,298.0 345.2,273.0 347.2,258.5 349.3,251.8 351.3,252.1 353.4,259.8 355.4,277.1 357.5,309.9 359.6,383.0 361.6,446.7 363.7,322.4 365.7,275.2 367.8,248.5 369.8,233.0 371.9,225.7 373.9,226.0 376.0,234.3 378.1,253.7 380.1,292.7 382.2,399.8 384.2,350.9 386.3,266.8 388.3,226.3 390.4,202.2 392.4,188.0 394.5,181.8 396.6,183.4 398.6,194.4 400.7,220.0 402.7,280.9 404.8,380.9 406.8,225.7 408.9,168.3 410.9,132.3 413.0,106.6 415.1,87.5 417.1,73.2 419.2,62.7 421.2,55.6 423.3,51.4 425.3,50.0 427.4,51.4 429.4,55.6 431.5,62.8 433.6,73.4 435.6,87.9 437.7,107.3 439.7,133.6 441.8,170.9 443.8,231.6 445.9,428.7 447.9,270.3 450.0,215.3 452.1,191.9 454.1,182.5 456.2,182.5 458.2,190.7 460.3,207.6 462.3,236.4 464.4,287.4 466.4,432.5 468.5,336.7 470.6,271.2 472.6,242.3 474.7,228.6 476.7,224.9 478.8,229.6 480.8,242.9 482.9,267.4 484.9,311.2 487.0,417.7 489.1,391.0 491.1,309.8 493.2,275.4 495.2,258.2 497.3,251.4 499.3,253.0 501.4,262.8 503.4,282.5 505.5,317.7 507.6,390.3 509.6,450.0 511.7,349.2 513.7,304.7 515.8,282.0 517.8,271.0 519.9,268.5 521.9,273.7 524.0,287.4 526.1,312.5 528.1,358.4 530.2,450.0 532.2,415.5 534.3,341.6 536.3,307.8 538.4,289.6 540.4,281.2 542.5,280.4 544.6,286.9 546.6,301.6 548.7,327.8 550.7,375.7 552.8,450.0 554.8,419.9 556.9,350.2 558.9,317.0 561.0,298.5 563.1,289.2 565.1,287.1 567.2,291.5 569.2,303.1 571.3,324.0 573.3,360.2 575.4,435.7 577.4,450.0 579.5,383.1 581.6,337.9 583.6,313.0 585.7,298.6 587.7,291.6 589.8,290.8 591.8,295.7 593.9,307.1 595.9,326.8 598.0,359.9 600.1,424.0 602.1,450.0 604.2,402.8 606.2,350.8 608.3,322.3 610.3,305.0 612.4,295.0 614.4,290.7 616.5,291.4 618.6,297.1 620.6,308.3 622.7,326.8 624.7,356.4 626.8,409.6 628.8,450.0 630.9,430.3 632.9,366.5 635.0,333.0 637.1,312.2 639.1,298.8 641.2,290.9 643.2,287.3 645.3,287.7 647.3,292.0 649.4,300.5 651.4,314.1 653.5,334.7 655.6,366.6 657.6,423.9 659.7,450.0 661.7,428.6 663.8,368.8 665.8,335.9 667.9,314.5 669.9,299.8 672.0,289.9 674.1,283.6 676.1,280.4 678.2,280.0 680.2,282.4 682.3,287.5 684.3,295.7 686.4,307.5 688.4,324.0 690.5,347.4 692.6,382.8 694.6,448.2 696.7,450.0 698.7,426.6 700.8,372.6 702.8,340.9 704.9,319.3 706.9,303.6 709.0,291.8 711.1,283.1 713.1,276.7 715.2,272.3 717.2,269.6 719.3,268.4 721.3,268.7 723.4,270.4 725.4,273.4 727.5,277.9 729.6,283.9 731.6,291.5 733.7,301.1 735.7,312.9 737.8,327.6 739.8,346.3 741.9,371.0 743.9,406.5 746.0,450.0 748.1,450.0 750.1,450.0 752.2,407.3 754.2,373.7 756.3,350.5 758.3,333.0 760.4,319.2 762.4,308.0 764.5,298.7 766.6,291.0 768.6,284.4 770.7,278.9 772.7,274.2 774.8,270.2 776.8,266.7 778.9,263.8 780.9,261.4 783.0,259.3 785.1,257.6 787.1,256.2 789.2,255.0 791.2,254.0 793.3,253.2 795.3,252.6 797.4,252.2 799.4,251.8 801.5,251.5 803.6,251.3 805.6,251.2 807.7,251.1 809.7,251.1 811.8,251.1 813.8,251.0 815.9,251.0 817.9,251.0 820.0,251.0" fill="none" stroke="#14213D" stroke-width="5"/></svg>
+<p style="position:absolute;left:80px;top:8px;width:740px;font-size:24px;font-weight:700;color:#14213D">세로 단면 (앙각) · 빔을 6° 아래로</p>
+<p style="position:absolute;left:0px;top:34px;width:72px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:234px;width:72px;font-size:24px;text-align:right;color:#5E6675">−20</p>
+<p style="position:absolute;left:0px;top:434px;width:72px;font-size:24px;text-align:right;color:#5E6675">−40</p>
+<p style="position:absolute;left:80px;top:456px;width:740px;font-size:24px;text-align:center;color:#5E6675">앙각 −90° (아래) … 0° (수평) … +90° (위) · dB</p>
+<p style="position:absolute;left:80px;top:494px;width:740px;font-size:24px;text-align:center;color:#4A5262"><span style="color:#255E9E">- - 포트 4개의 AF</span> · <span style="color:#A84A16">— 서브어레이 팩터</span> · <b>— 곱</b></p>
+<p style="position:absolute;left:429px;top:58px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">GL +14°</p>
+<p style="position:absolute;left:258px;top:58px;width:160px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">GL -27°</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">소자 수 N</p><p style="font-size:24px;line-height:1.4;color:#4A5262">round(d_v / 0.7 λ) = round(2.84 / 0.7) = <b>4</b> · 소자 간격 = d_v / N = 0.71 λ (추정, 제품팀 4개와 일치)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">서브어레이 틸트</p><p style="font-size:24px;line-height:1.4;color:#4A5262">소자들이 고정 위상으로 6° 아래를 향한다고 봄 = 선언 E-tilt (가정)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">왜 필요한가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">포트 피치 2.84 λ ≫ λ → 포트 AF에 <b>그레이팅 로브</b> · 서브어레이 길이 N × 0.71 = d_v라서 그 <b>널이 그레이팅 로브 자리에 정확히</b> 온다 → 곱은 -44 dB 이하</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">계산: 포트 4개 · 피치 2.84 λ · 소자 4개 · 0.71 λ · 틸트 6° (생성기 계산) · 규칙: beam_weights.py:174</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 17</p>
+<aside>(약 60초) 이제 포트 패턴입니다. 포트 하나는 소자 N개를 세로로 묶은 서브어레이로 봅니다. N은 세로 피치를 0.7 파장으로 나눠 반올림한 값이라, 2.84 나누기 0.7은 약 4, 소자 간격은 0.71 파장입니다. 제품팀 값도 4개였습니다. 서브어레이 소자들은 선언 E-tilt인 6도로 위상이 맞춰져 있다고 가정합니다. 왜 이 모델이 필요한지 그림으로 보겠습니다. 파란 점선은 포트 네 개만의 어레이 팩터입니다. 피치가 파장의 세 배 가까이 되니 +14도, -27도 같은 자리에 주엽과 같은 세기의 그레이팅 로브가 생깁니다. 주황 선은 서브어레이 팩터인데, 서브어레이 길이가 정확히 포트 피치와 같아서 널이 바로 그 그레이팅 로브 자리에 옵니다. 둘을 곱한 남색 선에서는 그레이팅 로브가 -44 dB 아래로 눌립니다. 실제 안테나가 포트를 이렇게 묶는 이유이기도 합니다.</aside>
+</section>
+<section id="element" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑥ 소자 패턴 · 가정 · 피팅</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">소자 수평폭은 SSB 빔폭이 선언값이 되도록 맞춘다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">감쇠(θ, φ) = min(12 · (φ / 수평폭)², 30) + min(12 · ((θ − 90°) / 수직폭)², 30)   [dB]<br><span style="color:#C9D3E3">TR 38.901 모양 · 두 항을 각각 30 dB에서 자름 · 수직폭 65° 고정 (가정)</span></p></div>
+<div style="display:flex;flex-direction:row;gap:28px;align-items:flex-start">
+<div style="position:relative;width:760px;height:500px">
+<svg aria-label="소자 수평폭을 바꿀 때 SSB 빔의 수평 HPBW가 어떻게 변하는지 그린 곡선. 선언값 65°와 만나는 곳이 약 108°" style="position:absolute;left:0px;top:0px;width:760px;height:500px" width="760" height="500" viewBox="0 0 760 500"><rect x="90" y="50" width="640" height="400" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="195" x2="730" y2="195" stroke="#A84A16" stroke-width="3" stroke-dasharray="10 6"/><polyline points="109.4,385.3 128.8,362.0 148.2,340.9 167.6,321.3 187.0,303.1 206.4,286.4 225.8,271.1 245.2,257.3 264.5,244.2 283.9,231.8 303.3,220.9 322.7,210.7 342.1,201.3 361.5,191.8 380.9,183.8 400.3,175.8 419.7,169.3 439.1,162.0 458.5,156.2 477.9,150.4 497.3,144.5 516.7,139.5 536.1,135.1 555.5,130.7 574.8,126.4 594.2,122.7 613.6,118.4 633.0,115.5 652.4,111.8 671.8,108.9 691.2,106.0 710.6,103.1" fill="none" stroke="#255E9E" stroke-width="4"/><circle cx="400" cy="176" r="10" fill="#14213D"/><circle cx="245" cy="257" r="10" fill="#14213D"/><circle cx="323" cy="211" r="10" fill="#14213D"/><circle cx="362" cy="192" r="10" fill="#14213D"/><circle cx="342" cy="201" r="10" fill="#14213D"/><line x1="354" y1="195" x2="354" y2="450" stroke="#14213D" stroke-width="2" stroke-dasharray="6 6"/></svg>
+<p style="position:absolute;left:90px;top:8px;width:640px;font-size:24px;font-weight:700;color:#14213D">SSB 빔의 수평 HPBW vs 소자 수평폭 (예시)</p>
+<p style="position:absolute;left:0px;top:70px;width:82px;font-size:24px;text-align:right;color:#5E6675">80°</p>
+<p style="position:absolute;left:0px;top:216px;width:82px;font-size:24px;text-align:right;color:#5E6675">60°</p>
+<p style="position:absolute;left:0px;top:361px;width:82px;font-size:24px;text-align:right;color:#5E6675">40°</p>
+<p style="position:absolute;left:89px;top:456px;width:80px;font-size:24px;text-align:center;color:#5E6675">50°</p>
+<p style="position:absolute;left:661px;top:456px;width:100px;font-size:24px;text-align:center;color:#5E6675">200°</p>
+<p style="position:absolute;left:90px;top:490px;width:640px;font-size:24px;text-align:center;color:#4A5262">소자 수평폭 (가정해 보는 값) → · ● 이분 탐색이 시험한 점</p>
+<p style="position:absolute;left:100px;top:155px;width:300px;font-size:24px;font-weight:700;color:#A84A16">선언값 65°</p>
+<p style="position:absolute;left:362px;top:406px;width:200px;font-size:24px;font-weight:700;color:#14213D">→ 108°</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">피팅 절차</p><p style="font-size:24px;line-height:1.4;color:#4A5262">① 소자 수평폭을 하나 가정 ② 이 소자에 웨이트 파일의 SSB 웨이트를 곱해 빔 계산 ③ 빔의 수평 HPBW를 잼 ④ 선언값과 비교해 <b>이분 탐색</b></p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">샘플 파일 결과</p><p style="font-size:24px;line-height:1.4;color:#4A5262"><b>87.8°</b> (선언 빔폭 65°) — 여러 열을 묶은 빔은 소자보다 좁으므로 소자는 더 넓어야 한다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">예시 그래프</p><p style="font-size:24px;line-height:1.4;color:#4A5262">합성 SSB 웨이트(이웃한 두 열, 크기 1 : 0.25)로 같은 절차 → 108° · 값은 웨이트에 따라 달라진다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">샘플 결과 87.8°는 CF 문서 값 · 그래프는 합성 SSB 웨이트로 계산한 예시 · 규칙: beam_weights.py:213</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 17</p>
+<aside>(약 55초) 포트 패턴의 다른 한 축은 소자 패턴입니다. 모양은 TR 38.901과 같습니다. 수평 감쇠는 12 곱하기 방위 나누기 수평폭의 제곱, 수직 감쇠는 12 곱하기 앙각 나누기 수직폭의 제곱이고, 각각 30 dB에서 자른 뒤 더합니다. 수직폭은 65도로 고정한 기본값입니다. 수평폭은 피팅합니다. 소자 수평폭을 하나 가정하고, 그 소자에 웨이트 파일의 SSB 웨이트를 곱해 빔을 계산한 뒤, 빔의 수평 반전력 빔폭이 선언값, 예를 들어 65도가 될 때까지 이분 탐색으로 맞춥니다. 샘플 파일에서는 87.8도가 나왔습니다. 소자가 선언 빔폭보다 넓은 이유는, 여러 열을 웨이트로 묶은 빔이 소자 하나보다 좁기 때문입니다. 왼쪽 그래프는 합성 SSB 웨이트로 같은 절차를 돌린 예시라 숫자는 108도로 다르지만, 곡선과 선언값이 만나는 곳을 찾는다는 원리는 같습니다.</aside>
+</section>
+<section id="port" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑦ 포트 패턴 완성</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">포트 패턴 = 소자 패턴 × 서브어레이 팩터 → 3D 격자</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:flex-start">
+<div style="position:relative;width:890px;height:400px">
+<svg aria-label="예시 포트 패턴의 수평 단면과 수직 단면. 수평은 넓고 완만하며, 수직은 서브어레이 때문에 좁고 6° 아래로 숙여져 있다. 지향성 약 13.6 dBi" style="position:absolute;left:0px;top:0px;width:890px;height:400px" width="890" height="400" viewBox="0 0 890 400"><rect x="70" y="50" width="380" height="300" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><line x1="70" y1="125" x2="450" y2="125" stroke="#EAE7DF" stroke-width="2"/><line x1="70" y1="200" x2="450" y2="200" stroke="#EAE7DF" stroke-width="2"/><line x1="70" y1="275" x2="450" y2="275" stroke="#EAE7DF" stroke-width="2"/><polyline points="70.0,275.0 71.1,275.0 72.1,275.0 73.2,275.0 74.2,275.0 75.3,275.0 76.3,275.0 77.4,275.0 78.4,275.0 79.5,275.0 80.6,275.0 81.6,275.0 82.7,275.0 83.7,275.0 84.8,275.0 85.8,275.0 86.9,275.0 87.9,275.0 89.0,275.0 90.1,275.0 91.1,275.0 92.2,275.0 93.2,275.0 94.3,275.0 95.3,275.0 96.4,275.0 97.4,275.0 98.5,275.0 99.6,275.0 100.6,275.0 101.7,275.0 102.7,275.0 103.8,275.0 104.8,275.0 105.9,275.0 106.9,275.0 108.0,275.0 109.1,275.0 110.1,275.0 111.2,275.0 112.2,275.0 113.3,275.0 114.3,272.3 115.4,269.1 116.4,265.9 117.5,262.8 118.6,259.6 119.6,256.5 120.7,253.4 121.7,250.4 122.8,247.3 123.8,244.3 124.9,241.3 125.9,238.3 127.0,235.4 128.1,232.4 129.1,229.5 130.2,226.6 131.2,223.8 132.3,220.9 133.3,218.1 134.4,215.3 135.4,212.6 136.5,209.8 137.6,207.1 138.6,204.4 139.7,201.7 140.7,199.1 141.8,196.5 142.8,193.8 143.9,191.3 144.9,188.7 146.0,186.2 147.1,183.7 148.1,181.2 149.2,178.7 150.2,176.3 151.3,173.9 152.3,171.5 153.4,169.1 154.4,166.7 155.5,164.4 156.6,162.1 157.6,159.8 158.7,157.6 159.7,155.4 160.8,153.2 161.8,151.0 162.9,148.8 163.9,146.7 165.0,144.6 166.1,142.5 167.1,140.4 168.2,138.4 169.2,136.3 170.3,134.4 171.3,132.4 172.4,130.4 173.4,128.5 174.5,126.6 175.6,124.7 176.6,122.9 177.7,121.0 178.7,119.2 179.8,117.4 180.8,115.7 181.9,113.9 182.9,112.2 184.0,110.5 185.1,108.9 186.1,107.2 187.2,105.6 188.2,104.0 189.3,102.4 190.3,100.9 191.4,99.3 192.4,97.8 193.5,96.3 194.6,94.9 195.6,93.4 196.7,92.0 197.7,90.6 198.8,89.3 199.8,87.9 200.9,86.6 201.9,85.3 203.0,84.0 204.1,82.8 205.1,81.6 206.2,80.4 207.2,79.2 208.3,78.0 209.3,76.9 210.4,75.8 211.4,74.7 212.5,73.6 213.6,72.6 214.6,71.6 215.7,70.6 216.7,69.6 217.8,68.7 218.8,67.8 219.9,66.9 220.9,66.0 222.0,65.1 223.1,64.3 224.1,63.5 225.2,62.7 226.2,62.0 227.3,61.2 228.3,60.5 229.4,59.8 230.4,59.2 231.5,58.5 232.6,57.9 233.6,57.3 234.7,56.7 235.7,56.2 236.8,55.7 237.8,55.1 238.9,54.7 239.9,54.2 241.0,53.8 242.1,53.4 243.1,53.0 244.2,52.6 245.2,52.3 246.3,52.0 247.3,51.7 248.4,51.4 249.4,51.2 250.5,50.9 251.6,50.7 252.6,50.6 253.7,50.4 254.7,50.3 255.8,50.2 256.8,50.1 257.9,50.0 258.9,50.0 260.0,50.0 261.1,50.0 262.1,50.0 263.2,50.1 264.2,50.2 265.3,50.3 266.3,50.4 267.4,50.6 268.4,50.7 269.5,50.9 270.6,51.2 271.6,51.4 272.7,51.7 273.7,52.0 274.8,52.3 275.8,52.6 276.9,53.0 277.9,53.4 279.0,53.8 280.1,54.2 281.1,54.7 282.2,55.1 283.2,55.7 284.3,56.2 285.3,56.7 286.4,57.3 287.4,57.9 288.5,58.5 289.6,59.2 290.6,59.8 291.7,60.5 292.7,61.2 293.8,62.0 294.8,62.7 295.9,63.5 296.9,64.3 298.0,65.1 299.1,66.0 300.1,66.9 301.2,67.8 302.2,68.7 303.3,69.6 304.3,70.6 305.4,71.6 306.4,72.6 307.5,73.6 308.6,74.7 309.6,75.8 310.7,76.9 311.7,78.0 312.8,79.2 313.8,80.4 314.9,81.6 315.9,82.8 317.0,84.0 318.1,85.3 319.1,86.6 320.2,87.9 321.2,89.3 322.3,90.6 323.3,92.0 324.4,93.4 325.4,94.9 326.5,96.3 327.6,97.8 328.6,99.3 329.7,100.9 330.7,102.4 331.8,104.0 332.8,105.6 333.9,107.2 334.9,108.9 336.0,110.5 337.1,112.2 338.1,113.9 339.2,115.7 340.2,117.4 341.3,119.2 342.3,121.0 343.4,122.9 344.4,124.7 345.5,126.6 346.6,128.5 347.6,130.4 348.7,132.4 349.7,134.4 350.8,136.3 351.8,138.4 352.9,140.4 353.9,142.5 355.0,144.6 356.1,146.7 357.1,148.8 358.2,151.0 359.2,153.2 360.3,155.4 361.3,157.6 362.4,159.8 363.4,162.1 364.5,164.4 365.6,166.7 366.6,169.1 367.7,171.5 368.7,173.9 369.8,176.3 370.8,178.7 371.9,181.2 372.9,183.7 374.0,186.2 375.1,188.7 376.1,191.3 377.2,193.8 378.2,196.5 379.3,199.1 380.3,201.7 381.4,204.4 382.4,207.1 383.5,209.8 384.6,212.6 385.6,215.3 386.7,218.1 387.7,220.9 388.8,223.8 389.8,226.6 390.9,229.5 391.9,232.4 393.0,235.4 394.1,238.3 395.1,241.3 396.2,244.3 397.2,247.3 398.3,250.4 399.3,253.4 400.4,256.5 401.4,259.6 402.5,262.8 403.6,265.9 404.6,269.1 405.7,272.3 406.7,275.0 407.8,275.0 408.8,275.0 409.9,275.0 410.9,275.0 412.0,275.0 413.1,275.0 414.1,275.0 415.2,275.0 416.2,275.0 417.3,275.0 418.3,275.0 419.4,275.0 420.4,275.0 421.5,275.0 422.6,275.0 423.6,275.0 424.7,275.0 425.7,275.0 426.8,275.0 427.8,275.0 428.9,275.0 429.9,275.0 431.0,275.0 432.1,275.0 433.1,275.0 434.2,275.0 435.2,275.0 436.3,275.0 437.3,275.0 438.4,275.0 439.4,275.0 440.5,275.0 441.6,275.0 442.6,275.0 443.7,275.0 444.7,275.0 445.8,275.0 446.8,275.0 447.9,275.0 448.9,275.0" fill="none" stroke="#14213D" stroke-width="4"/><rect x="510" y="50" width="380" height="300" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><line x1="510" y1="125" x2="890" y2="125" stroke="#EAE7DF" stroke-width="2"/><line x1="510" y1="200" x2="890" y2="200" stroke="#EAE7DF" stroke-width="2"/><line x1="510" y1="275" x2="890" y2="275" stroke="#EAE7DF" stroke-width="2"/><polyline points="510.0,341.6 512.1,338.0 514.2,334.9 516.3,332.3 518.4,330.3 520.6,328.9 522.7,328.1 524.8,327.9 526.9,328.6 529.0,330.2 531.1,332.8 533.2,336.8 535.3,342.5 537.4,350.0 539.6,350.0 541.7,350.0 543.8,350.0 545.9,350.0 548.0,350.0 550.1,350.0 552.2,350.0 554.3,333.6 556.4,313.8 558.6,297.5 560.7,283.5 562.8,271.3 564.9,260.5 567.0,250.9 569.1,242.1 571.2,234.2 573.3,227.0 575.4,220.6 577.6,214.7 579.7,209.4 581.8,204.7 583.9,200.6 586.0,197.0 588.1,194.0 590.2,191.6 592.3,189.8 594.4,188.6 596.6,188.1 598.7,188.4 600.8,189.4 602.9,191.4 605.0,194.5 607.1,198.9 609.2,204.8 611.3,212.9 613.4,223.8 615.6,239.1 617.7,262.1 619.8,302.8 621.9,350.0 624.0,307.0 626.1,258.2 628.2,229.9 630.3,210.0 632.4,194.8 634.6,182.7 636.7,173.0 638.8,165.1 640.9,158.8 643.0,153.8 645.1,150.1 647.2,147.6 649.3,146.3 651.4,146.4 653.6,147.9 655.7,151.0 657.8,156.0 659.9,163.6 662.0,174.7 664.1,191.4 666.2,218.6 668.3,277.0 670.4,308.1 672.6,220.1 674.7,181.8 676.8,156.6 678.9,137.8 681.0,122.8 683.1,110.3 685.2,99.9 687.3,90.9 689.4,83.2 691.6,76.6 693.7,70.9 695.8,66.0 697.9,61.8 700.0,58.3 702.1,55.5 704.2,53.3 706.3,51.6 708.4,50.6 710.6,50.0 712.7,50.0 714.8,50.5 716.9,51.6 719.0,53.2 721.1,55.3 723.2,58.0 725.3,61.2 727.4,65.1 729.6,69.5 731.7,74.7 733.8,80.6 735.9,87.3 738.0,95.0 740.1,103.7 742.2,113.7 744.3,125.2 746.4,138.7 748.6,154.9 750.7,175.2 752.8,202.5 754.9,244.9 757.0,350.0 759.1,280.0 761.2,230.8 763.3,206.3 765.4,191.0 767.6,180.7 769.7,173.7 771.8,168.9 773.9,166.0 776.0,164.4 778.1,164.1 780.2,164.8 782.3,166.6 784.4,169.2 786.6,172.8 788.7,177.2 790.8,182.5 792.9,188.8 795.0,196.0 797.1,204.5 799.2,214.2 801.3,225.6 803.4,239.0 805.6,255.3 807.7,275.8 809.8,303.7 811.9,348.8 814.0,350.0 816.1,350.0 818.2,322.2 820.3,298.2 822.4,282.7 824.6,271.7 826.7,263.7 828.8,257.7 830.9,253.3 833.0,250.0 835.1,247.7 837.2,246.2 839.3,245.4 841.4,245.1 843.6,245.3 845.7,245.9 847.8,247.0 849.9,248.3 852.0,250.0 854.1,251.9 856.2,254.1 858.3,256.4 860.4,259.0 862.6,261.7 864.7,264.6 866.8,267.7 868.9,270.8 871.0,274.1 873.1,277.4 875.2,280.9 877.3,284.4 879.4,287.9 881.6,291.6 883.7,295.2 885.8,299.0 887.9,302.7 890.0,306.6" fill="none" stroke="#14213D" stroke-width="4"/></svg>
+<p style="position:absolute;left:70px;top:8px;width:380px;font-size:24px;font-weight:700;color:#14213D">수평 단면 (θ = 96°)</p>
+<p style="position:absolute;left:510px;top:8px;width:380px;font-size:24px;font-weight:700;color:#14213D">수직 단면 (φ = 0°)</p>
+<p style="position:absolute;left:0px;top:34px;width:62px;font-size:24px;text-align:right;color:#5E6675">0</p>
+<p style="position:absolute;left:0px;top:334px;width:62px;font-size:24px;text-align:right;color:#5E6675">−40</p>
+<p style="position:absolute;left:70px;top:356px;width:380px;font-size:24px;text-align:center;color:#5E6675">방위 −180° … 0° … +180°</p>
+<p style="position:absolute;left:510px;top:356px;width:380px;font-size:24px;text-align:center;color:#5E6675">천정각 0° (위) … 90° … 180°</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">지향성으로 정규화</p><p style="font-size:24px;line-height:1.4;color:#4A5262">구 전체에서 평균한 값으로 나눔 → dBi · 예시 가정값으로 계산하면 약 <b>13.6 dBi</b></p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">저장</p><p style="font-size:24px;line-height:1.4;color:#4A5262">181 × 360 3D 격자 (천정각 0 ~ 180° · 방위 −180 ~ 179°, 1° 간격) — 빔 · BASTA와 같은 형식</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">주의</b> 포트 패턴은 <b>측정값이 아니라 모델</b>이다 — 주엽 밖의 모양 · 사이드로브 · 앞뒤비는 가정(소자 모양 · 수직폭 · 서브 틸트)이 정한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시: 수평폭 87.8° · 수직폭 65° · 소자 4개 0.71 λ · 틸트 6°로 생성기에서 계산 · 저장 규칙: beam_weights.py:480</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 17</p>
+<aside>(약 50초) 두 조각을 곱하면 포트 패턴이 됩니다. 소자 패턴 곱하기 서브어레이 팩터입니다. 왼쪽은 샘플 수평폭 87.8도, 수직폭 65도, 소자 4개, 틸트 6도로 계산한 예시입니다. 수평 단면은 넓고 완만하고, 수직 단면은 서브어레이 때문에 좁아지고 6도 아래로 숙여져 있습니다. 이 패턴을 구 전체에서 평균한 값으로 나눠 지향성으로 정규화하면 이 예에서는 약 13.6 dBi가 됩니다. 그리고 빔이나 BASTA와 같은 181 곱하기 360 격자로 저장합니다. 꼭 기억할 점은 이 포트 패턴이 측정값이 아니라 모델이라는 것입니다. 주엽 바깥의 모양과 사이드로브, 앞뒤비는 소자 모양, 수직폭, 서브어레이 틸트 같은 가정이 정합니다.</aside>
+</section>
+<section id="toarray" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">⑧ PlanarArray로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">추정한 값이 포트 레코드의 array가 되어 그대로 들어간다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;color:#14213D">포트 레코드 &lt;set&gt;-port의 array</p>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">{"rows": 4, "cols": 8,<br>&nbsp;"polarization": "cross",<br>&nbsp;"spacing": 0.5,<br>&nbsp;"vertical_spacing": 2.84,<br>&nbsp;"ports": 64}</p></div>
+</div>
+<p style="font-size:40px;color:#A84A16;align-self:center">→</p>
+<div style="flex:1.25;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;color:#14213D">섹터가 포트 패턴을 고르면</p>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">PlanarArray(num_rows=4, num_cols=8,<br>&nbsp;horizontal_spacing=0.5,<br>&nbsp;vertical_spacing=2.84,<br>&nbsp;pattern="lib-&lt;set&gt;-port",<br>&nbsp;polarization="cross")</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">핵심</b> Sionna가 말하는 <b>“소자”는 실제 안테나의 “포트”</b>다 — 소자 패턴 자리에 포트 패턴, 소자 간격 자리에 포트 피치(2.84 λ)가 들어간다</p>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">결과 채널</p><p style="font-size:24px;line-height:1.4;color:#4A5262">4 × 8 × 2 = 64포트 → /cfr/H의 bs_ant = 64 · 포트마다 따로 채널</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">빔 채널 만들기 (CF 밖)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">H @ w_k · w_k = 빔 레코드의 웨이트 — <b>같은 배치 · 순서 · 켤레</b> 기준으로 저장되어 있다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">크기 강제</p><p style="font-size:24px;line-height:1.4;color:#4A5262">포트 레코드는 이 array로, 빔 레코드 &lt;set&gt;-b&lt;k&gt;는 1 × 1로 서버가 강제</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">샘플 결과 array는 CF 문서 값 · H @ w의 쓰임은 cf-antenna-pattern 덱 13 ~ 16쪽</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 17</p>
+<aside>(약 50초) 이렇게 추정한 값이 포트 레코드의 array에 저장됩니다. 샘플에서는 행 4, 열 8, 편파 cross, 가로 간격 0.5, 세로 간격 2.84, 포트 64개입니다. 섹터가 포트 패턴을 고르면 이 값이 그대로 PlanarArray로 들어갑니다. 여기서 헷갈리기 쉬운 점이 있습니다. Sionna가 말하는 소자는 실제 안테나의 포트입니다. 소자 패턴 자리에 우리가 만든 포트 패턴이, 소자 간격 자리에 포트 피치 2.84 파장이 들어갑니다. 진짜 소자 네 개는 포트 패턴 안의 서브어레이 팩터에 이미 녹아 있습니다. 결과 채널은 포트마다 따로 나와 송신 안테나 축이 64입니다. 빔별 채널은 CF 밖에서 H에 빔 레코드의 웨이트를 곱해 만들고, 빔 레코드의 웨이트는 포트 레코드와 같은 배치, 순서, 켤레 기준으로 저장되어 있습니다.</aside>
+</section>
+<section id="trust" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑨ 믿을 수 있는 정도</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">배치와 피치는 믿을 만하고, 패턴 모양은 가정이다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">항목</p><p style="width:230px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">샘플 결과</p><p style="width:180px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">근거</p><p style="width:210px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">제품팀 값</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">비고</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D7EBDF;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">편파 × 열 × 행</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">2 × 8 × 4</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">추론</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">—</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">펼친 순서 전제 위에서</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D7EBDF;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">편파</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">cross (±45°)</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">추론</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">—</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">편파 수 2 → cross</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D7EBDF;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">세로 피치 d_v</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">2.84 λ</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">피팅</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">2.848 λ</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">일치</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D7EBDF;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">서브어레이 소자 수 N</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">4 (0.71 λ)</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">추정</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">4</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">일치</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">켤레</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">데이터로 결정</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">피팅</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">—</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">빔이 아래를 향하는 쪽</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">소자 수평폭</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">87.8°</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">피팅</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">—</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">SSB 빔폭 65°에 맞춤</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">가로 간격 d_h</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">0.5 λ</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">가정</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">0.541 λ</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">다름 → 덮어쓰기 후보</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">소자 수직폭</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">65°</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">가정</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">—</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">웨이트에 정보 없음</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">서브어레이 틸트</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">6°</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">가정</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">—</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">= 선언 E-tilt</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:300px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">좌우반전</p><p style="width:230px;font-size:24px;line-height:1.35;color:#4A5262">false</p><p style="width:180px;font-size:24px;line-height:1.35;color:#4A5262">가정</p><p style="width:210px;font-size:24px;line-height:1.35;color:#4A5262">—</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"></p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">영향</b> 주엽 밖 모양 · 사이드로브 · 앞뒤비는 <b>주황 줄의 가정</b>에서 정해진다 → 포트별 CFR 정확도에 가장 큰 영향</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 “믿을 수 있는 정도” · 초록 = 웨이트 · 제품팀 값과 맞음, 흰색 = 피팅, 주황 = 가정</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 17</p>
+<aside>(약 55초) 지금까지의 값을 얼마나 믿을 수 있는지 정리했습니다. 초록 줄은 비교적 믿을 만한 값입니다. 배치와 편파는 웨이트 자체에서 나왔고, 세로 피치 2.84 파장과 서브어레이 소자 수 4는 제품팀 값과 맞았습니다. 다만 배치는 앞에서 본 펼친 순서의 전제 위에 서 있습니다. 흰 줄은 선언값에 맞춘 피팅입니다. 주황 줄은 웨이트에 정보가 없어 기본값을 둔 가정입니다. 가로 간격은 0.5 파장을 썼는데 제품팀 값은 0.541이라 다릅니다. 소자 수직폭 65도, 서브어레이 틸트, 좌우반전도 가정입니다. 중요한 점은, 주엽 바깥의 모양과 사이드로브, 앞뒤비가 바로 이 주황 줄에서 정해진다는 것입니다. 그래서 포트별 CFR 정확도에 가장 큰 영향을 주는 것도 이 가정들입니다.</aside>
+</section>
+<section id="replace" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">⑩ 가정을 실제 값으로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">덮어쓰기는 API로, 근본 해결은 실제 서브어레이 자료로</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;font-weight:700;color:#14213D">지금 할 수 있는 것 — 가져올 때 geometry를 직접 준다</p>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">"geometry": {"d_h": 0.541, "d_v": 2.848,<br>&nbsp;"sub_elements": 4,<br>&nbsp;"element_h_bw_deg": …}</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">주의</p><p style="font-size:24px;line-height:1.4;color:#4A5262">콘솔 대화상자에는 이 칸이 없다 → <b>API로만</b> 가능 · 덮어쓴 뒤 다시 가져오면 개정판이 올라가 캐시도 새로 계산</p></div>
+</div>
+<div style="flex:1.1;display:flex;flex-direction:column;gap:7px">
+<p style="font-size:24px;font-weight:700;color:#14213D">근본 해결 — 받아야 할 자료와 바뀌는 가정</p>
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">받을 자료</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">바꾸는 가정 · 피팅</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">서브어레이 gain 패턴 (측정)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">포트 패턴 모델 자체 (소자 모양 · 수직폭 · 수평폭 피팅)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">서브어레이 웨이트</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">서브어레이 틸트 · 소자 수 · 소자 간격</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">패널 도면 · 제품 사양</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">가로 간격 d_h (0.5 → 0.541 λ) · 좌우반전</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">웨이트 순서 정의</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">펼친 순서 전제 → 배치 추론</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">요청 문서</p><p style="font-size:24px;line-height:1.4;color:#4A5262">docs/handoff/antenna-array-data-request.md 2절의 “to replace” 행 = 앞쪽 표의 가정 · 피팅 항목</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 · 개정판과 캐시는 cf-antenna-pattern 덱 4쪽 · 웨이트 순서 정의는 이 덱이 덧붙인 요청 항목</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">16 / 17</p>
+<aside>(약 50초) 가정을 실제 값으로 바꾸는 길은 둘입니다. 지금 당장은 가져올 때 geometry로 값을 직접 줄 수 있습니다. 예를 들어 가로 간격 0.541, 세로 피치 2.848, 서브어레이 소자 4개, 소자 수평폭을 넣습니다. 다만 콘솔 대화상자에는 이 칸이 없어서 API로만 됩니다. 근본적인 해결은 실제 자료를 받는 것입니다. 서브어레이의 gain 패턴을 측정값으로 받으면 소자 곱하기 서브어레이라는 포트 패턴 모델 자체를 대체할 수 있고, 서브어레이 웨이트를 받으면 서브어레이 틸트와 소자 수, 간격을 확정할 수 있습니다. 패널 도면이나 사양은 가로 간격을, 웨이트 순서 정의는 배치 추론의 전제를 확정해 줍니다. 마지막 줄은 제가 덧붙인 항목입니다. 요청 문서의 2절 to replace 행들이 바로 앞쪽 표의 가정과 피팅 항목입니다.</aside>
+</section>
+<section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F0A36B;letter-spacing:2px">정리</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#F5F3EE">웨이트는 위상 관계만 준다 — 나머지는 CF가 채운다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">파일에 있는 것</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">빔마다 포트별 복소 웨이트 64개<br>+ 선언값 E-tilt · 수평 HPBW</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">추론 (웨이트에서)</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">64 → 2 × 8 × 4 · 평면파에 맞는 배치<br>같은 위상 간격의 축 = 세로</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#8DB8E8">피팅 (선언값에)</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">d_v = Δψ / (2π sin E-tilt) → 2.84 λ<br>소자 수평폭 → SSB 빔폭 65°</p></div></div>
+<div style="display:flex;flex-direction:row;gap:16px">
+<div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">모델 (가정)</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">포트 패턴 = 소자(38.901, 수직 65°)<br>× 서브어레이(4소자 · 0.71 λ · 6°)</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">PlanarArray로</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">Sionna의 “소자” = 실제 포트<br>4 × 8 × cross · 0.5 λ · 2.84 λ → 64포트</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">바꿀 것</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">사이드로브 · 앞뒤비는 가정이 정한다<br>→ 서브어레이 gain 패턴 · 웨이트 · d_h</p></div></div>
+<p style="font-size:28px;line-height:1.5;color:#C9D3E3">확인할 것: 웨이트 펼친 순서(편파 → 열 → 행)를 코드에서 확인하고, 제품팀 d_h 0.541 λ로 덮어쓴 결과를 지금과 비교한다</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">관련 자료: cf-antenna-pattern · sionna-rt-antenna · antenna-basics · 용어집 glossary.md</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">17 / 17</p>
+<aside>(약 40초) 정리하겠습니다. 웨이트 파일이 주는 것은 빔마다 포트별 복소 웨이트, 즉 포트끼리의 위상 관계와 선언값뿐입니다. CF는 웨이트에서 배치를 추론해 2 곱하기 8 곱하기 4를 찾고, 모든 빔이 같은 위상 간격을 갖는 축을 세로로 봅니다. 선언값에 맞춰 세로 피치 2.84 파장과 소자 수평폭을 피팅합니다. 포트 패턴은 소자 패턴 곱하기 서브어레이 팩터라는 모델이고, 소자 수직폭과 서브어레이 틸트 같은 가정이 들어갑니다. 이 값들이 PlanarArray로 들어가는데, Sionna가 말하는 소자는 실제로는 포트입니다. 사이드로브와 앞뒤비는 가정이 정하므로, 서브어레이 gain 패턴과 웨이트, 가로 간격을 실제 값으로 바꾸는 것이 다음 단계입니다. 감사합니다.</aside>
+</section>
+    </div>
+  </div>
+  <aside class="notes" id="notes" aria-label="발표자 노트" hidden>
+    <h2 id="notesTitle">발표자 노트</h2>
+    <p id="notesText"></p>
+  </aside>
+</div>
+
+<div class="bar" id="bar">
+  <div class="progress" id="progress" aria-label="슬라이드 진행"></div>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">← 이전</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음 →</button>
+    <select id="jump" aria-label="슬라이드로 이동"></select>
+    <span class="spacer"></span>
+    <span class="hint">← → 이동 · G 개요 · N 노트 · F 전체화면</span>
+    <button class="btn" id="gridBtn" type="button" aria-pressed="false">개요</button>
+    <button class="btn" id="notesBtn" type="button" aria-pressed="false">노트</button>
+    <button class="btn" id="fsBtn" type="button">전체화면</button>
+  </div>
+</div>
+
+<div class="grid" id="grid" hidden>
+  <div class="grid-head">
+    <h2>전체 슬라이드</h2>
+    <button class="btn" id="gridClose" type="button">닫기 (Esc)</button>
+  </div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+
+<script>
+(function () {
+  var W = 1920, H = 1080;
+  var stage = document.getElementById('stage'), frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.children).filter(function (n) { return n.tagName === 'SECTION'; });
+  var n = slides.length, cur = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var prevBtn = $('prev'), nextBtn = $('next'), count = $('count'), jump = $('jump'), progress = $('progress');
+  var notes = $('notes'), notesText = $('notesText'), notesTitle = $('notesTitle'), notesBtn = $('notesBtn');
+  var grid = $('grid'), thumbs = $('thumbs'), gridBtn = $('gridBtn'), fsBtn = $('fsBtn');
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var info = slides.map(function (s, i) {
+    s.classList.add('slide');
+    var h = s.querySelector('h1, h2');
+    var tmp = h ? h.cloneNode(true) : null;
+    if (tmp) Array.prototype.forEach.call(tmp.querySelectorAll('br'), function (br) { br.replaceWith(' '); });
+    var title = tmp ? tmp.textContent.replace(/\s+/g, ' ').trim() : '슬라이드 ' + (i + 1);
+    var a = s.querySelector('aside');
+    return { title: title, note: a ? a.textContent.trim() : '' };
+  });
+
+  info.forEach(function (it, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = (i + 1) + '. ' + it.title;
+    jump.appendChild(o);
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '번 슬라이드: ' + it.title);
+    b.addEventListener('click', function () { go(i); });
+    progress.appendChild(b);
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'thumb';
+    var pic = document.createElement('div'); pic.className = 'pic';
+    var clone = slides[i].cloneNode(true); clone.removeAttribute('id');
+    pic.appendChild(clone);
+    var cap = document.createElement('span');
+    cap.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b>';
+    cap.appendChild(document.createTextNode(it.title));
+    t.appendChild(pic); t.appendChild(cap);
+    t.addEventListener('click', function () { go(i); showGrid(false); });
+    thumbs.appendChild(t);
+  });
+
+  function fit() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    frame.style.transform = 'translate(' + (r.width - W * s) / 2 + 'px,' + (r.height - H * s) / 2 + 'px) scale(' + s + ')';
+  }
+  function fitThumbs() {
+    Array.prototype.forEach.call(thumbs.querySelectorAll('.pic'), function (p) {
+      p.firstChild.style.transform = 'scale(' + p.clientWidth / W + ')';
+    });
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(n - 1, i));
+    slides[cur].classList.remove('on');
+    cur = i;
+    slides[cur].classList.add('on');
+    count.textContent = (cur + 1) + ' / ' + n;
+    jump.value = cur;
+    prevBtn.disabled = cur === 0; nextBtn.disabled = cur === n - 1;
+    Array.prototype.forEach.call(progress.children, function (b, k) {
+      b.className = k === cur ? 'on' : (k < cur ? 'done' : '');
+    });
+    Array.prototype.forEach.call(thumbs.children, function (t, k) { t.classList.toggle('on', k === cur); });
+    notesTitle.textContent = '발표자 노트 · ' + (cur + 1) + '/' + n;
+    notesText.textContent = info[cur].note || '(노트 없음)';
+    stage.setAttribute('aria-label', (cur + 1) + ' / ' + n + ': ' + info[cur].title);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+
+  function showNotes(on) {
+    notes.hidden = !on; notesBtn.setAttribute('aria-pressed', String(on));
+    store('deck-notes', on ? '1' : '0'); fit();
+  }
+  function showGrid(on) {
+    grid.hidden = !on; gridBtn.setAttribute('aria-pressed', String(on));
+    if (on) { fitThumbs(); var t = thumbs.children[cur]; if (t) { t.focus(); t.scrollIntoView({ block: 'nearest' }); } }
+  }
+  function toggleFs() {
+    var d = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    } else {
+      var el = d.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+  }
+  function onFs() {
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '전체화면 종료' : '전체화면';
+    poke(); setTimeout(fit, 50);
+  }
+  var idleTimer;
+  function poke() {
+    document.body.classList.remove('idle'); clearTimeout(idleTimer);
+    if (document.body.classList.contains('fs')) idleTimer = setTimeout(function () { document.body.classList.add('idle'); }, 2200);
+  }
+
+  prevBtn.addEventListener('click', function () { go(cur - 1); });
+  nextBtn.addEventListener('click', function () { go(cur + 1); });
+  jump.addEventListener('change', function () { go(+jump.value); jump.blur(); });
+  notesBtn.addEventListener('click', function () { showNotes(notes.hidden); });
+  gridBtn.addEventListener('click', function () { showGrid(grid.hidden); });
+  $('gridClose').addEventListener('click', function () { showGrid(false); });
+  fsBtn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+  document.addEventListener('mousemove', poke);
+
+  stage.addEventListener('click', function (e) {
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width * 0.3) go(cur - 1); else go(cur + 1);
+  });
+  var tx = null, ty = null;
+  stage.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); go(cur + (dx < 0 ? 1 : -1)); }
+    tx = null;
+  });
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target === jump) return;
+    var k = e.key;
+    if (!grid.hidden) {
+      if (k === 'Escape' || k === 'g' || k === 'G') { showGrid(false); e.preventDefault(); }
+      return;
+    }
+    if (/^[0-9]$/.test(k)) { typed += k; return; }
+    if (k === 'Enter' && typed) { go(+typed - 1); typed = ''; e.preventDefault(); return; }
+    typed = '';
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) || k === 'Backspace') { go(cur - 1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(n - 1); }
+    else if (k === 'n' || k === 'N') { showNotes(notes.hidden); }
+    else if (k === 'g' || k === 'G') { showGrid(true); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else return;
+    e.preventDefault();
+  });
+
+  window.addEventListener('resize', function () { fit(); if (!grid.hidden) fitThumbs(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  slides[0].classList.add('on');
+  go(isNaN(start) ? 0 : start - 1);
+  showNotes(store('deck-notes') === '1');
+  fit();
+})();
+</script>
+
+</body>
+</html>

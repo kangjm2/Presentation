@@ -31,6 +31,7 @@ Antennas 페이지에 올린 안테나 패턴이 CF 빌드에서 CIR과 CFR에 �
 - 예상 질문과 답변: [`qna.md`](qna.md) (슬라이드별)
 - 뷰어 조작법은 [`../propagation-models/README.md`](../propagation-models/README.md#뷰어-조작)와 같습니다. 슬라이드를 고친 뒤 리포 루트에서 `python3 viewer/build.py cf-antenna-pattern`로 뷰어를 다시 만듭니다.
 - 관련 덱:
+  - [`beam-weight-array`](../beam-weight-array/): 빔 웨이트 파일이 PlanarArray의 어레이 정보 · 포트 패턴으로 바뀌는 과정 (용어집 포함)
   - [`sionna-rt-antenna`](../sionna-rt-antenna/): Sionna RT 안테나 파라미터(PlanarArray · 패턴 · 편파)
   - [`sionna-rsrp-beam`](../sionna-rsrp-beam/): Sionna에서 빔과 RSRP
   - [`ss-rsrp`](../ss-rsrp/): 빔에서 SS-RSRP까지

@@ -1,0 +1,26 @@
+<section id="pitch" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">④ 세로 피치 d_v · 피팅</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">세로 위상 간격과 E-tilt로 포트 세로 피치를 푼다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.55;color:#F5F3EE;white-space:nowrap">Δψ_행 = 2π · d_v · sin(E-tilt)   →   d_v = (Δψ_행 / 360° + m) / sin(E-tilt)<br><span style="color:#F0A36B">예: (106.7° / 360° + 0) / sin 6° = 2.84 λ</span></p></div>
+<div style="display:flex;flex-direction:row;gap:26px;align-items:flex-start">
+<div style="position:relative;width:780px;height:290px">
+<svg aria-label="세로 피치 후보를 수직선 위에 찍은 그림. m = 0이면 2.84 λ, m = 1이면 12.4 λ, 0.5 λ 미만은 제외" style="position:absolute;left:0px;top:0px;width:780px;height:290px" width="780" height="290" viewBox="0 0 780 290"><rect x="60" y="120" width="24" height="60" fill="#EAE7DF"/><line x1="60" y1="150" x2="740" y2="150" stroke="#14213D" stroke-width="3"/><line x1="60" y1="142" x2="60" y2="158" stroke="#14213D" stroke-width="2"/><line x1="157" y1="142" x2="157" y2="158" stroke="#14213D" stroke-width="2"/><line x1="254" y1="142" x2="254" y2="158" stroke="#14213D" stroke-width="2"/><line x1="351" y1="142" x2="351" y2="158" stroke="#14213D" stroke-width="2"/><line x1="449" y1="142" x2="449" y2="158" stroke="#14213D" stroke-width="2"/><line x1="546" y1="142" x2="546" y2="158" stroke="#14213D" stroke-width="2"/><line x1="643" y1="142" x2="643" y2="158" stroke="#14213D" stroke-width="2"/><line x1="740" y1="142" x2="740" y2="158" stroke="#14213D" stroke-width="2"/><circle cx="198" cy="150" r="14" fill="#A84A16"/><circle cx="662" cy="150" r="14" fill="#FBFAF7" stroke="#255E9E" stroke-width="4"/><line x1="217.7" y1="210.0" x2="630.4" y2="210.0" stroke="#5E6675" stroke-width="3" stroke-dasharray="8 6"/><polygon points="642.4,210.0 630.4,204.0 630.4,216.0" fill="#5E6675"/></svg>
+<p style="position:absolute;left:30px;top:166px;width:60px;font-size:24px;text-align:center;color:#5E6675">0</p>
+<p style="position:absolute;left:680px;top:166px;width:120px;font-size:24px;text-align:center;color:#5E6675">14 λ</p>
+<p style="position:absolute;left:60px;top:74px;width:200px;font-size:24px;color:#5E6675">0.5 λ 미만 제외</p>
+<p style="position:absolute;left:98px;top:38px;width:200px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">m = 0 → 2.84 λ</p>
+<p style="position:absolute;left:542px;top:74px;width:240px;font-size:24px;text-align:center;font-weight:700;color:#255E9E">m = 1 → 12.4 λ</p>
+<p style="position:absolute;left:198px;top:226px;width:465px;font-size:24px;text-align:center;color:#5E6675">해 사이 간격 1 / sin 6° = 9.57 λ</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">2π 모호성</p><p style="font-size:24px;line-height:1.4;color:#4A5262">위상은 360°마다 같아 보인다 → m = 0, 1, 2 …의 해가 모두 맞는다</p></div>
+<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">고르는 규칙</p><p style="font-size:24px;line-height:1.4;color:#4A5262">0.5 λ 이상인 가장 작은 해 · 샘플 2.84 λ ↔ 제품팀 4 × 0.712 = 2.848 λ</p></div>
+</div>
+</div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">켤레 (conjugate) 먼저</p><p style="font-size:24px;line-height:1.4;color:#4A5262">w를 그대로 쓰느냐 w*로 쓰느냐에 따라 Δψ의 부호가 뒤집혀 빔이 위 또는 아래를 향한다 → <b>빔이 아래로 향하는 쪽</b>을 골라 부호를 정한 뒤 d_v를 푼다 (데이터로 결정)</p></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">식과 규칙: CF 문서 (beam_weights.py:314) · 106.7°는 합성 웨이트 값 · 샘플 결과 2.84 λ는 문서 값</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 17</p>
+<aside>(약 55초) 세로 위상 간격이 나오면 포트의 세로 피치를 풀 수 있습니다. 빔을 E-tilt만큼 숙이려면 위아래 포트 사이 위상 차가 2파이 곱하기 피치 곱하기 사인 E-tilt여야 합니다. 거꾸로 풀면 피치는 위상 차를 360도로 나눈 값에 정수 m을 더하고, 사인 E-tilt로 나눈 값입니다. 예시의 106.7도와 E-tilt 6도를 넣으면 2.84 파장이 나옵니다. 정수 m이 붙는 이유는 위상이 360도마다 같아 보이기 때문입니다. 그래서 해가 1 나누기 사인 6도, 약 9.6 파장 간격으로 여러 개 있고, CF는 0.5 파장 이상인 가장 작은 해를 고릅니다. 샘플 파일의 결과 2.84 파장은 제품팀 값 0.712 곱하기 4, 2.848과 맞았습니다. 하나 더, 웨이트를 그대로 쓰느냐 켤레로 쓰느냐에 따라 위상 차의 부호가 뒤집혀 빔이 위나 아래를 향합니다. CF는 빔이 아래로 향하는 쪽을 골라 부호를 먼저 정합니다.</aside>
+</section>
