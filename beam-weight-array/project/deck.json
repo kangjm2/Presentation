@@ -1,0 +1,65 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-11T12:00:00Z"
+  },
+  "lists": "css",
+  "title": "빔 웨이트 파일은 PlanarArray에 어떻게 매핑되나",
+  "order": [
+    "cover",
+    "flow",
+    "termstruct",
+    "termpattern",
+    "formats",
+    "gap",
+    "index",
+    "layout",
+    "axes",
+    "pitch",
+    "subarray",
+    "element",
+    "port",
+    "toarray",
+    "trust",
+    "replace",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "전체 그림과 용어(구조 · 패턴과 빔)",
+      "start": "cover"
+    },
+    "gap": {
+      "description": "형식별 이득 계산, 파일에 있는 것과 PlanarArray가 필요한 것",
+      "start": "formats"
+    },
+    "array": {
+      "description": "어레이 정보 추론: 펼친 순서, 배치, 세로 축, 세로 피치",
+      "start": "index"
+    },
+    "port": {
+      "description": "포트 패턴 모델: 서브어레이, 소자 패턴, 지향성 정규화",
+      "start": "subarray"
+    },
+    "result": {
+      "description": "PlanarArray로 들어가는 값, 신뢰도, 실제 값으로 바꾸기, 정리",
+      "start": "toarray"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

@@ -1,0 +1,25 @@
+<section id="replace" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">⑩ 가정을 실제 값으로</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">덮어쓰기는 API로, 근본 해결은 실제 서브어레이 자료로</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;font-weight:700;color:#14213D">지금 할 수 있는 것 — 가져올 때 geometry를 직접 준다</p>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">"geometry": {"d_h": 0.541, "d_v": 2.848,<br>&nbsp;"sub_elements": 4,<br>&nbsp;"element_h_bw_deg": …}</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">주의</p><p style="font-size:24px;line-height:1.4;color:#4A5262">콘솔 대화상자에는 이 칸이 없다 → <b>API로만</b> 가능 · 덮어쓴 뒤 다시 가져오면 개정판이 올라가 캐시도 새로 계산</p></div>
+</div>
+<div style="flex:1.1;display:flex;flex-direction:column;gap:7px">
+<p style="font-size:24px;font-weight:700;color:#14213D">근본 해결 — 받아야 할 자료와 바뀌는 가정</p>
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">받을 자료</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">바꾸는 가정 · 피팅</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">서브어레이 gain 패턴 (측정)</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">포트 패턴 모델 자체 (소자 모양 · 수직폭 · 수평폭 피팅)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">서브어레이 웨이트</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">서브어레이 틸트 · 소자 수 · 소자 간격</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">패널 도면 · 제품 사양</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">가로 간격 d_h (0.5 → 0.541 λ) · 좌우반전</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:380px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">웨이트 순서 정의</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">펼친 순서 전제 → 배치 추론</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">요청 문서</p><p style="font-size:24px;line-height:1.4;color:#4A5262">docs/handoff/antenna-array-data-request.md 2절의 “to replace” 행 = 앞쪽 표의 가정 · 피팅 항목</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 · 개정판과 캐시는 cf-antenna-pattern 덱 4쪽 · 웨이트 순서 정의는 이 덱이 덧붙인 요청 항목</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">16 / 17</p>
+<aside>(약 50초) 가정을 실제 값으로 바꾸는 길은 둘입니다. 지금 당장은 가져올 때 geometry로 값을 직접 줄 수 있습니다. 예를 들어 가로 간격 0.541, 세로 피치 2.848, 서브어레이 소자 4개, 소자 수평폭을 넣습니다. 다만 콘솔 대화상자에는 이 칸이 없어서 API로만 됩니다. 근본적인 해결은 실제 자료를 받는 것입니다. 서브어레이의 gain 패턴을 측정값으로 받으면 소자 곱하기 서브어레이라는 포트 패턴 모델 자체를 대체할 수 있고, 서브어레이 웨이트를 받으면 서브어레이 틸트와 소자 수, 간격을 확정할 수 있습니다. 패널 도면이나 사양은 가로 간격을, 웨이트 순서 정의는 배치 추론의 전제를 확정해 줍니다. 마지막 줄은 제가 덧붙인 항목입니다. 요청 문서의 2절 to replace 행들이 바로 앞쪽 표의 가정과 피팅 항목입니다.</aside>
+</section>

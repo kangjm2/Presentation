@@ -1,0 +1,27 @@
+<section id="axes" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">③ 세로 축 · 추론</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">모든 빔이 같은 위상 간격을 갖는 축이 세로다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:30px;align-items:flex-start">
+<div style="position:relative;width:760px;height:560px">
+<svg aria-label="빔 8개의 열 방향 위상 차는 -142°에서 +142°까지 빔마다 다르고, 행 방향 위상 차는 모두 약 107°로 같다" style="position:absolute;left:0px;top:0px;width:760px;height:560px" width="760" height="560" viewBox="0 0 760 560"><rect x="90" y="50" width="640" height="420" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="260" x2="730" y2="260" stroke="#EAE7DF" stroke-width="2"/><circle cx="130" cy="426" r="11" fill="#255E9E"/><rect x="120" y="126" width="20" height="20" fill="#A84A16"/><circle cx="210" cy="387" r="11" fill="#255E9E"/><rect x="200" y="126" width="20" height="20" fill="#A84A16"/><circle cx="290" cy="340" r="11" fill="#255E9E"/><rect x="280" y="125" width="20" height="20" fill="#A84A16"/><circle cx="370" cy="287" r="11" fill="#255E9E"/><rect x="360" y="126" width="20" height="20" fill="#A84A16"/><circle cx="450" cy="233" r="11" fill="#255E9E"/><rect x="440" y="125" width="20" height="20" fill="#A84A16"/><circle cx="530" cy="180" r="11" fill="#255E9E"/><rect x="520" y="125" width="20" height="20" fill="#A84A16"/><circle cx="610" cy="133" r="11" fill="#255E9E"/><rect x="600" y="125" width="20" height="20" fill="#A84A16"/><circle cx="690" cy="94" r="11" fill="#255E9E"/><rect x="680" y="126" width="20" height="20" fill="#A84A16"/><line x1="90" y1="136" x2="730" y2="136" stroke="#A84A16" stroke-width="2" stroke-dasharray="8 6"/></svg>
+<p style="position:absolute;left:0px;top:34px;width:82px;font-size:24px;text-align:right;color:#5E6675">+180°</p>
+<p style="position:absolute;left:0px;top:244px;width:82px;font-size:24px;text-align:right;color:#5E6675">0°</p>
+<p style="position:absolute;left:0px;top:454px;width:82px;font-size:24px;text-align:right;color:#5E6675">−180°</p>
+<p style="position:absolute;left:90px;top:8px;width:640px;font-size:24px;font-weight:700;color:#14213D">이웃 포트 사이 위상 차 Δψ · 빔 8개</p>
+<p style="position:absolute;left:90px;top:476px;width:640px;font-size:24px;text-align:center;color:#5E6675">빔 방위 -52.5° … +52.5° (15° 간격)</p>
+<p style="position:absolute;left:90px;top:514px;width:640px;font-size:24px;text-align:center;color:#4A5262"><span style="color:#255E9E">●</span> 열 방향 Δψ · <span style="color:#A84A16">■</span> 행 방향 Δψ</p>
+<p style="position:absolute;left:102px;top:148px;width:250px;font-size:24px;font-weight:700;color:#A84A16">모두 ≈ 107°</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">왜 이렇게 되나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SSB 빔들은 <b>같은 E-tilt</b>로 숙이고 <b>방위만 다르게</b> 흩어진다 → 세로 위상 간격은 모두 같고, 가로 위상 간격만 빔마다 다르다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">가로 (열 방향)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Δψ = 2π · d_h · cos(틸트) · sin(방위) — 방위가 바뀌면 값이 바뀐다</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">세로 (행 방향)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Δψ = 2π · d_v · sin(E-tilt) — 모든 빔이 같다 · 예시에서 106.7°</p></div>
+<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">결과</p><p style="font-size:24px;line-height:1.4;color:#4A5262">행 4개가 세로, 열 8개가 가로 → rows 4 · cols 8 · 편파 2</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">앞쪽과 같은 합성 웨이트로 계산 · 빔이 모두 같은 E-tilt라는 것은 SSB 빔 묶음의 일반적인 설계</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 17</p>
+<aside>(약 50초) 배치가 2 곱하기 8 곱하기 4로 정해져도, 8과 4 중 어느 쪽이 세로인지는 아직 모릅니다. 여기서 쓰는 규칙이, 모든 빔이 같은 위상 간격을 갖는 축을 세로로 본다는 것입니다. SSB 빔들은 보통 같은 전기 틸트로 숙이고 방위만 다르게 흩어지기 때문입니다. 왼쪽 그림의 파란 점은 열 방향 위상 차로, 빔 방위에 따라 -142도에서 +142도까지 바뀝니다. 주황 사각은 행 방향 위상 차로, 여덟 빔이 모두 약 107도로 같습니다. 그래서 행 방향이 세로입니다. 결과는 행 4개, 열 8개, 편파 둘입니다. 그리고 이 세로 위상 간격 107도가 다음 쪽에서 세로 피치를 계산하는 재료가 됩니다.</aside>
+</section>

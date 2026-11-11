@@ -1,0 +1,29 @@
+<section id="element" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑥ 소자 패턴 · 가정 · 피팅</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">소자 수평폭은 SSB 빔폭이 선언값이 되도록 맞춘다</h2>
+</div>
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">감쇠(θ, φ) = min(12 · (φ / 수평폭)², 30) + min(12 · ((θ − 90°) / 수직폭)², 30)   [dB]<br><span style="color:#C9D3E3">TR 38.901 모양 · 두 항을 각각 30 dB에서 자름 · 수직폭 65° 고정 (가정)</span></p></div>
+<div style="display:flex;flex-direction:row;gap:28px;align-items:flex-start">
+<div style="position:relative;width:760px;height:500px">
+<svg aria-label="소자 수평폭을 바꿀 때 SSB 빔의 수평 HPBW가 어떻게 변하는지 그린 곡선. 선언값 65°와 만나는 곳이 약 108°" style="position:absolute;left:0px;top:0px;width:760px;height:500px" width="760" height="500" viewBox="0 0 760 500"><rect x="90" y="50" width="640" height="400" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><line x1="90" y1="195" x2="730" y2="195" stroke="#A84A16" stroke-width="3" stroke-dasharray="10 6"/><polyline points="109.4,385.3 128.8,362.0 148.2,340.9 167.6,321.3 187.0,303.1 206.4,286.4 225.8,271.1 245.2,257.3 264.5,244.2 283.9,231.8 303.3,220.9 322.7,210.7 342.1,201.3 361.5,191.8 380.9,183.8 400.3,175.8 419.7,169.3 439.1,162.0 458.5,156.2 477.9,150.4 497.3,144.5 516.7,139.5 536.1,135.1 555.5,130.7 574.8,126.4 594.2,122.7 613.6,118.4 633.0,115.5 652.4,111.8 671.8,108.9 691.2,106.0 710.6,103.1" fill="none" stroke="#255E9E" stroke-width="4"/><circle cx="400" cy="176" r="10" fill="#14213D"/><circle cx="245" cy="257" r="10" fill="#14213D"/><circle cx="323" cy="211" r="10" fill="#14213D"/><circle cx="362" cy="192" r="10" fill="#14213D"/><circle cx="342" cy="201" r="10" fill="#14213D"/><line x1="354" y1="195" x2="354" y2="450" stroke="#14213D" stroke-width="2" stroke-dasharray="6 6"/></svg>
+<p style="position:absolute;left:90px;top:8px;width:640px;font-size:24px;font-weight:700;color:#14213D">SSB 빔의 수평 HPBW vs 소자 수평폭 (예시)</p>
+<p style="position:absolute;left:0px;top:70px;width:82px;font-size:24px;text-align:right;color:#5E6675">80°</p>
+<p style="position:absolute;left:0px;top:216px;width:82px;font-size:24px;text-align:right;color:#5E6675">60°</p>
+<p style="position:absolute;left:0px;top:361px;width:82px;font-size:24px;text-align:right;color:#5E6675">40°</p>
+<p style="position:absolute;left:89px;top:456px;width:80px;font-size:24px;text-align:center;color:#5E6675">50°</p>
+<p style="position:absolute;left:661px;top:456px;width:100px;font-size:24px;text-align:center;color:#5E6675">200°</p>
+<p style="position:absolute;left:90px;top:490px;width:640px;font-size:24px;text-align:center;color:#4A5262">소자 수평폭 (가정해 보는 값) → · ● 이분 탐색이 시험한 점</p>
+<p style="position:absolute;left:100px;top:155px;width:300px;font-size:24px;font-weight:700;color:#A84A16">선언값 65°</p>
+<p style="position:absolute;left:362px;top:406px;width:200px;font-size:24px;font-weight:700;color:#14213D">→ 108°</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">피팅 절차</p><p style="font-size:24px;line-height:1.4;color:#4A5262">① 소자 수평폭을 하나 가정 ② 이 소자에 웨이트 파일의 SSB 웨이트를 곱해 빔 계산 ③ 빔의 수평 HPBW를 잼 ④ 선언값과 비교해 <b>이분 탐색</b></p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">샘플 파일 결과</p><p style="font-size:24px;line-height:1.4;color:#4A5262"><b>87.8°</b> (선언 빔폭 65°) — 여러 열을 묶은 빔은 소자보다 좁으므로 소자는 더 넓어야 한다</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">예시 그래프</p><p style="font-size:24px;line-height:1.4;color:#4A5262">합성 SSB 웨이트(이웃한 두 열, 크기 1 : 0.25)로 같은 절차 → 108° · 값은 웨이트에 따라 달라진다</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">샘플 결과 87.8°는 CF 문서 값 · 그래프는 합성 SSB 웨이트로 계산한 예시 · 규칙: beam_weights.py:213</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 17</p>
+<aside>(약 55초) 포트 패턴의 다른 한 축은 소자 패턴입니다. 모양은 TR 38.901과 같습니다. 수평 감쇠는 12 곱하기 방위 나누기 수평폭의 제곱, 수직 감쇠는 12 곱하기 앙각 나누기 수직폭의 제곱이고, 각각 30 dB에서 자른 뒤 더합니다. 수직폭은 65도로 고정한 기본값입니다. 수평폭은 피팅합니다. 소자 수평폭을 하나 가정하고, 그 소자에 웨이트 파일의 SSB 웨이트를 곱해 빔을 계산한 뒤, 빔의 수평 반전력 빔폭이 선언값, 예를 들어 65도가 될 때까지 이분 탐색으로 맞춥니다. 샘플 파일에서는 87.8도가 나왔습니다. 소자가 선언 빔폭보다 넓은 이유는, 여러 열을 웨이트로 묶은 빔이 소자 하나보다 좁기 때문입니다. 왼쪽 그래프는 합성 SSB 웨이트로 같은 절차를 돌린 예시라 숫자는 108도로 다르지만, 곡선과 선언값이 만나는 곳을 찾는다는 원리는 같습니다.</aside>
+</section>
