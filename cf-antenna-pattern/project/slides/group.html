@@ -28,6 +28,6 @@
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">섞을 수 없는 것</p><p style="font-size:24px;line-height:1.4;color:#4A5262">소자 수가 다른 배열 — 결과의 송신 안테나 축(bs_ant)이 하나여야 한다 → 요청 단계에서 거부</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">그림의 섹터 구성과 경로 수(37 · 22)는 예시 · 출처: CF 문서 §4-4 · ADR 0079</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 20</p>
 <aside>(약 45초) 섹터마다 안테나가 다를 수 있습니다. 그런데 Sionna는 씬 하나에 송신 배열을 하나만 둡니다. 그래서 패턴, 편파, 배열, 간격이 모두 같은 섹터끼리 묶어 따로 추적한 뒤, 결과를 원래 송신기 순서대로 합칩니다. ADR 0079입니다. 그림 예시에서 A 묶음은 경로가 최대 37개, B 묶음은 22개라면, B 쪽은 37개까지 무효 경로로 채웁니다. 무효 경로는 지연을 음수로 둬서 표시합니다. 다만 결과 채널의 송신 안테나 축이 하나여야 하므로, 소자 수가 다른 배열은 한 빌드에 섞을 수 없고 요청 단계에서 거부됩니다.</aside>
 </section>

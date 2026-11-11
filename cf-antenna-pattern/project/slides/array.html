@@ -12,11 +12,11 @@
 <div style="flex:1;display:flex;flex-direction:column;gap:12px">
 <div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:22px;line-height:1.55;color:#F5F3EE;white-space:nowrap">PlanarArray(num_rows=rows, num_cols=cols,<br>&nbsp;&nbsp;&nbsp;&nbsp;horizontal_spacing=spacing,<br>&nbsp;&nbsp;&nbsp;&nbsp;vertical_spacing=vertical_spacing 또는 spacing,<br>&nbsp;&nbsp;&nbsp;&nbsp;pattern="lib-&lt;id&gt;", polarization=...)</p></div>
 <div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">소자 수</p><p style="font-size:24px;line-height:1.4;color:#4A5262">행 × 열 × 편파 수 (이중 편파면 2) — 8×8 V = 64, 8×8 VH = 128</p></div>
-<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">synthetic_array = True (기본)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">광선은 배열 중심 기준으로 한 번만 추적 · 소자별 차이는 위치에 따른 위상으로 계산</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">synthetic_array = True (기본)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">광선은 배열 중심에서 한 번만 추적 — 배열 크기 ≪ 단말 거리라 평면파로 봄 · 소자 n의 차이는 위치 위상 e^(+j2π r̂·p_n)뿐 (거리 차 d · sin θ, beam-weight-array 11쪽)</p></div>
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">그래서</p><p style="font-size:24px;line-height:1.4;color:#4A5262">배열 효과 = 소자 위치에 따른 위상뿐 — 빔을 만들려면 가중치를 곱해야 한다 (12쪽)</p></div>
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 §4-2 · Sionna RT PlanarArray</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 18</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 20</p>
 <aside>(약 45초) 배열은 Sionna의 PlanarArray로 만듭니다. 행과 열, 수평과 수직 간격을 주고, 패턴은 앞에서 등록한 이름, 편파는 요청대로 넣습니다. 배열의 소자 하나하나가 이 패턴을 가지므로, 소자 수는 행 곱하기 열 곱하기 편파 수입니다. 8×8에 수직 편파면 64개입니다. 기본 설정인 synthetic array에서는 광선을 배열 중심 기준으로 한 번만 추적하고, 소자마다의 차이는 위치에 따른 위상으로 계산합니다. 즉 배열이 하는 일은 소자마다 위상을 다르게 하는 것뿐이고, 빔을 만들려면 그 위에 가중치를 곱해야 합니다. 이 점은 12쪽에서 다시 봅니다.</aside>
 </section>
