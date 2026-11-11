@@ -11,13 +11,16 @@
     "flow",
     "termstruct",
     "termpattern",
+    "termgap",
     "formats",
     "gap",
     "index",
     "layout",
     "axes",
+    "phasestep",
     "pitch",
     "subarray",
+    "hpbw",
     "element",
     "port",
     "toarray",
@@ -27,7 +30,7 @@
   ],
   "sections": {
     "intro": {
-      "description": "전체 그림과 용어(구조 · 패턴과 빔)",
+      "description": "전체 그림과 용어(구조 · 패턴과 빔 · 간격과 폭)",
       "start": "cover"
     },
     "gap": {
@@ -35,11 +38,11 @@
       "start": "formats"
     },
     "array": {
-      "description": "어레이 정보 추론: 펼친 순서, 배치, 세로 축, 세로 피치",
+      "description": "어레이 정보 추론: 펼친 순서, 배치, 세로 축, 위상 간격의 뜻, 세로 피치",
       "start": "index"
     },
     "port": {
-      "description": "포트 패턴 모델: 서브어레이, 소자 패턴, 지향성 정규화",
+      "description": "포트 패턴 모델: 서브어레이, HPBW, 소자 패턴, 지향성 정규화",
       "start": "subarray"
     },
     "result": {

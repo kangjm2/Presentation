@@ -123,7 +123,7 @@ body.fs.idle .stage { cursor: none }
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">오늘의 질문</p><p style="font-size:24px;line-height:1.4;color:#4A5262">웨이트 파일에는 rows · cols · 간격 · 패턴이 없다 → 이 다섯 칸을 무엇으로 채우나</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 (antenna_sionna.py:122 · simulator.py:327 · 336) · 자세히는 cf-antenna-pattern 덱</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 20</p>
 <aside>(약 45초) 먼저 전체 그림입니다. 섹터가 라이브러리 패턴을 고르면, 계산할 때 워커가 그 레코드를 Sionna에 등록합니다. 그 다음 PlanarArray를 만드는데, 행과 열, 간격, 패턴 이름, 편파를 넣습니다. 이때 라이브러리 패턴은 어레이를 이루는 소자 하나하나의 패턴이 됩니다. 섹터의 방위각과 기계 틸트는 송신기 방향으로 들어가 패턴을 돌리고, 편파는 PolarizedAntennaPattern으로 감싸 적용합니다. 요청을 만든 뒤 같은 id의 패턴이 바뀌면 계산을 거절합니다. 핵심은 가운데 줄입니다. 빔 패턴은 소자 패턴 곱하기 어레이 팩터라서, 행이나 열이 1보다 크면 패턴 위에 어레이 팩터가 한 번 더 곱해집니다. 그런데 웨이트 파일에는 PlanarArray가 필요로 하는 행, 열, 간격, 패턴이 들어 있지 않습니다. 오늘은 이 빈칸을 어떻게 채우는지를 봅니다.</aside>
 </section>
 <section id="termstruct" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -148,7 +148,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시 수치(4 × 8 × 2 · 0.71 λ · 2.84 λ)는 CF 문서의 샘플 파일 결과 · 3.5 GHz는 λ 환산 예</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">03 / 20</p>
 <aside>(약 60초) 용어부터 정리하겠습니다. 소자는 전파를 내는 가장 작은 방사체 하나입니다. 기지국 안테나는 보통 플러스 45도, 마이너스 45도 두 다이폴이 한 자리에 겹쳐 있습니다. 서브어레이는 세로로 묶여 같은 신호를 받는 소자 묶음입니다. 묶인 소자끼리는 고정된 위상으로 연결돼 있어서, 무선 장비가 따로 조절할 수 없습니다. 포트는 무선 장비가 따로 웨이트를 줄 수 있는 입력 하나이고, 서브어레이 하나와 편파 하나의 조합입니다. 오늘 예에서는 포트가 64개입니다. 패널, 또는 어레이는 포트들이 행과 열로 놓인 판이고, Sionna에서는 PlanarArray로 표현합니다. 편파는 전기장이 떨리는 방향인데, cross라고 하면 플러스 마이너스 45도 두 소자가 한 자리에 있어 포트 수가 두 배가 됩니다. 간격은 이웃 중심 사이 거리를 파장으로 나눈 값입니다. 3.5 GHz라면 파장이 약 8.6 cm라서 0.5 파장은 약 4.3 cm입니다. 오른쪽 그림처럼 패널의 한 칸이 포트이고, 그 안에 소자 네 개가 세로로 들어 있습니다.</aside>
 </section>
 <section id="termpattern" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -163,7 +163,7 @@ body.fs.idle .stage { cursor: none }
 <div style="background:#F7DDCB;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#A84A16">웨이트 w (beam weight)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">포트마다 곱하는 복소수(크기 · 위상) · 빔 하나 = 포트 수만큼의 복소수</p></div>
 <div style="background:#D5E3F3;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#255E9E">조향 · 위상 간격 Δψ</p><p style="font-size:24px;line-height:1.35;color:#4A5262">이웃 포트 위상을 일정하게 어긋나게 해 빔을 돌린다 · Δψ = 2π · d · sin(각)</p></div>
 <div style="background:#F7DDCB;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#A84A16">빔 패턴</p><p style="font-size:24px;line-height:1.35;color:#4A5262">포트 패턴 × AF · 웨이트를 곱해 만든 빔 하나의 패턴 · 레코드 &lt;set&gt;-b&lt;k&gt;</p></div>
-<div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">HPBW (반전력 빔폭)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">최대보다 3 dB(절반) 낮아지는 두 방향 사이의 각 · 수평 · 수직 따로</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">HPBW (반전력 빔폭)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">정면에서 좌우로 돌며 세기가 절반(−3 dB)이 되는 두 방향 사이의 각 · 예: 65° = ±32.5° (14쪽)</p></div>
 <div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">E-tilt (전기 틸트)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">위상으로 빔을 아래로 숙인 각 · 기계 틸트는 장비 자체를 숙인 것</p></div>
 <div style="background:#F7DDCB;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#A84A16">그레이팅 로브</p><p style="font-size:24px;line-height:1.35;color:#4A5262">간격이 λ보다 넓을 때 주엽과 <b>같은 세기</b>로 다른 방향에 생기는 가짜 주엽</p></div>
 <div style="background:#D5E3F3;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#255E9E">서브어레이 팩터</p><p style="font-size:24px;line-height:1.35;color:#4A5262">서브어레이 안 소자들이 만드는 AF · 포트 패턴의 세로 모양을 정한다</p></div>
@@ -171,8 +171,32 @@ body.fs.idle .stage { cursor: none }
 <div style="background:#FBFAF7;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px"><p style="font-size:24px;font-weight:700;color:#14213D">켤레 (conjugate)</p><p style="font-size:24px;line-height:1.35;color:#4A5262">복소수의 위상 부호를 뒤집기 · w로 쓰느냐 w*로 쓰느냐에 따라 빔이 위아래로 뒤집힌다</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">빔 패턴 = 포트 패턴 × 어레이 팩터 — 아래 쪽들은 이 식의 두 항을 각각 채우는 과정</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">04 / 20</p>
 <aside>(약 60초) 패턴 쪽 용어입니다. 패턴은 방향마다 얼마나 세게 내보내는지를 나타내고, CF는 dB로 저장했다가 Sionna에는 진폭으로 바꿔 넘깁니다. 소자 패턴과 포트 패턴은 하나가 혼자 낼 때의 패턴이라 웨이트와 무관합니다. 반대로 어레이 팩터는 여러 포트의 위치 차이와 웨이트만으로 생기는 간섭 무늬이고, 소자 패턴과는 무관합니다. 웨이트는 포트마다 곱하는 복소수로, 크기와 위상을 함께 담습니다. 이웃 포트의 위상을 일정한 간격 델타 프사이만큼 어긋나게 하면 빔이 한쪽으로 돌아가는데, 이것이 조향입니다. 이렇게 만든 빔 하나의 패턴이 빔 패턴이고, 포트 패턴 곱하기 어레이 팩터입니다. HPBW는 최대보다 3 dB 낮아지는 두 방향 사이의 각, E-tilt는 위상으로 빔을 아래로 숙인 각입니다. 그레이팅 로브는 간격이 파장보다 넓을 때 다른 방향에 생기는 가짜 주엽입니다. 서브어레이 팩터는 포트 안 소자들이 만드는 어레이 팩터이고, 지향성은 구 전체 평균 대비 최대 방향의 세기입니다. 켤레는 위상 부호를 뒤집는 것인데, 이걸 잘못 쓰면 빔이 위아래로 뒤집힙니다.</aside>
+</section>
+<section id="termgap" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">용어 ③ · 보충</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">간격은 거리(λ), 폭은 각도(°) — 서로 다른 항에 들어간다</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE"></p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">가로 간격 d_h · 세로 피치 d_v</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">소자 수평폭 · 수직폭</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">무엇</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">이웃 포트 중심 사이 <b>거리</b></p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">포트 하나가 절반 세기로 덮는 <b>각</b> (HPBW)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">단위 · 샘플</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">λ · d_h 0.5 λ, d_v 2.84 λ</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">° · 수평 87.8°, 수직 65°</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">들어가는 곳</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b>어레이 팩터</b> — 포트 사이 위상 차</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262"><b>포트 패턴</b> — 모든 빔에 곱해지는 덮개</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">PlanarArray 인자</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">horizontal_spacing · vertical_spacing</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">pattern (포트 레코드의 3D 격자 안)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">정하는 것</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">빔 방향 · 날카로움 · 그레이팅 로브</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">옆으로 돌린 빔의 세기 · 사이드로브 · 앞뒤비</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:330px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">CF에서 정한 방법</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">d_h 가정 · d_v 피팅</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">수평폭 피팅 · 수직폭 가정</p></div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">식</b> 빔 패턴 = <b>포트 패턴</b>(폭이 정함) × <b>어레이 팩터</b>(간격과 웨이트가 정함)</p>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#14213D">간격이 틀리면 → 방향이 틀어진다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">웨이트의 위상 차는 고정 · 실제 0.541 λ로 37.5°를 노린 웨이트를 0.5 λ로 읽으면 약 41.2° (11쪽)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">폭이 틀리면 → 세기 분포가 틀어진다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">방향은 그대로 · 옆으로 돌린 빔은 그 방향의 포트 패턴만큼 약해진다 → 가장자리 빔이 너무 약하거나 세게</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">왜 “소자” 수평폭인가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">서브어레이는 세로로만 묶여 수평 모양을 안 바꾼다 → 소자 수평폭 = 포트 수평폭 · 수직은 서브어레이가 더 좁힌다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">방향 계산: sin(방위) = Δψ ÷ (2π · d_h) · 37.5° × 0.541 / 0.5 → 41.2° (생성기 계산) · 비유는 무대 조명</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 20</p>
+<aside>(약 55초) 보충으로, 헷갈리기 쉬운 두 종류의 값을 나란히 놓겠습니다. 가로 간격과 세로 피치는 이웃 포트 중심 사이의 거리이고 단위는 파장입니다. 소자 수평폭과 수직폭은 포트 하나가 절반 세기로 덮는 각도이고 단위는 도입니다. 무대 조명으로 비유하면 간격은 조명과 조명 사이 거리, 폭은 조명 하나가 비추는 원뿔의 각도입니다. 둘은 식의 다른 항에 들어갑니다. 간격은 웨이트와 함께 어레이 팩터를 정해 빔의 방향과 날카로움, 그레이팅 로브를 정하고, 폭은 포트 패턴, 즉 모든 빔에 곱해지는 덮개를 정합니다. 그래서 틀렸을 때의 증상도 다릅니다. 간격이 틀리면 빔 방향이 틀어집니다. 실제 간격 0.541 파장으로 37.5도를 노린 웨이트를 0.5 파장으로 읽으면 약 41.2도를 향하게 됩니다. 폭이 틀리면 방향은 그대로지만 옆으로 돌린 빔의 세기가 틀어집니다. 참고로 서브어레이는 세로로만 묶여 있어 소자 수평폭이 곧 포트의 수평폭입니다.</aside>
 </section>
 <section id="formats" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
 <div style="display:flex;flex-direction:column;gap:16px">
@@ -193,7 +217,7 @@ body.fs.idle .stage { cursor: none }
 <div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">같은 격자 · 같은 보간</p><p style="font-size:24px;line-height:1.4;color:#4A5262">뷰어 · Adjust(섹터 피팅 재가중) · 체크가 솔버와 같은 계산 → 화면의 패턴 = 솔버의 패턴 (3D 격자는 테스트로 고정)</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 “형식별 이득 계산 · 알아 둘 점” · 17 dBi는 문서의 예</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 20</p>
 <aside>(약 55초) 라이브러리에 들어오는 형식은 넷입니다. MSI나 Planet은 수평과 수직 단면 두 개를 1도 간격으로 저장하고, 방향별 이득은 최대 이득에 두 단면의 감쇠를 더해 만듭니다. NGMN BASTA는 181 곱하기 360의 3D 격자에서 이중선형 보간합니다. 오늘의 주제인 웨이트 파일은 두 종류의 레코드가 됩니다. 빔 레코드는 어레이 전체를 포함한 빔 하나의 3D 격자이고, 포트 레코드는 포트 하나의 3D 격자에 어레이 정보가 붙어 있습니다. 모든 형식이 Sionna에는 dB를 전력이 아니라 필드 진폭으로 바꿔 넘깁니다. 맨 오른쪽 열이 중요합니다. 빔 패턴은 1×1로, 포트 패턴은 파일의 어레이로 서버가 강제하지만, MSI와 BASTA는 사람이 정하고 CF가 막지 않습니다. 그래서 17 dBi짜리 패널 전체 패턴을 8×8에 올리면 어레이 이득이 두 번 들어가니, 그런 파일은 1×1로 써야 합니다. 뷰어와 Adjust, 체크 기능도 솔버와 같은 격자와 보간을 쓰므로, 화면에서 보는 패턴이 곧 솔버가 쓰는 패턴입니다.</aside>
 </section>
 <section id="gap" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -220,7 +244,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 “웨이트 파일의 포트 추정 · 어레이 정보” (beam_weights.py:174 · 213 · 314 · 480)</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 20</p>
 <aside>(약 55초) 문제를 한 장으로 정리하겠습니다. 웨이트 파일에 있는 것은 빔마다 포트별 복소 웨이트, 즉 포트끼리의 위상과 크기 관계, 그리고 E-tilt와 수평 빔폭 같은 선언값뿐입니다. 포트 하나가 내는 패턴, 포트가 몇 행 몇 열로 얼마 간격으로 놓였는지, 웨이트 64개를 어떤 순서로 펼쳤는지는 없습니다. 그런데 PlanarArray에는 오른쪽 표의 값이 모두 필요합니다. CF는 이를 세 등급의 근거로 채웁니다. 추론은 웨이트 자체에서 끌어낸 것이고, 피팅은 선언값에 맞도록 찾은 것, 가정은 기본값을 둔 것입니다. 배치와 세로 축은 추론, 세로 피치와 소자 수평폭은 피팅, 가로 간격과 소자 수직폭, 서브어레이 틸트는 가정입니다. 포트 패턴은 소자 패턴 곱하기 서브어레이 팩터라는 모델입니다. 다음 쪽부터 위에서 아래로 하나씩 보겠습니다.</aside>
 </section>
 <section id="index" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -254,7 +278,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">합성 웨이트 예시(2 × 8 × 4 · d_h 0.5 λ · d_v 2.84 λ · 틸트 6° · 위상 잡음 3°) · 실제 파일 아님</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">07 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 20</p>
 <aside>(약 55초) 웨이트 파일의 한 줄은 빔 하나이고, 복소수 64개가 일렬로 놓여 있습니다. 이 64개를 편파, 열, 행이라는 상자에 다시 접어야 어느 숫자가 어느 포트인지 알 수 있습니다. 문서의 순서 표기는 편파, 열, 행, 위에서 아래인데, 이것을 바깥에서 안쪽으로 읽으면 행이 가장 빨리 바뀌고, 위의 식처럼 번호 n에서 편파, 열, 행을 꺼낼 수 있습니다. 이 해석은 코드에서 꼭 확인해야 합니다. 왼쪽 그림은 합성 웨이트로 만든 예시입니다. 방위 +7.5도로 조향한 빔의 64개 웨이트를 접어 위상을 색으로 칠했습니다. 같은 행에서 열을 따라, 같은 열에서 행을 따라 색이 일정하게 돌아갑니다. 이것이 평면파 조향의 모습입니다. 접는 방법이 틀리면 이 규칙성이 깨지는데, 다음 쪽의 배치 추론이 바로 이 점을 이용합니다.</aside>
 </section>
 <section id="layout" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -289,7 +313,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">합성 웨이트(빔 8개, 편파마다 다른 위상 오프셋)로 같은 절차를 계산한 예시 · 실제 기준식은 코드 확인</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 20</p>
 <aside>(약 55초) 첫 번째 추론은 배치입니다. 64는 편파 하나나 둘에, 열과 행을 곱해 여러 방식으로 나눌 수 있습니다. 나누어떨어지는 경우가 모두 13가지입니다. 각 후보마다 웨이트를 그 모양으로 접은 뒤, 열 방향과 행 방향으로 이웃한 웨이트끼리 위상 차를 구합니다. 조향 빔이라면 이 위상 차가 어디서나 같아야 합니다. 그래서 위상 차들이 얼마나 흩어지는지를 재고, 전력이 고른 빔들로 평균해 가장 작은 배치를 고릅니다. 왼쪽은 합성 웨이트로 같은 절차를 돌린 결과입니다. 2 곱하기 8 곱하기 4가 0.005로 압도적으로 작고, 그 다음 후보도 0.07 이상입니다. 문서의 샘플 파일에서도 2 곱하기 8 곱하기 4가 나왔고, 이것은 웨이트 자체에서 나온 값이라 비교적 믿을 만합니다. 다만 앞쪽에서 본 펼친 순서의 전제 위에 서 있다는 점은 기억해야 합니다.</aside>
 </section>
 <section id="axes" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -316,8 +340,36 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">앞쪽과 같은 합성 웨이트로 계산 · 빔이 모두 같은 E-tilt라는 것은 SSB 빔 묶음의 일반적인 설계</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">09 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 20</p>
 <aside>(약 50초) 배치가 2 곱하기 8 곱하기 4로 정해져도, 8과 4 중 어느 쪽이 세로인지는 아직 모릅니다. 여기서 쓰는 규칙이, 모든 빔이 같은 위상 간격을 갖는 축을 세로로 본다는 것입니다. SSB 빔들은 보통 같은 전기 틸트로 숙이고 방위만 다르게 흩어지기 때문입니다. 왼쪽 그림의 파란 점은 열 방향 위상 차로, 빔 방위에 따라 -142도에서 +142도까지 바뀝니다. 주황 사각은 행 방향 위상 차로, 여덟 빔이 모두 약 107도로 같습니다. 그래서 행 방향이 세로입니다. 결과는 행 4개, 열 8개, 편파 둘입니다. 그리고 이 세로 위상 간격 107도가 다음 쪽에서 세로 피치를 계산하는 재료가 됩니다.</aside>
+</section>
+<section id="phasestep" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">③ 보충 · 위상 간격에 왜 간격이 들어가나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">Δψ는 거리 차를 위상으로 바꾼 값이다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:26px;align-items:flex-start">
+<div style="position:relative;width:720px;height:560px">
+<svg aria-label="포트 A와 B가 간격 d로 놓이고, 정면에서 θ 돌아간 먼 방향으로 평행한 두 전파가 나간다. B를 지나는 파면까지 A의 전파가 d · sin θ만큼 더 가야 한다" style="position:absolute;left:0px;top:0px;width:720px;height:560px" width="720" height="560" viewBox="0 0 720 560"><line x1="170" y1="430" x2="170" y2="100" stroke="#5E6675" stroke-width="2" stroke-dasharray="6 6"/><line x1="146" y1="231" x2="585" y2="485" stroke="#255E9E" stroke-width="3" stroke-dasharray="10 6"/><line x1="170.0" y1="430.0" x2="373.0" y2="78.4" stroke="#14213D" stroke-width="3"/><polygon points="380.0,66.3 366.9,74.9 379.1,81.9" fill="#14213D"/><line x1="490.0" y1="430.0" x2="613.0" y2="217.0" stroke="#14213D" stroke-width="3"/><polygon points="620.0,204.8 606.9,213.5 619.1,220.5" fill="#14213D"/><line x1="170" y1="430" x2="250" y2="291" stroke="#A84A16" stroke-width="10"/><line x1="170" y1="460" x2="490" y2="460" stroke="#14213D" stroke-width="2"/><line x1="170" y1="452" x2="170" y2="468" stroke="#14213D" stroke-width="2"/><line x1="490" y1="452" x2="490" y2="468" stroke="#14213D" stroke-width="2"/><path d="M170 360 A70 70 0 0 1 205.0 369.4" fill="none" stroke="#14213D" stroke-width="3"/><circle cx="170" cy="430" r="14" fill="#14213D"/><circle cx="490" cy="430" r="14" fill="#14213D"/></svg>
+<p style="position:absolute;left:110px;top:432px;width:40px;font-size:24px;font-weight:700;color:#14213D">A</p>
+<p style="position:absolute;left:510px;top:432px;width:40px;font-size:24px;font-weight:700;color:#14213D">B</p>
+<p style="position:absolute;left:170px;top:470px;width:320px;font-size:24px;text-align:center;font-weight:700;color:#14213D">d (포트 간격)</p>
+<p style="position:absolute;left:174px;top:330px;width:30px;font-size:24px;font-weight:700;color:#14213D">θ</p>
+<p style="position:absolute;left:20px;top:70px;width:300px;font-size:24px;text-align:center;color:#5E6675">정면 (θ = 0)</p>
+<p style="position:absolute;left:0px;top:290px;width:150px;font-size:24px;text-align:right;line-height:1.3;font-weight:700;color:#A84A16">d · sin θ<br>A가 더 가는 길</p>
+<p style="position:absolute;left:0px;top:150px;width:220px;font-size:24px;line-height:1.3;color:#255E9E">파면 — 여기서<br>위상이 같아야 한다</p>
+<p style="position:absolute;left:310px;top:16px;width:360px;font-size:24px;color:#14213D">먼 단말 쪽 (평행한 두 전파)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">거리 차 = d · sin θ  [λ]<br>위상 차 Δψ = 360° × d · sin θ = 2π · d · sin θ<br><span style="color:#F0A36B">예: d 0.5 λ · θ 30° → 0.25 λ → 90°</span></p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">가로 (열 사이 → d_h)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">거리 차 = d_h · cos(틸트) · sin(방위) · 예: 0.5 × cos 6° × sin 37.5° = 0.303 λ → <b>109°</b></p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">세로 (행 사이 → d_v)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">거리 차 = d_v · sin(틸트) · 예: 2.84 × sin 6° = 0.297 λ → <b>107°</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">그래서 d_v는 풀고, d_h는 가정한다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">세로: Δψ(웨이트) · 틸트(선언) 앎 → d_v 하나만 모름 → 풂<br>가로: 빔 방위가 파일에 없음 → d_h × sin(방위)만 앎<br>예: 0.5 λ · 37.5° = 0.541 λ · 34.2° (같은 Δψ)</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">9쪽의 Δψ는 웨이트에서 직접 잰 값 · 이 식은 그 값을 해석하고 d_v를 푸는 데 쓴다 · 예시 수치는 생성기 계산</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 20</p>
+<aside>(약 60초) 9쪽에서 위상 간격을 구할 때 왜 간격 d가 들어가는지 보충하겠습니다. 두 포트 A와 B가 d만큼 떨어져 있고, 먼 단말이 정면에서 세타만큼 돌아간 쪽에 있다고 하겠습니다. 단말이 아주 멀어서 두 포트에서 나간 전파는 평행하게 갑니다. 단말 쪽에서 같은 순간에 도착하려면, B를 지나는 파면, 즉 진행 방향에 수직인 선에서 두 전파의 위상이 같아야 합니다. 그런데 A의 전파는 그 파면까지 주황색만큼, d 곱하기 사인 세타를 더 가야 합니다. 거리가 한 파장이면 위상이 360도 밀리므로, 이 거리 차는 위상 차 360도 곱하기 d 사인 세타가 됩니다. 웨이트는 이 위상 차를 미리 보상해 주는 값이라 이웃 포트마다 이만큼 위상이 어긋나 있습니다. 가로로 열 사이에는 d_h가, 세로로 행 사이에는 d_v가 들어가고, 예시로 계산하면 109도와 107도로 9쪽에서 잰 값과 같습니다. 이 식에서 d_v와 d_h를 다르게 다루는 이유도 보입니다. 세로는 위상 차와 선언 틸트를 알아 d_v 하나만 풀면 됩니다. 가로는 빔마다의 방위가 파일에 없어서 d_h 곱하기 사인 방위만 알 수 있습니다. 0.5 파장에 37.5도와 0.541 파장에 34.2도가 같은 위상 차를 내기 때문에, CF는 d_h를 기본값으로 가정합니다.</aside>
 </section>
 <section id="pitch" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
 <div style="display:flex;flex-direction:column;gap:16px">
@@ -342,7 +394,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">켤레 (conjugate) 먼저</p><p style="font-size:24px;line-height:1.4;color:#4A5262">w를 그대로 쓰느냐 w*로 쓰느냐에 따라 Δψ의 부호가 뒤집혀 빔이 위 또는 아래를 향한다 → <b>빔이 아래로 향하는 쪽</b>을 골라 부호를 정한 뒤 d_v를 푼다 (데이터로 결정)</p></div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">식과 규칙: CF 문서 (beam_weights.py:314) · 106.7°는 합성 웨이트 값 · 샘플 결과 2.84 λ는 문서 값</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 20</p>
 <aside>(약 55초) 세로 위상 간격이 나오면 포트의 세로 피치를 풀 수 있습니다. 빔을 E-tilt만큼 숙이려면 위아래 포트 사이 위상 차가 2파이 곱하기 피치 곱하기 사인 E-tilt여야 합니다. 거꾸로 풀면 피치는 위상 차를 360도로 나눈 값에 정수 m을 더하고, 사인 E-tilt로 나눈 값입니다. 예시의 106.7도와 E-tilt 6도를 넣으면 2.84 파장이 나옵니다. 정수 m이 붙는 이유는 위상이 360도마다 같아 보이기 때문입니다. 그래서 해가 1 나누기 사인 6도, 약 9.6 파장 간격으로 여러 개 있고, CF는 0.5 파장 이상인 가장 작은 해를 고릅니다. 샘플 파일의 결과 2.84 파장은 제품팀 값 0.712 곱하기 4, 2.848과 맞았습니다. 하나 더, 웨이트를 그대로 쓰느냐 켤레로 쓰느냐에 따라 위상 차의 부호가 뒤집혀 빔이 위나 아래를 향합니다. CF는 빔이 아래로 향하는 쪽을 골라 부호를 먼저 정합니다.</aside>
 </section>
 <section id="subarray" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -369,8 +421,43 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">계산: 포트 4개 · 피치 2.84 λ · 소자 4개 · 0.71 λ · 틸트 6° (생성기 계산) · 규칙: beam_weights.py:174</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 20</p>
 <aside>(약 60초) 이제 포트 패턴입니다. 포트 하나는 소자 N개를 세로로 묶은 서브어레이로 봅니다. N은 세로 피치를 0.7 파장으로 나눠 반올림한 값이라, 2.84 나누기 0.7은 약 4, 소자 간격은 0.71 파장입니다. 제품팀 값도 4개였습니다. 서브어레이 소자들은 선언 E-tilt인 6도로 위상이 맞춰져 있다고 가정합니다. 왜 이 모델이 필요한지 그림으로 보겠습니다. 파란 점선은 포트 네 개만의 어레이 팩터입니다. 피치가 파장의 세 배 가까이 되니 +14도, -27도 같은 자리에 주엽과 같은 세기의 그레이팅 로브가 생깁니다. 주황 선은 서브어레이 팩터인데, 서브어레이 길이가 정확히 포트 피치와 같아서 널이 바로 그 그레이팅 로브 자리에 옵니다. 둘을 곱한 남색 선에서는 그레이팅 로브가 -44 dB 아래로 눌립니다. 실제 안테나가 포트를 이렇게 묶는 이유이기도 합니다.</aside>
+</section>
+<section id="hpbw" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">⑥ 보충 · HPBW란, 왜 재나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">세기가 절반이 되는 두 방향 사이의 각 = HPBW</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:26px;align-items:flex-start">
+<div style="position:relative;width:800px;height:480px">
+<svg aria-label="소자 하나의 수평 감쇠 곡선. 정면 0 dB에서 좌우로 갈수록 감쇠가 커지고, ±32.5°에서 3 dB(절반)가 된다. 그 사이 65°가 HPBW" style="position:absolute;left:0px;top:0px;width:800px;height:480px" width="800" height="480" viewBox="0 0 800 480"><rect x="80" y="50" width="700" height="380" fill="#FBFAF7" stroke="#EAE7DF" stroke-width="2"/><rect x="304" y="50" width="253" height="380" fill="#F7DDCB" opacity="0.6"/><line x1="80" y1="126" x2="780" y2="126" stroke="#A84A16" stroke-width="3" stroke-dasharray="10 6"/><polyline points="80.0,430.0 81.9,430.0 83.9,430.0 85.8,430.0 87.8,430.0 89.7,430.0 91.7,430.0 93.6,430.0 95.6,430.0 97.5,430.0 99.4,430.0 101.4,430.0 103.3,430.0 105.3,430.0 107.2,430.0 109.2,430.0 111.1,430.0 113.1,430.0 115.0,430.0 116.9,430.0 118.9,430.0 120.8,430.0 122.8,430.0 124.7,430.0 126.7,430.0 128.6,430.0 130.6,430.0 132.5,430.0 134.4,430.0 136.4,430.0 138.3,430.0 140.3,430.0 142.2,430.0 144.2,430.0 146.1,430.0 148.1,428.2 150.0,423.0 151.9,417.8 153.9,412.7 155.8,407.6 157.8,402.6 159.7,397.5 161.7,392.6 163.6,387.6 165.6,382.7 167.5,377.8 169.4,373.0 171.4,368.2 173.3,363.4 175.3,358.7 177.2,354.0 179.2,349.3 181.1,344.7 183.1,340.1 185.0,335.6 186.9,331.1 188.9,326.6 190.8,322.1 192.8,317.7 194.7,313.4 196.7,309.0 198.6,304.7 200.6,300.5 202.5,296.2 204.4,292.0 206.4,287.9 208.3,283.8 210.3,279.7 212.2,275.6 214.2,271.6 216.1,267.7 218.1,263.7 220.0,259.8 221.9,255.9 223.9,252.1 225.8,248.3 227.8,244.6 229.7,240.8 231.7,237.1 233.6,233.5 235.6,229.9 237.5,226.3 239.4,222.8 241.4,219.3 243.3,215.8 245.3,212.3 247.2,208.9 249.2,205.6 251.1,202.3 253.1,199.0 255.0,195.7 256.9,192.5 258.9,189.3 260.8,186.2 262.8,183.0 264.7,180.0 266.7,176.9 268.6,173.9 270.6,171.0 272.5,168.0 274.4,165.1 276.4,162.3 278.3,159.4 280.3,156.7 282.2,153.9 284.2,151.2 286.1,148.5 288.1,145.9 290.0,143.3 291.9,140.7 293.9,138.1 295.8,135.6 297.8,133.2 299.7,130.7 301.7,128.4 303.6,126.0 305.6,123.7 307.5,121.4 309.4,119.1 311.4,116.9 313.3,114.8 315.3,112.6 317.2,110.5 319.2,108.4 321.1,106.4 323.1,104.4 325.0,102.5 326.9,100.5 328.9,98.6 330.8,96.8 332.8,95.0 334.7,93.2 336.7,91.4 338.6,89.7 340.6,88.1 342.5,86.4 344.4,84.8 346.4,83.3 348.3,81.7 350.3,80.2 352.2,78.8 354.2,77.4 356.1,76.0 358.1,74.6 360.0,73.3 361.9,72.0 363.9,70.8 365.8,69.6 367.8,68.4 369.7,67.3 371.7,66.2 373.6,65.1 375.6,64.1 377.5,63.1 379.4,62.2 381.4,61.2 383.3,60.4 385.3,59.5 387.2,58.7 389.2,57.9 391.1,57.2 393.1,56.5 395.0,55.8 396.9,55.2 398.9,54.6 400.8,54.0 402.8,53.5 404.7,53.0 406.7,52.6 408.6,52.2 410.6,51.8 412.5,51.5 414.4,51.2 416.4,50.9 418.3,50.6 420.3,50.4 422.2,50.3 424.2,50.2 426.1,50.1 428.1,50.0 430.0,50.0 431.9,50.0 433.9,50.1 435.8,50.2 437.8,50.3 439.7,50.4 441.7,50.6 443.6,50.9 445.6,51.2 447.5,51.5 449.4,51.8 451.4,52.2 453.3,52.6 455.3,53.0 457.2,53.5 459.2,54.0 461.1,54.6 463.1,55.2 465.0,55.8 466.9,56.5 468.9,57.2 470.8,57.9 472.8,58.7 474.7,59.5 476.7,60.4 478.6,61.2 480.6,62.2 482.5,63.1 484.4,64.1 486.4,65.1 488.3,66.2 490.3,67.3 492.2,68.4 494.2,69.6 496.1,70.8 498.1,72.0 500.0,73.3 501.9,74.6 503.9,76.0 505.8,77.4 507.8,78.8 509.7,80.2 511.7,81.7 513.6,83.3 515.6,84.8 517.5,86.4 519.4,88.1 521.4,89.7 523.3,91.4 525.3,93.2 527.2,95.0 529.2,96.8 531.1,98.6 533.1,100.5 535.0,102.5 536.9,104.4 538.9,106.4 540.8,108.4 542.8,110.5 544.7,112.6 546.7,114.8 548.6,116.9 550.6,119.1 552.5,121.4 554.4,123.7 556.4,126.0 558.3,128.4 560.3,130.7 562.2,133.2 564.2,135.6 566.1,138.1 568.1,140.7 570.0,143.3 571.9,145.9 573.9,148.5 575.8,151.2 577.8,153.9 579.7,156.7 581.7,159.4 583.6,162.3 585.6,165.1 587.5,168.0 589.4,171.0 591.4,173.9 593.3,176.9 595.3,180.0 597.2,183.0 599.2,186.2 601.1,189.3 603.1,192.5 605.0,195.7 606.9,199.0 608.9,202.3 610.8,205.6 612.8,208.9 614.7,212.3 616.7,215.8 618.6,219.3 620.6,222.8 622.5,226.3 624.4,229.9 626.4,233.5 628.3,237.1 630.3,240.8 632.2,244.6 634.2,248.3 636.1,252.1 638.1,255.9 640.0,259.8 641.9,263.7 643.9,267.7 645.8,271.6 647.8,275.6 649.7,279.7 651.7,283.8 653.6,287.9 655.6,292.0 657.5,296.2 659.4,300.5 661.4,304.7 663.3,309.0 665.3,313.4 667.2,317.7 669.2,322.1 671.1,326.6 673.1,331.1 675.0,335.6 676.9,340.1 678.9,344.7 680.8,349.3 682.8,354.0 684.7,358.7 686.7,363.4 688.6,368.2 690.6,373.0 692.5,377.8 694.4,382.7 696.4,387.6 698.3,392.6 700.3,397.5 702.2,402.6 704.2,407.6 706.1,412.7 708.1,417.8 710.0,423.0 711.9,428.2 713.9,430.0 715.8,430.0 717.8,430.0 719.7,430.0 721.7,430.0 723.6,430.0 725.6,430.0 727.5,430.0 729.4,430.0 731.4,430.0 733.3,430.0 735.3,430.0 737.2,430.0 739.2,430.0 741.1,430.0 743.1,430.0 745.0,430.0 746.9,430.0 748.9,430.0 750.8,430.0 752.8,430.0 754.7,430.0 756.7,430.0 758.6,430.0 760.6,430.0 762.5,430.0 764.4,430.0 766.4,430.0 768.3,430.0 770.3,430.0 772.2,430.0 774.2,430.0 776.1,430.0 778.1,430.0 780.0,430.0" fill="none" stroke="#14213D" stroke-width="5"/><circle cx="304" cy="126" r="11" fill="#A84A16"/><circle cx="556" cy="126" r="11" fill="#A84A16"/><line x1="430.0" y1="390.0" x2="540.4" y2="390.0" stroke="#A84A16" stroke-width="3"/><polygon points="552.4,390.0 540.4,384.0 540.4,396.0" fill="#A84A16"/><line x1="430.0" y1="390.0" x2="319.6" y2="390.0" stroke="#A84A16" stroke-width="3"/><polygon points="307.6,390.0 319.6,396.0 319.6,384.0" fill="#A84A16"/></svg>
+<p style="position:absolute;left:80px;top:8px;width:700px;font-size:24px;font-weight:700;color:#14213D">소자 하나의 수평 감쇠 (수평폭 65°)</p>
+<p style="position:absolute;left:0px;top:34px;width:72px;font-size:24px;text-align:right;color:#5E6675">0 dB</p>
+<p style="position:absolute;left:0px;top:110px;width:72px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">−3</p>
+<p style="position:absolute;left:0px;top:414px;width:72px;font-size:24px;text-align:right;color:#5E6675">−15</p>
+<p style="position:absolute;left:154px;top:82px;width:140px;font-size:24px;text-align:right;font-weight:700;color:#A84A16">−32.5°</p>
+<p style="position:absolute;left:566px;top:82px;width:140px;font-size:24px;text-align:left;font-weight:700;color:#A84A16">+32.5°</p>
+<p style="position:absolute;left:304px;top:346px;width:253px;font-size:24px;text-align:center;font-weight:700;color:#A84A16">HPBW = 65°</p>
+<p style="position:absolute;left:80px;top:436px;width:700px;font-size:24px;text-align:center;color:#5E6675">정면에서 돈 방위 −90° … 0° (정면) … +90°</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">정면에서 돈 각</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">감쇠 12(φ/65)²</p><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">세기 (정면 100%)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">±0°</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">0.0 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">100%</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">±20°</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">1.1 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">77%</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">±32.5°</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">3.0 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">50%</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">±45°</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">5.8 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">27%</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="flex:1.0;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">±65°</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">12.0 dB</p><p style="flex:1.0;font-size:24px;line-height:1.35;color:#4A5262">6%</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">3 dB = 절반</p><p style="font-size:24px;line-height:1.4;color:#4A5262">10 · log₁₀(0.5) ≈ −3 dB → “최대보다 3 dB 낮다” = “세기가 절반” · 그래서 반전력(half-power) 빔폭</p></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:14px">
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">왜 재나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">웨이트 파일이 빔 모양에 대해 주는 숫자는 <b>SSB 빔의 수평 HPBW 하나</b> → 보이지 않는 소자 수평폭을 정하는 기준으로 쓴다 (다음 쪽)</p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">소자 폭이 중요한 이유</p><p style="font-size:24px;line-height:1.4;color:#4A5262">모든 빔에 곱해지는 덮개 → 가장자리 빔(±52.5°)의 세기 · 이웃 섹터와의 겹침 · 포트별 CFR이 달라진다</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">감쇠식은 TR 38.901 모양(수평폭 65°) · 표와 곡선은 생성기 계산 · 선언 HPBW = SSB 빔의 수평 빔폭</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 20</p>
+<aside>(약 55초) 다음 쪽의 피팅에 앞서 HPBW를 정확히 짚고 가겠습니다. 안테나에서 같은 거리를 두고 원을 따라 돈다고 생각해 보세요. 정면에서 세기가 가장 세고, 좌우로 돌수록 약해집니다. 세기가 정면의 절반이 되는 지점을 왼쪽과 오른쪽에 하나씩 찾고, 안테나에서 본 두 지점 사이의 각을 재면 그것이 반전력 빔폭, HPBW입니다. 전력이 절반이면 10 로그 0.5, 약 마이너스 3 dB라서 최대보다 3 dB 낮아지는 곳이라고도 말합니다. 수평폭 65도인 소자는 감쇠가 12 곱하기 방위 나누기 65의 제곱이라, 오른쪽 표처럼 32.5도에서 정확히 3 dB, 세기 50퍼센트가 됩니다. 좌우 32.5도씩, 합쳐서 65도입니다. 이걸 왜 재느냐면, 웨이트 파일이 빔 모양에 대해 알려 주는 숫자가 SSB 빔의 수평 HPBW 하나뿐이기 때문입니다. 이 숫자를 기준으로 보이지 않는 소자 수평폭을 정합니다. 소자 폭은 모든 빔에 곱해지는 덮개라서, 가장자리 빔의 세기와 이웃 섹터와의 겹침, 포트별 CFR에 바로 영향을 줍니다.</aside>
 </section>
 <section id="element" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
 <div style="display:flex;flex-direction:column;gap:16px">
@@ -398,7 +485,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">샘플 결과 87.8°는 CF 문서 값 · 그래프는 합성 SSB 웨이트로 계산한 예시 · 규칙: beam_weights.py:213</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 20</p>
 <aside>(약 55초) 포트 패턴의 다른 한 축은 소자 패턴입니다. 모양은 TR 38.901과 같습니다. 수평 감쇠는 12 곱하기 방위 나누기 수평폭의 제곱, 수직 감쇠는 12 곱하기 앙각 나누기 수직폭의 제곱이고, 각각 30 dB에서 자른 뒤 더합니다. 수직폭은 65도로 고정한 기본값입니다. 수평폭은 피팅합니다. 소자 수평폭을 하나 가정하고, 그 소자에 웨이트 파일의 SSB 웨이트를 곱해 빔을 계산한 뒤, 빔의 수평 반전력 빔폭이 선언값, 예를 들어 65도가 될 때까지 이분 탐색으로 맞춥니다. 샘플 파일에서는 87.8도가 나왔습니다. 소자가 선언 빔폭보다 넓은 이유는, 여러 열을 웨이트로 묶은 빔이 소자 하나보다 좁기 때문입니다. 왼쪽 그래프는 합성 SSB 웨이트로 같은 절차를 돌린 예시라 숫자는 108도로 다르지만, 곡선과 선언값이 만나는 곳을 찾는다는 원리는 같습니다.</aside>
 </section>
 <section id="port" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -423,7 +510,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">주의</b> 포트 패턴은 <b>측정값이 아니라 모델</b>이다 — 주엽 밖의 모양 · 사이드로브 · 앞뒤비는 가정(소자 모양 · 수직폭 · 서브 틸트)이 정한다</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">예시: 수평폭 87.8° · 수직폭 65° · 소자 4개 0.71 λ · 틸트 6°로 생성기에서 계산 · 저장 규칙: beam_weights.py:480</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">13 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">16 / 20</p>
 <aside>(약 50초) 두 조각을 곱하면 포트 패턴이 됩니다. 소자 패턴 곱하기 서브어레이 팩터입니다. 왼쪽은 샘플 수평폭 87.8도, 수직폭 65도, 소자 4개, 틸트 6도로 계산한 예시입니다. 수평 단면은 넓고 완만하고, 수직 단면은 서브어레이 때문에 좁아지고 6도 아래로 숙여져 있습니다. 이 패턴을 구 전체에서 평균한 값으로 나눠 지향성으로 정규화하면 이 예에서는 약 13.6 dBi가 됩니다. 그리고 빔이나 BASTA와 같은 181 곱하기 360 격자로 저장합니다. 꼭 기억할 점은 이 포트 패턴이 측정값이 아니라 모델이라는 것입니다. 주엽 바깥의 모양과 사이드로브, 앞뒤비는 소자 모양, 수직폭, 서브어레이 틸트 같은 가정이 정합니다.</aside>
 </section>
 <section id="toarray" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -449,7 +536,7 @@ body.fs.idle .stage { cursor: none }
 <div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">크기 강제</p><p style="font-size:24px;line-height:1.4;color:#4A5262">포트 레코드는 이 array로, 빔 레코드 &lt;set&gt;-b&lt;k&gt;는 1 × 1로 서버가 강제</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">샘플 결과 array는 CF 문서 값 · H @ w의 쓰임은 cf-antenna-pattern 덱 13 ~ 16쪽</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">14 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">17 / 20</p>
 <aside>(약 50초) 이렇게 추정한 값이 포트 레코드의 array에 저장됩니다. 샘플에서는 행 4, 열 8, 편파 cross, 가로 간격 0.5, 세로 간격 2.84, 포트 64개입니다. 섹터가 포트 패턴을 고르면 이 값이 그대로 PlanarArray로 들어갑니다. 여기서 헷갈리기 쉬운 점이 있습니다. Sionna가 말하는 소자는 실제 안테나의 포트입니다. 소자 패턴 자리에 우리가 만든 포트 패턴이, 소자 간격 자리에 포트 피치 2.84 파장이 들어갑니다. 진짜 소자 네 개는 포트 패턴 안의 서브어레이 팩터에 이미 녹아 있습니다. 결과 채널은 포트마다 따로 나와 송신 안테나 축이 64입니다. 빔별 채널은 CF 밖에서 H에 빔 레코드의 웨이트를 곱해 만들고, 빔 레코드의 웨이트는 포트 레코드와 같은 배치, 순서, 켤레 기준으로 저장되어 있습니다.</aside>
 </section>
 <section id="trust" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -472,7 +559,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 <p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">영향</b> 주엽 밖 모양 · 사이드로브 · 앞뒤비는 <b>주황 줄의 가정</b>에서 정해진다 → 포트별 CFR 정확도에 가장 큰 영향</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 “믿을 수 있는 정도” · 초록 = 웨이트 · 제품팀 값과 맞음, 흰색 = 피팅, 주황 = 가정</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">15 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">18 / 20</p>
 <aside>(약 55초) 지금까지의 값을 얼마나 믿을 수 있는지 정리했습니다. 초록 줄은 비교적 믿을 만한 값입니다. 배치와 편파는 웨이트 자체에서 나왔고, 세로 피치 2.84 파장과 서브어레이 소자 수 4는 제품팀 값과 맞았습니다. 다만 배치는 앞에서 본 펼친 순서의 전제 위에 서 있습니다. 흰 줄은 선언값에 맞춘 피팅입니다. 주황 줄은 웨이트에 정보가 없어 기본값을 둔 가정입니다. 가로 간격은 0.5 파장을 썼는데 제품팀 값은 0.541이라 다릅니다. 소자 수직폭 65도, 서브어레이 틸트, 좌우반전도 가정입니다. 중요한 점은, 주엽 바깥의 모양과 사이드로브, 앞뒤비가 바로 이 주황 줄에서 정해진다는 것입니다. 그래서 포트별 CFR 정확도에 가장 큰 영향을 주는 것도 이 가정들입니다.</aside>
 </section>
 <section id="replace" data-transition="fade" style="background:#F5F3EE;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
@@ -497,7 +584,7 @@ body.fs.idle .stage { cursor: none }
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 · 개정판과 캐시는 cf-antenna-pattern 덱 4쪽 · 웨이트 순서 정의는 이 덱이 덧붙인 요청 항목</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">16 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">19 / 20</p>
 <aside>(약 50초) 가정을 실제 값으로 바꾸는 길은 둘입니다. 지금 당장은 가져올 때 geometry로 값을 직접 줄 수 있습니다. 예를 들어 가로 간격 0.541, 세로 피치 2.848, 서브어레이 소자 4개, 소자 수평폭을 넣습니다. 다만 콘솔 대화상자에는 이 칸이 없어서 API로만 됩니다. 근본적인 해결은 실제 자료를 받는 것입니다. 서브어레이의 gain 패턴을 측정값으로 받으면 소자 곱하기 서브어레이라는 포트 패턴 모델 자체를 대체할 수 있고, 서브어레이 웨이트를 받으면 서브어레이 틸트와 소자 수, 간격을 확정할 수 있습니다. 패널 도면이나 사양은 가로 간격을, 웨이트 순서 정의는 배치 추론의 전제를 확정해 줍니다. 마지막 줄은 제가 덧붙인 항목입니다. 요청 문서의 2절 to replace 행들이 바로 앞쪽 표의 가정과 피팅 항목입니다.</aside>
 </section>
 <section id="summary" data-transition="fade" style="background:#14213D;color:#F5F3EE;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:30px">
@@ -511,7 +598,7 @@ body.fs.idle .stage { cursor: none }
 <div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">모델 (가정)</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">포트 패턴 = 소자(38.901, 수직 65°)<br>× 서브어레이(4소자 · 0.71 λ · 6°)</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">PlanarArray로</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">Sionna의 “소자” = 실제 포트<br>4 × 8 × cross · 0.5 λ · 2.84 λ → 64포트</p></div><div style="flex:1;background:#22325A;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:6px"><p style="font-size:30px;font-weight:700;color:#F0A36B">바꿀 것</p><p style="font-size:24px;line-height:1.4;color:#C9D3E3">사이드로브 · 앞뒤비는 가정이 정한다<br>→ 서브어레이 gain 패턴 · 웨이트 · d_h</p></div></div>
 <p style="font-size:28px;line-height:1.5;color:#C9D3E3">확인할 것: 웨이트 펼친 순서(편파 → 열 → 행)를 코드에서 확인하고, 제품팀 d_h 0.541 λ로 덮어쓴 결과를 지금과 비교한다</p>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#8DB8E8">관련 자료: cf-antenna-pattern · sionna-rt-antenna · antenna-basics · 용어집 glossary.md</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">17 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#8DB8E8;text-align:right">20 / 20</p>
 <aside>(약 40초) 정리하겠습니다. 웨이트 파일이 주는 것은 빔마다 포트별 복소 웨이트, 즉 포트끼리의 위상 관계와 선언값뿐입니다. CF는 웨이트에서 배치를 추론해 2 곱하기 8 곱하기 4를 찾고, 모든 빔이 같은 위상 간격을 갖는 축을 세로로 봅니다. 선언값에 맞춰 세로 피치 2.84 파장과 소자 수평폭을 피팅합니다. 포트 패턴은 소자 패턴 곱하기 서브어레이 팩터라는 모델이고, 소자 수직폭과 서브어레이 틸트 같은 가정이 들어갑니다. 이 값들이 PlanarArray로 들어가는데, Sionna가 말하는 소자는 실제로는 포트입니다. 사이드로브와 앞뒤비는 가정이 정하므로, 서브어레이 gain 패턴과 웨이트, 가로 간격을 실제 값으로 바꾸는 것이 다음 단계입니다. 감사합니다.</aside>
 </section>
     </div>

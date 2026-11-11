@@ -17,6 +17,6 @@
 <div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#255E9E">같은 격자 · 같은 보간</p><p style="font-size:24px;line-height:1.4;color:#4A5262">뷰어 · Adjust(섹터 피팅 재가중) · 체크가 솔버와 같은 계산 → 화면의 패턴 = 솔버의 패턴 (3D 격자는 테스트로 고정)</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 “형식별 이득 계산 · 알아 둘 점” · 17 dBi는 문서의 예</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">05 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">06 / 20</p>
 <aside>(약 55초) 라이브러리에 들어오는 형식은 넷입니다. MSI나 Planet은 수평과 수직 단면 두 개를 1도 간격으로 저장하고, 방향별 이득은 최대 이득에 두 단면의 감쇠를 더해 만듭니다. NGMN BASTA는 181 곱하기 360의 3D 격자에서 이중선형 보간합니다. 오늘의 주제인 웨이트 파일은 두 종류의 레코드가 됩니다. 빔 레코드는 어레이 전체를 포함한 빔 하나의 3D 격자이고, 포트 레코드는 포트 하나의 3D 격자에 어레이 정보가 붙어 있습니다. 모든 형식이 Sionna에는 dB를 전력이 아니라 필드 진폭으로 바꿔 넘깁니다. 맨 오른쪽 열이 중요합니다. 빔 패턴은 1×1로, 포트 패턴은 파일의 어레이로 서버가 강제하지만, MSI와 BASTA는 사람이 정하고 CF가 막지 않습니다. 그래서 17 dBi짜리 패널 전체 패턴을 8×8에 올리면 어레이 이득이 두 번 들어가니, 그런 파일은 1×1로 써야 합니다. 뷰어와 Adjust, 체크 기능도 솔버와 같은 격자와 보간을 쓰므로, 화면에서 보는 패턴이 곧 솔버가 쓰는 패턴입니다.</aside>
 </section>

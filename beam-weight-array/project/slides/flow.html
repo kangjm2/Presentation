@@ -11,6 +11,6 @@
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;flex:1"><p style="font-size:24px;font-weight:700;color:#A84A16">오늘의 질문</p><p style="font-size:24px;line-height:1.4;color:#4A5262">웨이트 파일에는 rows · cols · 간격 · 패턴이 없다 → 이 다섯 칸을 무엇으로 채우나</p></div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: CF 문서 (antenna_sionna.py:122 · simulator.py:327 · 336) · 자세히는 cf-antenna-pattern 덱</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 17</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">02 / 20</p>
 <aside>(약 45초) 먼저 전체 그림입니다. 섹터가 라이브러리 패턴을 고르면, 계산할 때 워커가 그 레코드를 Sionna에 등록합니다. 그 다음 PlanarArray를 만드는데, 행과 열, 간격, 패턴 이름, 편파를 넣습니다. 이때 라이브러리 패턴은 어레이를 이루는 소자 하나하나의 패턴이 됩니다. 섹터의 방위각과 기계 틸트는 송신기 방향으로 들어가 패턴을 돌리고, 편파는 PolarizedAntennaPattern으로 감싸 적용합니다. 요청을 만든 뒤 같은 id의 패턴이 바뀌면 계산을 거절합니다. 핵심은 가운데 줄입니다. 빔 패턴은 소자 패턴 곱하기 어레이 팩터라서, 행이나 열이 1보다 크면 패턴 위에 어레이 팩터가 한 번 더 곱해집니다. 그런데 웨이트 파일에는 PlanarArray가 필요로 하는 행, 열, 간격, 패턴이 들어 있지 않습니다. 오늘은 이 빈칸을 어떻게 채우는지를 봅니다.</aside>
 </section>
