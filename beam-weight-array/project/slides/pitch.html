@@ -16,11 +16,11 @@
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:10px">
 <div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">2π 모호성</p><p style="font-size:24px;line-height:1.4;color:#4A5262">위상은 360°마다 같아 보인다 → m = 0, 1, 2 …의 해가 모두 맞는다</p></div>
-<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">고르는 규칙</p><p style="font-size:24px;line-height:1.4;color:#4A5262">0.5 λ 이상인 가장 작은 해 · 샘플 2.84 λ ↔ 제품팀 4 × 0.712 = 2.848 λ</p></div>
+<div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">고르는 규칙</p><p style="font-size:24px;line-height:1.4;color:#4A5262">0.5 λ 이상인 가장 작은 해 (0.5 λ는 포트가 겹치지 않는 최소 간격으로 보임 · 문서에 이유 없음) · 샘플 2.84 λ ↔ 제품팀 2.848 λ</p></div>
 </div>
 </div>
-<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">켤레 (conjugate) 먼저</p><p style="font-size:24px;line-height:1.4;color:#4A5262">w를 그대로 쓰느냐 w*로 쓰느냐에 따라 Δψ의 부호가 뒤집혀 빔이 위 또는 아래를 향한다 → <b>빔이 아래로 향하는 쪽</b>을 골라 부호를 정한 뒤 d_v를 푼다 (데이터로 결정)</p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">켤레 (conjugate) 먼저</p><p style="font-size:24px;line-height:1.4;color:#4A5262">w 대신 w*를 쓰면 세로 · 가로 Δψ의 부호가 <b>함께</b> 뒤집힌다 → 세로는 <b>빔이 아래로 향하는 쪽</b>을 골라 정하고(데이터), 그 결과 가로 부호도 따라 정해진다 · 가로를 따로 뒤집는 것은 좌우반전(가정 false)</p></div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">식과 규칙: CF 문서 (beam_weights.py:314) · 106.7°는 합성 웨이트 값 · 샘플 결과 2.84 λ는 문서 값</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 20</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 22</p>
 <aside>(약 55초) 세로 위상 간격이 나오면 포트의 세로 피치를 풀 수 있습니다. 빔을 E-tilt만큼 숙이려면 위아래 포트 사이 위상 차가 2파이 곱하기 피치 곱하기 사인 E-tilt여야 합니다. 거꾸로 풀면 피치는 위상 차를 360도로 나눈 값에 정수 m을 더하고, 사인 E-tilt로 나눈 값입니다. 예시의 106.7도와 E-tilt 6도를 넣으면 2.84 파장이 나옵니다. 정수 m이 붙는 이유는 위상이 360도마다 같아 보이기 때문입니다. 그래서 해가 1 나누기 사인 6도, 약 9.6 파장 간격으로 여러 개 있고, CF는 0.5 파장 이상인 가장 작은 해를 고릅니다. 샘플 파일의 결과 2.84 파장은 제품팀 값 0.712 곱하기 4, 2.848과 맞았습니다. 하나 더, 웨이트를 그대로 쓰느냐 켤레로 쓰느냐에 따라 위상 차의 부호가 뒤집혀 빔이 위나 아래를 향합니다. CF는 빔이 아래로 향하는 쪽을 골라 부호를 먼저 정합니다.</aside>
 </section>

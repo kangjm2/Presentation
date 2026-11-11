@@ -15,13 +15,13 @@
 <p style="position:absolute;left:102px;top:148px;width:250px;font-size:24px;font-weight:700;color:#A84A16">모두 ≈ 107°</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:12px">
-<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">왜 이렇게 되나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">SSB 빔들은 <b>같은 E-tilt</b>로 숙이고 <b>방위만 다르게</b> 흩어진다 → 세로 위상 간격은 모두 같고, 가로 위상 간격만 빔마다 다르다</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">왜 이렇게 되나</p><p style="font-size:24px;line-height:1.4;color:#4A5262">파일의 빔들은 보통 <b>같은 E-tilt</b>로 숙이고 <b>방위만 다르게</b> 흩어진다 → 세로 위상 간격은 모두 같고, 가로만 빔마다 다르다 · 빔이 하나뿐이거나 틸트가 다른 층이 섞이면 이 규칙이 약해진다</p></div>
 <div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">가로 (열 방향)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Δψ = 2π · d_h · cos(틸트) · sin(방위) — 방위가 바뀌면 값이 바뀐다</p></div>
 <div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">세로 (행 방향)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">Δψ = 2π · d_v · sin(E-tilt) — 모든 빔이 같다 · 예시에서 106.7°</p></div>
 <div style="background:#D7EBDF;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#2F7D5B">결과</p><p style="font-size:24px;line-height:1.4;color:#4A5262">행 4개가 세로, 열 8개가 가로 → rows 4 · cols 8 · 편파 2</p></div>
 </div>
 </div>
-<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">앞쪽과 같은 합성 웨이트로 계산 · 빔이 모두 같은 E-tilt라는 것은 SSB 빔 묶음의 일반적인 설계</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 20</p>
-<aside>(약 50초) 배치가 2 곱하기 8 곱하기 4로 정해져도, 8과 4 중 어느 쪽이 세로인지는 아직 모릅니다. 여기서 쓰는 규칙이, 모든 빔이 같은 위상 간격을 갖는 축을 세로로 본다는 것입니다. SSB 빔들은 보통 같은 전기 틸트로 숙이고 방위만 다르게 흩어지기 때문입니다. 왼쪽 그림의 파란 점은 열 방향 위상 차로, 빔 방위에 따라 -142도에서 +142도까지 바뀝니다. 주황 사각은 행 방향 위상 차로, 여덟 빔이 모두 약 107도로 같습니다. 그래서 행 방향이 세로입니다. 결과는 행 4개, 열 8개, 편파 둘입니다. 그리고 이 세로 위상 간격 107도가 다음 쪽에서 세로 피치를 계산하는 재료가 됩니다.</aside>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">앞쪽과 같은 합성 웨이트(좁은 조향 빔 8개)로 계산 · 빔이 모두 같은 E-tilt라는 것은 일반적인 설계</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">10 / 22</p>
+<aside>(약 50초) 배치가 2 곱하기 8 곱하기 4로 정해져도, 8과 4 중 어느 쪽이 세로인지는 아직 모릅니다. 여기서 쓰는 규칙이, 모든 빔이 같은 위상 간격을 갖는 축을 세로로 본다는 것입니다. 파일의 빔들은 보통 같은 전기 틸트로 숙이고 방위만 다르게 흩어지기 때문입니다. 왼쪽 그림의 파란 점은 열 방향 위상 차로, 빔 방위에 따라 -142도에서 +142도까지 바뀝니다. 주황 사각은 행 방향 위상 차로, 여덟 빔이 모두 약 107도로 같습니다. 그래서 행 방향이 세로입니다. 결과는 행 4개, 열 8개, 편파 둘입니다. 그리고 이 세로 위상 간격 107도가 다음 쪽에서 세로 피치를 계산하는 재료가 됩니다.</aside>
 </section>

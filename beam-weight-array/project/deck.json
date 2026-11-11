@@ -19,7 +19,9 @@
     "axes",
     "phasestep",
     "pitch",
+    "weaklink",
     "subarray",
+    "subtilt",
     "hpbw",
     "element",
     "port",
@@ -38,11 +40,11 @@
       "start": "formats"
     },
     "array": {
-      "description": "어레이 정보 추론: 펼친 순서, 배치, 세로 축, 위상 간격의 뜻, 세로 피치",
+      "description": "어레이 정보 추론: 펼친 순서, 배치, 세로 축, 위상 간격의 뜻, 세로 피치와 그 약한 고리",
       "start": "index"
     },
     "port": {
-      "description": "포트 패턴 모델: 서브어레이, HPBW, 소자 패턴, 지향성 정규화",
+      "description": "포트 패턴 모델: 서브어레이와 서브 틸트, HPBW, 소자 패턴, 지향성 정규화",
       "start": "subarray"
     },
     "result": {
