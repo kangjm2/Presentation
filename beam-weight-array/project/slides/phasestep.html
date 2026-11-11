@@ -1,0 +1,28 @@
+<section id="phasestep" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#255E9E;letter-spacing:2px">③ 보충 · 위상 간격에 왜 간격이 들어가나</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">Δψ는 거리 차를 위상으로 바꾼 값이다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:26px;align-items:flex-start">
+<div style="position:relative;width:720px;height:560px">
+<svg aria-label="포트 A와 B가 간격 d로 놓이고, 정면에서 θ 돌아간 먼 방향으로 평행한 두 전파가 나간다. B를 지나는 파면까지 A의 전파가 d · sin θ만큼 더 가야 한다" style="position:absolute;left:0px;top:0px;width:720px;height:560px" width="720" height="560" viewBox="0 0 720 560"><line x1="170" y1="430" x2="170" y2="100" stroke="#5E6675" stroke-width="2" stroke-dasharray="6 6"/><line x1="146" y1="231" x2="585" y2="485" stroke="#255E9E" stroke-width="3" stroke-dasharray="10 6"/><line x1="170.0" y1="430.0" x2="373.0" y2="78.4" stroke="#14213D" stroke-width="3"/><polygon points="380.0,66.3 366.9,74.9 379.1,81.9" fill="#14213D"/><line x1="490.0" y1="430.0" x2="613.0" y2="217.0" stroke="#14213D" stroke-width="3"/><polygon points="620.0,204.8 606.9,213.5 619.1,220.5" fill="#14213D"/><line x1="170" y1="430" x2="250" y2="291" stroke="#A84A16" stroke-width="10"/><line x1="170" y1="460" x2="490" y2="460" stroke="#14213D" stroke-width="2"/><line x1="170" y1="452" x2="170" y2="468" stroke="#14213D" stroke-width="2"/><line x1="490" y1="452" x2="490" y2="468" stroke="#14213D" stroke-width="2"/><path d="M170 360 A70 70 0 0 1 205.0 369.4" fill="none" stroke="#14213D" stroke-width="3"/><circle cx="170" cy="430" r="14" fill="#14213D"/><circle cx="490" cy="430" r="14" fill="#14213D"/></svg>
+<p style="position:absolute;left:110px;top:432px;width:40px;font-size:24px;font-weight:700;color:#14213D">A</p>
+<p style="position:absolute;left:510px;top:432px;width:40px;font-size:24px;font-weight:700;color:#14213D">B</p>
+<p style="position:absolute;left:170px;top:470px;width:320px;font-size:24px;text-align:center;font-weight:700;color:#14213D">d (포트 간격)</p>
+<p style="position:absolute;left:174px;top:330px;width:30px;font-size:24px;font-weight:700;color:#14213D">θ</p>
+<p style="position:absolute;left:20px;top:70px;width:300px;font-size:24px;text-align:center;color:#5E6675">정면 (θ = 0)</p>
+<p style="position:absolute;left:0px;top:290px;width:150px;font-size:24px;text-align:right;line-height:1.3;font-weight:700;color:#A84A16">d · sin θ<br>A가 더 가는 길</p>
+<p style="position:absolute;left:0px;top:150px;width:220px;font-size:24px;line-height:1.3;color:#255E9E">파면 — 여기서<br>위상이 같아야 한다</p>
+<p style="position:absolute;left:310px;top:16px;width:360px;font-size:24px;color:#14213D">먼 단말 쪽 (평행한 두 전파)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:9px">
+<div style="background:#14213D;border-radius:12px;padding:14px 20px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.55;color:#F5F3EE;white-space:nowrap">거리 차 = d · sin θ  [λ]<br>위상 차 Δψ = 360° × d · sin θ = 2π · d · sin θ<br><span style="color:#F0A36B">예: d 0.5 λ · θ 30° → 0.25 λ → 90°</span></p></div>
+<div style="background:#D5E3F3;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#255E9E">가로 (열 사이 → d_h)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">거리 차 = d_h · cos(틸트) · sin(방위) · 예: 0.5 × cos 6° × sin 37.5° = 0.303 λ → <b>109°</b></p></div>
+<div style="background:#F7DDCB;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#A84A16">세로 (행 사이 → d_v)</p><p style="font-size:24px;line-height:1.4;color:#4A5262">거리 차 = d_v · sin(틸트) · 예: 2.84 × sin 6° = 0.297 λ → <b>107°</b></p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px"><p style="font-size:24px;font-weight:700;color:#14213D">그래서 d_v는 풀고, d_h는 가정한다</p><p style="font-size:24px;line-height:1.4;color:#4A5262">세로: Δψ(웨이트) · 틸트(선언) 앎 → d_v 하나만 모름 → 풂<br>가로: 빔 방위가 파일에 없음 → d_h × sin(방위)만 앎<br>예: 0.5 λ · 37.5° = 0.541 λ · 34.2° (같은 Δψ)</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">9쪽의 Δψ는 웨이트에서 직접 잰 값 · 이 식은 그 값을 해석하고 d_v를 푸는 데 쓴다 · 예시 수치는 생성기 계산</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">11 / 20</p>
+<aside>(약 60초) 9쪽에서 위상 간격을 구할 때 왜 간격 d가 들어가는지 보충하겠습니다. 두 포트 A와 B가 d만큼 떨어져 있고, 먼 단말이 정면에서 세타만큼 돌아간 쪽에 있다고 하겠습니다. 단말이 아주 멀어서 두 포트에서 나간 전파는 평행하게 갑니다. 단말 쪽에서 같은 순간에 도착하려면, B를 지나는 파면, 즉 진행 방향에 수직인 선에서 두 전파의 위상이 같아야 합니다. 그런데 A의 전파는 그 파면까지 주황색만큼, d 곱하기 사인 세타를 더 가야 합니다. 거리가 한 파장이면 위상이 360도 밀리므로, 이 거리 차는 위상 차 360도 곱하기 d 사인 세타가 됩니다. 웨이트는 이 위상 차를 미리 보상해 주는 값이라 이웃 포트마다 이만큼 위상이 어긋나 있습니다. 가로로 열 사이에는 d_h가, 세로로 행 사이에는 d_v가 들어가고, 예시로 계산하면 109도와 107도로 9쪽에서 잰 값과 같습니다. 이 식에서 d_v와 d_h를 다르게 다루는 이유도 보입니다. 세로는 위상 차와 선언 틸트를 알아 d_v 하나만 풀면 됩니다. 가로는 빔마다의 방위가 파일에 없어서 d_h 곱하기 사인 방위만 알 수 있습니다. 0.5 파장에 37.5도와 0.541 파장에 34.2도가 같은 위상 차를 내기 때문에, CF는 d_h를 기본값으로 가정합니다.</aside>
+</section>
