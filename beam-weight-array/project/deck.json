@@ -27,6 +27,7 @@
     "element",
     "port",
     "toarray",
+    "bs64",
     "trust",
     "replace",
     "summary"
