@@ -1,0 +1,50 @@
+<section id="eirp" data-transition="fade" style="background:#EAE7DF;color:#14213D;font-family:'IBM Plex Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#A84A16;letter-spacing:2px">패턴 ④ 보충 · EIRP의 송신 전력</p>
+<h2 style="font-family:'Noto Serif KR', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15;color:#14213D">송신 전력은 실제로 넣은 전력, 가상인 쪽은 EIRP</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="position:relative;width:1000px;height:440px;flex-shrink:0">
+<svg width="1000" height="440" viewBox="0 0 1000 440" style="position:absolute;left:0px;top:0px">
+<defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#14213D"/></marker>
+<marker id="ab" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#255E9E"/></marker></defs>
+<line x1="282" y1="105" x2="334" y2="105" stroke="#14213D" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="612" y1="105" x2="624" y2="105" stroke="#14213D" stroke-width="3"/>
+<rect x="624" y="55" width="12" height="100" rx="3" fill="#14213D"/>
+<path d="M638,105 C700,52 840,70 852,105 C840,140 700,158 638,105 Z" fill="#F7DDCB" stroke="#A84A16" stroke-width="3"/>
+<circle cx="900" cy="105" r="18" fill="#FBFAF7" stroke="#14213D" stroke-width="3"/>
+<circle cx="900" cy="105" r="6" fill="#14213D"/>
+<line x1="612" y1="330" x2="666" y2="330" stroke="#255E9E" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#ab)"/>
+<circle cx="745" cy="330" r="72" fill="#D5E3F3" fill-opacity="0.6" stroke="#255E9E" stroke-width="3" stroke-dasharray="10 7"/>
+<circle cx="745" cy="330" r="7" fill="#255E9E"/>
+<circle cx="900" cy="330" r="18" fill="#FBFAF7" stroke="#14213D" stroke-width="3"/>
+<circle cx="900" cy="330" r="6" fill="#14213D"/>
+<line x1="900" y1="168" x2="900" y2="292" stroke="#5E6675" stroke-width="3" stroke-dasharray="6 6"/>
+<line x1="70" y1="218" x2="990" y2="218" stroke="#CFCAC0" stroke-width="2"/>
+</svg>
+<p style="position:absolute;left:0px;top:88px;width:70px;font-size:24px;line-height:1.3;font-weight:700;color:#A84A16">실제</p>
+<p style="position:absolute;left:0px;top:313px;width:70px;font-size:24px;line-height:1.3;font-weight:700;color:#255E9E">가상</p>
+<div style="position:absolute;left:80px;top:40px;width:200px;height:130px;background:#FBFAF7;border:3px solid #B9B3A6;border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px"><p style="font-size:24px;line-height:1.3;text-align:center;font-weight:700;color:#14213D">무선기 출력</p><p style="font-size:24px;line-height:1.3;text-align:center;color:#4A5262">40 W · 46 dBm</p></div>
+<p style="position:absolute;left:220px;top:4px;width:180px;font-size:24px;line-height:1.3;text-align:center;color:#5E6675">급전선 −3 dB</p>
+<div style="position:absolute;left:340px;top:40px;width:270px;height:130px;background:#F7DDCB;border:3px solid #A84A16;border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px"><p style="font-size:24px;line-height:1.3;text-align:center;font-weight:700;color:#A84A16">송신 전력</p><p style="font-size:24px;line-height:1.3;text-align:center;color:#4A5262">= 안테나 입력</p><p style="font-size:24px;line-height:1.3;text-align:center;font-weight:700;color:#14213D">20 W · 43 dBm</p></div>
+<p style="position:absolute;left:640px;top:10px;width:220px;font-size:24px;line-height:1.3;text-align:center;font-weight:700;color:#A84A16">×50 (17 dBi)</p>
+<p style="position:absolute;left:840px;top:130px;width:120px;font-size:24px;line-height:1.3;text-align:center;color:#5E6675">받는 곳</p>
+<p style="position:absolute;left:80px;top:262px;width:250px;font-size:24px;line-height:1.3;color:#4A5262">같은 세기를 등방성으로 내려면 →</p>
+<div style="position:absolute;left:340px;top:265px;width:270px;height:130px;background:#D5E3F3;border:3px dashed #255E9E;border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px"><p style="font-size:24px;line-height:1.3;text-align:center;font-weight:700;color:#255E9E">EIRP</p><p style="font-size:24px;line-height:1.3;text-align:center;color:#4A5262">= 등방성에 넣을 전력</p><p style="font-size:24px;line-height:1.3;text-align:center;font-weight:700;color:#14213D">1 kW · 60 dBm</p></div>
+<p style="position:absolute;left:665px;top:405px;width:160px;font-size:24px;line-height:1.3;text-align:center;font-weight:700;color:#255E9E">×1 (0 dBi)</p>
+<p style="position:absolute;left:840px;top:355px;width:120px;font-size:24px;line-height:1.3;text-align:center;color:#5E6675">받는 곳</p>
+<p style="position:absolute;left:912px;top:212px;width:88px;font-size:24px;line-height:1.3;font-weight:700;color:#14213D">세기<br>같다</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;gap:14px;background:#14213D;border-radius:10px;padding:9px 16px"><p style="width:130px;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">값</p><p style="flex:1;font-size:24px;line-height:1.35;font-weight:700;color:#F5F3EE">어디에 있나</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#F7DDCB;border-radius:10px;padding:9px 16px"><p style="width:130px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">송신 전력</p><p style="flex:1;font-size:24px;line-height:1.35;color:#4A5262">장비 설정 · 시뮬레이터 입력<br>(CF <span style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:22px">power_dbm</span>)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#FBFAF7;border-radius:10px;padding:9px 16px"><p style="width:130px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">이득</p><p style="flex:1;font-size:24px;line-height:1.35;color:#4A5262">안테나 패턴 파일 — 방향마다 다름<br>(시뮬레이션에선 경로 계수 안)</p></div>
+<div style="display:flex;flex-direction:row;gap:14px;background:#D5E3F3;border-radius:10px;padding:9px 16px"><p style="width:130px;font-size:24px;line-height:1.35;font-weight:700;color:#14213D">EIRP</p><p style="flex:1;font-size:24px;line-height:1.35;color:#4A5262">보통 저장하지 않는다<br>→ 송신 전력 + 그 방향 이득</p></div>
+<div style="background:#FBFAF7;border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:4px;margin-top:8px"><p style="font-size:24px;font-weight:700;color:#A84A16">주의 · 무엇의 전력인가</p><p style="font-size:24px;line-height:1.4;color:#4A5262">셀 전체 43 dBm ≠ RE 한 칸 전력(SSB) — 약 35 dB 작다 (14쪽)</p></div>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.45;background:#14213D;color:#F5F3EE;border-radius:12px;padding:12px 20px"><b style="color:#F0A36B">정리</b> 20 W를 실제로 넣고 정면으로 50배 모으면, 정면 세기는 등방성에 1 kW를 넣은 것과 같다 ⇔ <b style="color:#8DB8E8">43 dBm + 17 dBi = 60 dBm EIRP</b></p>
+<p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">EIRP는 방향마다 다르다 · 흔히 말하는 값은 가장 센 방향 기준 · 안테나 일체형(AAU)은 급전선 손실이 거의 없다</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">08 / 14</p>
+<aside>(약 50초) 앞 장에서 EIRP는 송신 전력 더하기 이득이라고 했는데, 여기서 송신 전력은 가상의 값이 아닙니다. 안테나 입력단에 실제로 들어가는 전력, 계측기로 잴 수 있는 전력입니다. 무선기가 40와트를 내도 급전선에서 3 dB를 잃으면 안테나에는 20와트, 43 dBm이 들어가고, 이것이 송신 전력입니다. 가상의 값은 오히려 EIRP 쪽입니다. 이 안테나가 정면으로 50배를 모으니 정면의 세기는, 모든 방향으로 똑같이 내는 등방성 안테나에 1킬로와트를 넣었을 때와 같습니다. 그 1킬로와트, 60 dBm이 EIRP입니다. 실제로 1킬로와트를 쓰는 것이 아닙니다. 데이터에서 보면 송신 전력은 장비 설정이나 시뮬레이터 입력값으로 이미 있습니다. 이득은 안테나 패턴 파일에 방향별로 들어 있고, EIRP는 보통 따로 저장하지 않으니 필요하면 송신 전력에 그 방향의 이득을 더해 계산합니다. 한 가지 주의할 점은 그 전력이 무엇의 전력인가입니다. 셀 전체 전력과 SSB의 RE 한 칸 전력은 35 dB쯤 차이가 납니다.</aside>
+</section>
