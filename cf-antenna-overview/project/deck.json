@@ -1,0 +1,78 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-17T12:00:00Z"
+  },
+  "lists": "css",
+  "title": "CF는 안테나로 무엇을 하나",
+  "order": [
+    "cover",
+    "why",
+    "flow",
+    "record",
+    "units",
+    "frame",
+    "signs",
+    "sources",
+    "weights",
+    "formula",
+    "patmul",
+    "grating",
+    "fit",
+    "conj",
+    "level",
+    "ports",
+    "solver",
+    "ssb",
+    "onebyone",
+    "kpi",
+    "compare",
+    "adjust",
+    "revision",
+    "console",
+    "open",
+    "summary"
+  ],
+  "sections": {
+    "intro": {
+      "description": "왜 안테나인가와 데이터 흐름 열 단계",
+      "start": "cover"
+    },
+    "pattern": {
+      "description": "패턴 레코드 · 이득 단위 · 좌표와 부호 · 패턴의 출처",
+      "start": "record"
+    },
+    "beam": {
+      "description": "빔 = 배열 인자 × 포트 패턴: 웨이트 파일, 식, 곱, 그레이팅, 맞춤, 이득 수준, 측정 포트",
+      "start": "weights"
+    },
+    "solve": {
+      "description": "솔버: 패턴 함수 · 묶음 · SSB 레이어 · 1×1 규칙 · 64포트 채널",
+      "start": "solver"
+    },
+    "result": {
+      "description": "결과: SS-RSRP와 실측 비교, Adjust, 리비전",
+      "start": "kpi"
+    },
+    "close": {
+      "description": "콘솔 흐름, 열린 것, 정리",
+      "start": "console"
+    }
+  },
+  "faces": {
+    "noto-serif-kr": {
+      "family": "Noto Serif KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap"
+    },
+    "ibm-plex-sans-kr": {
+      "family": "IBM Plex Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}
