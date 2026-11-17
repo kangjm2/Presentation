@@ -44,7 +44,7 @@
 - **실현 이득:** 지향성에서 안테나 안의 손실(과 정합 손실)을 뺀 값입니다.
 - **CF에서:** 파일 리더는 둘을 구분하지 않습니다. 웨이트 파일로 만든 빔 레코드는 지향성 기준입니다. 측정 포트 파일의 최대가 지향성보다 조금 낮으면 실현 이득으로 봅니다.
 
-**physics_sha256** (8 · 28쪽)
+**physics_sha256** (8 · 29쪽)
 - **한 줄 요약:** 풀이에 영향을 주는 키만 모아 만든 해시입니다. 같으면 똑같이 풀립니다.
 - **들어가는 키:** shape · reconstruction · vertical_positive · gain_dbi · horizontal_db · vertical_db · grid_att_db, 기본값이 아닌 array.polarization, pol_grids.
 
@@ -173,29 +173,29 @@
 
 ## 5. 결과와 실측 비교
 
-**SS-RSRP · path_gain_db · power_per_re_dbm** (25쪽)
+**SS-RSRP · path_gain_db · power_per_re_dbm** (26쪽)
 - **한 줄 요약:** ss_rsrp_dbm = path_gain_db + power_per_re_dbm.
 - **path_gain_db:** 송수신 소자 패턴을 포함한 경로 이득. 배열 이득은 없습니다(안테나 쌍 평균).
 - **power_per_re_dbm:** 포트 전력 − 급전선 손실 − 10 log₁₀ N_RE.
 - 숫자 예: 100 MHz · 30 kHz면 N_RE = 3276, 10 log₁₀ N_RE ≈ 35 dB.
 
-**coupling_loss_db** (25쪽)
+**coupling_loss_db** (26쪽)
 - **한 줄 요약:** 포트 전력 − 급전선 손실 − 수신 전력. 이득이 들어 있으므로 경로 손실이 아닙니다.
 
-**비동기 · 동기 합치기** (25쪽)
+**비동기 · 동기 합치기** (26쪽)
 - **비동기:** 경로 전력을 더합니다(Σ_p mean_ant |a_p|²).
 - **동기:** CFR의 대역 평균 |H|². ss_rsrp_coherent_dbm.
 
-**SSB EPRE** (25쪽)
+**SSB EPRE** (26쪽)
 - **한 줄 요약:** SSB 자원 요소 하나의 전력. CF는 따로 모델링하지 않고 전력을 RE마다 고르게 나눕니다.
 
-**rsrp_quantity · rx_gain_db** (26쪽)
+**rsrp_quantity · rx_gain_db** (27쪽)
 - **한 줄 요약:** 측정값이 어떤 양인지와 수신 이득을 적는 약속입니다. CF는 등방성 UE 안테나 하나로 예측하지만, 보고된 빔 RSRP는 Rx 경로 평균보다 약 3.5 dB 높습니다(ADR 0079 결정 5).
 
-**SSB 인덱스 짝짓기** (26쪽)
+**SSB 인덱스 짝짓기** (27쪽)
 - **한 줄 요약:** 측정 행에 ssb_index가 있고 PCI가 예측 서버와 같으면 그 빔 레이어로, 아니면 셀 레이어(최고 빔)로 채점합니다.
 
-**Adjust · reweight_db · 패턴 후보** (27쪽)
+**Adjust · reweight_db · 패턴 후보** (28쪽)
 - **한 줄 요약:** 경로는 한 번 풀고, 경로마다 새 소자 이득 − 옛 소자 이득만큼 다시 매겨 실측에 맞춥니다.
 - **패턴 후보:** 후보마다 맞춰 최저 비용을 고릅니다. 0.25 dB 이상이면 "distinct". 채택하면 계획 전체에 적용합니다.
 - **식별성:** 수직 65° 소자로는 틸트 변화가 100분의 몇 dB라 "not identifiable"입니다.
@@ -204,17 +204,17 @@
 
 ## 6. 기록과 운영
 
-**리비전 · history · retired** (28쪽)
+**리비전 · history · retired** (29쪽)
 - **한 줄 요약:** id마다 가리켰던 physics sha256의 목록(history)이 리비전입니다. 지우면 retired 묘비가 남습니다.
 
-**guard_reuse** (28쪽)
+**guard_reuse** (29쪽)
 - **한 줄 요약:** 살아 있는 id에 다른 패턴을 넣으면 409로 거부합니다. 같은 패턴은 괜찮습니다.
 
-**pattern_rev · job id** (28쪽)
+**pattern_rev · job id** (29쪽)
 - **한 줄 요약:** 서버가 제출마다 찍는 리비전 번호이고 job 키에 들어갑니다. None과 0은 빠져 옛 키가 그대로입니다.
 
-**physics revision** (9 · 10 · 28쪽)
+**physics revision** (9 · 10 · 29쪽)
 - **한 줄 요약:** 엔진의 물리가 바뀐 번호입니다. 안테나에 관련된 것은 6(다운틸트 부호)과 7(MSI 시계 단면)입니다.
 
-**Array 탭 · Preview · Effect · Apply** (29쪽)
+**Array 탭 · Preview · Effect · Apply** (30쪽)
 - **한 줄 요약:** 빔 세트의 어레이 모델을 고치는 화면입니다. Preview가 Effect 패널(빔별 Δ, 쓰는 계획)을 채우고, Apply가 다음 리비전을 만듭니다.
