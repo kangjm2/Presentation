@@ -20,6 +20,7 @@
     "sources",
     "weights",
     "formula",
+    "afs",
     "patmul",
     "grating",
     "fit",
