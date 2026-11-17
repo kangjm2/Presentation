@@ -11,6 +11,6 @@
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#14213D">n = (p · 8 + c) · 4 + r</p>
 </div></div>
 <p style="position:absolute;left:128px;bottom:64px;width:1400px;font-size:24px;color:#5E6675">출처: beam_weights.py:3-10, 58-61, 88-123, 242-248 · beam_sets.py:115, 126 · ADR 0076 · plan 2026-10-23</p>
-<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 29</p>
+<p style="position:absolute;right:128px;bottom:64px;width:160px;font-size:24px;color:#5E6675;text-align:right">12 / 30</p>
 <aside>(약 50초) 이제 중심인 빔 모델입니다. 웨이트 파일은 한 줄이 빔 하나의 I 또는 Q입니다. 빔 번호, 태그, 그리고 포트 64개의 값이 옵니다. 태그 73이 I, 81이 Q이고, 값은 크기 256인 위상만의 Q8 숫자입니다. 모두 0인 빔은 빈 슬롯입니다. 포트 순서가 중요합니다. 편파가 가장 바깥이라 0에서 31이 한 편파, 32에서 63이 다른 편파이고, 그 안에서 열, 다시 그 안에서 행이 위에서부터 갑니다. Sionna PlanarArray와 같은 순서입니다. 오른쪽 그림처럼 열 0은 안테나의 오른쪽, 즉 마주 본 사람의 왼쪽입니다. 표본 파일은 3849.6 MHz 셀이고, 좁은 빔들은 틸트를 정하는 행 스텝은 같고 열 스텝만 달라 방위로 8개를 훑습니다. SSB 빔 3은 위상으로 합성한 넓은 빔입니다. 파일에 없는 것도 기억해 두십시오. 간격, 서브어레이, 소자, 어느 빔이 SSB인지, 편파 기울기는 파일에 없습니다.</aside>
 </section>
